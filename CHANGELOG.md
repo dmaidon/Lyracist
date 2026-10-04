@@ -1,5 +1,5 @@
-<!-- Edited on Oct 3, 2026 @ 14:10:00 -> Add Release startup deadlock fix and responsive Live FFT synth display to CHANGELOG -->
-Last Edit: Oct 3, 2026 - Adjust Synth Display Modal Dialog & Spectrum Customization
+<!-- Edited on Oct 4, 2026 @ 09:59:00 -> Add Pre-Show welcome screen suppression and sequenced release to CHANGELOG -->
+Last Edit: Oct 4, 2026 - Pre-Show Screen Mode, Welcome Screen Hold & Sequenced Release
 
 # Changelog
 
@@ -8,6 +8,13 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-04
 
 ### Added
+- **Pre-Show Screen Mode & Stacked Wi-Fi / Sign-Up QR Codes (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)**:
+  - Added dedicated **Pre-Show Screen** toggle ("📺 Pre-Show Screen") to the main DJ playback toolbar and rotation monitor controls in both Lyracist and KSRotation, allowing KJs to hold the audience welcome screen active even when singers are queued in the rotation before the show begins.
+  - Added configurable hotkey shortcut (`HkTogglePreShowScreen`, customizable in Lyracist Settings > Hotkeys) to instantly toggle Pre-Show Mode from anywhere in the application.
+  - Stacked QR code visual layout: ~20% of the display width on the right side of the 1080p canvas displays stacked cards for venue Wi-Fi ("📶 1. CONNECT WI-FI" with SSID and password) and singer sign-up ("📱 2. SCAN TO SIGN UP" with URL).
+  - Automatic Wi-Fi fallback: If no venue Wi-Fi network is detected or configured, cleanly adapts to show only the single sign-up QR code card on the right side.
+  - **Welcome Screen Hold & Sequenced Release**: While the pre-show screen is showing, individual new performer welcome screens are suppressed and held in queue without interrupting the audience onboarding display. If pre-show mode is engaged while a welcome is displaying, it is hidden and saved at the front of the queue. When the pre-show screen is closed to start the show, all held singer welcome screens automatically display one by one in exact sequence before returning to the rotation billboard.
+  - Unit test coverage in `WelcomeScreenTests.cs` and user manual documentation update tests in `CatalogBookGeneratorTests.cs`.
 - **Shared Spectrum Analyzer (`Shared/SpectrumAnalyzer.cs`, `MonoSampleConverter.cs`, `SpectrumBarStyles.cs`)**: FFT/band logic extracted from Lyracist's `AudioSpectrumService` into shared code, with unit tests (`SpectrumAnalyzerTests.cs`).
 - **KSRotation Line-In Spectrum (`LineInSpectrumService.cs`, `Controls/`)**: Spectrum visualizer for the singer display and DJ banner windows, with new settings in `AppSettings.cs` and controls in `MainWindow.xaml`.
 

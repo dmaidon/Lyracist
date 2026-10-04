@@ -60,6 +60,9 @@ namespace KSRotation.Services
             set => _analyzer.Sensitivity = value;
         }
 
+        /// <summary>Bar opacity shared by every screen (0.1 - 1).</summary>
+        public double Opacity { get; set; } = 0.85;
+
         public static IReadOnlyList<SpectrumInputDevice> GetInputDevices()
         {
             var list = new List<SpectrumInputDevice> { new(DefaultDeviceId, "System default input") };

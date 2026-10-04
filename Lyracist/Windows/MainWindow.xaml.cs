@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 10:11:00 -> Fix NullReferenceException by triggering navigation in OnMainWindowLoaded
+// Edited on Oct 4, 2026 @ 09:31:00 -> Add TogglePreShowScreen hotkey action handling
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -201,6 +201,9 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
                     {
                         ShowRotationCommand.Execute(null);
                     }
+                    break;
+                case "TogglePreShowScreen":
+                    _karaokeViewModel.IsPreShowModeActive = !_karaokeViewModel.IsPreShowModeActive;
                     break;
                 case "ToggleLyricsWindow":
                     if (ShowLyricsCommand.CanExecute(null))

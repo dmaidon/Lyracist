@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add unit tests for WelcomeDesignChoices and SelectedDesign
+// Edited on Oct 4, 2026 @ 09:57:00 -> Add unit tests for Pre-Show welcome screen suppression and sequenced release
 using System.IO;
 using System.Windows.Threading;
 using System.Windows;
@@ -177,10 +177,121 @@ public class WelcomeScreenTests
         Assert.Equal(new string?[] { "Order One", "Order Two", "Order Three", null }, seen);
     }
 
+    [Fact]
+    public void PreShowMode_SuppressesWelcomeScreensUntilPreShowCloses_ThenShowsInSequence()
+    {
+        var seen = new List<string?>();
+        var service = new WelcomeScreenService { SecondsUnit = TimeSpan.FromMilliseconds(40) };
+        Dispatcher? dispatcher = null;
+        using var ready = new ManualResetEventSlim();
+        var thread = new Thread(() =>
+        {
+            dispatcher = Dispatcher.CurrentDispatcher;
+            service.Dispatcher = dispatcher;
+            service.Seconds = 3; // 3 x 40 ms per welcome
+            service.CurrentChanged += (_, r) =>
+            {
+                lock (seen)
+                {
+                    seen.Add(r?.Name);
+                }
+            };
+            ready.Set();
+            Dispatcher.Run();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.IsBackground = true;
+        thread.Start();
+        ready.Wait(TestContext.Current.CancellationToken);
+
+        // Pre-show mode is active before singers arrive
+        service.IsPreShowActive = true;
+
+        Assert.True(service.TryWelcome("Alice PreShow"));
+        Assert.True(service.TryWelcome("Bob PreShow"));
+        Assert.True(service.TryWelcome("Charlie PreShow"));
+
+        // Wait 250 ms to ensure nothing fired while pre-show was active
+        Thread.Sleep(250);
+        lock (seen)
+        {
+            Assert.Empty(seen);
+        }
+        Assert.Null(service.Current);
+
+        // Pre-show screen is closed (turned off)
+        service.IsPreShowActive = false;
+
+        // Welcomes must now play in sequence: Alice, Bob, Charlie, then null
+        SpinWait.SpinUntil(() => { lock (seen) return seen.Count >= 4; }, TimeSpan.FromSeconds(5));
+        dispatcher!.InvokeShutdown();
+        thread.Join();
+
+        lock (seen)
+        {
+            Assert.Equal(new string?[] { "Alice PreShow", "Bob PreShow", "Charlie PreShow", null }, seen);
+        }
+    }
+
+    [Fact]
+    public void PreShowMode_InterruptsActiveWelcome_AndResumesOnClose()
+    {
+        var seen = new List<string?>();
+        var service = new WelcomeScreenService { SecondsUnit = TimeSpan.FromMilliseconds(80) };
+        Dispatcher? dispatcher = null;
+        using var ready = new ManualResetEventSlim();
+        var thread = new Thread(() =>
+        {
+            dispatcher = Dispatcher.CurrentDispatcher;
+            service.Dispatcher = dispatcher;
+            service.Seconds = 20; // 20 x 80 = 1600 ms, plenty of time to interrupt mid-welcome
+            service.CurrentChanged += (_, r) =>
+            {
+                lock (seen)
+                {
+                    seen.Add(r?.Name);
+                }
+            };
+            ready.Set();
+            Dispatcher.Run();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.IsBackground = true;
+        thread.Start();
+        ready.Wait(TestContext.Current.CancellationToken);
+
+        // Start welcome normally
+        Assert.True(service.TryWelcome("Active Singer"));
+        SpinWait.SpinUntil(() => { lock (seen) return seen.Count >= 1; }, TimeSpan.FromSeconds(2));
+        Assert.NotNull(service.Current);
+
+        // Engage pre-show mode mid-welcome -> should immediately interrupt and set Current to null
+        service.IsPreShowActive = true;
+        SpinWait.SpinUntil(() => service.Current == null, TimeSpan.FromSeconds(2));
+        Assert.Null(service.Current);
+
+        // Add another singer during pre-show
+        Assert.True(service.TryWelcome("Second Singer"));
+
+        // Close pre-show mode -> should resume Active Singer, then Second Singer, then finish
+        service.Seconds = 2; // 2 x 80ms on resume
+        service.IsPreShowActive = false;
+        SpinWait.SpinUntil(() => { lock (seen) return seen.Count >= 5; }, TimeSpan.FromSeconds(5));
+        dispatcher!.InvokeShutdown();
+        thread.Join();
+
+        lock (seen)
+        {
+            Assert.Equal(new string?[] { "Active Singer", null, "Active Singer", "Second Singer", null }, seen);
+        }
+    }
+
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void SignUpInvite_BuildsAndRenders_WithAndWithoutQr(bool withQr)
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void SignUpInvite_BuildsAndRenders_WithAndWithoutQr(bool withQr, bool withWifi)
     {
         Exception? failure = null;
         var thread = new Thread(() =>
@@ -196,7 +307,21 @@ public class WelcomeScreenTests
                     qr.Freeze();
                 }
 
-                using var visual = WelcomeScreenDesigns.BuildSignUpInvite(qr, withQr ? "http://192.168.1.50:8080" : null);
+                BitmapSource? wifiQr = null;
+                if (withWifi)
+                {
+                    var pixels = new byte[64 * 64 * 4];
+                    for (int i = 0; i < pixels.Length; i += 4) { byte v = (byte)(((i / 4) / 8 + (i / 4) / 64 / 8) % 2 == 0 ? 255 : 0); pixels[i] = pixels[i + 1] = pixels[i + 2] = v; pixels[i + 3] = 255; }
+                    wifiQr = BitmapSource.Create(64, 64, 96, 96, PixelFormats.Bgra32, null, pixels, 64 * 4);
+                    wifiQr.Freeze();
+                }
+
+                using var visual = WelcomeScreenDesigns.BuildSignUpInvite(
+                    qr,
+                    withQr ? "http://192.168.1.50:8080" : null,
+                    wifiQr,
+                    withWifi ? "TheVenueWiFi" : null,
+                    withWifi ? "Secret123" : null);
                 var root = visual.Root;
                 root.Measure(new Size(1920, 1080));
                 root.Arrange(new Rect(0, 0, 1920, 1080));
@@ -210,7 +335,7 @@ public class WelcomeScreenTests
                     Directory.CreateDirectory(previewDir);
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                    using var stream = File.Create(Path.Combine(previewDir, $"invite_{(withQr ? "qr" : "noqr")}.png"));
+                    using var stream = File.Create(Path.Combine(previewDir, $"invite_qr{withQr}_wifi{withWifi}.png"));
                     encoder.Save(stream);
                 }
             }

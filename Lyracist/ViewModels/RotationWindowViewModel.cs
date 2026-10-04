@@ -1,10 +1,11 @@
-// Edited on Sep 24, 2026 @ 09:05:00 -> Add SingerName, Song, and WaitTime properties to NextSingerDisplay for Jukebox banner split-line layout
+// Edited on Oct 4, 2026 @ 09:53:00 -> Sync IsPreShowActive with WelcomeScreenService to hold welcome screens
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Models;
 using Lyracist.Core.Helpers;
+using Lyracist.Shared;
 
 namespace Lyracist.ViewModels;
 
@@ -18,6 +19,23 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     [ObservableProperty]
     private System.Windows.Media.ImageSource? _qrCodeImage;
+
+    [ObservableProperty]
+    private System.Windows.Media.ImageSource? _wifiQrCodeImage;
+
+    [ObservableProperty]
+    private string _wifiSsid = string.Empty;
+
+    [ObservableProperty]
+    private string _wifiPasswordDisplay = string.Empty;
+
+    [ObservableProperty]
+    private bool _isPreShowModeActive = false;
+
+    partial void OnIsPreShowModeActiveChanged(bool value)
+    {
+        WelcomeScreenService.Instance.IsPreShowActive = value;
+    }
 
     [ObservableProperty]
     private string _currentSinger = string.Empty;
@@ -182,6 +200,38 @@ public partial class RotationWindowViewModel : BaseViewModel
         catch (System.Exception ex)
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "Failed to generate QR Code", ex);
+        }
+
+        try
+        {
+            string? ssid = WifiHelper.GetConnectedSsid();
+            string savedPwd = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
+            string pwd = !string.IsNullOrEmpty(savedPwd) ? savedPwd : AppSettings.WifiPassword;
+
+            WifiSsid = ssid ?? string.Empty;
+            WifiPasswordDisplay = string.IsNullOrWhiteSpace(pwd) ? "No Password Required" : pwd;
+
+            if (!string.IsNullOrWhiteSpace(ssid))
+            {
+                string wifiPayload = string.IsNullOrWhiteSpace(pwd)
+                    ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(ssid)};T:nopass;;;"
+                    : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(ssid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(pwd)};;";
+
+                using var wifiGenerator = new QRCoder.QRCodeGenerator();
+                using var wifiData = wifiGenerator.CreateQrCode(wifiPayload, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                using var wifiCode = new QRCoder.PngByteQRCode(wifiData);
+                byte[] wifiPng = wifiCode.GetGraphic(20);
+                WifiQrCodeImage = LoadImage(wifiPng);
+            }
+            else
+            {
+                WifiQrCodeImage = null;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to generate Wi-Fi QR Code", ex);
+            WifiQrCodeImage = null;
         }
     }
 

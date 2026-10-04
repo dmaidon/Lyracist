@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split hotkey settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Oct 4, 2026 @ 09:31:00 -> Add HkTogglePreShowScreen hotkey support
 using System;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -27,6 +27,9 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private string _hkToggleRotationWindow = GetKeyForAction("ToggleRotationWindow");
 
+    [ObservableProperty]
+    private string _hkTogglePreShowScreen = GetKeyForAction("TogglePreShowScreen");
+
     private static string GetKeyForAction(string actionName)
     {
         var dict = AppSettings.Hotkeys;
@@ -47,6 +50,7 @@ public partial class SettingsViewModel
         if (HkToggleBanner != "None" && !string.IsNullOrWhiteSpace(HkToggleBanner)) dict[HkToggleBanner] = "ToggleBanner";
         if (HkToggleLyricsWindow != "None" && !string.IsNullOrWhiteSpace(HkToggleLyricsWindow)) dict[HkToggleLyricsWindow] = "ToggleLyricsWindow";
         if (HkToggleRotationWindow != "None" && !string.IsNullOrWhiteSpace(HkToggleRotationWindow)) dict[HkToggleRotationWindow] = "ToggleRotationWindow";
+        if (HkTogglePreShowScreen != "None" && !string.IsNullOrWhiteSpace(HkTogglePreShowScreen)) dict[HkTogglePreShowScreen] = "TogglePreShowScreen";
         AppSettings.Hotkeys = dict;
     }
 
@@ -56,4 +60,5 @@ public partial class SettingsViewModel
     partial void OnHkToggleBannerChanged(string value) => SaveHotkeys();
     partial void OnHkToggleLyricsWindowChanged(string value) => SaveHotkeys();
     partial void OnHkToggleRotationWindowChanged(string value) => SaveHotkeys();
+    partial void OnHkTogglePreShowScreenChanged(string value) => SaveHotkeys();
 }

@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 08:47:00 -> Clear SelectedSpecialEvent on UpdateDjBanner and fix ShowDjBannerWindowInternal VM update
+// Edited on Oct 4, 2026 @ 09:54:00 -> Set WelcomeScreenService.IsPreShowActive in DisplayService
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -126,6 +126,30 @@ public class DisplayService : IDisplayService
     public void ShowRotationWindow() => IsRotationActive = true;
     public void ShowDjBannerWindow() => IsDjBannerActive = true;
     public void HideDjBannerWindow() => IsDjBannerActive = false;
+
+    public bool IsPreShowModeActive
+    {
+        get
+        {
+            var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+            return vm?.IsPreShowModeActive ?? false;
+        }
+        set
+        {
+            WelcomeScreenService.Instance.IsPreShowActive = value;
+            var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+            if (vm != null && vm.IsPreShowModeActive != value)
+            {
+                vm.IsPreShowModeActive = value;
+                if (value)
+                {
+                    ShowRotationWindow();
+                }
+            }
+        }
+    }
+
+    public void TogglePreShowMode() => IsPreShowModeActive = !IsPreShowModeActive;
 
     public void HideLyricsWindow() => IsLyricsActive = false;
     public void HideRotationWindow() => IsRotationActive = false;

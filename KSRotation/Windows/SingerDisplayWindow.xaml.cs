@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:00:00 -> Wire up Purple Velvet Curtain projection view with bulb chase and velvet folds
+// Edited on Oct 4, 2026 @ 09:31:00 -> Support Pre-Show mode and pass Wi-Fi QR credentials in RefreshSignUpInvite
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -94,13 +94,19 @@ namespace KSRotation.Windows
 
         private readonly Lyracist.Shared.WelcomeOverlayHost _welcomeHost;
 
-        // An empty rotation shows the "sign up for tonight's karaoke" screen instead - but never over the
+        // An empty rotation (or pre-show mode) shows the "sign up for tonight's karaoke" screen instead - but never over the
         // Last Song banner, which has to stay visible even when the rotation is empty.
         private void RefreshSignUpInvite()
         {
-            bool show = _vm?.IsRotationEmpty == true && LastSongBannerOverlay.Visibility != Visibility.Visible;
+            bool show = (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) && LastSongBannerOverlay.Visibility != Visibility.Visible;
             bool showQr = _vm?.ShowQrCode == true;
-            _welcomeHost.SetSignUpInvite(show, showQr ? _vm?.QrCodeImage : null, showQr ? _vm?.ConnectionUrl : null);
+            _welcomeHost.SetSignUpInvite(
+                show,
+                showQr ? _vm?.QrCodeImage : null,
+                showQr ? _vm?.ConnectionUrl : null,
+                showQr ? _vm?.WifiQrCodeImage : null,
+                _vm?.WifiSsid,
+                _vm?.WifiPasswordDisplay);
         }
 
         public void UpdateLastSongBanner(string? bannerPath)
@@ -224,9 +230,13 @@ namespace KSRotation.Windows
             switch (e.PropertyName)
             {
                 case nameof(DisplayViewModel.IsRotationEmpty):
+                case nameof(DisplayViewModel.IsPreShowModeActive):
                 case nameof(DisplayViewModel.QrCodeImage):
                 case nameof(DisplayViewModel.ConnectionUrl):
                 case nameof(DisplayViewModel.ShowQrCode):
+                case nameof(DisplayViewModel.WifiQrCodeImage):
+                case nameof(DisplayViewModel.WifiSsid):
+                case nameof(DisplayViewModel.WifiPasswordDisplay):
                     RefreshSignUpInvite();
                     break;
 

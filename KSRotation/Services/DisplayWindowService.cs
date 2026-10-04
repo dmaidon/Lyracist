@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:50:55 -> Add SetLastRound method to DisplayWindowService
+// Edited on Oct 4, 2026 @ 09:55:00 -> Set WelcomeScreenService.IsPreShowActive in SetPreShowMode
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -307,6 +307,25 @@ namespace KSRotation.Services
             _qrCodeImage = qrCode;
             _viewModel.ConnectionUrl = _connectionUrl;
             _viewModel.QrCodeImage = _qrCodeImage;
+        }
+
+        /// <summary>
+        /// Sets the Wi-Fi credentials and QR code image for display.
+        /// </summary>
+        public void SetWifiInfo(string ssid, string passwordDisplay, ImageSource? wifiQrCode)
+        {
+            _viewModel.WifiSsid = ssid ?? string.Empty;
+            _viewModel.WifiPasswordDisplay = passwordDisplay ?? string.Empty;
+            _viewModel.WifiQrCodeImage = wifiQrCode;
+        }
+
+        /// <summary>
+        /// Toggles or sets pre-show mode on the audience rotation display.
+        /// </summary>
+        public void SetPreShowMode(bool active)
+        {
+            _viewModel.IsPreShowModeActive = active;
+            Lyracist.Shared.WelcomeScreenService.Instance.IsPreShowActive = active;
         }
 
         /// <summary>

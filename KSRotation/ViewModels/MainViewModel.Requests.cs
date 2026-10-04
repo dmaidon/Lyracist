@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:28:00 -> Pass OnSingerProfileChangedFromPatron to PatronRequestServer
+// Edited on Oct 4, 2026 @ 09:31:00 -> Pass Wi-Fi credentials to DisplayWindowService on startup and info refresh
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -291,6 +291,7 @@ namespace KSRotation.ViewModels
             string startWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(startSsid)};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(startPass)};;";
             WifiQrCodeImage = started && !string.IsNullOrWhiteSpace(startSsid) ? GenerateQRCode(startWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
+            _displayWindowService.SetWifiInfo(startSsid, string.IsNullOrWhiteSpace(startPass) ? "No Password Required" : startPass, WifiQrCodeImage);
             RefreshConnectInstructionsBanner();
         }
 
@@ -326,6 +327,7 @@ namespace KSRotation.ViewModels
             string refreshWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(refreshSsid)};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(refreshPass)};;";
             WifiQrCodeImage = !string.IsNullOrWhiteSpace(refreshSsid) ? GenerateQRCode(refreshWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
+            _displayWindowService.SetWifiInfo(refreshSsid, string.IsNullOrWhiteSpace(refreshPass) ? "No Password Required" : refreshPass, WifiQrCodeImage);
             // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),
             // and the banner regeneration underneath is a full QR render + PNG encode + disk write.
             QueueRefreshConnectInstructionsBanner();

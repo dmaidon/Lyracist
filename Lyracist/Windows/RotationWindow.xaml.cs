@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:05:00 -> Stop all projection animations on close (parity with KSRotation)
+// Edited on Oct 4, 2026 @ 09:31:00 -> Support Pre-Show mode and pass Wi-Fi QR credentials in RefreshSignUpInvite
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -104,13 +104,19 @@ public partial class RotationWindow : Window, ICaptureSource
 
     private readonly Lyracist.Shared.WelcomeOverlayHost _welcomeHost;
 
-    // An empty rotation shows the "sign up for tonight's karaoke" screen instead - but never over the
+    // An empty rotation (or pre-show mode) shows the "sign up for tonight's karaoke" screen instead - but never over the
     // Last Song banner, which has to stay visible even when the last singer has left the queue.
     private void RefreshSignUpInvite()
     {
-        bool show = _vm?.IsRotationEmpty == true && LastSongBannerOverlay.Visibility != Visibility.Visible;
+        bool show = (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) && LastSongBannerOverlay.Visibility != Visibility.Visible;
         bool showQr = _vm?.ShowQrCodeOnRotationScreen == true;
-        _welcomeHost.SetSignUpInvite(show, showQr ? _vm?.QrCodeImage : null, showQr ? _vm?.JoinUrl : null);
+        _welcomeHost.SetSignUpInvite(
+            show,
+            showQr ? _vm?.QrCodeImage : null,
+            showQr ? _vm?.JoinUrl : null,
+            showQr ? _vm?.WifiQrCodeImage : null,
+            _vm?.WifiSsid,
+            _vm?.WifiPasswordDisplay);
     }
 
     public void UpdateLastSongBanner(string? bannerPath)
@@ -265,9 +271,13 @@ public partial class RotationWindow : Window, ICaptureSource
         switch (e.PropertyName)
         {
             case nameof(RotationWindowViewModel.IsRotationEmpty):
+            case nameof(RotationWindowViewModel.IsPreShowModeActive):
             case nameof(RotationWindowViewModel.QrCodeImage):
             case nameof(RotationWindowViewModel.JoinUrl):
             case nameof(RotationWindowViewModel.ShowQrCodeOnRotationScreen):
+            case nameof(RotationWindowViewModel.WifiQrCodeImage):
+            case nameof(RotationWindowViewModel.WifiSsid):
+            case nameof(RotationWindowViewModel.WifiPasswordDisplay):
                 RefreshSignUpInvite();
                 break;
 

@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:20:00 -> Load upright avatar images using AvatarImageHelper with EXIF orientation handling
+// Edited on Oct 4, 2026 @ 09:56:00 -> Sync IsPreShowActive with WelcomeScreenService in DisplayViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -51,7 +51,24 @@ namespace KSRotation.ViewModels
         public partial System.Windows.Media.ImageSource? QrCodeImage { get; set; }
 
         [ObservableProperty]
+        public partial System.Windows.Media.ImageSource? WifiQrCodeImage { get; set; }
+
+        [ObservableProperty]
+        public partial string WifiSsid { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string WifiPasswordDisplay { get; set; } = string.Empty;
+
+        [ObservableProperty]
         public partial bool ShowQrCode { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool IsPreShowModeActive { get; set; } = false;
+
+        partial void OnIsPreShowModeActiveChanged(bool value)
+        {
+            Lyracist.Shared.WelcomeScreenService.Instance.IsPreShowActive = value;
+        }
 
         /// <summary>True while nobody is in the rotation, so the window shows the sign-up invite instead of an empty list.</summary>
         [ObservableProperty]

@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 07:56:00 -> Add SetAutoRotateDurationSeconds to IDisplayService
+// Edited on Oct 4, 2026 @ 09:31:00 -> Add IsPreShowModeActive and TogglePreShowMode to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,6 +21,9 @@ public interface IDisplayService
     bool IsLyricsActive { get; set; }
     bool IsRotationActive { get; set; }
     bool IsDjBannerActive { get; set; }
+    bool IsPreShowModeActive { get; set; }
+
+    void TogglePreShowMode();
 
     IReadOnlyList<ScreenInfo> GetScreens();
 

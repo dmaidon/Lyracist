@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:06:45 -> Add Invoke and InvokeAsync shims to Dispatcher for shared MainViewModel compatibility
+// Edited on Oct 4, 2026 @ 09:37:00 -> Complete SpectrumInputDevice, LineInSpectrumService, and MainViewModel shims for MAUI
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -181,6 +181,9 @@ namespace KSRotation.Services
         public void SetShowEstimatedWaitTime(bool show) { }
         public void SetJumbotronBanner(string? path) { }
         public void SetReducedEffects(bool enabled) { }
+        public void SetWifiInfo(string ssid, string passwordDisplay, Microsoft.Maui.Controls.ImageSource? wifiQrCode) { }
+        public void SetPreShowMode(bool active) { }
+        public void SetShowSpectrum(bool show) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => MauiCastingService.Instance.StopCastingAsync();
@@ -206,6 +209,44 @@ namespace KSRotation.Services
         public void Show(object? dataContext = null) { }
         public void Hide() { }
         public void Shutdown() { }
+        public void SetShowSpectrum(bool show) { }
         public void RepositionWindow() { }
+    }
+
+    public sealed record SpectrumInputDevice(string Id, string Name);
+
+    public static class SpectrumBarStyles
+    {
+        public const string Default = "Default";
+        public static readonly System.Collections.Generic.IReadOnlyList<string> Names = ["Default"];
+        public static string Normalize(string? style) => Default;
+    }
+
+    public sealed class LineInSpectrumService : IDisposable
+    {
+        public static LineInSpectrumService Instance { get; } = new();
+        public const string DefaultDeviceId = "";
+        public bool IsCapturing => false;
+        public string? LastError => null;
+        public float Sensitivity { get; set; } = 1.0f;
+        public string Style { get; set; } = "Default";
+        public double Opacity { get; set; } = 1.0;
+        public static System.Collections.Generic.IReadOnlyList<SpectrumInputDevice> GetInputDevices() => [];
+        public void Start(string? deviceId = null) { }
+        public void Stop() { }
+        public void Configure(bool enabled, string? deviceId) { }
+        public void SetDeviceId(string? deviceId) { }
+        public void SetStyle(string style) { }
+        public void SetCustomColor(string? hex) { }
+        public void SetOpacity(double opacity) { }
+        public void Dispose() { }
+    }
+}
+
+namespace KSRotation.ViewModels
+{
+    public partial class MainViewModel
+    {
+        public System.Threading.Tasks.Task LoadAllUsersAsync() => System.Threading.Tasks.Task.CompletedTask;
     }
 }

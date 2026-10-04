@@ -1,6 +1,18 @@
-<!-- Edited on Oct 2, 2026 @ 11:30:00 -> Add Dedicated Welcome Screen GroupBox to KSRotation CHANGELOG -->
+<!-- Edited on Oct 4, 2026 @ 09:59:00 -> Add Pre-Show welcome screen hold and sequenced release to KSRotation CHANGELOG -->
 
 # Changelog
+
+## 2026-10-04
+
+- **Pre-Show Screen Mode & Stacked Wi-Fi / Sign-Up QR Codes (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `DisplayWindowService.cs`, `SingerDisplayWindow.xaml.cs`, `DisplayViewModel.cs`, `Shared/WelcomeScreen.cs`)**:
+  - Added dedicated **Pre-Show Screen** toggle ("📺 Pre-Show Screen") to the main rotation toolbar and projection screen settings.
+  - When active, keeps the audience welcome and sign-up screen held on the singer display window even when singers are queued up before showtime.
+  - Right ~20% of display width stacks cards for venue Wi-Fi ("📶 1. CONNECT WI-FI" with SSID and password) and song sign-up ("📱 2. SCAN TO SIGN UP" with URL).
+  - If no venue Wi-Fi is detected or configured, automatically falls back to showing only the single sign-up QR code card.
+  - While Pre-Show Screen is active, individual new singer welcome screens are held in queue and remain hidden; when Pre-Show mode is closed, all queued welcome screens display one by one in exact sequence.
+
+- **Line-In Audio Spectrum Visualizer (`LineInSpectrumService.cs`, `Controls/`, `MainWindow.xaml`, `AppSettings.cs`)**:
+  - Added real-time line-in audio spectrum analysis powered by shared FFT analyzer for the singer display and DJ banner windows.
 
 ## 2026-10-02
 

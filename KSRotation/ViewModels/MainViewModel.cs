@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:22:00 -> Add SelectedMainTabIndex to reload Users on tab activation
+// Edited on Oct 4, 2026 @ 09:56:00 -> Set WelcomeScreenService.IsPreShowActive on pre-show toggle
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -607,6 +607,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial double SpectrumSensitivity { get; set; } = 1.0;
 
+        [ObservableProperty]
+        public partial double SpectrumOpacity { get; set; } = 0.85;
+
+        partial void OnSpectrumOpacityChanged(double value) => LineInSpectrumService.Instance.Opacity = Math.Clamp(value, 0.1, 1.0);
+
         public IReadOnlyList<string> SpectrumStyles { get; } = SpectrumBarStyles.Names;
 
         [ObservableProperty]
@@ -818,6 +823,15 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool ShowQrCodeOnRotationScreen { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool IsPreShowModeActive { get; set; } = false;
+
+        partial void OnIsPreShowModeActiveChanged(bool value)
+        {
+            Lyracist.Shared.WelcomeScreenService.Instance.IsPreShowActive = value;
+            _displayWindowService.SetPreShowMode(value);
+        }
 
         [ObservableProperty]
         public partial string WifiPassword { get; set; } = string.Empty;
@@ -1392,6 +1406,7 @@ namespace KSRotation.ViewModels
             ReducedProjectionEffects = settings.ReducedProjectionEffects;
             SpectrumInputDeviceId = settings.SpectrumInputDeviceId ?? string.Empty;
             SpectrumSensitivity = Math.Clamp(settings.SpectrumSensitivity, 0.25, 4.0);
+            SpectrumOpacity = Math.Clamp(settings.SpectrumOpacity, 0.1, 1.0);
             SpectrumStyle = SpectrumBarStyles.Normalize(settings.SpectrumStyle);
             SpectrumOnRotation = settings.SpectrumOnRotation;
             SpectrumOnDjBanners = settings.SpectrumOnDjBanners;
@@ -3238,6 +3253,7 @@ namespace KSRotation.ViewModels
                 ReducedProjectionEffects = ReducedProjectionEffects,
                 SpectrumInputDeviceId = SpectrumInputDeviceId,
                 SpectrumSensitivity = SpectrumSensitivity,
+                SpectrumOpacity = SpectrumOpacity,
                 SpectrumStyle = SpectrumStyle,
                 SpectrumOnRotation = SpectrumOnRotation,
                 SpectrumOnDjBanners = SpectrumOnDjBanners,

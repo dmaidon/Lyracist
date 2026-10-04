@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 09:05:00 -> Update ApplicationDisplayVersion to 1.0.1 -->
+<!-- Edited on Oct 4, 2026 @ 09:36:00 -> Exclude desktop-only LineInSpectrumService from KSRotation.Maui build -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -99,7 +99,7 @@
 		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
 		     edit here. Excludes the services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
-		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs;..\KSRotation\Services\CastingService.cs;..\KSRotation\Services\BrowserCastServer.cs;..\KSRotation\Services\ChromecastSender.cs;..\KSRotation\Services\MiracastController.cs;..\KSRotation\Services\RotationRenderer.cs;..\KSRotation\Services\IRotationRenderer.cs;..\KSRotation\Services\ICastingService.cs;..\KSRotation\Services\ConfirmationService.cs" Link="Services\%(Filename)%(Extension)" />
+		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs;..\KSRotation\Services\CastingService.cs;..\KSRotation\Services\BrowserCastServer.cs;..\KSRotation\Services\ChromecastSender.cs;..\KSRotation\Services\MiracastController.cs;..\KSRotation\Services\RotationRenderer.cs;..\KSRotation\Services\IRotationRenderer.cs;..\KSRotation\Services\ICastingService.cs;..\KSRotation\Services\ConfirmationService.cs;..\KSRotation\Services\LineInSpectrumService.cs" Link="Services\%(Filename)%(Extension)" />
 
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />

@@ -87,6 +87,7 @@ namespace KSRotation.Controls
             double height = ActualHeight;
             if (width <= 0 || height <= 0) return;
 
+            Opacity = LineInSpectrumService.Instance.Opacity;
             float[] bands = LineInSpectrumService.Instance.GetBands(BarCount);
             double slot = width / BarCount;
             double barWidth = Math.Max(2, slot * 0.72);

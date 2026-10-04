@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeDesignChoice model and selectable welcome screen style support
+// Edited on Oct 4, 2026 @ 09:52:00 -> Suppress welcome screens while Pre-Show Screen is active and show in sequence on close
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,8 +58,59 @@ public sealed class WelcomeScreenService
     private DispatcherTimer? _timer;
     private int _lastDesign = -1;
     private int _seconds = DefaultSeconds;
+    private bool _isPreShowActive;
 
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// When true (Pre-Show Screen mode is active), singer welcome screens are not shown on projection
+    /// displays. Newly welcomed singers stay queued in sequence and automatically begin displaying one by one
+    /// once Pre-Show mode is closed/turned off.
+    /// </summary>
+    public bool IsPreShowActive
+    {
+        get
+        {
+            lock (_gate) return _isPreShowActive;
+        }
+        set
+        {
+            RunOnUi(() =>
+            {
+                lock (_gate)
+                {
+                    if (_isPreShowActive == value) return;
+                    _isPreShowActive = value;
+                }
+
+                if (value)
+                {
+                    // Pre-show screen engaged: hide any active welcome screen immediately and re-queue it at the front
+                    if (Current != null)
+                    {
+                        string currentName = Current.Name;
+                        _timer?.Stop();
+                        SetCurrent(null);
+                        var remaining = _queue.ToList();
+                        _queue.Clear();
+                        _queue.Enqueue(currentName);
+                        foreach (var item in remaining)
+                        {
+                            _queue.Enqueue(item);
+                        }
+                    }
+                }
+                else
+                {
+                    // Pre-show screen closed: play any queued welcome screens in sequence
+                    if (Current == null && _queue.Count > 0)
+                    {
+                        Start(_queue.Dequeue());
+                    }
+                }
+            });
+        }
+    }
 
     /// <summary>
     /// Index of the chosen welcome screen design, or -1 for "All (Random)".
@@ -167,11 +218,15 @@ public sealed class WelcomeScreenService
     public void ResetTonight()
     {
         lock (_gate) _greeted.Clear();
+        RunOnUi(ClearQueueAndStopTimer);
     }
 
     private void Enqueue(string name)
     {
-        if (Current != null)
+        bool preShow;
+        lock (_gate) preShow = _isPreShowActive;
+
+        if (preShow || Current != null)
         {
             _queue.Enqueue(name);
             return;
@@ -202,7 +257,10 @@ public sealed class WelcomeScreenService
     private void OnTimerTick(object? sender, EventArgs e)
     {
         _timer?.Stop();
-        if (_queue.Count > 0)
+        bool preShow;
+        lock (_gate) preShow = _isPreShowActive;
+
+        if (!preShow && _queue.Count > 0)
         {
             Start(_queue.Dequeue());
             return;
@@ -260,6 +318,9 @@ public sealed class WelcomeOverlayHost
     private WelcomeVisual? _inviteVisual;
     private ImageSource? _inviteQr;
     private string? _inviteUrl;
+    private ImageSource? _inviteWifiQr;
+    private string? _inviteWifiSsid;
+    private string? _inviteWifiPassword;
     private int _generation;
     private int _inviteGeneration;
 
@@ -301,11 +362,17 @@ public sealed class WelcomeOverlayHost
     /// <paramref name="show"/> is true, and fades back to the untouched content when it turns false.
     /// Safe to call repeatedly; it only rebuilds when the QR code or address changes.
     /// </summary>
-    public void SetSignUpInvite(bool show, ImageSource? qr, string? url)
+    public void SetSignUpInvite(
+        bool show,
+        ImageSource? qr,
+        string? url,
+        ImageSource? wifiQr = null,
+        string? wifiSsid = null,
+        string? wifiPassword = null)
     {
         if (!_window.Dispatcher.CheckAccess())
         {
-            _window.Dispatcher.InvokeAsync(() => SetSignUpInvite(show, qr, url));
+            _window.Dispatcher.InvokeAsync(() => SetSignUpInvite(show, qr, url, wifiQr, wifiSsid, wifiPassword));
             return;
         }
 
@@ -323,7 +390,12 @@ public sealed class WelcomeOverlayHost
         }
 
         bool alreadyShown = _inviteVisual != null && _inviteLayer.Visibility == Visibility.Visible;
-        if (alreadyShown && ReferenceEquals(qr, _inviteQr) && url == _inviteUrl)
+        if (alreadyShown &&
+            ReferenceEquals(qr, _inviteQr) &&
+            url == _inviteUrl &&
+            ReferenceEquals(wifiQr, _inviteWifiQr) &&
+            wifiSsid == _inviteWifiSsid &&
+            wifiPassword == _inviteWifiPassword)
         {
             // Same content: just make sure a fade-out that was starting is cancelled.
             _inviteGeneration++;
@@ -336,7 +408,10 @@ public sealed class WelcomeOverlayHost
         ClearInvite();
         _inviteQr = qr;
         _inviteUrl = url;
-        _inviteVisual = WelcomeScreenDesigns.BuildSignUpInvite(qr, url);
+        _inviteWifiQr = wifiQr;
+        _inviteWifiSsid = wifiSsid;
+        _inviteWifiPassword = wifiPassword;
+        _inviteVisual = WelcomeScreenDesigns.BuildSignUpInvite(qr, url, wifiQr, wifiSsid, wifiPassword);
         _inviteLayer.Children.Add(_inviteVisual.Root);
         _inviteLayer.Visibility = Visibility.Visible;
         _inviteLayer.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(500)));
@@ -351,6 +426,9 @@ public sealed class WelcomeOverlayHost
         _inviteVisual = null;
         _inviteQr = null;
         _inviteUrl = null;
+        _inviteWifiQr = null;
+        _inviteWifiSsid = null;
+        _inviteWifiPassword = null;
     }
 
     private void OnCurrentChanged(object? sender, WelcomeRequest? request)
@@ -738,7 +816,12 @@ public static class WelcomeScreenDesigns
     /// Shown instead of an empty rotation: invites everyone to sign up for tonight's karaoke. Built fresh
     /// each time so the date is current; includes the sign-up QR code when one is available.
     /// </summary>
-    public static WelcomeVisual BuildSignUpInvite(ImageSource? qr, string? url)
+    public static WelcomeVisual BuildSignUpInvite(
+        ImageSource? qr,
+        string? url,
+        ImageSource? wifiQr = null,
+        string? wifiSsid = null,
+        string? wifiPassword = null)
     {
         var canvas = new Grid { Width = W, Height = H, ClipToBounds = true };
         canvas.Background = new LinearGradientBrush(
@@ -776,20 +859,30 @@ public static class WelcomeScreenDesigns
             });
         }
 
-        var layout = new Grid { Margin = new Thickness(110, 80, 110, 80) };
+        var layout = new Grid { Margin = new Thickness(90, 60, 90, 60) };
         layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
         bool hasQr = qr != null;
-        if (hasQr) layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        bool hasWifi = wifiQr != null;
+        bool hasAnyQr = hasQr || hasWifi;
+        bool hasBothQr = hasQr && hasWifi;
+
+        // QR section uses ~20% of the screen width (384px)
+        const double qrColumnWidth = 384;
+        if (hasAnyQr)
+        {
+            layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(qrColumnWidth) });
+        }
         canvas.Children.Add(layout);
 
-        // Left-aligned beside the QR card; centred across the whole screen when there is no QR code.
-        var align = hasQr ? HorizontalAlignment.Left : HorizontalAlignment.Center;
-        double bigSize = hasQr ? 185 : 260;
+        // Left-aligned beside the QR cards; centred across the whole screen when there is no QR code.
+        var align = hasAnyQr ? HorizontalAlignment.Left : HorizontalAlignment.Center;
+        double bigSize = hasBothQr ? 165 : (hasAnyQr ? 185 : 260);
         var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = align };
         text.Children.Add(new TextBlock
         {
             Text = $"TONIGHT  •  {DateTime.Now:dddd, MMMM d}".ToUpperInvariant(),
-            FontFamily = BodyFont, FontSize = 54, Foreground = Solid("#FFD76A"), HorizontalAlignment = align,
+            FontFamily = BodyFont, FontSize = 50, Foreground = Solid("#FFD76A"), HorizontalAlignment = align,
             Effect = Glow(Rgb("#FFB400"), 18, 0.7),
         });
         text.Children.Add(new TextBlock
@@ -805,52 +898,203 @@ public static class WelcomeScreenDesigns
         text.Children.Add(new TextBlock
         {
             Text = "Sign up now and take the stage!",
-            FontFamily = BodyFont, FontSize = 70, Foreground = Brushes.White, HorizontalAlignment = align,
-            Margin = new Thickness(0, 30, 0, 0), TextWrapping = TextWrapping.Wrap,
+            FontFamily = BodyFont, FontSize = 64, Foreground = Brushes.White, HorizontalAlignment = align,
+            Margin = new Thickness(0, 26, 0, 0), TextWrapping = TextWrapping.Wrap,
             Effect = Glow(Rgb("#FF3CAC"), 22, 0.8),
         });
+
+        string instructionText;
+        if (hasBothQr)
+        {
+            instructionText = "1. Connect to venue Wi-Fi   •   2. Scan to pick your songs";
+        }
+        else if (hasQr)
+        {
+            instructionText = "Scan the QR code or ask the DJ to put you on the list";
+        }
+        else if (hasWifi)
+        {
+            instructionText = "Connect to venue Wi-Fi and ask the DJ to sign up";
+        }
+        else
+        {
+            instructionText = "Ask the DJ to put you on the list";
+        }
+
         text.Children.Add(new TextBlock
         {
-            Text = hasQr ? "Scan the QR code or ask the DJ" : "Ask the DJ to put you on the list",
-            FontFamily = BodyFont, FontSize = 48, Foreground = Solid("#FFD9F2"), HorizontalAlignment = align,
+            Text = instructionText,
+            FontFamily = BodyFont, FontSize = 42, Foreground = Solid("#FFD9F2"), HorizontalAlignment = align,
             Margin = new Thickness(0, 14, 0, 0), TextWrapping = TextWrapping.Wrap,
         });
         layout.Children.Add(text);
 
-        if (hasQr)
+        if (hasAnyQr)
         {
-            var card = new StackPanel
+            var rightContainer = new StackPanel
             {
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(60, 0, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Width = qrColumnWidth,
+                Margin = new Thickness(30, 0, 0, 0),
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1),
             };
-            card.Children.Add(new Border
-            {
-                Width = 520, Height = 520, Background = Brushes.White, CornerRadius = new CornerRadius(30), Padding = new Thickness(26),
-                Effect = Glow(Rgb("#FF3CAC"), 50, 0.9),
-                Child = new Image { Source = qr, Stretch = Stretch.Uniform },
-            });
-            card.Children.Add(new TextBlock
-            {
-                Text = "SCAN TO SIGN UP", FontFamily = DisplayFont, FontSize = 46, Foreground = Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 22, 0, 0),
-            });
-            if (!string.IsNullOrWhiteSpace(url))
-            {
-                card.Children.Add(new TextBlock
-                {
-                    Text = url, FontFamily = BodyFont, FontSize = 30, Foreground = Solid("#FFD9F2"),
-                    HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 6, 0, 0),
-                });
-            }
-            Grid.SetColumn(card, 1);
-            layout.Children.Add(card);
 
-            var scale = (ScaleTransform)card.RenderTransform;
-            visual.Animate(scale, ScaleTransform.ScaleXProperty, Pulse(1.0, 1.04, 1.6));
-            visual.Animate(scale, ScaleTransform.ScaleYProperty, Pulse(1.0, 1.04, 1.6));
+            if (hasBothQr)
+            {
+                // Top Card: Wi-Fi Join
+                rightContainer.Children.Add(new TextBlock
+                {
+                    Text = "📶 1. CONNECT WI-FI",
+                    FontFamily = DisplayFont,
+                    FontSize = 26,
+                    Foreground = Solid("#38BDF8"),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 0, 0, 6),
+                    Effect = Glow(Rgb("#38BDF8"), 14, 0.75),
+                });
+                rightContainer.Children.Add(new Border
+                {
+                    Width = 240,
+                    Height = 240,
+                    Background = Brushes.White,
+                    CornerRadius = new CornerRadius(18),
+                    Padding = new Thickness(12),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Effect = Glow(Rgb("#38BDF8"), 26, 0.85),
+                    Child = new Image { Source = wifiQr, Stretch = Stretch.Uniform },
+                });
+
+                string displaySsid = !string.IsNullOrWhiteSpace(wifiSsid) ? wifiSsid : "Venue Wi-Fi";
+                rightContainer.Children.Add(new TextBlock
+                {
+                    Text = $"Network: {displaySsid}",
+                    FontFamily = BodyFont,
+                    FontSize = 19,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 6, 0, 2),
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    MaxWidth = qrColumnWidth,
+                });
+
+                string displayPwd = !string.IsNullOrWhiteSpace(wifiPassword) ? wifiPassword : "No Password Required";
+                rightContainer.Children.Add(new TextBlock
+                {
+                    Text = $"Password: {displayPwd}",
+                    FontFamily = BodyFont,
+                    FontSize = 18,
+                    Foreground = Solid("#FFD76A"),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 0, 0, 20),
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    MaxWidth = qrColumnWidth,
+                });
+
+                // Bottom Card: Song Sign-Up
+                rightContainer.Children.Add(new TextBlock
+                {
+                    Text = "📱 2. SCAN TO SIGN UP",
+                    FontFamily = DisplayFont,
+                    FontSize = 26,
+                    Foreground = Solid("#FF8AD8"),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 0, 0, 6),
+                    Effect = Glow(Rgb("#FF3CAC"), 14, 0.75),
+                });
+                rightContainer.Children.Add(new Border
+                {
+                    Width = 240,
+                    Height = 240,
+                    Background = Brushes.White,
+                    CornerRadius = new CornerRadius(18),
+                    Padding = new Thickness(12),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Effect = Glow(Rgb("#FF3CAC"), 26, 0.85),
+                    Child = new Image { Source = qr, Stretch = Stretch.Uniform },
+                });
+
+                if (!string.IsNullOrWhiteSpace(url))
+                {
+                    rightContainer.Children.Add(new TextBlock
+                    {
+                        Text = url,
+                        FontFamily = BodyFont,
+                        FontSize = 19,
+                        Foreground = Solid("#FFD9F2"),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 6, 0, 0),
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                        MaxWidth = qrColumnWidth,
+                    });
+                }
+            }
+            else
+            {
+                // Single QR code on the right side (sign-up or Wi-Fi only)
+                var singleImage = qr ?? wifiQr;
+                string singleTitle = hasQr ? "SCAN TO SIGN UP" : "CONNECT WI-FI";
+                var singleColor = hasQr ? Rgb("#FF3CAC") : Rgb("#38BDF8");
+
+                rightContainer.Children.Add(new Border
+                {
+                    Width = 360,
+                    Height = 360,
+                    Background = Brushes.White,
+                    CornerRadius = new CornerRadius(24),
+                    Padding = new Thickness(18),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Effect = Glow(singleColor, 40, 0.9),
+                    Child = new Image { Source = singleImage, Stretch = Stretch.Uniform },
+                });
+                rightContainer.Children.Add(new TextBlock
+                {
+                    Text = singleTitle,
+                    FontFamily = DisplayFont,
+                    FontSize = 38,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 18, 0, 0),
+                });
+
+                if (hasQr && !string.IsNullOrWhiteSpace(url))
+                {
+                    rightContainer.Children.Add(new TextBlock
+                    {
+                        Text = url,
+                        FontFamily = BodyFont,
+                        FontSize = 24,
+                        Foreground = Solid("#FFD9F2"),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 6, 0, 0),
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                        MaxWidth = qrColumnWidth,
+                    });
+                }
+                else if (hasWifi)
+                {
+                    string displaySsid = !string.IsNullOrWhiteSpace(wifiSsid) ? wifiSsid : "Venue Wi-Fi";
+                    string displayPwd = !string.IsNullOrWhiteSpace(wifiPassword) ? wifiPassword : "No Password Required";
+                    rightContainer.Children.Add(new TextBlock
+                    {
+                        Text = $"Network: {displaySsid}  •  Password: {displayPwd}",
+                        FontFamily = BodyFont,
+                        FontSize = 20,
+                        Foreground = Solid("#FFD76A"),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 8, 0, 0),
+                    });
+                }
+            }
+
+            Grid.SetColumn(rightContainer, 1);
+            layout.Children.Add(rightContainer);
+
+            var scale = (ScaleTransform)rightContainer.RenderTransform;
+            visual.Animate(scale, ScaleTransform.ScaleXProperty, Pulse(1.0, 1.03, 1.6));
+            visual.Animate(scale, ScaleTransform.ScaleYProperty, Pulse(1.0, 1.03, 1.6));
         }
 
         return visual;

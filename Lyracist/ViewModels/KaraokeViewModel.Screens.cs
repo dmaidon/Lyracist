@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 08:49:30 -> Auto-toggle between DJ Banner and Rotation when on the same screen
+// Edited on Oct 4, 2026 @ 09:31:00 -> Add IsPreShowModeActive property delegating to IDisplayService
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -59,6 +59,20 @@ public partial class KaraokeViewModel
                 }
                 _displayService.IsDjBannerActive = value;
                 OnPropertyChanged(nameof(IsDjBannerActive));
+            }
+        }
+    }
+
+    public bool IsPreShowModeActive
+    {
+        get => _displayService.IsPreShowModeActive;
+        set
+        {
+            if (_displayService.IsPreShowModeActive != value)
+            {
+                _displayService.IsPreShowModeActive = value;
+                OnPropertyChanged(nameof(IsPreShowModeActive));
+                OnPropertyChanged(nameof(IsRotationActive));
             }
         }
     }

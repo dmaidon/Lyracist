@@ -117,6 +117,9 @@ namespace KSRotation.Models
         /// <summary>How strongly quiet input fills the synth bars (0.25 - 4).</summary>
         public double SpectrumSensitivity { get; init; } = 1.0;
 
+        /// <summary>Opacity of the synth bars on every screen (0.1 - 1).</summary>
+        public double SpectrumOpacity { get; init; } = 0.85;
+
         /// <summary>Show the live synth bars on the rotation (singer display) screen.</summary>
         public bool SpectrumOnRotation { get; init; }
 

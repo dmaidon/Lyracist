@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:49:00 -> Add User Manual update test for Adjust Synth Display DJ modal dialog
+// Edited on Oct 4, 2026 @ 09:58:00 -> Add User Manual update test for Pre-Show welcome screen suppression
 using System;
 using System.IO;
 using Xunit;
@@ -3415,6 +3415,308 @@ To ensure a completely professional live performance experience without audience
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " AdjustSynthDisplayNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManual_PreShowScreenAndWifiQr_Oct2026()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+
+            if (Directory.Exists(docDir))
+            {
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"Section: Audience Welcome & Pre-Show Screen / Dual QR Code Integration (Wi-Fi & Song Sign-Up)
+
+[Update Details]
+To optimize patron onboarding before a show begins and between active performance sets, the venue projection display now features a dedicated Pre-Show Screen mode with stacked Wi-Fi and Singer Sign-Up QR codes.
+
+1. Pre-Show Screen Mode ('Hold Screen'):
+   - A dedicated 'Pre-Show Screen' toggle button is accessible directly on the primary DJ control toolbar in both Lyracist and KSRotation, as well as under Rotation Monitor controls.
+   - When engaged, the Audience Sign-Up / Welcome screen remains actively displayed on the singer/audience projection monitor even after singers and requests are added to the rotation queue.
+   - This allows DJs and KJs to set up and populate their queue ahead of time while keeping the audience welcome, Wi-Fi credentials, and sign-up instructions prominently visible on screen until the show officially begins.
+   - A configurable hotkey shortcut (customizable in Settings > Hotkeys) is provided to toggle Pre-Show Mode instantly from anywhere in the application.
+
+2. Stacked QR Code Layout (~20% Screen Width):
+   - The right side of the 1080p audience canvas is dedicated to clear, high-contrast QR code cards utilizing approximately 20% of the display width.
+   - When a venue Wi-Fi network is detected or configured, two stacked cards are presented:
+     * 'CONNECT WI-FI': Displays the venue Wi-Fi QR code, network SSID, and password for one-scan automatic network connection.
+     * 'SCAN TO SIGN UP': Displays the Web Remote / Patron Portal QR code and direct URL for submitting song requests.
+   - Automatic Wi-Fi Fallback: If no venue Wi-Fi is configured or detected, the display cleanly adapts to show only the single sign-up QR code card on the right side.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Audience Welcome & Pre-Show Screen / Dual QR Code Integration"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                string docText = body.InnerText;
+                                if (!docText.Contains("Audience Welcome & Pre-Show Screen / Dual QR Code Integration"))
+                                {
+                                    var titlePara = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" },
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = "360", After = "120" }
+                                        ),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "0066CC" },
+                                                new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "26" }
+                                            ),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Audience Welcome & Pre-Show Screen / Dual QR Code Integration (Wi-Fi & Song Sign-Up)")
+                                        )
+                                    );
+                                    body.AppendChild(titlePara);
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+
+                                        bool isHeader = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
+                                        var pPr = new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = isHeader ? "140" : "60", After = "60" }
+                                        );
+
+                                        var rPr = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "21" }
+                                        );
+                                        if (isHeader)
+                                        {
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1A365D" });
+                                        }
+
+                                        var run = new DocumentFormat.OpenXml.Wordprocessing.Run(rPr, new DocumentFormat.OpenXml.Wordprocessing.Text(line));
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(pPr, run));
+                                    }
+
+                                    doc.MainDocumentPart?.Document?.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file if not already present
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PreShowScreenNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Audience Welcome & Pre-Show Screen / Dual QR Code Integration", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " PreShowScreenNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManual_PreShowWelcomeSuppression_Oct2026()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+
+            if (Directory.Exists(docDir))
+            {
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"Section: Pre-Show Screen / Singer Welcome Screen Hold & Sequenced Release
+
+[Update Details]
+To prevent audience projection distraction and keep Wi-Fi onboarding instructions visible before the show starts, singer welcome screens are held in queue while Pre-Show Mode is active.
+
+1. Welcome Screen Suppression:
+   - While the Pre-Show screen ('Hold Screen') is actively displayed on the audience projection monitor, individual 'Welcome to our new performer' screens are suppressed from appearing.
+   - Any new performers who join the rotation (via patron smartphone QR portal, tablet kiosk, or KJ queue addition) are registered in the background and queued in order.
+   - If Pre-Show Mode is engaged while a welcome screen was actively displaying, that welcome screen is immediately hidden and saved at the head of the queue.
+
+2. Sequenced Release on Pre-Show Close:
+   - When the host closes/turns off Pre-Show Screen mode to kick off the show, all held singer welcome screens automatically display one after another in exact sequence.
+   - Once all queued new performers have been welcomed, the projection window transitions smoothly to the active Rotation Billboard queue.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Singer Welcome Screen Hold & Sequenced Release"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                string docText = body.InnerText;
+                                if (!docText.Contains("Singer Welcome Screen Hold & Sequenced Release"))
+                                {
+                                    var titlePara = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" },
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = "360", After = "120" }
+                                        ),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "0066CC" },
+                                                new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "26" }
+                                            ),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Pre-Show Screen / Singer Welcome Screen Hold & Sequenced Release")
+                                        )
+                                    );
+                                    body.AppendChild(titlePara);
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+
+                                        bool isHeader = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.");
+                                        var pPr = new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = isHeader ? "140" : "60", After = "60" }
+                                        );
+
+                                        var rPr = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "21" }
+                                        );
+                                        if (isHeader)
+                                        {
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1A365D" });
+                                        }
+
+                                        var run = new DocumentFormat.OpenXml.Wordprocessing.Run(rPr, new DocumentFormat.OpenXml.Wordprocessing.Text(line));
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(pPr, run));
+                                    }
+
+                                    doc.MainDocumentPart?.Document?.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file if not already present
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PreShowWelcomeHoldNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Pre-Show Screen / Singer Welcome Screen Hold & Sequenced Release", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " PreShowWelcomeHoldNotice";
                                 doc.Save(pdfPath);
                             }
                         }
