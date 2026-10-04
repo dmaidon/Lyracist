@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:35:00 -> Add IsVisualizerModeFft and IsVisualizerModeSimulated properties to SettingsViewModel
+// Edited on Oct 4, 2026 @ 10:12:00 -> Refresh RotationWindowViewModel QR codes on WifiPassword change
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -633,6 +633,7 @@ public partial class SettingsViewModel
                 OnPropertyChanged();
                 RefreshConnectInstructionsBanner();
                 _display.RefreshActiveBanner();
+                _rotationWindowVm?.RefreshQrCode();
             }
         }
     }

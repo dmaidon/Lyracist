@@ -1,4 +1,4 @@
-<!-- Edited on Oct 4, 2026 @ 09:59:00 -> Add Pre-Show welcome screen hold and sequenced release to KSRotation CHANGELOG -->
+<!-- Edited on Oct 4, 2026 @ 10:38:00 -> Add live Wi-Fi password QR sync to KSRotation CHANGELOG -->
 
 # Changelog
 
@@ -10,6 +10,7 @@
   - Right ~20% of display width stacks cards for venue Wi-Fi ("📶 1. CONNECT WI-FI" with SSID and password) and song sign-up ("📱 2. SCAN TO SIGN UP" with URL).
   - If no venue Wi-Fi is detected or configured, automatically falls back to showing only the single sign-up QR code card.
   - While Pre-Show Screen is active, individual new singer welcome screens are held in queue and remain hidden; when Pre-Show mode is closed, all queued welcome screens display one by one in exact sequence.
+  - Resolved an issue where typing or editing a Wi-Fi password did not update the pre-show screen: `OnWifiPasswordChanged` regenerates `WifiQrCodeImage`, refreshes `WifiPasswordDisplay`, and pushes the updated credentials to `DisplayWindowService.SetWifiInfo(...)` live as the host types (`UpdateSourceTrigger=PropertyChanged`).
 
 - **Line-In Audio Spectrum Visualizer (`LineInSpectrumService.cs`, `Controls/`, `MainWindow.xaml`, `AppSettings.cs`)**:
   - Added real-time line-in audio spectrum analysis powered by shared FFT analyzer for the singer display and DJ banner windows.

@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:56:00 -> Set WelcomeScreenService.IsPreShowActive on pre-show toggle
+// Edited on Oct 4, 2026 @ 10:10:00 -> Update Wi-Fi QR and display window info on WifiPassword change
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -843,11 +843,20 @@ namespace KSRotation.ViewModels
             // here too would just write a "localhost" placeholder that gets overwritten a moment later.
             if (_isInitializing) return;
 
-            string? ssid = WifiHelper.GetConnectedSsid();
-            if (!string.IsNullOrWhiteSpace(ssid))
+            string? detectedSsid = WifiHelper.GetConnectedSsid();
+            string activeSsid = !string.IsNullOrWhiteSpace(detectedSsid) ? detectedSsid : WifiSsidDisplay;
+            if (!string.IsNullOrWhiteSpace(activeSsid))
             {
-                WifiPasswordStore.SetPasswordForSsid(ssid, value);
+                WifiPasswordStore.SetPasswordForSsid(activeSsid, value);
             }
+            OnPropertyChanged(nameof(WifiPasswordDisplay));
+
+            // Regenerate Wi-Fi QR code and update audience rotation / pre-show screen immediately
+            string pass = value;
+            string wifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(activeSsid)};T:{(string.IsNullOrWhiteSpace(pass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(pass)};;";
+            WifiQrCodeImage = !string.IsNullOrWhiteSpace(activeSsid) ? GenerateQRCode(wifiPayload) : null;
+            _displayWindowService?.SetWifiInfo(activeSsid, string.IsNullOrWhiteSpace(pass) ? "No Password Required" : pass, WifiQrCodeImage);
+
             RefreshConnectInstructionsBanner();
             UpdateDjBannerPath();
         }

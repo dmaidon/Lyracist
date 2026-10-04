@@ -1,4 +1,4 @@
-<!-- Edited on Oct 4, 2026 @ 09:31:00 -> Add Pre-Show Screen checkboxes to rotation toolbar and display settings -->
+<!-- Edited on Oct 4, 2026 @ 10:11:00 -> Set WifiPassword TextBox UpdateSourceTrigger to PropertyChanged -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2102,7 +2102,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
-                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                     </Grid>
                                     <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
 

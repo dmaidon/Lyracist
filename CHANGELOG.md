@@ -1,5 +1,5 @@
-<!-- Edited on Oct 4, 2026 @ 09:59:00 -> Add Pre-Show welcome screen suppression and sequenced release to CHANGELOG -->
-Last Edit: Oct 4, 2026 - Pre-Show Screen Mode, Welcome Screen Hold & Sequenced Release
+<!-- Edited on Oct 4, 2026 @ 10:37:00 -> Add live Wi-Fi password QR code synchronization to CHANGELOG -->
+Last Edit: Oct 4, 2026 - Live Wi-Fi Password QR Synchronization & Real-Time Pre-Show Update
 
 # Changelog
 
@@ -14,6 +14,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Stacked QR code visual layout: ~20% of the display width on the right side of the 1080p canvas displays stacked cards for venue Wi-Fi ("📶 1. CONNECT WI-FI" with SSID and password) and singer sign-up ("📱 2. SCAN TO SIGN UP" with URL).
   - Automatic Wi-Fi fallback: If no venue Wi-Fi network is detected or configured, cleanly adapts to show only the single sign-up QR code card on the right side.
   - **Welcome Screen Hold & Sequenced Release**: While the pre-show screen is showing, individual new performer welcome screens are suppressed and held in queue without interrupting the audience onboarding display. If pre-show mode is engaged while a welcome is displaying, it is hidden and saved at the front of the queue. When the pre-show screen is closed to start the show, all held singer welcome screens automatically display one by one in exact sequence before returning to the rotation billboard.
+  - **Live Wi-Fi Password Synchronization (`MainViewModel.cs`, `MainWindow.xaml`, `SettingsViewModel.Display.cs`, `SettingsPage.xaml`)**: Resolved an issue where editing a Wi-Fi password did not immediately reflect on the audience projection display. `OnWifiPasswordChanged` regenerates `WifiQrCodeImage`, refreshes `WifiPasswordDisplay`, and forwards updated credentials to `DisplayWindowService.SetWifiInfo(...)` / `RotationWindowViewModel.RefreshQrCode()`, with `UpdateSourceTrigger=PropertyChanged` text bindings for instant keystroke updates.
   - Unit test coverage in `WelcomeScreenTests.cs` and user manual documentation update tests in `CatalogBookGeneratorTests.cs`.
 - **Shared Spectrum Analyzer (`Shared/SpectrumAnalyzer.cs`, `MonoSampleConverter.cs`, `SpectrumBarStyles.cs`)**: FFT/band logic extracted from Lyracist's `AudioSpectrumService` into shared code, with unit tests (`SpectrumAnalyzerTests.cs`).
 - **KSRotation Line-In Spectrum (`LineInSpectrumService.cs`, `Controls/`)**: Spectrum visualizer for the singer display and DJ banner windows, with new settings in `AppSettings.cs` and controls in `MainWindow.xaml`.

@@ -1,4 +1,4 @@
-<!-- Edited on Oct 4, 2026 @ 09:31:00 -> Add Toggle Pre-Show Screen hotkey binding control in SettingsPage -->
+<!-- Edited on Oct 4, 2026 @ 10:13:00 -> Set WifiPassword TextBox UpdateSourceTrigger to PropertyChanged in SettingsPage -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -829,7 +829,7 @@
                                     <ComboBox ItemsSource="{Binding ConnectInstructionScreens}" SelectedItem="{Binding ConnectInstructionsScreen, Mode=TwoWay}" Margin="0,0,0,12" ToolTip="Select display screen/monitor for projected Wi-Fi and Song Request QR code banner." />
 
                                     <TextBlock Text="Wi-Fi Password (Optional)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
-                                    <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" PlaceholderText="Wi-Fi Password for QR code" Margin="0,0,0,12" />
+                                    <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Wi-Fi Password for QR code" Margin="0,0,0,12" />
 
                                     <TextBlock Text="Dynamic Banner &amp; Dual QR Code Status" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png with dual scan-to-connect Wi-Fi and portal QR codes." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12" />
