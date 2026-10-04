@@ -531,6 +531,8 @@
                             <GroupBox Header="Lyrics Screen Audio Visualizer" Style="{StaticResource BlueSettingsGroupBoxStyle}">
                                 <StackPanel>
                                     <CheckBox Content="Enable Audio Visualizer" IsChecked="{Binding EnableLyricsVisualizer, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Renders an animated audio spectrum visualizer along the bottom of the active Lyrics projection screen." />
+                                    <CheckBox Content="Also show on Rotation screen" IsChecked="{Binding ShowVisualizerOnRotation, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Draws the synth bars on the rotation projection (Up Next lists lift to stay visible). Uses the style and opacity below." />
+                                    <CheckBox Content="Also show on DJ Banner screen" IsChecked="{Binding ShowVisualizerOnDjBanners, Mode=TwoWay}" Margin="0,0,0,8" />
 
                                     <TextBlock Text="Visualizer Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">

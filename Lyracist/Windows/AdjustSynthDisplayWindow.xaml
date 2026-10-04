@@ -116,6 +116,9 @@
                               Checked="OnSettingChanged"
                               Unchecked="OnSettingChanged" />
 
+                    <CheckBox x:Name="ShowOnRotationCheckBox" Content="Also show on Rotation screen" FontSize="12" Margin="0,0,0,6" Checked="OnScreenToggleChanged" Unchecked="OnScreenToggleChanged" />
+                    <CheckBox x:Name="ShowOnDjBannersCheckBox" Content="Also show on DJ Banner screen" FontSize="12" Margin="0,0,0,10" Checked="OnScreenToggleChanged" Unchecked="OnScreenToggleChanged" />
+
                     <TextBlock Text="Motion Mode" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,6" />
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="ModeFftRadio"

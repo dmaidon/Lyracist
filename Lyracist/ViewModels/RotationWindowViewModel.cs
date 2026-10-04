@@ -70,8 +70,13 @@ public partial class RotationWindowViewModel : BaseViewModel
     public bool IsRatingSystemEnabled => Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled;
     public bool ShowQrCodeOnRotationScreen => Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnRotationScreen;
 
+    /// <summary>True while synth bars are drawn on the rotation screen, so themed views can lift their Up Next list.</summary>
+    public bool ShowSpectrumOnRotation => Lyracist.Core.Helpers.AppSettings.ShowVisualizerOnRotation;
+
     public RotationWindowViewModel()
     {
+        Lyracist.Core.Helpers.AppSettings.VisualizerScreensChanged += () =>
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(ShowSpectrumOnRotation)));
         RefreshQrCode();
 
         // The timer and event subscription below are never stopped/unsubscribed:

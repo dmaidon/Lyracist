@@ -184,6 +184,18 @@ public partial class SettingsViewModel
         }
     }
 
+    public bool ShowVisualizerOnRotation
+    {
+        get => AppSettings.ShowVisualizerOnRotation;
+        set { if (AppSettings.ShowVisualizerOnRotation != value) { AppSettings.ShowVisualizerOnRotation = value; OnPropertyChanged(); } }
+    }
+
+    public bool ShowVisualizerOnDjBanners
+    {
+        get => AppSettings.ShowVisualizerOnDjBanners;
+        set { if (AppSettings.ShowVisualizerOnDjBanners != value) { AppSettings.ShowVisualizerOnDjBanners = value; OnPropertyChanged(); } }
+    }
+
     public bool EnableLyricsVisualizer
     {
         get => AppSettings.EnableLyricsVisualizer;

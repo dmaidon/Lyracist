@@ -46,6 +46,8 @@ public partial class AdjustSynthDisplayWindow : Window
 
         // Load persisted settings
         EnableVisualizerCheckBox.IsChecked = AppSettings.EnableLyricsVisualizer;
+        ShowOnRotationCheckBox.IsChecked = AppSettings.ShowVisualizerOnRotation;
+        ShowOnDjBannersCheckBox.IsChecked = AppSettings.ShowVisualizerOnDjBanners;
         bool isFft = AppSettings.LyricsVisualizerMode == "Audio Spectrum (Live FFT)";
         ModeFftRadio.IsChecked = isFft;
         ModeSimulatedRadio.IsChecked = !isFft;
@@ -65,6 +67,13 @@ public partial class AdjustSynthDisplayWindow : Window
         Closed += (_, _) => CompositionTarget.Rendering -= OnPreviewRendering;
 
         UpdatePreviewBars();
+    }
+
+    private void OnScreenToggleChanged(object sender, RoutedEventArgs e)
+    {
+        if (!_initialized) return;
+        AppSettings.ShowVisualizerOnRotation = ShowOnRotationCheckBox.IsChecked == true;
+        AppSettings.ShowVisualizerOnDjBanners = ShowOnDjBannersCheckBox.IsChecked == true;
     }
 
     private void OnSettingChanged(object? sender, RoutedEventArgs e)

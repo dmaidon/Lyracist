@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
+        xmlns:ctrl="clr-namespace:Lyracist.Controls"
         Title="Singer Rotation Screen" Height="600" Width="1000"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -524,6 +525,16 @@
 
                     <!-- Up next strip -->
                     <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,4">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <!-- Lift the list above the synth bars only while they are showing -->
+                                    <DataTrigger Binding="{Binding ShowSpectrumOnRotation}" Value="True">
+                                        <Setter Property="Margin" Value="0,0,0,180" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
                             <TextBlock Text="UP NEXT"
                                        FontSize="18"
@@ -719,6 +730,16 @@
 
                 <!-- Up next strip -->
                 <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,12,0,0">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <!-- Lift the list above the synth bars only while they are showing -->
+                                <DataTrigger Binding="{Binding ShowSpectrumOnRotation}" Value="True">
+                                    <Setter Property="Margin" Value="0,12,0,190" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
                         <TextBlock Text="UP NEXT"
                                    FontSize="20"
@@ -2497,6 +2518,9 @@
         </Border>
 
         <!-- Scaryoke Wheel Overlay on Rotation Billboard -->
+        <!-- Live synth bars (Settings > Audio Visualizer > Show on Rotation screen) -->
+        <ctrl:SpectrumBarsOverlay Grid.RowSpan="3" Screen="Rotation" Panel.ZIndex="110" VerticalAlignment="Bottom" Height="260" />
+
         <Border x:Name="ScaryokeWheelOverlay" Background="#E504060B" Visibility="Collapsed" Panel.ZIndex="120">
             <Grid Margin="40">
                 <Grid.RowDefinitions>

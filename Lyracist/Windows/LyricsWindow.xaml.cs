@@ -38,7 +38,7 @@ public partial class LyricsWindow : Window
     {
         System.Windows.Media.CompositionTarget.Rendering -= OnCompositionTargetRendering;
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived -= OnReactionReceived;
-        _spectrumService?.Stop();
+        if (!Lyracist.Controls.SpectrumBarsOverlay.AnyActive) _spectrumService?.Stop();
     }
 
     public void LoadSong(string songTitle, string artist)
@@ -145,7 +145,7 @@ public partial class LyricsWindow : Window
             {
                 VisualizerCanvas.Visibility = Visibility.Collapsed;
             }
-            _spectrumService?.Stop();
+            if (!Lyracist.Controls.SpectrumBarsOverlay.AnyActive) _spectrumService?.Stop();
             return;
         }
 
@@ -221,7 +221,7 @@ public partial class LyricsWindow : Window
         }
         else
         {
-            _spectrumService?.Stop();
+            if (!Lyracist.Controls.SpectrumBarsOverlay.AnyActive) _spectrumService?.Stop();
         }
 
         double decay = 0.16;

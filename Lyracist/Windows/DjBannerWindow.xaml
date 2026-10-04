@@ -9,10 +9,12 @@
         Topmost="True"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
+        xmlns:ctrl="clr-namespace:Lyracist.Controls"
         MouseDoubleClick="OnMouseDoubleClick">
 
     <Grid>
         <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
         <MediaElement x:Name="BannerVideo" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaEnded="BannerVideo_MediaEnded" />
+        <ctrl:SpectrumBarsOverlay Screen="DjBanners" VerticalAlignment="Bottom" Height="260" />
     </Grid>
 </Window>

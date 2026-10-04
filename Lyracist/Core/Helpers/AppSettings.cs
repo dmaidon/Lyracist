@@ -718,6 +718,21 @@ public static class AppSettings
         set { _data.EnableLyricsVisualizer = value; Save(); }
     }
 
+    /// <summary>Raised when a per-screen visualizer toggle changes so open windows can show/hide their bars.</summary>
+    public static event Action? VisualizerScreensChanged;
+
+    public static bool ShowVisualizerOnRotation
+    {
+        get => _data.ShowVisualizerOnRotation;
+        set { _data.ShowVisualizerOnRotation = value; Save(); VisualizerScreensChanged?.Invoke(); }
+    }
+
+    public static bool ShowVisualizerOnDjBanners
+    {
+        get => _data.ShowVisualizerOnDjBanners;
+        set { _data.ShowVisualizerOnDjBanners = value; Save(); VisualizerScreensChanged?.Invoke(); }
+    }
+
     public static string LyricsVisualizerMode
     {
         get => _data.LyricsVisualizerMode;
@@ -1273,6 +1288,8 @@ public static class AppSettings
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";
         public bool EnableLyricsVisualizer { get; set; } = true;
+        public bool ShowVisualizerOnRotation { get; set; } = false;
+        public bool ShowVisualizerOnDjBanners { get; set; } = false;
         public string LyricsVisualizerMode { get; set; } = "Audio Spectrum (Live FFT)";
         public string LyricsVisualizerStyle { get; set; } = "Neon Sunset";
         public double LyricsVisualizerOpacity { get; set; } = 0.8;
