@@ -97,6 +97,9 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
+    <Compile Include="..\Shared\SpectrumAnalyzer.cs" Link="SpectrumAnalyzer.cs" />
+    <Compile Include="..\Shared\SpectrumBarStyles.cs" Link="SpectrumBarStyles.cs" />
+    <Compile Include="..\Shared\MonoSampleConverter.cs" Link="MonoSampleConverter.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />

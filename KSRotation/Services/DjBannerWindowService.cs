@@ -18,6 +18,15 @@ namespace KSRotation.Services
             _selectedMonitorDevice = deviceName ?? string.Empty;
         }
 
+        private bool _showSpectrum;
+
+        /// <summary>Whether the synth bars show on the banner window (DJ banner vs special event is decided by the caller).</summary>
+        public void SetShowSpectrum(bool show)
+        {
+            _showSpectrum = show;
+            _window?.SetShowSpectrum(show);
+        }
+
         public void SetBannerPath(string path)
         {
             _bannerPath = path ?? string.Empty;
@@ -51,6 +60,7 @@ namespace KSRotation.Services
 
             _window = new DjBannerWindow();
             _window.DataContext = dataContext;
+            _window.SetShowSpectrum(_showSpectrum);
             _window.Closed += OnWindowClosed;
 
             UpdateImage();

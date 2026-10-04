@@ -5,6 +5,7 @@
 <Window x:Class="KSRotation.Windows.DjBannerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="clr-namespace:KSRotation.Controls"
         Title="DJ Banner Screen"
         Width="1000"
         Height="600"
@@ -19,6 +20,13 @@
     <Grid>
         <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
         <MediaElement x:Name="BannerVideo" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaEnded="BannerVideo_MediaEnded" />
+
+        <!-- Live synth bars driven by the DJ line-in; shown per the Synth Bars screen options (DJ banner vs special event) -->
+        <ctrl:SpectrumBarsOverlay x:Name="SpectrumBars"
+                                  Panel.ZIndex="50"
+                                  VerticalAlignment="Bottom"
+                                  Height="240"
+                                  Opacity="0.85" />
 
         <!-- Floating QR Code Overlay for audience scanning (shown in the corner of the screen) -->
         <Border VerticalAlignment="Bottom"

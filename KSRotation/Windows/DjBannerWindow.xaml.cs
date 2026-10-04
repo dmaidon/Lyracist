@@ -14,6 +14,9 @@ namespace KSRotation.Windows
             Lyracist.Shared.WelcomeOverlayHost.Attach(this);
         }
 
+        /// <summary>Turns the line-in synth bars on or off for whichever banner is currently showing.</summary>
+        public void SetShowSpectrum(bool show) => SpectrumBars.IsActive = show;
+
         public void UpdateBanner(string? path)
         {
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))

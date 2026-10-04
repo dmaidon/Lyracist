@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:44:00 -> Make GetBarBrush internal static for AdjustSynthDisplayWindow dialog preview
+// Edited on Oct 3, 2026 @ 15:55:00 -> GetBarBrush now delegates to Shared/SpectrumBarStyles so KSRotation uses the same themes
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -278,118 +278,7 @@ public partial class LyricsWindow : Window
     }
 
     internal static System.Windows.Media.Brush GetBarBrush(string style, int barIndex, int totalBars)
-    {
-        switch (style)
-        {
-            case "Cyberpunk":
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(0, 240, 255), 0.0), // Cyan
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(121, 40, 202), 0.5), // Violet
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(255, 0, 127), 1.0)  // Fuchsia
-                    }
-                };
-            case "Emerald Pulse":
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(6, 95, 70), 0.0),    // Dark Emerald
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(16, 185, 129), 0.5), // Vibrant Jade
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(132, 204, 22), 1.0)  // Neon Lime
-                    }
-                };
-            case "Solar Flare":
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(220, 38, 38), 0.0),  // Crimson
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(245, 158, 11), 0.5), // Vivid Amber
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(253, 224, 71), 1.0)  // Electric Gold
-                    }
-                };
-            case "Electric Blue":
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(30, 58, 138), 0.0),  // Deep Navy
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(2, 132, 199), 0.5),  // Azure
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(103, 232, 249), 1.0) // Ice Cyan
-                    }
-                };
-            case "Rainbow Spectrum":
-                double hue = totalBars > 1 ? (barIndex / (double)(totalBars - 1)) * 300.0 : 0;
-                var baseColor = HsvToRgb(hue, 0.9, 0.9);
-                var topColor = HsvToRgb(hue, 0.4, 1.0);
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(baseColor, 0.0),
-                        new System.Windows.Media.GradientStop(topColor, 1.0)
-                    }
-                };
-            case "Monochrome Glow":
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(51, 65, 85), 0.0),    // Slate
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(148, 163, 184), 0.5), // Silver
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(255, 255, 255), 1.0)  // Pure White
-                    }
-                };
-            case "Neon Sunset":
-            default:
-                return new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0),  // Blue
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0)  // Pink
-                    }
-                };
-        }
-    }
-
-    private static System.Windows.Media.Color HsvToRgb(double h, double s, double v)
-    {
-        int hi = (int)(Math.Floor(h / 60.0)) % 6;
-        double f = h / 60.0 - Math.Floor(h / 60.0);
-        byte vByte = (byte)(v * 255);
-        byte p = (byte)(v * (1 - s) * 255);
-        byte q = (byte)(v * (1 - f * s) * 255);
-        byte t = (byte)(v * (1 - (1 - f) * s) * 255);
-
-        return hi switch
-        {
-            0 => System.Windows.Media.Color.FromRgb(vByte, t, p),
-            1 => System.Windows.Media.Color.FromRgb(q, vByte, p),
-            2 => System.Windows.Media.Color.FromRgb(p, vByte, t),
-            3 => System.Windows.Media.Color.FromRgb(p, q, vByte),
-            4 => System.Windows.Media.Color.FromRgb(t, p, vByte),
-            _ => System.Windows.Media.Color.FromRgb(vByte, p, q)
-        };
-    }
+        => Lyracist.Shared.SpectrumBarStyles.GetBarBrush(style, barIndex, totalBars);
 
     private void OnReactionReceived(string emoji)
     {

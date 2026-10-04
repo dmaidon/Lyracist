@@ -597,6 +597,85 @@ namespace KSRotation.ViewModels
             QueueSaveSettings();
         }
 
+        // ---- Synth bars (live line-in spectrum) -------------------------------------------------
+
+        public IReadOnlyList<SpectrumInputDevice> SpectrumInputDevices { get; private set; } = LineInSpectrumService.GetInputDevices();
+
+        [ObservableProperty]
+        public partial string SpectrumInputDeviceId { get; set; } = LineInSpectrumService.DefaultDeviceId;
+
+        [ObservableProperty]
+        public partial double SpectrumSensitivity { get; set; } = 1.0;
+
+        public IReadOnlyList<string> SpectrumStyles { get; } = SpectrumBarStyles.Names;
+
+        [ObservableProperty]
+        public partial string SpectrumStyle { get; set; } = SpectrumBarStyles.Default;
+
+        partial void OnSpectrumStyleChanged(string value) => OnSpectrumSettingChanged();
+
+        [ObservableProperty]
+        public partial bool SpectrumOnRotation { get; set; }
+
+        [ObservableProperty]
+        public partial bool SpectrumOnDjBanners { get; set; }
+
+        [ObservableProperty]
+        public partial bool SpectrumOnSpecialEvents { get; set; }
+
+        /// <summary>Plain-language capture state shown under the device picker.</summary>
+        [ObservableProperty]
+        public partial string SpectrumStatus { get; set; } = "Synth bars are off.";
+
+        partial void OnSpectrumInputDeviceIdChanged(string value) => OnSpectrumSettingChanged();
+        partial void OnSpectrumSensitivityChanged(double value) => OnSpectrumSettingChanged();
+        partial void OnSpectrumOnRotationChanged(bool value) => OnSpectrumSettingChanged();
+        partial void OnSpectrumOnDjBannersChanged(bool value) => OnSpectrumSettingChanged();
+        partial void OnSpectrumOnSpecialEventsChanged(bool value) => OnSpectrumSettingChanged();
+
+        private void OnSpectrumSettingChanged()
+        {
+            ApplySpectrumSettings();
+            if (_isInitializing) return;
+            QueueSaveSettings();
+        }
+
+        [RelayCommand]
+        private void RefreshSpectrumDevices()
+        {
+            SpectrumInputDevices = LineInSpectrumService.GetInputDevices();
+            OnPropertyChanged(nameof(SpectrumInputDevices));
+            // Re-assert the selection so the ComboBox re-binds against the new list.
+            string id = SpectrumInputDeviceId;
+            SpectrumInputDeviceId = string.Empty;
+            SpectrumInputDeviceId = id;
+        }
+
+        private bool IsSpecialEventActive =>
+            !string.IsNullOrEmpty(ActiveSpecialEvent) &&
+            !ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Pushes the synth-bar options to the capture service and every screen that can show them.
+        /// Called on any option change and whenever the active banner flips between DJ banner and special event.</summary>
+        private void ApplySpectrumSettings()
+        {
+            var spectrum = LineInSpectrumService.Instance;
+            spectrum.Sensitivity = (float)SpectrumSensitivity;
+            spectrum.Style = SpectrumStyle;
+
+            bool anyScreen = SpectrumOnRotation || SpectrumOnDjBanners || SpectrumOnSpecialEvents;
+            spectrum.Configure(anyScreen, SpectrumInputDeviceId);
+
+            _displayWindowService.SetShowSpectrum(SpectrumOnRotation);
+            _djBannerWindowService.SetShowSpectrum(IsSpecialEventActive ? SpectrumOnSpecialEvents : SpectrumOnDjBanners);
+
+            SpectrumStatus = !anyScreen
+                ? "Synth bars are off. Tick a screen above to turn them on."
+                : spectrum.IsCapturing
+                    ? "Listening to the selected input."
+                    : $"Can't open the input: {spectrum.LastError ?? "unknown error"}. Check the device and Windows microphone privacy settings.";
+        }
+
         /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>
         [ObservableProperty]
         public partial int AutoRotateDurationSeconds { get; set; } = 180;
@@ -1311,6 +1390,13 @@ namespace KSRotation.ViewModels
             AutoSwitchToRemoteDjOnHandoff = settings.AutoSwitchToRemoteDjOnHandoff;
             AutoRotateProjectionViews = settings.AutoRotateProjectionViews;
             ReducedProjectionEffects = settings.ReducedProjectionEffects;
+            SpectrumInputDeviceId = settings.SpectrumInputDeviceId ?? string.Empty;
+            SpectrumSensitivity = Math.Clamp(settings.SpectrumSensitivity, 0.25, 4.0);
+            SpectrumStyle = SpectrumBarStyles.Normalize(settings.SpectrumStyle);
+            SpectrumOnRotation = settings.SpectrumOnRotation;
+            SpectrumOnDjBanners = settings.SpectrumOnDjBanners;
+            SpectrumOnSpecialEvents = settings.SpectrumOnSpecialEvents;
+            ApplySpectrumSettings();
             AutoRotateDurationSeconds = settings.AutoRotateDurationSeconds > 0 ? settings.AutoRotateDurationSeconds : 180;
             LoadProjectionRotationSchedule(settings.ProjectionRotationSchedule);
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
@@ -3150,6 +3236,12 @@ namespace KSRotation.ViewModels
                 AutoSwitchToRemoteDjOnHandoff = AutoSwitchToRemoteDjOnHandoff,
                 AutoRotateProjectionViews = AutoRotateProjectionViews,
                 ReducedProjectionEffects = ReducedProjectionEffects,
+                SpectrumInputDeviceId = SpectrumInputDeviceId,
+                SpectrumSensitivity = SpectrumSensitivity,
+                SpectrumStyle = SpectrumStyle,
+                SpectrumOnRotation = SpectrumOnRotation,
+                SpectrumOnDjBanners = SpectrumOnDjBanners,
+                SpectrumOnSpecialEvents = SpectrumOnSpecialEvents,
                 AutoRotateDurationSeconds = AutoRotateDurationSeconds > 0 ? AutoRotateDurationSeconds : 180,
                 ProjectionRotationSchedule = [.. ProjectionRotationSchedule]
             };
@@ -3495,6 +3587,7 @@ namespace KSRotation.ViewModels
         private void UpdateDjBannerPath()
         {
             _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
+            ApplySpectrumSettings(); // DJ banner vs special event may have just flipped
         }
 
         public void RefreshAvailableEventBannerFiles()

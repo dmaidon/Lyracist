@@ -74,6 +74,10 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ReducedEffects { get; set; }
 
+        /// <summary>Whether the live synth bars (line-in spectrum) show on the rotation screen.</summary>
+        [ObservableProperty]
+        public partial bool ShowSpectrum { get; set; }
+
         public sealed record NextSingerDisplay
         {
             public string Text { get; init; }

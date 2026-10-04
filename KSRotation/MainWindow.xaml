@@ -2027,6 +2027,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Column 0: Target Monitor, Connect & Request Instructions, Casting Controls -->
@@ -2151,6 +2152,129 @@
                             </GroupBox>
                         </StackPanel>
 
+                        <!-- Column 2: Synth Bars and New Performer Welcome Screen -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="15,0,0,12">
+                            <!-- Synth Bars GroupBox: live frequency bars driven by a line-in / mic -->
+                            <GroupBox Header="🎚 Synth Bars (Live Audio Input)" Style="{StaticResource NavySettingsGroupBoxStyle}">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Animated bars that react to the music. KSRotation plays no audio itself, so pick the input they listen to: a line-in from the DJ's mixer (best) or a microphone."
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               Margin="0,0,0,10" />
+
+                                    <TextBlock Text="Audio input:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox
+                                            ItemsSource="{Binding SpectrumInputDevices}"
+                                            SelectedValue="{Binding SpectrumInputDeviceId, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedValuePath="Id"
+                                            DisplayMemberPath="Name"
+                                            Style="{StaticResource ModernComboBoxStyle}" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Content="Refresh"
+                                            Command="{Binding RefreshSpectrumDevicesCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Padding="8,4"
+                                            Height="32" />
+                                    </Grid>
+
+                                    <TextBlock Text="Show the bars on:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <CheckBox Content="Rotation screen"
+                                              IsChecked="{Binding SpectrumOnRotation, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,0,0,6" />
+                                    <CheckBox Content="DJ banner screen"
+                                              IsChecked="{Binding SpectrumOnDjBanners, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,0,0,6" />
+                                    <CheckBox Content="Special event screens"
+                                              IsChecked="{Binding SpectrumOnSpecialEvents, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,0,0,10"
+                                              ToolTip="Shown on the banner screen while a special event (Birthday, Wedding, Last Song, ...) is active." />
+
+                                    <TextBlock Text="Color theme:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding SpectrumStyles}"
+                                              SelectedItem="{Binding SpectrumStyle, Mode=TwoWay}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              Margin="0,0,0,10"
+                                              ToolTip="Same color themes as Lyracist's lyrics screen. Changes apply to open screens right away." />
+
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Sensitivity:" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Slider Grid.Column="1"
+                                                Minimum="0.25" Maximum="4" TickFrequency="0.25"
+                                                Value="{Binding SpectrumSensitivity, Mode=TwoWay}"
+                                                VerticalAlignment="Center" Margin="10,0"
+                                                ToolTip="Raise this if the bars barely move (distant mic or quiet line-in)." />
+                                        <TextBlock Grid.Column="2" Text="{Binding SpectrumSensitivity, StringFormat={}{0:0.00}x}" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    </Grid>
+
+                                    <TextBlock Text="{Binding SpectrumStatus}"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="New Performer Welcome Screen"
+                                      Style="{StaticResource BlueSettingsGroupBoxStyle}"
+                                      Margin="0,15,0,0">
+                                <StackPanel Margin="0,4,0,0">
+                                    <CheckBox
+                                        Content="Show 'Welcome to our new performer' screen when a new singer joins"
+                                        IsChecked="{Binding WelcomeScreenEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                        ToolTip="Covers the rotation and DJ Banner screens with a randomly designed welcome for each singer who is new to tonight's rotation."
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,6" />
+                                    <TextBlock Text="Welcome Screen Display" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <ComboBox
+                                        ItemsSource="{Binding WelcomeScreenChoices}"
+                                        SelectedValue="{Binding WelcomeScreenMonitor, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="DeviceName"
+                                        DisplayMemberPath="Label"
+                                        Style="{StaticResource ModernComboBoxStyle}"
+                                        ToolTip="Default overlays the rotation and DJ Banner screens where they already are. Pick a monitor to show the welcome there instead; the rotation and DJ Banner are not changed and come back when it ends."
+                                        Margin="0,0,0,8" />
+                                    <TextBlock Text="Welcome Screen Style" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <ComboBox
+                                        ItemsSource="{Binding WelcomeDesignChoices}"
+                                        SelectedValue="{Binding WelcomeScreenDesign, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="Id"
+                                        DisplayMemberPath="Name"
+                                        Style="{StaticResource ModernComboBoxStyle}"
+                                        ToolTip="Choose a specific welcome screen design to always display, or select 'All (Random)' to rotate through all models."
+                                        Margin="0,0,0,8" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Show welcome for:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBox Text="{Binding WelcomeScreenSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Style="{StaticResource ModernCompactTextBoxStyle}"
+                                                 Width="50" Height="28" Padding="4,2" TextAlignment="Center" VerticalContentAlignment="Center"
+                                                 ToolTip="3 to 120 seconds." />
+                                        <TextBlock Text="sec" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,12,0" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Button Content="Preview"
+                                                Command="{Binding PreviewWelcomeScreenCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Padding="10,4" Height="28"
+                                                ToolTip="Shows a sample welcome on the rotation and DJ Banner screens." />
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
                         <!-- Column 1: Screen Rotation -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="15,0,0,12">
                             <!-- Screen Rotation GroupBox -->
@@ -2244,55 +2368,11 @@
                                     </ItemsControl>
                                 </StackPanel>
                             </GroupBox>
-
-                            <GroupBox Header="New Performer Welcome Screen"
-                                      Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                      Margin="0,15,0,0">
-                                <StackPanel Margin="0,4,0,0">
-                                    <CheckBox
-                                        Content="Show 'Welcome to our new performer' screen when a new singer joins"
-                                        IsChecked="{Binding WelcomeScreenEnabled, UpdateSourceTrigger=PropertyChanged}"
-                                        ToolTip="Covers the rotation and DJ Banner screens with a randomly designed welcome for each singer who is new to tonight's rotation."
-                                        Style="{StaticResource ModernCheckBoxStyle}"
-                                        Margin="0,0,0,6" />
-                                    <TextBlock Text="Welcome Screen Display" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <ComboBox
-                                        ItemsSource="{Binding WelcomeScreenChoices}"
-                                        SelectedValue="{Binding WelcomeScreenMonitor, UpdateSourceTrigger=PropertyChanged}"
-                                        SelectedValuePath="DeviceName"
-                                        DisplayMemberPath="Label"
-                                        Style="{StaticResource ModernComboBoxStyle}"
-                                        ToolTip="Default overlays the rotation and DJ Banner screens where they already are. Pick a monitor to show the welcome there instead; the rotation and DJ Banner are not changed and come back when it ends."
-                                        Margin="0,0,0,8" />
-                                    <TextBlock Text="Welcome Screen Style" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <ComboBox
-                                        ItemsSource="{Binding WelcomeDesignChoices}"
-                                        SelectedValue="{Binding WelcomeScreenDesign, UpdateSourceTrigger=PropertyChanged}"
-                                        SelectedValuePath="Id"
-                                        DisplayMemberPath="Name"
-                                        Style="{StaticResource ModernComboBoxStyle}"
-                                        ToolTip="Choose a specific welcome screen design to always display, or select 'All (Random)' to rotate through all models."
-                                        Margin="0,0,0,8" />
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="Show welcome for:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBox Text="{Binding WelcomeScreenSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource ModernCompactTextBoxStyle}"
-                                                 Width="50" Height="28" Padding="4,2" TextAlignment="Center" VerticalContentAlignment="Center"
-                                                 ToolTip="3 to 120 seconds." />
-                                        <TextBlock Text="sec" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,12,0" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <Button Content="Preview"
-                                                Command="{Binding PreviewWelcomeScreenCommand}"
-                                                Style="{StaticResource ModernSecondaryButtonStyle}"
-                                                Padding="10,4" Height="28"
-                                                ToolTip="Shows a sample welcome on the rotation and DJ Banner screens." />
-                                    </StackPanel>
-                                </StackPanel>
-                            </GroupBox>
                         </StackPanel>
 
                         <GroupBox Header="DJ &amp; Special Event Banners"
                                   Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                  Grid.Column="2"
+                                  Grid.Column="3"
                                   Grid.ColumnSpan="2"
                                   VerticalAlignment="Top"
                                   Margin="15,0,0,0">

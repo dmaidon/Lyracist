@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.3.714</AssemblyVersion>
-    <FileVersion>26.10.3.714</FileVersion>
+    <AssemblyVersion>26.10.3.717</AssemblyVersion>
+    <FileVersion>26.10.3.717</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -64,6 +64,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="FlashCap" Version="1.12.0" />
+    <PackageReference Include="NAudio.Wasapi" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="QRCoder" Version="1.8.0" />
@@ -112,6 +113,9 @@
   <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
+    <Compile Include="..\Shared\SpectrumAnalyzer.cs" Link="SpectrumAnalyzer.cs" />
+    <Compile Include="..\Shared\SpectrumBarStyles.cs" Link="SpectrumBarStyles.cs" />
+    <Compile Include="..\Shared\MonoSampleConverter.cs" Link="MonoSampleConverter.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />

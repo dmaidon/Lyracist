@@ -5,6 +5,15 @@ Last Edit: Oct 3, 2026 - Adjust Synth Display Modal Dialog & Spectrum Customizat
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] - 2026-10-04
+
+### Added
+- **Shared Spectrum Analyzer (`Shared/SpectrumAnalyzer.cs`, `MonoSampleConverter.cs`, `SpectrumBarStyles.cs`)**: FFT/band logic extracted from Lyracist's `AudioSpectrumService` into shared code, with unit tests (`SpectrumAnalyzerTests.cs`).
+- **KSRotation Line-In Spectrum (`LineInSpectrumService.cs`, `Controls/`)**: Spectrum visualizer for the singer display and DJ banner windows, with new settings in `AppSettings.cs` and controls in `MainWindow.xaml`.
+
+### Changed
+- Lyracist `AudioSpectrumService` and `LyricsWindow` now use the shared analyzer.
+
 ## [26.10.1.0] - 2026-10-03
 
 ### Fixed & Enhanced

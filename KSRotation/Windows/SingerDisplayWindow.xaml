@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:KSRotation.ViewModels"
     xmlns:conv="clr-namespace:KSRotation.Converters"
+    xmlns:ctrl="clr-namespace:KSRotation.Controls"
     mc:Ignorable="d"
     Title="Singer Display"
     Width="450"
@@ -2254,6 +2255,14 @@
                            Margin="0,4,0,0" />
             </StackPanel>
         </Border>
+
+        <!-- Live synth bars driven by the DJ line-in (Settings > Synth Bars); only active when enabled for this screen -->
+        <ctrl:SpectrumBarsOverlay Grid.RowSpan="2"
+                                  Panel.ZIndex="110"
+                                  VerticalAlignment="Bottom"
+                                  Height="260"
+                                  Opacity="0.85"
+                                  IsActive="{Binding ShowSpectrum}" />
 
         <!-- Last Song Banner Overlay (shown on all non-lyric screens when Last Song is activated) -->
         <Grid x:Name="LastSongBannerOverlay"

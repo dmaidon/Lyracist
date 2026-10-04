@@ -108,6 +108,24 @@ namespace KSRotation.Models
         /// views use fewer particles and skip per-element blur effects.</summary>
         public bool ReducedProjectionEffects { get; init; }
 
+        /// <summary>Audio input (mixer line-in, USB interface or mic) the synth bars listen to. Empty = system default input.</summary>
+        public string SpectrumInputDeviceId { get; init; } = string.Empty;
+
+        /// <summary>Color theme of the synth bars (same names as Lyracist: Neon Sunset, Cyberpunk, ...).</summary>
+        public string SpectrumStyle { get; init; } = "Neon Sunset";
+
+        /// <summary>How strongly quiet input fills the synth bars (0.25 - 4).</summary>
+        public double SpectrumSensitivity { get; init; } = 1.0;
+
+        /// <summary>Show the live synth bars on the rotation (singer display) screen.</summary>
+        public bool SpectrumOnRotation { get; init; }
+
+        /// <summary>Show the live synth bars on the DJ banner screen while a regular DJ banner is up.</summary>
+        public bool SpectrumOnDjBanners { get; init; }
+
+        /// <summary>Show the live synth bars on the banner screen while a special event banner is active.</summary>
+        public bool SpectrumOnSpecialEvents { get; init; }
+
         /// <summary>When true, patrons cannot request songs via the portal that have already been performed or queued in the current session.</summary>
         public bool BlockDuplicateSongsInSession { get; init; } = true;
 
