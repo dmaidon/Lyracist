@@ -1,4 +1,4 @@
-<!-- Edited on Sep 21, 2026 @ 11:58:30 -> Add dynamic round completion estimation notice with remaining performers and ETA to Remote DJ Board -->
+<!-- Edited on Oct 5, 2026 @ 07:53:00 -> Make DONE (LAST ROUND) badge clickable to clear last-round-done flag -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -860,6 +860,19 @@
                         </div>
                     </div>
 
+                    <!-- Dynamic Announcement Banner Modal Overlay -->
+                    <div id="announcement-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9999; justify-content: center; align-items: center; padding: 16px;">
+                        <div class="panel" style="max-width: 480px; width: 100%; border: 1px solid var(--amber); box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center;">
+                            <div class="panel-title" style="color: var(--amber); font-size: 1.2rem; justify-content: center;">📢 Special Event Announcement</div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Enter announcement text to display on screen:</p>
+                            <textarea id="announcement-text-input" class="form-control" rows="3" placeholder="Welcome to Jill &amp; Robert, 1st timers tonight" style="font-size: 1.05rem; text-align: center; margin-bottom: 16px; width: 100%; box-sizing: border-box; resize: vertical;" onkeydown="checkAnnouncementModalKey(event)"></textarea>
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button type="button" class="btn-outline" onclick="closeAnnouncementModal()" style="flex: 1; padding: 10px;">Cancel</button>
+                                <button type="button" class="btn-primary" onclick="submitAnnouncementBanner()" style="flex: 1; padding: 10px; font-weight: bold; background-color: var(--amber);">📢 Launch Banner</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Incoming Requests Card -->
                     <div class="panel">
                         <div class="panel-title">Incoming Requests</div>
@@ -1196,6 +1209,8 @@
                             btn.onclick = () => {
                                 if (eventName.toLowerCase() === "birthday") {
                                     showBirthdayModal();
+                                } else if (eventName.toLowerCase() === "announcement") {
+                                    showAnnouncementModal();
                                 } else {
                                     sendAction("set-special-event", eventName);
                                 }
@@ -1235,6 +1250,44 @@
                     const performerName = input ? input.value.trim() : "";
                     closeBirthdayModal();
                     sendAction("set-special-event", "Birthday", performerName);
+                }
+
+                function showAnnouncementModal() {
+                    const input = document.getElementById("announcement-text-input");
+                    if (input && !input.value) {
+                        input.value = "Welcome to Jill & Robert, 1st timers tonight";
+                    }
+                    const modal = document.getElementById("announcement-modal");
+                    if (modal) {
+                        modal.style.display = "flex";
+                        setTimeout(() => {
+                            if (input) {
+                                input.focus();
+                                input.select();
+                            }
+                        }, 100);
+                    }
+                }
+
+                function closeAnnouncementModal() {
+                    const modal = document.getElementById("announcement-modal");
+                    if (modal) modal.style.display = "none";
+                }
+
+                function checkAnnouncementModalKey(event) {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        submitAnnouncementBanner();
+                    } else if (event.key === "Escape") {
+                        closeAnnouncementModal();
+                    }
+                }
+
+                function submitAnnouncementBanner() {
+                    const input = document.getElementById("announcement-text-input");
+                    const announcementText = input ? input.value.trim() : "";
+                    closeAnnouncementModal();
+                    sendAction("set-special-event", "Announcement", announcementText);
                 }
 
                 function renderQueue(singers) {
@@ -1304,7 +1357,7 @@
                         }
                         if (s.hasSungInLastRound) {
                             cardClass += ' sung-last-round';
-                            badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px;">DONE (LAST ROUND)</span>';
+                            badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px; cursor: pointer;" title="Singer completed song in last round. Click to remove flag if marked by accident." onclick="sendAction(\'clear-last-round-done\', \'' + s.id + '\')">DONE (LAST ROUND) ✕</span>';
                         }
 
                         // Render rounds checkboxes

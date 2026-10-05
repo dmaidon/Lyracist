@@ -1,4 +1,4 @@
-// Edited on Sep 11, 2026 @ 07:47:00 -> Update tests to invoke production sync and selection methods on KaraokeViewModel directly
+// Edited on Oct 4, 2026 @ 23:35:00 -> Add tests for Announcement dynamic special event banner option and generation
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -196,4 +196,47 @@ public class SpecialEventBannerSelectionTests
         bool caseSensitiveMismatch = (currentEvent == incomingEvent);
         Assert.False(caseSensitiveMismatch); // Confirms why == was flawed and OrdinalIgnoreCase fixes it
     }
+
+    [Fact]
+    public void Announcement_IsStandardEvent_AndGeneratesDynamicBanner()
+    {
+        Assert.Contains(Lyracist.Shared.DjBannerFileManager.StandardEventNames, s => s.Equals("Announcement", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("Announcement.png", Lyracist.Shared.DjBannerFileManager.GetStandardBannerFileName("Announcement"));
+
+        string tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"announcement_test_{Guid.NewGuid():N}.png");
+        try
+        {
+            Lyracist.Shared.DjBannerFileManager.CreateDynamicAnnouncementBannerPng(tempPath, "Welcome to Jill & Robert, 1st timers tonight");
+            Assert.True(System.IO.File.Exists(tempPath));
+            var fileInfo = new System.IO.FileInfo(tempPath);
+            Assert.True(fileInfo.Length > 1000);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempPath))
+            {
+                System.IO.File.Delete(tempPath);
+            }
+        }
+    }
+
+    [Fact]
+    public void UpdateActiveSpecialEventFromSync_WithAnnouncement_QuietlyUpdatesSelection()
+    {
+        var vm = CreateTestKaraokeViewModel(out var mockDisplay);
+
+        vm.UpdateActiveSpecialEventFromSync("Announcement");
+
+        Assert.Equal("Announcement", vm.ActiveSpecialEvent);
+
+        var announcementOption = vm.SpecialEventOptions.FirstOrDefault(o => o.Value.Equals("Announcement", StringComparison.OrdinalIgnoreCase));
+        Assert.NotNull(announcementOption);
+        Assert.True(announcementOption.IsSelected);
+
+        var noneOption = vm.SpecialEventOptions.First(o => o.Value.Equals("None", StringComparison.OrdinalIgnoreCase));
+        Assert.False(noneOption.IsSelected);
+
+        mockDisplay.Verify(d => d.UpdateSpecialEvent("Announcement"), Times.Once);
+    }
 }
+

@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 07:13:00 -> Validate DJ PIN and focus Pin entry when selecting peer
+// Edited on Oct 5, 2026 @ 07:55:00 -> Support HasSungInLastRound in Edit Singer dialog
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -884,6 +884,7 @@ public partial class MainPage : ContentPage
             EditSongEntry.Text = entry.Song;
             EditArtistEntry.Text = entry.Artist;
             EditSpecialCheckBox.IsChecked = entry.IsSpecial;
+            EditLastRoundDoneCheckBox.IsChecked = entry.HasSungInLastRound;
             EditSingerOverlay.IsVisible = true;
             Dispatcher.Dispatch(() =>
             {
@@ -909,6 +910,9 @@ public partial class MainPage : ContentPage
         }
 
         bool becameSpecial = !_editingSinger.IsSpecial && EditSpecialCheckBox.IsChecked;
+        bool lastRoundDoneChanged = _editingSinger.HasSungInLastRound != EditLastRoundDoneCheckBox.IsChecked;
+        bool targetLastRoundDone = EditLastRoundDoneCheckBox.IsChecked;
+
         _editingSinger.Name = name;
         _editingSinger.DuetPartnerName = EditDuetEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
@@ -925,6 +929,18 @@ public partial class MainPage : ContentPage
         else
         {
             _editingSinger.IsSpecial = EditSpecialCheckBox.IsChecked;
+        }
+
+        if (lastRoundDoneChanged)
+        {
+            if (!targetLastRoundDone)
+            {
+                vm.ClearLastRoundDoneCommand.Execute(_editingSinger);
+            }
+            else
+            {
+                vm.ToggleLastRoundDoneCommand.Execute(_editingSinger);
+            }
         }
 
         _editingSinger = null;

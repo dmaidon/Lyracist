@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign to AppSettings
+// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement standard special event configuration
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -87,7 +87,8 @@ namespace KSRotation.Models
             new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
             new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" },
             new() { EventName = "Last Song", BannerFileName = "LastSong.png" },
-            new() { EventName = "Connect Instructions", BannerFileName = "ConnectInstructions.png" }
+            new() { EventName = "Connect Instructions", BannerFileName = "ConnectInstructions.png" },
+            new() { EventName = "Announcement", BannerFileName = "Announcement.png" }
         ];
 
         /// <summary>The display target type (Monitor, Chromecast, Miracast, BrowserCast, etc.)</summary>

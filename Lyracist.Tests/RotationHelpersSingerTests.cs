@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 12:04:00 -> Add unit tests for CalculateRoundEstimation
+// Edited on Oct 5, 2026 @ 07:56:00 -> Add unit tests for restoring accidental finished singers during last round
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -1035,6 +1035,44 @@ public class RotationHelpersSingerTests
         Assert.Equal(0, result.RemainingSeconds);
         Assert.Equal(0, result.FullRoundSeconds);
         Assert.Contains("No performers", result.SummaryText);
+    }
+
+    [Fact]
+    public void RecalculateNextSinger_LastRound_ClearingFinishedFlagRestoresSingerAsNext()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = new Singer { Name = "Bob", HasSungInLastRound = true }; // Accidental finish
+        var carol = new Singer { Name = "Carol", HasSungInLastRound = false };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        // While Bob is marked finished, Carol is next
+        RotationHelpers.UpdateNextSingerHighlight(singers, isLastRound: true);
+        Assert.False(bob.IsNext);
+        Assert.True(carol.IsNext);
+
+        // Clear Bob's accidental last-round done flag
+        bob.HasSungInLastRound = false;
+        RotationHelpers.UpdateNextSingerHighlight(singers, isLastRound: true);
+
+        // Bob is immediately after Alice and now eligible again, so Bob becomes next
+        Assert.True(bob.IsNext);
+        Assert.False(carol.IsNext);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_LastRound_ClearingFinishedFlagRestoresEstimatedWait()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", HasSungInLastRound = true, EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers, isLastRound: true, defaultEstimatedPerformanceSeconds: 300, enabled: true);
+        Assert.Equal(0, bob.EstimatedWaitMinutes); // marked done in last round, so wait is 0
+
+        // Clear accidental done flag
+        bob.HasSungInLastRound = false;
+        RotationHelpers.RecalculateEstimatedWaits(singers, isLastRound: true, defaultEstimatedPerformanceSeconds: 300, enabled: true);
+        Assert.True(bob.EstimatedWaitMinutes > 0);
     }
 }
 

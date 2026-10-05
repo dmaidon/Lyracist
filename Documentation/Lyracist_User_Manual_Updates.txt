@@ -2344,3 +2344,34 @@ To prevent audience projection distraction and keep Wi-Fi onboarding instruction
 2. Sequenced Release on Pre-Show Close:
    - When the host closes/turns off Pre-Show Screen mode to kick off the show, all held singer welcome screens automatically display one after another in exact sequence.
    - Once all queued new performers have been welcomed, the projection window transitions smoothly to the active Rotation Billboard queue.
+
+Section: Dynamic Special Event Announcement Banner Studio (Updated Oct 4, 2026)
+- Dynamic Announcement Banner: DJs can now select 'Announcement' from the Special Event Banner picker in both Lyracist and KSRotation to broadcast custom, dynamically generated full-screen celebration announcements (e.g. 'Welcome to Jill & Robert, 1st timers tonight').
+- Host Laptop Interactive Modal: Selecting 'Announcement' immediately opens an intuitive prompt dialog where the DJ can type any custom message, shoutout, or welcome greeting. Clicking 'Launch Banner' instantly renders a high-definition 16:9 graphic into the shared EventBanners folder with dual gold borders, ambient radial glow, corner celebration fireworks, and auto-scaled typography.
+- Remote DJ Board Support: On the web-based Remote DJ Board (/dj), tapping the 'Announcement' special event button presents a modal overlay allowing the mobile DJ to enter announcement text directly from their tablet or smartphone.
+- Cancellation Safety: Dismissing or cancelling the announcement prompt cleanly preserves the previously selected banner without switching displays prematurely.
+
+Lyracist Pro Suite & KSRotation: Clear 'Last Round Done' Accidental Flag & Restore Performer (`RotationViewModel.cs`, `EditSingerWindow.xaml`, `MainViewModel.cs`, `KSRotation.Maui`, `dj.html`) - (October 2026)
+
+Section: Lyracist & KSRotation / Rotation Management / Last Round Rotation Controls
+
+[Overview & Purpose]
+During the final round of the evening (when 'Last Round' is engaged), performers who have completed their song are marked as completed for the round and removed from active rotation eligibility. If a performer was marked finished by accident, hosts previously had to toggle the entire Last Round mode off and on again, which cleared completion flags for all singers in the rotation. Hosts across all applications now have multiple intuitive methods to clear the 'Last Round Done' flag for an individual singer and immediately restore them to active rotation eligibility.
+
+[Interactive Badge & Direct Action]
+- Clickable Badge (✕): The 'DONE (LAST ROUND)' badge displayed next to a performer's name is now an interactive button badge with a distinct close/clear icon ('DONE (LAST ROUND) ✕'). Clicking or tapping this badge immediately removes the last-round done flag.
+- Immediate Eligibility Restoration: Clearing the flag instantly restores the singer's eligibility as the Next Performer ('IsNext'), recalculates cumulative wait times and round duration estimations, and refreshes the audience rotation billboard.
+
+[Multiple Access Points Across Apps]
+1. Lyracist Desktop:
+   - Click the 'DONE (LAST ROUND) ✕' badge directly on the singer row in RotationPage or KaraokePage.
+   - Right-click the singer and select '↩ Clear Last Round Done Status' from the context menu.
+   - Click 'Edit Performer' (✏) and uncheck the 'Completed in Last Round' checkbox in the dialog.
+2. KSRotation Desktop:
+   - Click the 'DONE (LAST ROUND) ✕' badge on the singer row in the active rotation list.
+   - Right-click the performer and choose '↩ Clear Last Round Done Status' from the context menu.
+3. KSRotation.Maui:
+   - Tap the 'DONE (LAST ROUND) ✕' badge on the performer card.
+   - Tap 'Edit Performer' (✏) and uncheck 'Done in Last Round (uncheck to restore)'.
+4. Remote DJ Web Portal (/dj):
+   - Mobile DJs can tap the 'DONE (LAST ROUND) ✕' badge on their tablet or phone to restore performers remotely.

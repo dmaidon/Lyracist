@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared.NameFormatting and apply ProperCase to song title and artist
+// Edited on Oct 5, 2026 @ 07:48:00 -> Add HasSungInLastRound property to allow viewing and clearing last round done flag
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Models;
 using Lyracist.Shared;
@@ -28,6 +28,9 @@ namespace Lyracist.ViewModels
         private string _notes = string.Empty;
 
         [ObservableProperty]
+        private bool _hasSungInLastRound;
+
+        [ObservableProperty]
         private string _validationError = string.Empty;
 
         public void Load(Singer singer)
@@ -39,6 +42,7 @@ namespace Lyracist.ViewModels
             Artist = singer.Artist;
             Key = singer.Key;
             Notes = singer.Notes;
+            HasSungInLastRound = singer.HasSungInLastRound;
             ValidationError = string.Empty;
         }
 
@@ -64,6 +68,7 @@ namespace Lyracist.ViewModels
             _target.Artist = NameFormatting.ProperCase(Artist?.Trim() ?? string.Empty);
             _target.Key = string.IsNullOrWhiteSpace(Key) ? "0" : Key.Trim();
             _target.Notes = Notes ?? string.Empty;
+            _target.HasSungInLastRound = HasSungInLastRound;
             return true;
         }
     }

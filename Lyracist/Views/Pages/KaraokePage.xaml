@@ -1,4 +1,4 @@
-<!-- Edited on Oct 4, 2026 @ 09:31:00 -> Add Pre-Show Screen toggle button to DJ toolbar and Rotation Monitor controls -->
+<!-- Edited on Oct 5, 2026 @ 07:48:00 -> Add clickable DONE (LAST ROUND) badge and Clear Last Round Done to context menu -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -879,6 +879,20 @@
                                     </Border.Style>
                                     <Border.ContextMenu>
                                         <ContextMenu>
+                                            <MenuItem Header="↩ Clear 'Last Round Done' Status"
+                                                      Command="{Binding Path=PlacementTarget.Tag.Rotation.ClearLastRoundDoneCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding}">
+                                                <MenuItem.Style>
+                                                    <Style TargetType="MenuItem">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasSungInLastRound}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </MenuItem.Style>
+                                            </MenuItem>
                                             <MenuItem Command="{Binding Path=PlacementTarget.Tag.Rotation.SetRotationStartSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
                                                 <MenuItem.Style>
                                                     <Style TargetType="MenuItem">
@@ -968,6 +982,24 @@
                                                 <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
                                                     <TextBlock Text="SKIP" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
+                                                <Button Command="{Binding DataContext.Rotation.ClearLastRoundDoneCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                        CommandParameter="{Binding}"
+                                                        Visibility="{Binding HasSungInLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+                                                        Background="#5C1010"
+                                                        BorderThickness="0"
+                                                        Padding="4,1"
+                                                        Margin="6,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        Cursor="Hand"
+                                                        ToolTip="Singer completed song in the last round. Click to remove flag (if marked finished by accident)">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                                <TextBlock Text="DONE (LAST ROUND) ✕" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
                                                 <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
                                                     <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>

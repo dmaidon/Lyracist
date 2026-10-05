@@ -46,9 +46,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.23.295</AssemblyVersion>
+		<AssemblyVersion>26.10.5.728</AssemblyVersion>
 
-		<FileVersion>26.9.23.295</FileVersion>
+		<FileVersion>26.10.5.728</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -59,6 +59,15 @@
 		<PackageIcon>ksr_logo.png</PackageIcon>
 
 		<PackageOutputPath Condition="!$(TargetFramework.Contains('-android'))">C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
+
+		<!-- Release's default AOT / profiled-AOT build crashes at startup (SIGSEGV in libmonosgen before any managed code runs)
+		     on the tablets; plain trimmed JIT builds start fine. -->
+		<RunAOTCompilation Condition="$(TargetFramework.Contains('-android'))">false</RunAOTCompilation>
+		<AndroidEnableProfiledAot Condition="$(TargetFramework.Contains('-android'))">false</AndroidEnableProfiledAot>
+
+		<!-- Sideloaded to a tablet, so build an APK. The default Release .aab goes through bundletool, which fails on this
+		     machine deleting its temp proto1.apk ("being used by another process"). -->
+		<AndroidPackageFormat Condition="$(TargetFramework.Contains('-android'))">apk</AndroidPackageFormat>
 
 		<NeutralLanguage>en-US</NeutralLanguage>
 

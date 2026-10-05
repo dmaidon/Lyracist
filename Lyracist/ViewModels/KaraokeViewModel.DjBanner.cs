@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 08:48:00 -> Reset ActiveSpecialEvent when SelectedDjBanner changes
+// Edited on Oct 4, 2026 @ 23:35:00 -> Add dynamic announcement banner prompt and event handling
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -116,6 +116,26 @@ public partial class KaraokeViewModel
     {
         var prefs = _displayService.GetPreferences();
         ActiveSpecialEvent = string.IsNullOrWhiteSpace(prefs.SelectedSpecialEvent) ? "None" : prefs.SelectedSpecialEvent;
+
+        var currentEvents = Lyracist.Core.Helpers.AppSettings.SpecialEvents;
+        bool addedAny = false;
+        foreach (var stdName in DjBannerFileManager.StandardEventNames)
+        {
+            if (!currentEvents.Any(e => e.EventName.Equals(stdName, StringComparison.OrdinalIgnoreCase)))
+            {
+                currentEvents.Add(new Lyracist.Shared.SpecialEventConfig
+                {
+                    EventName = stdName,
+                    BannerFileName = DjBannerFileManager.GetStandardBannerFileName(stdName)
+                });
+                addedAny = true;
+            }
+        }
+        if (addedAny)
+        {
+            Lyracist.Core.Helpers.AppSettings.SpecialEvents = currentEvents;
+        }
+
         RebuildSpecialEventOptions();
         RefreshConnectInstructionsBanner();
     }
@@ -150,13 +170,16 @@ public partial class KaraokeViewModel
         }
     }
 
+    public static Func<string, string?>? AnnouncementPromptHandler { get; set; }
+    public static Func<string, string?>? BirthdayPromptHandler { get; set; }
+    private string? _lastAnnouncementText;
+
     private void OnSpecialEventChanged(string value)
     {
         if (value.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
         {
-#if WPF
-            string defaultName = ActiveSinger?.SingerName ?? "";
-            string? performerName = KSRotation.ViewModels.MainViewModel.ShowPersonalizedBirthdayPrompt(defaultName);
+            string defaultName = Rotation?.SelectedSinger?.Name ?? Rotation?.Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsMusic)?.Name ?? Rotation?.Rotation.FirstOrDefault()?.Name ?? "";
+            string? performerName = ShowPersonalizedBirthdayPrompt(defaultName);
             if (performerName != null)
             {
                 try
@@ -169,11 +192,49 @@ public partial class KaraokeViewModel
                     Lyracist.Shared.Globals.LogError("Lyracist", "Failed creating birthday banner", ex);
                 }
             }
-#endif
+        }
+        else if (value.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+        {
+            string defaultText = !string.IsNullOrWhiteSpace(_lastAnnouncementText)
+                ? _lastAnnouncementText
+                : "Welcome to Jill & Robert, 1st timers tonight";
+            string? announcementText = ShowDynamicAnnouncementPrompt(defaultText);
+            if (announcementText != null)
+            {
+                _lastAnnouncementText = announcementText;
+                try
+                {
+                    DjBannerFileManager.CreateAnnouncementBanner(Globals.EventBannersDir, announcementText);
+                }
+                catch (Exception ex)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Failed creating dynamic announcement banner", ex);
+                }
+            }
+            else
+            {
+                // Cancelled by DJ - revert selection to previous ActiveSpecialEvent
+                SyncSpecialEventOptionSelections(ActiveSpecialEvent);
+                return;
+            }
         }
         ActiveSpecialEvent = value;
         _displayService.UpdateSpecialEvent(value);
         OnLocalSpecialEventChanged?.Invoke(value);
+    }
+
+    public static string? ShowDynamicAnnouncementPrompt(string defaultText = "")
+    {
+        if (AnnouncementPromptHandler != null) return AnnouncementPromptHandler(defaultText);
+        if (System.Windows.Application.Current == null) return defaultText;
+        return TextPromptDialog.ShowAnnouncement(defaultText);
+    }
+
+    public static string? ShowPersonalizedBirthdayPrompt(string defaultName = "")
+    {
+        if (BirthdayPromptHandler != null) return BirthdayPromptHandler(defaultName);
+        if (System.Windows.Application.Current == null) return defaultName;
+        return TextPromptDialog.ShowBirthday(defaultName);
     }
 
     partial void OnActiveSpecialEventChanged(string value)

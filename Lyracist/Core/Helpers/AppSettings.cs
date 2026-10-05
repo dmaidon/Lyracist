@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:10:00 -> Add Lyrics Screen Audio Visualizer settings for FFT spectrum, style, opacity, and bar width
+// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement standard special event configuration
 using System;
 using System.IO;
 using System.Text.Json;
@@ -1320,7 +1320,8 @@ public static class AppSettings
             new() { EventName = "Wedding", BannerFileName = "Wedding.png" },
             new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
             new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" },
-            new() { EventName = "Last Song", BannerFileName = "LastSong.png" }
+            new() { EventName = "Last Song", BannerFileName = "LastSong.png" },
+            new() { EventName = "Announcement", BannerFileName = "Announcement.png" }
         ];
     }
 }

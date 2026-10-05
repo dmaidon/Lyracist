@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Pass Wi-Fi credentials to DisplayWindowService on startup and info refresh
+// Edited on Oct 5, 2026 @ 07:52:00 -> Support clear-last-round-done action in request server
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -762,6 +762,14 @@ namespace KSRotation.ViewModels
                         ToggleSpecialSinger(singer);
                         return "";
                     }
+                case "clear-last-round-done":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+
+                        ClearLastRoundDone(singer);
+                        return "";
+                    }
                 case "delete":
                     {
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
@@ -878,6 +886,17 @@ namespace KSRotation.ViewModels
                             catch (Exception ex)
                             {
                                 LoggerService.LogError("Failed creating personalized birthday banner", ex);
+                            }
+                        }
+                        else if (targetId.Equals("Announcement", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(performerName))
+                        {
+                            try
+                            {
+                                DjBannerFileManager.CreateAnnouncementBanner(Globals.EventBannersDir, performerName);
+                            }
+                            catch (Exception ex)
+                            {
+                                LoggerService.LogError("Failed creating dynamic announcement banner", ex);
                             }
                         }
                         ActiveSpecialEvent = targetId;

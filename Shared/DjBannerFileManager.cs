@@ -1,6 +1,7 @@
-// Edited on Oct 1, 2026 @ 07:46:15 -> Use WifiHelper.EscapeWifiQrValue for standard Wi-Fi QR escaping
+// Edited on Oct 4, 2026 @ 23:50:00 -> Fix announcement banner text centering and auto-fit sizing
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 namespace Lyracist.Shared;
@@ -16,12 +17,47 @@ public static class DjBannerFileManager
     // "Connect Instructions" is deliberately excluded — it's an auto-generated Wi-Fi/QR instructional
     // graphic (see ConnectInstructions.png handling below), not a selectable party/event banner, so it
     // must not appear in the DJ's Special Event Banner picker that this list seeds.
-    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary", "Last Song"];
+    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary", "Last Song", "Announcement"];
+
+    // Each announcement is written to a fresh file here (a subfolder, so the banner picker does not list them): the
+    // display reloads a banner only when its path changes, and the old file may still be held open by the window.
+    private const string GeneratedFolder = "Generated";
+
+    /// <summary>Renders the announcement to a new uniquely named PNG, removes older ones, and returns its path.</summary>
+    public static string CreateAnnouncementBanner(string eventBannersDir, string announcementText)
+    {
+        string folder = Path.Combine(eventBannersDir, GeneratedFolder);
+        Directory.CreateDirectory(folder);
+        string path = Path.Combine(folder, $"Announcement-{DateTime.UtcNow:yyyyMMddHHmmssfff}.png");
+        CreateDynamicAnnouncementBannerPng(path, announcementText);
+
+        foreach (string old in Directory.GetFiles(folder, "Announcement-*.png"))
+        {
+            if (string.Equals(old, path, StringComparison.OrdinalIgnoreCase)) continue;
+            try { File.Delete(old); } catch (IOException) { /* still on screen; the next announcement cleans it up */ }
+        }
+        return path;
+    }
+
+    /// <summary>The newest generated announcement, else the default Announcement.png, else null.</summary>
+    public static string? GetCurrentAnnouncementPath(string eventBannersDir)
+    {
+        string folder = Path.Combine(eventBannersDir, GeneratedFolder);
+        if (Directory.Exists(folder))
+        {
+            string? newest = Directory.GetFiles(folder, "Announcement-*.png")
+                .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
+            if (newest != null) return newest;
+        }
+        string fallback = Path.Combine(eventBannersDir, "Announcement.png");
+        return File.Exists(fallback) ? fallback : null;
+    }
 
     public static string GetStandardBannerFileName(string eventName)
     {
         if (eventName.Equals("Last Song", StringComparison.OrdinalIgnoreCase)) return "LastSong.png";
         if (eventName.Equals("Connect Instructions", StringComparison.OrdinalIgnoreCase)) return "ConnectInstructions.png";
+        if (eventName.Equals("Announcement", StringComparison.OrdinalIgnoreCase)) return "Announcement.png";
         return $"{eventName}.png";
     }
 
@@ -35,7 +71,7 @@ public static class DjBannerFileManager
             }
 
 #if !MAUI
-            string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png", "LastSong.png", "ConnectInstructions.png"];
+            string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png", "LastSong.png", "ConnectInstructions.png", "Announcement.png"];
             for (int i = 0; i < standardFiles.Length; i++)
             {
                 string fullPath = Path.Combine(directory, standardFiles[i]);
@@ -51,9 +87,13 @@ public static class DjBannerFileManager
                         {
                             CreateLastSongBannerPng(fullPath);
                         }
+                        else if (standardFiles[i] == "Announcement.png")
+                        {
+                            CreateDynamicAnnouncementBannerPng(fullPath, "Welcome to Tonight's Show!");
+                        }
                         else
                         {
-                            CreateDefaultBannerPng(fullPath, StandardEventNames[i]);
+                            CreateDefaultBannerPng(fullPath, standardFiles[i].Replace(".png", ""));
                         }
                     }
                     catch
@@ -635,6 +675,179 @@ public static class DjBannerFileManager
         using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         encoder.Save(fs);
     }
+
+    public static void CreateDynamicAnnouncementBannerPng(string filePath, string announcementText, int targetWidth = 1920, int targetHeight = 1080)
+    {
+        int width = targetWidth > 0 ? targetWidth : 1920;
+        int height = targetHeight > 0 ? targetHeight : 1080;
+        double scale = width / 1920.0;
+
+        var visual = new System.Windows.Media.DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            // 1. Festive Midnight / Deep Purple Gradient Background
+            var backgroundGradient = new System.Windows.Media.LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(15, 8, 32),
+                System.Windows.Media.Color.FromRgb(58, 16, 92),
+                45);
+            dc.DrawRectangle(backgroundGradient, null, new System.Windows.Rect(0, 0, width, height));
+
+            // Radial Glow in Center (Warm Golden Glow)
+            var centerGlow = new System.Windows.Media.RadialGradientBrush(
+                System.Windows.Media.Color.FromArgb(125, 255, 215, 0),
+                System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
+            dc.DrawEllipse(centerGlow, null, new System.Windows.Point(width / 2.0, height / 2.0), width * 0.48, height * 0.48);
+
+            // 2. Elegant Dual Gold Borders
+            var goldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 10 * scale);
+            var innerGoldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 255, 215, 0)), 3 * scale);
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - (60 * scale), height - (60 * scale)));
+            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - (90 * scale), height - (90 * scale)));
+
+            // 3. Ornate Fireworks / Starbursts in All 4 Corners
+            DrawFireworks(dc, new System.Windows.Point(210 * scale, 210 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(width - (210 * scale), 210 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(210 * scale, height - (210 * scale)), scale * 0.85);
+            DrawFireworks(dc, new System.Windows.Point(width - (210 * scale), height - (210 * scale)), scale * 0.85);
+
+            // 4. Floating Music Notes
+            DrawMusicNote(dc, new System.Windows.Point(340 * scale, height * 0.38), scale * 1.2, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(width - (340 * scale), height * 0.38), scale * 1.2, System.Windows.Media.Color.FromRgb(6, 182, 212));
+            DrawMusicNote(dc, new System.Windows.Point(380 * scale, height * 0.76), scale * 0.95, System.Windows.Media.Color.FromRgb(236, 72, 153));
+            DrawMusicNote(dc, new System.Windows.Point(width - (380 * scale), height * 0.76), scale * 0.95, System.Windows.Media.Color.FromRgb(255, 215, 0));
+
+            // 5. Header: "★ SPECIAL ANNOUNCEMENT ★"
+            var headerText = new System.Windows.Media.FormattedText(
+                "★ SPECIAL ANNOUNCEMENT ★",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.ExtraBold, System.Windows.FontStretches.Normal),
+                68 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 220, 100)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center,
+                MaxTextWidth = width
+            };
+            dc.DrawText(headerText, new System.Windows.Point(0, 125 * scale));
+
+            // Decorative Divider Line below header
+            var dividerPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 245, 158, 11)), 2 * scale);
+            dc.DrawLine(dividerPen, new System.Windows.Point(width * 0.22, 215 * scale), new System.Windows.Point(width * 0.78, 215 * scale));
+
+            // 6. Dynamic Main Announcement Message
+            string message = string.IsNullOrWhiteSpace(announcementText) ? "Welcome to Tonight's Show!" : announcementText.Trim();
+            // Remote DJ boards can submit this text; keep a runaway paste from stalling the font-fit loop.
+            if (message.Length > 400) message = message[..400];
+
+            double maxTextWidth = width - (320 * scale);
+            double maxTextHeight = height - (440 * scale);
+            double textX = (width - maxTextWidth) / 2.0;
+
+            var typeface = new System.Windows.Media.Typeface(
+                new System.Windows.Media.FontFamily("Arial"),
+                System.Windows.FontStyles.Normal,
+                System.Windows.FontWeights.Bold,
+                System.Windows.FontStretches.Normal);
+
+            // Dynamically fit font size so message never truncates and occupies optimal vertical space
+            double fontSize = 115 * scale;
+            if (message.Length > 40) fontSize = 95 * scale;
+            if (message.Length > 80) fontSize = 75 * scale;
+            if (message.Length > 130) fontSize = 58 * scale;
+            if (message.Length > 200) fontSize = 46 * scale;
+
+            double measuredHeight = 0;
+            while (fontSize >= 28 * scale)
+            {
+                var testFormattedText = new System.Windows.Media.FormattedText(
+                    message,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Windows.FlowDirection.LeftToRight,
+                    typeface,
+                    fontSize,
+                    System.Windows.Media.Brushes.White,
+                    1.0)
+                {
+                    TextAlignment = System.Windows.TextAlignment.Center,
+                    MaxTextWidth = maxTextWidth
+                };
+
+                measuredHeight = testFormattedText.Height;
+                if (measuredHeight <= maxTextHeight)
+                {
+                    break;
+                }
+
+                fontSize -= 4 * scale;
+            }
+
+            double contentTop = 225 * scale;
+            double contentBottom = height - (165 * scale);
+            double textY = contentTop + ((contentBottom - contentTop - measuredHeight) / 2.0);
+
+            // Message Shadow (3D Depth)
+            var messageShadow = new System.Windows.Media.FormattedText(
+                message,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                typeface,
+                fontSize,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 0, 0, 0)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center,
+                MaxTextWidth = maxTextWidth
+            };
+
+            dc.DrawText(messageShadow, new System.Windows.Point(textX + (5 * scale), textY + (5 * scale)));
+
+            // Message Foreground Text (Vibrant Radiant Golden Gradient)
+            var messageForeground = new System.Windows.Media.FormattedText(
+                message,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                typeface,
+                fontSize,
+                new System.Windows.Media.LinearGradientBrush(
+                    System.Windows.Media.Color.FromRgb(255, 250, 200),
+                    System.Windows.Media.Color.FromRgb(245, 158, 11), 90),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center,
+                MaxTextWidth = maxTextWidth
+            };
+
+            dc.DrawText(messageForeground, new System.Windows.Point(textX, textY));
+
+            // 7. Footer: "★ TONIGHT AT KARAOKE • MAKE SOME NOISE! ★"
+            var footerText = new System.Windows.Media.FormattedText(
+                "★ TONIGHT AT KARAOKE • MAKE SOME NOISE! ★",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Bold, System.Windows.FontStretches.Normal),
+                42 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(6, 182, 212)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center,
+                MaxTextWidth = width
+            };
+            dc.DrawText(footerText, new System.Windows.Point(0, height - (145 * scale)));
+        }
+
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+        rtb.Render(visual);
+
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        encoder.Save(fs);
+    }
 #endif
 
 #if MAUI
@@ -649,6 +862,14 @@ public static class DjBannerFileManager
     public static void CreateLastSongBannerPng(string filePath, int targetWidth = 1920, int targetHeight = 1080)
     {
         _ = filePath;
+        _ = targetWidth;
+        _ = targetHeight;
+    }
+
+    public static void CreateDynamicAnnouncementBannerPng(string filePath, string announcementText, int targetWidth = 1920, int targetHeight = 1080)
+    {
+        _ = filePath;
+        _ = announcementText;
         _ = targetWidth;
         _ = targetHeight;
     }

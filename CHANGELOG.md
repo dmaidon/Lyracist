@@ -1,13 +1,27 @@
-<!-- Edited on Oct 4, 2026 @ 10:37:00 -> Add live Wi-Fi password QR code synchronization to CHANGELOG -->
-Last Edit: Oct 4, 2026 - Live Wi-Fi Password QR Synchronization & Real-Time Pre-Show Update
+<!-- Edited on Oct 5, 2026 @ 07:56:00 -> Document Clear Last Round Done flag restoration feature in CHANGELOG -->
+Last Edit: Oct 5, 2026 - Clear "Last Round Done" Accidental Flag & Restore Performer to Final Round
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-04
+## [Unreleased] - 2026-10-05
 
 ### Added
+- **Clear "Last Round Done" Flag & Restore Accidental Finished Singers (`RotationViewModel.cs`, `EditSingerViewModel.cs`, `EditSingerWindow.xaml`, `RotationPage.xaml`, `KaraokePage.xaml`, `MainViewModel.cs`, `MainWindow.xaml`, `KSRotation.Maui`, `dj.html`)**:
+  - Added the ability to clear the `HasSungInLastRound` completion flag when a singer was marked finished on the last round by accident.
+  - Interactive Singer Badge: Replaced the static "DONE (LAST ROUND)" badge with a clickable button badge (`DONE (LAST ROUND) ✕`) in the rotation queues of Lyracist, KSRotation desktop, KSRotation.Maui, and the Remote DJ portal (`dj.html`). Clicking or tapping this badge immediately removes the last-round done flag, restores the singer to active eligibility, recalculates wait times and round estimations, updates Next Singer highlights, and syncs to audience billboard and remote devices.
+  - Singer Context Menus: Added "↩ Clear 'Last Round Done' Status" to singer row context menus in Lyracist (both Rotation and Karaoke pages) and KSRotation desktop.
+  - Edit Performer Dialogs: Added a "Done in Last Round (uncheck to restore)" checkbox in Lyracist's `EditSingerWindow` and KSRotation.Maui's `EditSingerOverlay`, allowing DJs to review and toggle completion state directly while editing singer details.
+  - Remote DJ Board Action: Added `clear-last-round-done` request action in KSRotation's remote DJ web handler (`PatronRequestServer`) and bound it to the interactive badge in `dj.html`.
+  - Added unit test coverage in `RotationHelpersSingerTests.cs` verifying immediate restoration of Next Singer eligibility and wait time estimations when clearing the last-round done flag.
+
+- **Dynamic Special Event Announcement Banner Studio (`Shared/DjBannerFileManager.cs`, `Lyracist`, `KSRotation`, `dj.html`, `PatronRequestServer.cs`)**:
+  - Added 'Announcement' as a standard special event banner option across both Lyracist and KSRotation, allowing DJs to author custom, high-definition full-screen celebration graphics dynamically on demand.
+  - Interactive Host Modal: Selecting 'Announcement' immediately opens an intuitive dialog (`ShowDynamicAnnouncementPrompt`) on the host laptop where the DJ can type any custom greeting (e.g. *"Welcome to Jill & Robert, 1st timers tonight"*). Clicking 'Launch Banner' dynamically renders a 16:9 graphic into `EventBanners/Announcement.png` with midnight/deep purple gradient, ambient radial glow, corner fireworks, floating music notes, and auto-scaled typography.
+  - Remote DJ Board Modal (`dj.html`): Mobile DJs operating from phones or tablets can tap 'Announcement' to bring up a responsive modal overlay and launch custom announcements remotely without physical access to the host laptop.
+  - Cancellation Safety: Cancelling or closing the announcement prompt cleanly preserves the previously selected banner without switching displays prematurely.
+  - Unit test coverage in `SpecialEventBannerSelectionTests.cs` and documentation updates verified in `CatalogBookGeneratorTests.cs`.
 - **Pre-Show Screen Mode & Stacked Wi-Fi / Sign-Up QR Codes (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)**:
   - Added dedicated **Pre-Show Screen** toggle ("📺 Pre-Show Screen") to the main DJ playback toolbar and rotation monitor controls in both Lyracist and KSRotation, allowing KJs to hold the audience welcome screen active even when singers are queued in the rotation before the show begins.
   - Added configurable hotkey shortcut (`HkTogglePreShowScreen`, customizable in Lyracist Settings > Hotkeys) to instantly toggle Pre-Show Mode from anywhere in the application.

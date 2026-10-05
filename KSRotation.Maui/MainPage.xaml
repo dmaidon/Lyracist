@@ -1,4 +1,4 @@
-<!-- Edited on Sep 21, 2026 @ 11:59:15 -> Add Round Completion Estimation and Duration Notice to Active Rotation Queue -->
+<!-- Edited on Oct 5, 2026 @ 07:55:00 -> Add Last Round Done badge with clear command and checkbox to Edit Performer overlay -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -166,6 +166,19 @@
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" IsVisible="{Binding IsSpecial}" StrokeThickness="0" ToolTipProperties.Text="Special one-time performer">
                                                     <Label Text="⭐ SPECIAL" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
+                                                <Button Text="DONE (LAST ROUND) ✕"
+                                                        IsVisible="{Binding HasSungInLastRound}"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ClearLastRoundDoneCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="#5C1010"
+                                                        TextColor="White"
+                                                        FontSize="9"
+                                                        FontAttributes="Bold"
+                                                        Padding="4,2"
+                                                        HeightRequest="22"
+                                                        CornerRadius="4"
+                                                        VerticalOptions="Center"
+                                                        ToolTipProperties.Text="Singer completed song in the last round. Tap to remove flag (if marked finished by accident)" />
 
                                                 <Label Text="-" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
                                                     <Label.Triggers>
@@ -733,9 +746,14 @@
                     <Label Text="Artist" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                     <Entry x:Name="EditArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,10" />
 
-                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,14">
+                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,6">
                         <CheckBox x:Name="EditSpecialCheckBox" Scale="0.85" />
                         <Label Text="Special (One-Time Performance)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,14">
+                        <CheckBox x:Name="EditLastRoundDoneCheckBox" Scale="0.85" />
+                        <Label Text="Done in Last Round (uncheck to restore)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
                     <Button Text="Save" Clicked="OnSaveEditSingerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
@@ -834,6 +852,19 @@
                                         <VerticalStackLayout Spacing="1" VerticalOptions="Center">
                                             <Label Text="Special (One-Time)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                                             <Label Text="Performs once then automatically becomes inactive" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Last Round Done -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#FEE2E2, Dark=#2D1414}" Stroke="#991B1B" StrokeThickness="1" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#5C1010" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="DONE ✕" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Done (Last Round Completed)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Singer finished last round. Tap badge to clear if accidental" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
                                         </VerticalStackLayout>
                                     </HorizontalStackLayout>
                                 </Border>

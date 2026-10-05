@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:58:00 -> Add User Manual update test for Pre-Show welcome screen suppression
+// Edited on Oct 5, 2026 @ 07:58:00 -> Add User Manual update test for Clear Last Round Done Accidental Flag
 using System;
 using System.IO;
 using Xunit;
@@ -3725,6 +3725,258 @@ To prevent audience projection distraction and keep Wi-Fi onboarding instruction
                     {
                         throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
                     }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForDynamicSpecialEventAnnouncementBanner()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Dynamic Special Event Announcement Banner Studio (Updated Oct 4, 2026)
+- Dynamic Announcement Banner: DJs can now select 'Announcement' from the Special Event Banner picker in both Lyracist and KSRotation to broadcast custom, dynamically generated full-screen celebration announcements (e.g. 'Welcome to Jill & Robert, 1st timers tonight').
+- Host Laptop Interactive Modal: Selecting 'Announcement' immediately opens an intuitive prompt dialog where the DJ can type any custom message, shoutout, or welcome greeting. Clicking 'Launch Banner' instantly renders a high-definition 16:9 graphic into the shared EventBanners folder with dual gold borders, ambient radial glow, corner celebration fireworks, and auto-scaled typography.
+- Remote DJ Board Support: On the web-based Remote DJ Board (/dj), tapping the 'Announcement' special event button presents a modal overlay allowing the mobile DJ to enter announcement text directly from their tablet or smartphone.
+- Cancellation Safety: Dismissing or cancelling the announcement prompt cleanly preserves the previously selected banner without switching displays prematurely.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Dynamic Special Event Announcement Banner Studio"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Dynamic Special Event Announcement Banner Studio"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Dynamic Special Event Announcement Banner Studio")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("DynamicAnnouncementBannerStudio"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Dynamic Special Event Announcement Banner Studio", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                    yPos += 18;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " DynamicAnnouncementBannerStudio";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManuals_ClearLastRoundDone()
+        {
+            string docDir = @"C:\VB26\Lyracist\Documentation";
+            if (!Directory.Exists(docDir)) return;
+
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            string updateText = @"
+Lyracist Pro Suite & KSRotation: Clear 'Last Round Done' Accidental Flag & Restore Performer (`RotationViewModel.cs`, `EditSingerWindow.xaml`, `MainViewModel.cs`, `KSRotation.Maui`, `dj.html`) - (October 2026)
+
+Section: Lyracist & KSRotation / Rotation Management / Last Round Rotation Controls
+
+[Overview & Purpose]
+During the final round of the evening (when 'Last Round' is engaged), performers who have completed their song are marked as completed for the round and removed from active rotation eligibility. If a performer was marked finished by accident, hosts previously had to toggle the entire Last Round mode off and on again, which cleared completion flags for all singers in the rotation. Hosts across all applications now have multiple intuitive methods to clear the 'Last Round Done' flag for an individual singer and immediately restore them to active rotation eligibility.
+
+[Interactive Badge & Direct Action]
+- Clickable Badge (✕): The 'DONE (LAST ROUND)' badge displayed next to a performer's name is now an interactive button badge with a distinct close/clear icon ('DONE (LAST ROUND) ✕'). Clicking or tapping this badge immediately removes the last-round done flag.
+- Immediate Eligibility Restoration: Clearing the flag instantly restores the singer's eligibility as the Next Performer ('IsNext'), recalculates cumulative wait times and round duration estimations, and refreshes the audience rotation billboard.
+
+[Multiple Access Points Across Apps]
+1. Lyracist Desktop:
+   - Click the 'DONE (LAST ROUND) ✕' badge directly on the singer row in RotationPage or KaraokePage.
+   - Right-click the singer and select '↩ Clear Last Round Done Status' from the context menu.
+   - Click 'Edit Performer' (✏) and uncheck the 'Completed in Last Round' checkbox in the dialog.
+2. KSRotation Desktop:
+   - Click the 'DONE (LAST ROUND) ✕' badge on the singer row in the active rotation list.
+   - Right-click the performer and choose '↩ Clear Last Round Done Status' from the context menu.
+3. KSRotation.Maui:
+   - Tap the 'DONE (LAST ROUND) ✕' badge on the performer card.
+   - Tap 'Edit Performer' (✏) and uncheck 'Done in Last Round (uncheck to restore)'.
+4. Remote DJ Web Portal (/dj):
+   - Mobile DJs can tap the 'DONE (LAST ROUND) ✕' badge on their tablet or phone to restore performers remotely.";
+
+            // 1. Append to updates log text file if not already present
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingUpdates = File.ReadAllText(updatesTxtPath);
+                if (!existingUpdates.Contains("Clear 'Last Round Done' Accidental Flag"))
+                {
+                    File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                }
+            }
+
+            // 2. Update docx file if not already present
+            if (File.Exists(docxPath))
+            {
+                using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                            {
+                                if (p.InnerText.Contains("Clear 'Last Round Done' Accidental Flag"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Clear 'Last Round Done' Accidental Flag & Restore Performer")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ClearLastRoundDoneFlag"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Clear 'Last Round Done' Accidental Flag & Restore Performer", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ClearLastRoundDoneFlag";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
                 }
             }
         }

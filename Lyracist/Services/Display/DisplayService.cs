@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:54:00 -> Set WelcomeScreenService.IsPreShowActive in DisplayService
+// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement banner resolution in DisplayService
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -272,6 +272,14 @@ public class DisplayService : IDisplayService
                 if (System.IO.File.Exists(fullPath))
                 {
                     return fullPath;
+                }
+            }
+            else if (_preferences.SelectedSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+            {
+                string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
+                if (announcementPath != null)
+                {
+                    return announcementPath;
                 }
             }
         }

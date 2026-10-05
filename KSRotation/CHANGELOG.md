@@ -1,8 +1,23 @@
-<!-- Edited on Oct 4, 2026 @ 10:38:00 -> Add live Wi-Fi password QR sync to KSRotation CHANGELOG -->
+<!-- Edited on Oct 5, 2026 @ 07:57:00 -> Add Clear Last Round Done flag restoration feature to KSRotation CHANGELOG -->
 
 # Changelog
 
+## 2026-10-05
+
+- **Clear "Last Round Done" Flag & Restore Accidental Finished Singers (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `KSRotation.Maui`, `dj.html`)**:
+  - Added the ability to clear the `HasSungInLastRound` completion flag when a singer was marked finished on the last round by accident.
+  - Interactive Singer Badge: Replaced the static "DONE (LAST ROUND)" badge with a clickable button badge (`DONE (LAST ROUND) ✕`) in the rotation queues of KSRotation desktop, KSRotation.Maui, and the Remote DJ portal (`dj.html`). Clicking or tapping this badge immediately removes the last-round done flag, restores the singer to active eligibility, recalculates wait times and round estimations, updates Next Singer highlights, and syncs to audience billboard and remote devices.
+  - Singer Context Menu: Added "↩ Clear 'Last Round Done' Status" to singer row context menu in KSRotation desktop.
+  - Remote DJ Board Action: Added `clear-last-round-done` request action in KSRotation's remote DJ web handler (`PatronRequestServer`) and bound it to the interactive badge in `dj.html`.
+  - Edit Performer Dialog (Maui): Added "Done in Last Round (uncheck to restore)" checkbox in KSRotation.Maui's `EditSingerOverlay`.
+
 ## 2026-10-04
+
+- **Dynamic Special Event Announcement Banner Studio (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `dj.html`, `Shared/DjBannerFileManager.cs`)**:
+  - Added 'Announcement' as a standard special event banner option in KSRotation, allowing DJs to author custom, high-definition full-screen celebration graphics dynamically on demand.
+  - Interactive Host Modal: Selecting 'Announcement' immediately opens an intuitive dialog (`ShowDynamicAnnouncementPrompt`) on the host laptop where the DJ can type any custom greeting (e.g. *"Welcome to Jill & Robert, 1st timers tonight"*). Clicking 'Launch Banner' dynamically renders a 16:9 graphic into `EventBanners/Announcement.png` with midnight/deep purple gradient, ambient radial glow, corner fireworks, floating music notes, and auto-scaled typography.
+  - Remote DJ Board Modal (`dj.html`): Mobile DJs operating from phones or tablets can tap 'Announcement' to bring up a responsive modal overlay and launch custom announcements remotely without physical access to the host laptop.
+  - Cancellation Safety: Cancelling or closing the announcement prompt cleanly preserves the previously selected banner without switching displays prematurely.
 
 - **Pre-Show Screen Mode & Stacked Wi-Fi / Sign-Up QR Codes (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `DisplayWindowService.cs`, `SingerDisplayWindow.xaml.cs`, `DisplayViewModel.cs`, `Shared/WelcomeScreen.cs`)**:
   - Added dedicated **Pre-Show Screen** toggle ("📺 Pre-Show Screen") to the main rotation toolbar and projection screen settings.

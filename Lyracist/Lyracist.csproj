@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.4.564</AssemblyVersion>
-    <FileVersion>26.10.4.564</FileVersion>
+    <AssemblyVersion>26.10.5.566</AssemblyVersion>
+    <FileVersion>26.10.5.566</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -121,6 +121,7 @@
     <Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
     <Compile Include="..\Shared\ProjectionRotationEntry.cs" Link="ProjectionRotationEntry.cs" />
     <Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
+    <Compile Include="..\Shared\TextPromptDialog.cs" Link="TextPromptDialog.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="WindowPositioner.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />
     <Compile Include="..\Shared\MonitorEnumerator.cs" Link="MonitorEnumerator.cs" />

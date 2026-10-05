@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:37:00 -> Complete SpectrumInputDevice, LineInSpectrumService, and MainViewModel shims for MAUI
+// Edited on Oct 4, 2026 @ 23:55:00 -> Add PreShowReset and WelcomeScreenService shims for MAUI
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -183,6 +183,7 @@ namespace KSRotation.Services
         public void SetReducedEffects(bool enabled) { }
         public void SetWifiInfo(string ssid, string passwordDisplay, Microsoft.Maui.Controls.ImageSource? wifiQrCode) { }
         public void SetPreShowMode(bool active) { }
+        public event Action? PreShowReset { add { } remove { } }
         public void SetShowSpectrum(bool show) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
@@ -240,6 +241,16 @@ namespace KSRotation.Services
         public void SetCustomColor(string? hex) { }
         public void SetOpacity(double opacity) { }
         public void Dispose() { }
+    }
+}
+
+namespace Lyracist.Shared
+{
+    public sealed class WelcomeScreenService
+    {
+        public static WelcomeScreenService Instance { get; } = new();
+        public bool IsPreShowActive { get; set; }
+        public bool ShowWifiPassword { get; set; } = true;
     }
 }
 

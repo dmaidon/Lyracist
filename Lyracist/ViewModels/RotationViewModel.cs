@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Set SelectedDesign from AppSettings in WelcomeScreenService
+// Edited on Oct 5, 2026 @ 07:48:00 -> Add ClearLastRoundDone and ToggleLastRoundDone commands to restore accidental finished singers
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1226,6 +1226,24 @@ public partial class RotationViewModel : BaseViewModel
             RefreshLinkedPartnerNames();
         }
 
+        Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
+        RecalculateAllWaitsAndEstimations();
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    [RelayCommand]
+    public void ClearLastRoundDone(Singer? singer) => SetLastRoundDone(singer, false);
+
+    [RelayCommand]
+    public void ToggleLastRoundDone(Singer? singer) => SetLastRoundDone(singer, singer?.HasSungInLastRound != true);
+
+    private void SetLastRoundDone(Singer? singer, bool done)
+    {
+        if (singer == null) return;
+        singer.HasSungInLastRound = done;
+        Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
+        RecalculateAllWaitsAndEstimations();
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

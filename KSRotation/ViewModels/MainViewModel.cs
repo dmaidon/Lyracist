@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 10:10:00 -> Update Wi-Fi QR and display window info on WifiPassword change
+// Edited on Oct 5, 2026 @ 07:51:00 -> Add ClearLastRoundDone and ToggleLastRoundDone commands to restore accidental finished singers
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2341,6 +2341,30 @@ namespace KSRotation.ViewModels
             }
         }
 
+        /// <summary>Clears the singer's completed last-round flag, restoring them to active rotation in the final round.</summary>
+        [RelayCommand]
+        public void ClearLastRoundDone(SingerEntry? entry) => SetLastRoundDone(entry, false);
+
+        /// <summary>Toggles the singer's completed last-round flag.</summary>
+        [RelayCommand]
+        public void ToggleLastRoundDone(SingerEntry? entry) => SetLastRoundDone(entry, entry?.HasSungInLastRound != true);
+
+        private void SetLastRoundDone(SingerEntry? entry, bool done)
+        {
+            if (entry == null) return;
+            entry.HasSungInLastRound = done;
+            UpdateNextSingerHighlight();
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+            RecalculateRoundEstimation();
+        }
+
         /// <summary>Toggles the singer's one-time special performance state.</summary>
         [RelayCommand]
         public void ToggleSpecialSinger(SingerEntry entry)
@@ -3620,6 +3644,14 @@ namespace KSRotation.ViewModels
                         return fullPath;
                     }
                 }
+                else if (ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+                {
+                    string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
+                    if (announcementPath != null)
+                    {
+                        return announcementPath;
+                    }
+                }
             }
             return SelectedDjBannerPath;
         }
@@ -3666,6 +3698,10 @@ namespace KSRotation.ViewModels
             }
         }
 
+#if WPF
+        private string? _lastAnnouncementText;
+#endif
+
         private void OnSpecialEventOptionChanged(string value)
         {
             if (value.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
@@ -3684,6 +3720,33 @@ namespace KSRotation.ViewModels
                     {
                         LoggerService.LogError("Failed creating birthday banner", ex);
                     }
+                }
+#endif
+            }
+            else if (value.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+            {
+#if WPF
+                string defaultText = !string.IsNullOrWhiteSpace(_lastAnnouncementText)
+                    ? _lastAnnouncementText
+                    : "Welcome to Jill & Robert, 1st timers tonight";
+                string? announcementText = ShowDynamicAnnouncementPrompt(defaultText);
+                if (announcementText != null)
+                {
+                    _lastAnnouncementText = announcementText;
+                    try
+                    {
+                        DjBannerFileManager.CreateAnnouncementBanner(Globals.EventBannersDir, announcementText);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerService.LogError("Failed creating dynamic announcement banner", ex);
+                    }
+                }
+                else
+                {
+                    // Cancelled by DJ - restore previous selection
+                    SyncSpecialEventOptions(ActiveSpecialEvent);
+                    return;
                 }
 #endif
             }
@@ -3721,93 +3784,9 @@ namespace KSRotation.ViewModels
         }
 
 #if WPF
-        public static string? ShowPersonalizedBirthdayPrompt(string defaultName = "")
-        {
-            var window = new System.Windows.Window
-            {
-                Title = "Birthday Special Event Banner",
-                Width = 440,
-                Height = 220,
-                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen,
-                ResizeMode = System.Windows.ResizeMode.NoResize,
-                WindowStyle = System.Windows.WindowStyle.ToolWindow,
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(24, 24, 32)),
-                Foreground = System.Windows.Media.Brushes.White,
-                Topmost = true
-            };
+        public static string? ShowPersonalizedBirthdayPrompt(string defaultName = "") => TextPromptDialog.ShowBirthday(defaultName);
 
-            var grid = new System.Windows.Controls.Grid { Margin = new System.Windows.Thickness(20) };
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
-
-            var label = new System.Windows.Controls.TextBlock
-            {
-                Text = "Enter Birthday Performer Name:",
-                FontSize = 14,
-                FontWeight = System.Windows.FontWeights.SemiBold,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
-                Margin = new System.Windows.Thickness(0, 0, 0, 10)
-            };
-            System.Windows.Controls.Grid.SetRow(label, 0);
-
-            var textBox = new System.Windows.Controls.TextBox
-            {
-                Text = defaultName,
-                FontSize = 16,
-                Padding = new System.Windows.Thickness(8, 6, 8, 6),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(36, 36, 48)),
-                Foreground = System.Windows.Media.Brushes.White,
-                BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
-                Margin = new System.Windows.Thickness(0, 0, 0, 16)
-            };
-            textBox.SelectAll();
-            System.Windows.Controls.Grid.SetRow(textBox, 1);
-
-            var buttonPanel = new System.Windows.Controls.StackPanel
-            {
-                Orientation = System.Windows.Controls.Orientation.Horizontal,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
-            };
-
-            var okButton = new System.Windows.Controls.Button
-            {
-                Content = "🎉 Launch Banner",
-                IsDefault = true,
-                Padding = new System.Windows.Thickness(16, 6, 16, 6),
-                Margin = new System.Windows.Thickness(0, 0, 8, 0),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
-                Foreground = System.Windows.Media.Brushes.Black,
-                FontWeight = System.Windows.FontWeights.Bold,
-                Cursor = System.Windows.Input.Cursors.Hand
-            };
-            string? result = null;
-            okButton.Click += (s, e) => { result = textBox.Text; window.DialogResult = true; window.Close(); };
-
-            var cancelButton = new System.Windows.Controls.Button
-            {
-                Content = "Cancel",
-                IsCancel = true,
-                Padding = new System.Windows.Thickness(16, 6, 16, 6),
-                Cursor = System.Windows.Input.Cursors.Hand
-            };
-            cancelButton.Click += (s, e) => { window.DialogResult = false; window.Close(); };
-
-            buttonPanel.Children.Add(okButton);
-            buttonPanel.Children.Add(cancelButton);
-            System.Windows.Controls.Grid.SetRow(buttonPanel, 3);
-
-            grid.Children.Add(label);
-            grid.Children.Add(textBox);
-            grid.Children.Add(buttonPanel);
-
-            window.Content = grid;
-            window.Loaded += (s, e) => textBox.Focus();
-
-            bool? dialogResult = window.ShowDialog();
-            return dialogResult == true ? result : null;
-        }
+        public static string? ShowDynamicAnnouncementPrompt(string defaultText = "") => TextPromptDialog.ShowAnnouncement(defaultText);
 #endif
 
         [RelayCommand]
