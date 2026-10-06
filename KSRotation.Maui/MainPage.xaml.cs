@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:55:00 -> Support HasSungInLastRound in Edit Singer dialog
+// Edited on Oct 6, 2026 @ 11:41:00 -> Use randomized test singers pool in OnLoadTestDataClicked
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -842,36 +842,7 @@ public partial class MainPage : ContentPage
     private void OnLoadTestDataClicked(object? sender, EventArgs e)
     {
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-        vm.Singers.Clear();
-
-        (string Name, string Song, string Artist)[] testData =
-        [
-            ("Dennis Maidon",    "I will Be Alright", "Dennis Maidon"),
-            ("Marie Hatton",     "Livin' on a Prayer",         "Bon Jovi"),
-            ("Brenda Maidon",   "End of the World",     "Ann Murray"),
-            ("Carlos Watson",   "Rap God",             "Eminem"),
-            ("Amy Banks",     "Don't Stop Believin'",       "Journey"),
-            ("Mike Hatton",    "Bohemian Rhapsody",          "Queen"),
-            ("Stephen Rayner",     "Remember",        "Dennis Maidon"),
-            ("Tim Honeycutt",    "Piano Man",                  "Billy Joel"),
-            ("Sharon Jernigan",   "Since U Been Gone",          "Kelly Clarkson"),
-            ("Randy Jernigan",      "Mr. Brightside",             "The Killers"),
-            ("Todd Stowe",    "Dancing Queen",              "ABBA"),
-            ("Wendy Stowe",      "Africa",                     "Toto"),
-            ("Wendy Tart",    "Take It to the Limit",    "Eagles"),
-            ("Sandra Moore",     "Somebody That I Used to Know", "Gotye"),
-            ("Artie Davis",    "Wonderwall",                 "Oasis"),
-        ];
-
-        foreach (var (name, song, artist) in testData)
-        {
-            vm.Singers.Add(new KSRotation.Models.SingerEntry
-            {
-                Name = name,
-                Song = song,
-                Artist = artist
-            });
-        }
+        vm.LoadTestData(vm.TestSingerCount);
     }
 
     private void OnEditSingerClicked(object? sender, EventArgs e)

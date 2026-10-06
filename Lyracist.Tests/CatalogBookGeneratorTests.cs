@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:56:30 -> Add User Manual update test for Move to Top of Rotation
+// Edited on Oct 6, 2026 @ 12:22:00 -> Add User Manual update test for mouse drag-and-drop rotation reordering
 using System;
 using System.IO;
 using Xunit;
@@ -4105,6 +4105,384 @@ If the performer being moved to the top was previously skipped ('IsSkipped'), pa
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " MoveToTopOfRotation";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManuals_NewSingerPlaceholderCleanup()
+        {
+            string docDir = @"C:\VB26\Lyracist\Documentation";
+            if (!Directory.Exists(docDir)) return;
+
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            string updateText = @"
+Lyracist Pro Suite & KSRotation: New Singer Placeholder Cleanup & Automatic Unused Row Removal (`NameFormatting.cs`, `SingerEntry.cs`, `MainViewModel.cs`, `MainWindow.xaml.cs`, `RotationViewModel.cs`) - (October 2026)
+
+Section: Lyracist & KSRotation / Rotation Management / Singer Addition & Placeholder Cleanup
+
+[Overview & Purpose]
+When adding a new performer to the rotation queue (via the 'New Singer' button), a new row is created with the default placeholder text 'New Singer' focused and highlighted for typing. In fast-paced hosting environments, a host may click 'New Singer' but then click elsewhere or press Enter without typing a name, leaving an unwanted orphan 'New Singer' row in the queue. Alternatively, a host may start typing after or amidst the placeholder, creating unformatted names such as 'New Singertom' or 'New Singer Tom'.
+
+[Automatic Row Removal on Lost Focus]
+If the host adds a new singer and navigates away or moves focus without typing a new name (so that 'New Singer' remains the only text in the box, or the box is left blank or whitespace), the application automatically removes that orphan line from the rotation queue immediately without displaying an interrupting confirmation prompt.
+
+[Smart Placeholder Stripping & Proper-Casing]
+If the placeholder 'New Singer' is present alongside additional text (for example, typing 'New Singertom', 'New Singer Tom', or 'Tom New Singer'), the system automatically strips the 'New Singer' token and any surrounding delimiters or punctuation, cleans the remaining name, and applies intelligent Title/Proper Casing (for example, converting 'New Singertom' to 'Tom').
+
+[Keyboard & Flow Handling]
+Pressing Enter in the singer name input commits the name and advances focus to the next field (e.g. Song title), triggering instant validation, cleaning, or cleanup smoothly.";
+
+            // 1. Append to updates log text file if not already present
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingUpdates = File.ReadAllText(updatesTxtPath);
+                if (!existingUpdates.Contains("New Singer Placeholder Cleanup & Automatic Unused Row Removal"))
+                {
+                    File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                }
+            }
+
+            // 2. Update docx file if not already present
+            if (File.Exists(docxPath))
+            {
+                using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                            {
+                                if (p.InnerText.Contains("Section: New Singer Placeholder Cleanup"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: New Singer Placeholder Cleanup & Automatic Row Removal")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("NewSingerPlaceholderCleanup"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: New Singer Placeholder Cleanup & Automatic Row Removal", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " NewSingerPlaceholderCleanup";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManuals_TestModeSingerCountOptions()
+        {
+            string docDir = @"C:\VB26\Lyracist\Documentation";
+            if (!Directory.Exists(docDir)) return;
+
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            string updateText = @"
+Lyracist Pro Suite & KSRotation: Test Mode Settings GroupBox & Performer Count Options (3, 5, 10, 15) (`RotationHelpers.cs`, `MainWindow.xaml`, `MainViewModel.cs`, `SettingsPage.xaml`, `SettingsViewModel.cs`, `AppSettings.cs`) - (October 2026)
+
+Section: Lyracist & KSRotation / Settings / Test Mode & Sample Singer Generation
+
+[Overview & Purpose]
+Hosts and KJs frequently utilize Test Mode to verify audio leveling, screen projection, rotation advancing, and network request kiosks before live show doors open. Previously, test mode automatically seeded a fixed list of 15 performers with identical startup names. The system now features a dedicated 'Test Mode Settings' GroupBox (GBX) providing configurable sample singer counts and a dynamic, randomized pool of realistic performer names.
+
+[Configurable Performer Counts (3, 5, 10, & 15)]
+Hosts can now select exactly how many sample performers to load from a dedicated dropdown selector:
+- 3 Singers: Ideal for quick audio and dual-screen verification checks.
+- 5 Singers: Perfect for testing rotation handoffs and next-singer notifications.
+- 10 Singers: Well-suited for testing multi-round progression and last round workflows.
+- 15 Singers: Thorough full-queue testing across multi-monitor displays, billboards, and remote DJ boards.
+
+[Dedicated Test Mode Settings GroupBox (GBX)]
+- Dedicated UI Organization: Test Mode settings are now cleanly isolated within their own GroupBox ('Test Mode Settings') in both KSRotation and Lyracist Settings panels.
+- Instant 'Load Test Singers Now' Action: In addition to startup seeding, hosts can immediately populate or refresh the rotation queue with the selected number of sample singers with one click, without restarting the application.
+- Preservation of Session Settings: General session settings (e.g. 'Block Duplicate Songs in Session') remain in 'Rotation Settings', keeping operational controls distinct from testing tools.
+
+[Randomized Performer Names & Song Pool]
+The test generator utilizes a curated pool of 18 realistic performer names (Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling) paired randomly with popular karaoke tracks, guaranteeing varied and realistic practice sessions.";
+
+            // 1. Append to updates log text file if not already present
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingUpdates = File.ReadAllText(updatesTxtPath);
+                if (!existingUpdates.Contains("Test Mode Settings GroupBox & Performer Count Options"))
+                {
+                    File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                }
+            }
+
+            // 2. Update docx file if not already present
+            if (File.Exists(docxPath))
+            {
+                using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                            {
+                                if (p.InnerText.Contains("Section: Test Mode Settings GroupBox"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Test Mode Settings GroupBox & Performer Count Options")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("TestModeSingerCountOptions"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Test Mode Settings GroupBox & Performer Count Options", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " TestModeSingerCountOptions";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForMouseDragAndDropRotationReordering()
+        {
+            string baseDir = AppContext.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            if (!Directory.Exists(docDir))
+            {
+                return;
+            }
+
+            string updateText = @"
+Section: Lyracist & KSRotation / Rotation Management / Mouse Drag-and-Drop Performer Reordering (October 2026)
+
+[Overview & Purpose]
+Hosts and KJs frequently need to manually adjust queue order during a live show - for example, accommodating a singer stepping away briefly, grouping duet partners, or prioritizing a VIP guest. In both Lyracist and KSRotation, hosts can now click and drag any performer in the active rotation queue and drop them at a new position using the mouse. (Note: Remote DJ web portals retain standard button controls and do not require mouse dragging).
+
+[Drag Grip Handle & Visual Ergonomics]
+1. Dedicated Drag Grip Handle (⋮⋮): Each performer row in KSRotation and Lyracist features a dedicated drag grip handle on the left edge with a 4-way move cursor (SizeAll) and tooltip indicator ('Drag to reorder singer in rotation').
+2. Flexible Grab Zones: In addition to the drag grip, hosts can click and drag anywhere on non-interactive portions of the performer row (background, borders, badges, and labels) without accidentally triggering text editing or button commands.
+3. Interactive Controls Protection: Text inputs (Name, Duet Partner, Song, Artist) and interactive controls (Buttons, Checkboxes) remain protected, ensuring text selection and editing work seamlessly without triggering unintended drags.
+
+[Intelligent Midpoint Drop Calculation & Boundary Protection]
+1. Top/Bottom Half Precision: When dragging a performer over another row, dropping on the upper half places the performer above that row; dropping on the lower half places them below that row.
+2. Empty Space Drop: Dropping a performer below the queue in the empty list space automatically relocates them to the end of the rotation.
+3. Partition Boundary Enforcement: Active and inactive partitions are strictly protected. Inactive singers cannot be dragged into the active queue, and active singers cannot be dragged into the inactive section.
+4. Linked Duet Partner Integrity: If a linked performer is reordered, EnforceLinkedAdjacency automatically keeps linked duet partners adjacent.
+5. Live Real-Time Propagation: Dropping a performer immediately recalculates wait times, updates next-singer blue highlights, refreshes audience billboard displays, rebuilds rotation JSON caches, and saves changes to the database.
+";
+
+            // 1. Update text file
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingText = File.ReadAllText(updatesTxtPath);
+                if (!existingText.Contains("Mouse Drag-and-Drop Performer Reordering"))
+                {
+                    File.AppendAllText(updatesTxtPath, Environment.NewLine + updateText);
+                }
+            }
+
+            // 2. Update docx file
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var textElem in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (textElem.Text.Contains("Mouse Drag-and-Drop Performer Reordering"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Mouse Drag-and-Drop Performer Reordering")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("MouseDragAndDropRotationReordering"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Mouse Drag-and-Drop Performer Reordering", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " MouseDragAndDropRotationReordering";
                             doc.Save(pdfPath);
                         }
                     }

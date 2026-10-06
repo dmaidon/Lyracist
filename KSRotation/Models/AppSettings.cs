@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement standard special event configuration
+// Edited on Oct 6, 2026 @ 11:40:00 -> Add TestSingerCount setting for test mode
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -21,8 +21,11 @@ namespace KSRotation.Models
         // Pixels per second (20–200). Default 60.
         public double MarqueeSpeed { get; init; } = 60;
 
-        /// <summary>When true, 15 sample singers are loaded on startup.</summary>
+        /// <summary>When true, sample singers are loaded on startup.</summary>
         public bool IsTestMode { get; init; }
+
+        /// <summary>Number of sample singers to load in test mode (3, 5, 10, or 15). Default 15.</summary>
+        public int TestSingerCount { get; init; } = 15;
 
         /// <summary>Email address to receive the end-of-night rotation report.</summary>
         public string EmailRecipient { get; init; } = string.Empty;
@@ -167,4 +170,4 @@ namespace KSRotation.Models
         public System.Collections.Generic.List<ProjectionRotationEntry> ProjectionRotationSchedule { get; init; } = [];
     }
 }
-
+

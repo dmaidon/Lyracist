@@ -2403,3 +2403,59 @@ If the performer being moved to the top was previously skipped ('IsSkipped'), pa
    - Tap the dedicated '⤒' button on any performer card in the active rotation queue.
 4. Remote DJ Web Portal (/dj):
    - Supports 'move-to-top' and 'move-top' remote control actions.
+
+Lyracist Pro Suite & KSRotation: New Singer Placeholder Cleanup & Automatic Unused Row Removal (`NameFormatting.cs`, `SingerEntry.cs`, `MainViewModel.cs`, `MainWindow.xaml.cs`, `RotationViewModel.cs`) - (October 2026)
+
+Section: Lyracist & KSRotation / Rotation Management / Singer Addition & Placeholder Cleanup
+
+[Overview & Purpose]
+When adding a new performer to the rotation queue (via the 'New Singer' button), a new row is created with the default placeholder text 'New Singer' focused and highlighted for typing. In fast-paced hosting environments, a host may click 'New Singer' but then click elsewhere or press Enter without typing a name, leaving an unwanted orphan 'New Singer' row in the queue. Alternatively, a host may start typing after or amidst the placeholder, creating unformatted names such as 'New Singertom' or 'New Singer Tom'.
+
+[Automatic Row Removal on Lost Focus]
+If the host adds a new singer and navigates away or moves focus without typing a new name (so that 'New Singer' remains the only text in the box, or the box is left blank or whitespace), the application automatically removes that orphan line from the rotation queue immediately without displaying an interrupting confirmation prompt.
+
+[Smart Placeholder Stripping & Proper-Casing]
+If the placeholder 'New Singer' is present alongside additional text (for example, typing 'New Singertom', 'New Singer Tom', or 'Tom New Singer'), the system automatically strips the 'New Singer' token and any surrounding delimiters or punctuation, cleans the remaining name, and applies intelligent Title/Proper Casing (for example, converting 'New Singertom' to 'Tom').
+
+[Keyboard & Flow Handling]
+Pressing Enter in the singer name input commits the name and advances focus to the next field (e.g. Song title), triggering instant validation, cleaning, or cleanup smoothly.
+
+Lyracist Pro Suite & KSRotation: Test Mode Settings GroupBox & Performer Count Options (3, 5, 10, 15) (`RotationHelpers.cs`, `MainWindow.xaml`, `MainViewModel.cs`, `SettingsPage.xaml`, `SettingsViewModel.cs`, `AppSettings.cs`) - (October 2026)
+
+Section: Lyracist & KSRotation / Settings / Test Mode & Sample Singer Generation
+
+[Overview & Purpose]
+Hosts and KJs frequently utilize Test Mode to verify audio leveling, screen projection, rotation advancing, and network request kiosks before live show doors open. Previously, test mode automatically seeded a fixed list of 15 performers with identical startup names. The system now features a dedicated 'Test Mode Settings' GroupBox (GBX) providing configurable sample singer counts and a dynamic, randomized pool of realistic performer names.
+
+[Configurable Performer Counts (3, 5, 10, & 15)]
+Hosts can now select exactly how many sample performers to load from a dedicated dropdown selector:
+- 3 Singers: Ideal for quick audio and dual-screen verification checks.
+- 5 Singers: Perfect for testing rotation handoffs and next-singer notifications.
+- 10 Singers: Well-suited for testing multi-round progression and last round workflows.
+- 15 Singers: Thorough full-queue testing across multi-monitor displays, billboards, and remote DJ boards.
+
+[Dedicated Test Mode Settings GroupBox (GBX)]
+- Dedicated UI Organization: Test Mode settings are now cleanly isolated within their own GroupBox ('Test Mode Settings') in both KSRotation and Lyracist Settings panels.
+- Instant 'Load Test Singers Now' Action: In addition to startup seeding, hosts can immediately populate or refresh the rotation queue with the selected number of sample singers with one click, without restarting the application.
+- Preservation of Session Settings: General session settings (e.g. 'Block Duplicate Songs in Session') remain in 'Rotation Settings', keeping operational controls distinct from testing tools.
+
+[Randomized Performer Names & Song Pool]
+The test generator utilizes a curated pool of 18 realistic performer names (Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling) paired randomly with popular karaoke tracks, guaranteeing varied and realistic practice sessions.
+
+
+Section: Lyracist & KSRotation / Rotation Management / Mouse Drag-and-Drop Performer Reordering (October 2026)
+
+[Overview & Purpose]
+Hosts and KJs frequently need to manually adjust queue order during a live show - for example, accommodating a singer stepping away briefly, grouping duet partners, or prioritizing a VIP guest. In both Lyracist and KSRotation, hosts can now click and drag any performer in the active rotation queue and drop them at a new position using the mouse. (Note: Remote DJ web portals retain standard button controls and do not require mouse dragging).
+
+[Drag Grip Handle & Visual Ergonomics]
+1. Dedicated Drag Grip Handle (⋮⋮): Each performer row in KSRotation and Lyracist features a dedicated drag grip handle on the left edge with a 4-way move cursor (SizeAll) and tooltip indicator ('Drag to reorder singer in rotation').
+2. Flexible Grab Zones: In addition to the drag grip, hosts can click and drag anywhere on non-interactive portions of the performer row (background, borders, badges, and labels) without accidentally triggering text editing or button commands.
+3. Interactive Controls Protection: Text inputs (Name, Duet Partner, Song, Artist) and interactive controls (Buttons, Checkboxes) remain protected, ensuring text selection and editing work seamlessly without triggering unintended drags.
+
+[Intelligent Midpoint Drop Calculation & Boundary Protection]
+1. Top/Bottom Half Precision: When dragging a performer over another row, dropping on the upper half places the performer above that row; dropping on the lower half places them below that row.
+2. Empty Space Drop: Dropping a performer below the queue in the empty list space automatically relocates them to the end of the rotation.
+3. Partition Boundary Enforcement: Active and inactive partitions are strictly protected. Inactive singers cannot be dragged into the active queue, and active singers cannot be dragged into the inactive section.
+4. Linked Duet Partner Integrity: If a linked performer is reordered, EnforceLinkedAdjacency automatically keeps linked duet partners adjacent.
+5. Live Real-Time Propagation: Dropping a performer immediately recalculates wait times, updates next-singer blue highlights, refreshes audience billboard displays, rebuilds rotation JSON caches, and saves changes to the database.

@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial property for one-time performance special singers
+// Edited on Oct 6, 2026 @ 10:46:30 -> Add IsNewPlaceholder and clean singer name in Name setter
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -74,13 +74,25 @@ namespace KSRotation.Models
 
         public List<QueuedSong> QueuedSongs { get; set; } = [];
 
+        /// <summary>True when this entry is a newly added placeholder pending its initial name edit.</summary>
+        [ObservableProperty]
+        public partial bool IsNewPlaceholder { get; set; }
+
         private string _name = string.Empty;
         public string Name
         {
             get => _name;
             set
             {
-                if (SetProperty(ref _name, ProperCase(value)))
+                string input = value;
+                string cleaned = Lyracist.Shared.NameFormatting.CleanSingerName(input);
+                if (!string.IsNullOrWhiteSpace(cleaned))
+                {
+                    input = cleaned;
+                    IsNewPlaceholder = false;
+                }
+
+                if (SetProperty(ref _name, ProperCase(input)))
                 {
                     OnPropertyChanged(nameof(DisplayNameWithDuet));
                 }

@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 22:51:00 -> Add Move to Top of Rotation context menu item and list item button -->
+<!-- Edited on Oct 6, 2026 @ 12:13:00 -> Add mouse drag-and-drop reordering with drag grip handle to rotation queue -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -88,6 +88,12 @@
 
         <!-- Gold highlight for the currently-singing row and context menu -->
         <Style x:Key="CurrentSingerRowStyle" TargetType="ListViewItem">
+            <Setter Property="AllowDrop" Value="True" />
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SingersListViewItem_PreviewMouseLeftButtonDown" />
+            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="SingersListViewItem_PreviewMouseLeftButtonUp" />
+            <EventSetter Event="MouseMove" Handler="SingersListViewItem_MouseMove" />
+            <EventSetter Event="DragOver" Handler="SingersListViewItem_DragOver" />
+            <EventSetter Event="Drop" Handler="SingersListViewItem_Drop" />
             <Setter Property="Padding" Value="0,1,0,1" />
             <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}" />
             <Setter Property="ContextMenu">
@@ -754,6 +760,7 @@
 
                         <Grid Grid.Row="1" Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="colGrip" MinWidth="24" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
                                 <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="110" />
                                 <ColumnDefinition Width="1.8*" SharedSizeGroup="colDuet" MinWidth="95" />
@@ -767,11 +774,12 @@
                                 </Style>
                             </Grid.Resources>
 
-                            <TextBlock Text="★" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Set current singer" />
-                            <TextBlock Grid.Column="1" Text="Singer" FontWeight="SemiBold" Margin="4,0,0,0" />
-                            <TextBlock Grid.Column="2" Text="Duet Partner" FontWeight="SemiBold" Margin="4,0,0,0" />
-                            <TextBlock Grid.Column="3" Text="Song" FontWeight="SemiBold" Margin="4,0,0,0" />
-                            <TextBlock Grid.Column="4" Text="Artist" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="0" Text="⋮⋮" FontWeight="Bold" FontSize="14" Opacity="0.4" HorizontalAlignment="Center" ToolTip="Drag and drop to reorder singers" />
+                            <TextBlock Grid.Column="1" Text="★" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Set current singer" />
+                            <TextBlock Grid.Column="2" Text="Singer" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="3" Text="Duet Partner" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="4" Text="Song" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="5" Text="Artist" FontWeight="SemiBold" Margin="4,0,0,0" />
                         </Grid>
 
                         <ListView
@@ -779,6 +787,9 @@
                         Grid.Row="2"
                         ItemsSource="{Binding Singers}"
                         ItemContainerStyle="{StaticResource CurrentSingerRowStyle}"
+                        AllowDrop="True"
+                        DragOver="SingersListView_DragOver"
+                        Drop="SingersListView_Drop"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                         HorizontalContentAlignment="Stretch"
                         UseLayoutRounding="True"
@@ -796,6 +807,7 @@
                                             <!-- Row 0: Identity & Song Inputs -->
                                             <Grid Grid.Row="0">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="colGrip" MinWidth="24" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
                                                     <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="110" />
                                                     <ColumnDefinition Width="1.8*" SharedSizeGroup="colDuet" MinWidth="95" />
@@ -803,10 +815,20 @@
                                                     <ColumnDefinition Width="2.5*" SharedSizeGroup="col3" MinWidth="140" />
                                                 </Grid.ColumnDefinitions>
 
+                                                <Border Grid.Column="0"
+                                                        Background="Transparent"
+                                                        Cursor="SizeAll"
+                                                        ToolTip="Drag to reorder singer in rotation"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"
+                                                        Padding="4,2">
+                                                    <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBodyLight}" Opacity="0.6" />
+                                                </Border>
+
                                                 <Button
                                                 Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"
-                                                Grid.Column="0"
+                                                Grid.Column="1"
                                                 Margin="2"
                                                 ToolTip="Set as current singer">
                                                     <!-- In vertical mode this reads as a small badge next to the Name field rather than a
@@ -834,7 +856,7 @@
                                                     </Button.Style>
                                                 </Button>
 
-                                                <Grid Grid.Column="1">
+                                                <Grid Grid.Column="2">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="*" />
@@ -961,7 +983,7 @@
                                                     </Popup>
                                                 </Grid>
 
-                                                <TextBox Text="{Binding DuetPartnerName, UpdateSourceTrigger=LostFocus}" Grid.Column="2">
+                                                <TextBox Text="{Binding DuetPartnerName, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -974,7 +996,7 @@
                                                     </TextBox.Style>
                                                 </TextBox>
 
-                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
+                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="4">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -986,7 +1008,7 @@
                                                         </Style>
                                                     </TextBox.Style>
                                                 </TextBox>
-                                                <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="4">
+                                                <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="5">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -1004,7 +1026,7 @@
                                                  Wide layout: checkboxes (left) and action buttons (right) share this one row.
                                                  Vertical mode (list narrower than 700px): checkboxes take the full row, and action
                                                  buttons drop to their own row below — giving the 3-row layout (Name+badge / checkboxes / buttons). -->
-                                            <Grid Grid.Row="1" Margin="38,6,4,2">
+                                            <Grid Grid.Row="1" Margin="62,6,4,2">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
@@ -1870,22 +1892,51 @@
                                   Margin="0,0,0,12">
                             <StackPanel Margin="0,4,0,0">
                                 <CheckBox
-                                         Content="Test Mode (loads sample singers on next startup)"
-                                         IsChecked="{Binding IsTestMode}"
-                                         Style="{StaticResource ModernCheckBoxStyle}"
-                                         Margin="0,0,0,10" />
-                                <CheckBox
                                          Content="Block Duplicate Songs in Session"
                                          IsChecked="{Binding BlockDuplicateSongsInSession}"
                                          Style="{StaticResource ModernCheckBoxStyle}"
-                                         Margin="0,0,0,10"
+                                         Margin="0,0,0,4"
                                          ToolTip="When enabled, patrons cannot request a song via the patron portal that has already been performed or queued in the current session." />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Test Mode Settings"
+                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
+                                  Padding="14,10,14,12"
+                                  Margin="0,0,0,12">
+                            <StackPanel Margin="0,4,0,0">
+                                <CheckBox
+                                         Content="Test Mode (loads sample singers on startup)"
+                                         IsChecked="{Binding IsTestMode}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,0,0,8" />
+                                <TextBlock Text="Sample Singers Count"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,4"
+                                           Foreground="{DynamicResource AppHeaderBrush}" />
+                                <ComboBox ItemsSource="{Binding TestSingerCountOptions}"
+                                          SelectedItem="{Binding TestSingerCount, UpdateSourceTrigger=PropertyChanged}"
+                                          Width="90" Height="45"
+                                          HorizontalAlignment="Left"
+                                          Style="{StaticResource ModernComboBoxStyle}"
+                                          Margin="0,0,0,10"
+                                          ToolTip="Select how many sample singers to load (3, 5, 10, or 15)." />
+                                <Button
+                                         Content="Load Test Singers Now"
+                                         Command="{Binding LoadTestSingersNowCommand}"
+                                         HorizontalAlignment="Center"
+                                         Width="260"
+                                         Style="{StaticResource ModernSecondaryButtonStyle}"
+                                         Margin="0,0,0,8"
+                                         ToolTip="Immediately populates the rotation queue with the selected number of random sample singers." />
                                 <Button
                                          Content="Save Current Rotation as Test List"
                                          Command="{Binding SaveCurrentAsTestListCommand}"
                                          HorizontalAlignment="Center"
                                          Width="260"
-                                         Style="{StaticResource ModernButtonStyle}" />
+                                         Style="{StaticResource ModernButtonStyle}"
+                                         ToolTip="Saves the current rotation queue as the custom test list." />
                             </StackPanel>
                         </GroupBox>
 
@@ -4005,7 +4056,7 @@
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="4,0,0,0" Padding="12" Margin="0,0,0,16">
                                     <StackPanel>
                                         <TextBlock Text="💡 Tip: Test Mode" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="Enable 'Test Mode' in Settings to automatically pre-populate the queue with 15 sample singers on the next startup. Perfect for practicing or testing screen layouts!" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="Enable 'Test Mode' in Settings to automatically pre-populate the queue with sample singers (3, 5, 10, or 15) on startup, or click 'Load Test Singers Now' to load them immediately. Perfect for practicing or testing screen layouts!" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

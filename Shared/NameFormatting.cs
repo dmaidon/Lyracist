@@ -1,7 +1,8 @@
-// Created on Aug 27, 2026 @ 07:07:00 -> Implement smart proper-casing for names, artists, and song titles
+// Edited on Oct 6, 2026 @ 10:46:00 -> Add CleanSingerName to strip placeholder text and sanitize singer names
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Lyracist.Shared
 {
@@ -16,6 +17,34 @@ namespace Lyracist.Shared
             "DJ", "MC", "TV", "CD", "DVD", "EP", "LP", "UK", "USA", "US",
             "II", "III", "IV", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"
         };
+
+        /// <summary>
+        /// Cleans a singer name by removing any leftover placeholder text such as "New Singer".
+        /// If the string contains only "New Singer" (or is whitespace), returns <see cref="string.Empty"/>.
+        /// If "New Singer" appears alongside other text (e.g. "New Singertom" or "New Singer Tom"),
+        /// strips "New Singer" out and returns the properly cased name (e.g. "Tom").
+        /// </summary>
+        public static string CleanSingerName(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            string trimmed = input.Trim();
+
+            if (trimmed.Equals("New Singer", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+
+            // Remove any occurrence of "New Singer" (case-insensitive, with optional whitespace between words)
+            string stripped = Regex.Replace(trimmed, @"(?i)new\s*singer", string.Empty);
+
+            // Clean up any leftover punctuation or whitespace (e.g. leading/trailing dashes, colons)
+            stripped = stripped.Trim(' ', '-', ':', ',', '.');
+
+            if (string.IsNullOrWhiteSpace(stripped))
+                return string.Empty;
+
+            return ProperCase(stripped);
+        }
 
         /// <summary>
         /// Converts the given input string to proper case while preserving intentional mixed-case

@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:48:30 -> Add MoveToTop and MoveSingerToTop commands to move singer to top of rotation without altering rotation anchor
+// Edited on Oct 6, 2026 @ 12:14:00 -> Update NotifyRotationReordered with anchor, float current, and wait time sync
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -332,7 +332,7 @@ public partial class RotationViewModel : BaseViewModel
 
         if (AppSettings.IsTestMode)
         {
-            SeedSingers();
+            SeedSingers(AppSettings.TestSingerCount);
         }
         LoadSingerNames();
 
@@ -348,24 +348,22 @@ public partial class RotationViewModel : BaseViewModel
         RecalculateRoundEstimation();
     }
 
-    public void SeedSingers()
+    public void SeedSingers(int count = 15)
     {
         Rotation.Clear();
-        Rotation.Add(new Singer { Name = "Alice Johnson", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond", Score = 240, AverageRating = 4.8, RatingCount = 5 });
-        Rotation.Add(new Singer { Name = "Bob Caruthers", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles", Score = 180, AverageRating = 4.5, RatingCount = 4 });
-        Rotation.Add(new Singer { Name = "Charlie Brown", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson", Score = 120, AverageRating = 4.0, RatingCount = 3 });
-        Rotation.Add(new Singer { Name = "Diana Smith", Key = "+2", Notes = "Sings alto, loves jazz standards", SongTitle = "Fly Me to the Moon", Artist = "Frank Sinatra", Score = 90, AverageRating = 4.5, RatingCount = 2 });
-        Rotation.Add(new Singer { Name = "Emma Watson", Key = "0", Notes = "Loves pop ballads", SongTitle = "Rolling in the Deep", Artist = "Adele", Score = 50, AverageRating = 5.0, RatingCount = 1 });
-        Rotation.Add(new Singer { Name = "Frank Miller", Key = "-1", Notes = "Prefers classic soul", SongTitle = "My Girl", Artist = "Temptations", Score = 40, AverageRating = 4.0, RatingCount = 1 });
-        Rotation.Add(new Singer { Name = "Grace Hopper", Key = "+3", Notes = "Energetic performance style", SongTitle = "Respect", Artist = "Aretha Franklin" });
-        Rotation.Add(new Singer { Name = "Harry Potter", Key = "0", Notes = "Group favorite song choice", SongTitle = "Bohemian Rhapsody", Artist = "Queen" });
-        Rotation.Add(new Singer { Name = "Irene Adler", Key = "+2", Notes = "Sings soprano powerhouse tracks", SongTitle = "I Will Always Love You", Artist = "Whitney Houston" });
-        Rotation.Add(new Singer { Name = "Jack Sparrow", Key = "-3", Notes = "Likes pub singalongs", SongTitle = "Piano Man", Artist = "Billy Joel" });
-        Rotation.Add(new Singer { Name = "Karen Walker", Key = "+1", Notes = "Likes modern acoustic pop", SongTitle = "Someone Like You", Artist = "Adele" });
-        Rotation.Add(new Singer { Name = "Leo Tolstoy", Key = "0", Notes = "Classic rock fan", SongTitle = "Hey Jude", Artist = "Beatles" });
-        Rotation.Add(new Singer { Name = "Mary Shelley", Key = "-1", Notes = "Loves spooky themed pop", SongTitle = "Thriller", Artist = "Michael Jackson" });
-        Rotation.Add(new Singer { Name = "Ned Stark", Key = "+2", Notes = "Epic rock singalong", SongTitle = "Don't Stop Believin'", Artist = "Journey" });
-        Rotation.Add(new Singer { Name = "Oliver Twist", Key = "0", Notes = "Prefers 80s synth rock", SongTitle = "Purple Rain", Artist = "Prince" });
+        var sampleSingers = Lyracist.Shared.RotationHelpers.GenerateRandomTestSingers(count);
+        foreach (var (name, song, artist) in sampleSingers)
+        {
+            Rotation.Add(new Singer
+            {
+                Name = name,
+                SongTitle = song,
+                Artist = artist,
+                Score = 120,
+                AverageRating = 4.5,
+                RatingCount = 3
+            });
+        }
 
         // Save seed singers to DB for leaderboard
         System.Threading.Tasks.Task.Run(() =>
@@ -483,6 +481,16 @@ public partial class RotationViewModel : BaseViewModel
 
     public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false, double tempo = 1.0, bool isSpecial = false)
     {
+        string cleanedName = NameFormatting.CleanSingerName(name);
+        if (!string.IsNullOrWhiteSpace(cleanedName))
+        {
+            name = cleanedName;
+        }
+        else if (string.Equals(name?.Trim(), "New Singer", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         name = NameFormatting.ProperCase(name);
         duetPartner = NameFormatting.ProperCase(duetPartner);
         title = NameFormatting.ProperCase(title);
@@ -1471,7 +1479,13 @@ public partial class RotationViewModel : BaseViewModel
         // one half of a pair away from the other) - snap the pair back adjacent before notifying.
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
         RefreshLinkedPartnerNames();
+        Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+        if (FloatCurrentSingerToTop)
+        {
+            Lyracist.Shared.RotationHelpers.FloatCurrentSingerToTop(Rotation);
+        }
 
+        RecalculateAllWaitsAndEstimations();
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

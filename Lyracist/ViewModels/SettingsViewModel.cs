@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:22:00 -> Guard library update dispatches against TaskCanceledException during shutdown
+// Edited on Oct 6, 2026 @ 11:42:00 -> Add TestSingerCount and LoadTestSingersNow command to SettingsViewModel
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -40,6 +40,20 @@ public partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _isTestMode = AppSettings.IsTestMode;
+
+    [ObservableProperty]
+    private int _testSingerCount = AppSettings.TestSingerCount;
+
+    partial void OnTestSingerCountChanged(int value)
+    {
+        AppSettings.TestSingerCount = value;
+        if (IsTestMode)
+        {
+            _rotation.SeedSingers(value);
+        }
+    }
+
+    public IReadOnlyList<int> TestSingerCountOptions { get; } = [3, 5, 10, 15];
 
     [ObservableProperty]
     private bool _floatCurrentSingerToTop = AppSettings.FloatCurrentSingerToTop;
@@ -461,12 +475,18 @@ public partial class SettingsViewModel : BaseViewModel
         AppSettings.IsTestMode = value;
         if (value)
         {
-            _rotation.SeedSingers();
+            _rotation.SeedSingers(TestSingerCount);
         }
         else
         {
             _rotation.ClearRotationQueue();
         }
+    }
+
+    [RelayCommand]
+    private void LoadTestSingersNow()
+    {
+        _rotation.SeedSingers(TestSingerCount);
     }
 
 }

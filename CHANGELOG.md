@@ -1,5 +1,5 @@
-<!-- Edited on Oct 6, 2026 @ 10:24:00 -> Document Single-Instance Enforcement across suite applications in CHANGELOG -->
-Last Edit: Oct 6, 2026 - Single-Instance Application Enforcement
+<!-- Edited on Oct 6, 2026 @ 12:23:00 -> Document mouse drag-and-drop rotation reordering in CHANGELOG -->
+Last Edit: Oct 6, 2026 - Mouse Drag-and-Drop Rotation Reordering
 
 # Changelog
 
@@ -8,6 +8,28 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-06
 
 ### Added
+- **Mouse Drag-and-Drop Rotation Queue Reordering (`KSRotation/MainWindow.xaml`, `KSRotation/MainWindow.xaml.cs`, `KSRotation/ViewModels/MainViewModel.cs`, `Lyracist/Views/Pages/RotationPage.xaml`, `Lyracist/Views/Pages/RotationPage.xaml.cs`, `Lyracist/ViewModels/RotationViewModel.cs`)**:
+  - Full Mouse Drag-and-Drop Support: Hosts can now click and drag any performer in the active rotation queue and drop them at any desired position using the mouse in both KSRotation and Lyracist desktop applications. (Remote DJ screens retain standard button-based queue controls and do not require mouse dragging).
+  - Dedicated Drag Grip Handle (⋮⋮): Each performer row features a dedicated drag grip handle on the left edge with a 4-way move cursor (`SizeAll`) and tooltip hint ("Drag to reorder singer in rotation").
+  - Broad Row Grab Zones: Hosts can click and drag either the grip handle or any non-interactive part of the performer row (background, borders, badges, and labels) to smoothly reorder. Interactive inputs (text fields, buttons, checkboxes) remain fully protected for typing and clicking without accidental drag initiation.
+  - Intelligent Midpoint Drop Positioning: Dropping on the upper half of a performer row places the dragged singer directly above that row; dropping on the lower half places them directly below.
+  - Empty Space Drop: Dropping a performer into empty space below the list automatically moves them to the end of the rotation.
+  - Active & Inactive Partition Boundary Protection: Inactive singers cannot be dragged into the active queue, and active singers cannot be dragged into the inactive section.
+  - Linked Duet Partner Preservation: `EnforceLinkedAdjacency` automatically keeps linked duet partners strictly adjacent after any drag-and-drop reordering.
+  - Real-Time Live Sync: Reordering instantly updates wait time estimates, refreshes next-performer highlights, pushes updates to audience billboard projection displays, updates rotation JSON caches, and saves changes to the database.
+- **Test Mode Settings GroupBox & Performer Count Options (3, 5, 10, 15) (`Shared/RotationHelpers.cs`, `KSRotation/MainWindow.xaml`, `KSRotation/ViewModels/MainViewModel.cs`, `KSRotation/Models/AppSettings.cs`, `Lyracist/Views/Pages/SettingsPage.xaml`, `Lyracist/ViewModels/SettingsViewModel.cs`, `Lyracist/ViewModels/RotationViewModel.cs`, `Lyracist/Core/Helpers/AppSettings.cs`, `KSRotation.Maui/MainPage.xaml.cs`)**:
+  - Dedicated Test Mode GroupBox (GBX): Organized test mode controls into a dedicated "Test Mode Settings" GroupBox across KSRotation and Lyracist settings, keeping operational rotation settings (such as session duplicate song blocking) separate from testing tools.
+  - Performer Count Options (3, 5, 10, & 15): Introduced a configurable sample singer count selector allowing KJs to load 3, 5, 10, or 15 test performers to suit the scope of their pre-show tests.
+  - Curated 18 Performer Names Pool: Replaced legacy sample names with 18 realistic performer names: Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling.
+  - Randomized Selection & Pairing: Seeding now shuffles and randomly selects distinct performers and popular karaoke tracks from `SampleSongPool`, providing varied and realistic practice sessions every time test data is generated.
+  - 1-Click "Load Test Singers Now" Action: Added dedicated buttons to instantly load the selected number of random test performers into the queue on demand without restarting the application.
+  - Documentation & Unit Tests: Added unit test suite in `RotationTests.cs` and updated user manuals (`Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, `Lyracist_User_Manual_Updates.txt`).
+- **New Singer Auto-Cleanup & Automatic Unused Row Removal (`Shared/NameFormatting.cs`, `KSRotation/Models/SingerEntry.cs`, `KSRotation/ViewModels/MainViewModel.cs`, `KSRotation/MainWindow.xaml.cs`, `Lyracist/ViewModels/RotationViewModel.cs`, `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`)**:
+  - Auto-Removal of Orphan New Singer Rows: When adding a new performer to the rotation queue, if focus leaves the singer name input and "New Singer" remains the sole text (or the box is left blank/whitespace), the row is automatically deleted from the rotation queue immediately without an interrupting confirmation dialog.
+  - Smart Placeholder Stripping & Proper-Casing: If text is entered alongside the "New Singer" placeholder (e.g. "New Singertom", "New Singer Tom", "Tom New Singer"), the application automatically strips the "New Singer" token and any surrounding delimiters, cleans the remaining name, and applies intelligent Title/Proper Casing (e.g. converting "New Singertom" to "Tom").
+  - Enter Key Traversal: Pressing Enter in the singer name field commits the input and advances focus to the next field (e.g. song title), triggering the automatic validation and cleanup seamlessly.
+  - Direct Removal Support: Added `RemoveSingerDirectly` to `MainViewModel` to bypass prompts and safely clear any active `LastInsertedSinger` or `PendingLinkSinger` references.
+  - Documentation & Unit Tests: Added comprehensive test coverage in `RotationTests.cs` and updated user manuals (`Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, `Lyracist_User_Manual_Updates.txt`).
 - **Single-Instance Application Enforcement Across All Suite Apps (`Shared/SingleInstanceHelper.cs`, `Lyracist`, `KSRotation`, `KnockoutTrivia`, `Lyracist.Trivia`, `ScaryokeWheel`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`)**:
   - Configured all applications across the suite as strictly single-instance applications, preventing duplicate processes, audio device conflicts, database concurrency locks, and port binding collisions.
   - Session-Scoped Mutex: Utilizes session-scoped named mutexes (`Local\Lyracist_SingleInstance_{appName}`) preventing standard-user elevation conflicts and isolating multi-user Terminal Services sessions.

@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 08:58:30 -> Add unit test for duetPartnerName and partner serialization in RotationItemDto
+// Edited on Oct 6, 2026 @ 12:15:00 -> Add unit tests for MoveSingerToPosition drag-and-drop reordering
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2137,6 +2137,240 @@ public class RoundEstimationTests
         Assert.Equal("Jane Smith", deserialized.duetPartnerName);
     }
 }
+
+public class NewSingerCleanupTests
+{
+    [Theory]
+    [InlineData("New Singer", "")]
+    [InlineData("new singer", "")]
+    [InlineData("NEW SINGER", "")]
+    [InlineData("  New Singer  ", "")]
+    [InlineData("New Singer   ", "")]
+    [InlineData("", "")]
+    [InlineData("   ", "")]
+    [InlineData(null, "")]
+    [InlineData("New Singertom", "Tom")]
+    [InlineData("New Singer Tom", "Tom")]
+    [InlineData("Tom New Singer", "Tom")]
+    [InlineData("new singertom", "Tom")]
+    [InlineData("tom", "Tom")]
+    [InlineData("New Singer - Jane Doe", "Jane Doe")]
+    [InlineData("New Singer : Bob Smith", "Bob Smith")]
+    [InlineData("Alice and Bob", "Alice And Bob")]
+    public void CleanSingerName_FormatsAndStripsCorrectly(string? input, string expected)
+    {
+        string actual = NameFormatting.CleanSingerName(input);
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void SingerEntry_Name_CleansNewSingerPrefixAutomatically()
+    {
+        var entry = new SingerEntry { Name = "New Singer", IsNewPlaceholder = true };
+        Assert.True(entry.IsNewPlaceholder);
+
+        entry.Name = "New Singertom";
+        Assert.Equal("Tom", entry.Name);
+        Assert.False(entry.IsNewPlaceholder);
+    }
+
+    [Fact]
+    public void MainViewModel_AddSinger_SetsIsNewPlaceholderTrue()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        vm.AddSingerCommand.Execute(null);
+
+        Assert.Single(vm.Singers);
+        var added = vm.Singers[0];
+        Assert.Equal("New Singer", added.Name);
+        Assert.True(added.IsNewPlaceholder);
+    }
+
+    [Fact]
+    public void MainViewModel_RemoveSingerDirectly_RemovesWithoutPromptAndClearsReferences()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        vm.AddSingerCommand.Execute(null);
+        var added = vm.Singers[0];
+        vm.LastInsertedSinger = added;
+        vm.PendingLinkSinger = added;
+
+        vm.RemoveSingerDirectly(added);
+
+        Assert.Empty(vm.Singers);
+        Assert.Null(vm.LastInsertedSinger);
+        Assert.Null(vm.PendingLinkSinger);
+    }
+}
+
+public class SampleSingerTests
+{
+    [Fact]
+    public void SampleSingerNames_ContainsAllExpectedUserNames()
+    {
+        string[] expectedNames =
+        [
+            "Brenda Bumps",
+            "James Smith",
+            "Raymond Carter",
+            "Sharon Roberts",
+            "Ami Anderson",
+            "Ali Davis",
+            "Randy Davis",
+            "Larry Strickland",
+            "Robert Roberts",
+            "Cynthis Nix",
+            "David Wayne",
+            "Danny Hinnant",
+            "Cerrina Culbert",
+            "Julia Stanton",
+            "Carol Henderson",
+            "Joe Bob Briggs",
+            "Craven Counts",
+            "Dennis Starling"
+        ];
+
+        Assert.Equal(18, RotationHelpers.SampleSingerNames.Length);
+        foreach (var name in expectedNames)
+        {
+            Assert.Contains(name, RotationHelpers.SampleSingerNames);
+        }
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(5)]
+    [InlineData(10)]
+    [InlineData(15)]
+    public void GenerateRandomTestSingers_GeneratesExactCountOfUniqueSingers(int count)
+    {
+        var singers = RotationHelpers.GenerateRandomTestSingers(count);
+
+        Assert.Equal(count, singers.Count);
+        // All names unique
+        Assert.Equal(count, singers.Select(s => s.Name).Distinct().Count());
+        // All names from the allowed pool
+        foreach (var (name, song, artist) in singers)
+        {
+            Assert.Contains(name, RotationHelpers.SampleSingerNames);
+            Assert.False(string.IsNullOrWhiteSpace(song));
+            Assert.False(string.IsNullOrWhiteSpace(artist));
+        }
+    }
+
+    [Fact]
+    public void MainViewModel_TestSingerCountOptions_ContainsExpectedValues()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        Assert.Equal([3, 5, 10, 15], vm.TestSingerCountOptions);
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(5)]
+    [InlineData(10)]
+    [InlineData(15)]
+    public void MainViewModel_LoadTestSingersNow_PopulatesSelectedCount(int count)
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.TestSingerCount = count;
+
+        vm.LoadTestSingersNow();
+
+        Assert.Equal(count, vm.Singers.Count);
+        Assert.True(vm.Singers[0].IsRotationStart);
+        foreach (var s in vm.Singers)
+        {
+            Assert.Contains(s.Name, RotationHelpers.SampleSingerNames);
+        }
+    }
+
+    [Fact]
+    public void MoveSingerToPosition_MovesSingerToTargetIndex_AndRecalculatesWaits()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.ShowEstimatedWaitTime = true;
+        vm.DefaultSongLengthMinutes = 5.0;
+
+        for (int i = 1; i <= 5; i++)
+        {
+            vm.Singers.Add(new SingerEntry { Name = $"Singer{i}", EstimatedPerformanceSeconds = 300 });
+        }
+
+        vm.Singers[0].IsCurrent = true;
+        RotationHelpers.RecalculateEstimatedWaits(vm.Singers, enabled: true, defaultEstimatedPerformanceSeconds: 300);
+
+        var singer5 = vm.Singers[4];
+        Assert.Equal("Singer5", singer5.Name);
+        Assert.Equal(20, singer5.EstimatedWaitMinutes); // 4 * 5 min = 20 min
+
+        bool moved = vm.MoveSingerToPosition(singer5, 1);
+        Assert.True(moved);
+        Assert.Equal(1, vm.Singers.IndexOf(singer5));
+        Assert.Equal(5, singer5.EstimatedWaitMinutes); // 1 * 5 min = 5 min
+    }
+
+    [Fact]
+    public void MoveSingerToPosition_PreventsInactiveCrossingActivePartition()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var s1 = new SingerEntry { Name = "Active1" };
+        var s2 = new SingerEntry { Name = "Active2" };
+        var s3 = new SingerEntry { Name = "Inactive1", IsInactive = true };
+        vm.Singers.Add(s1);
+        vm.Singers.Add(s2);
+        vm.Singers.Add(s3);
+
+        // Try to move s3 (inactive) to index 0 (active partition)
+        vm.MoveSingerToPosition(s3, 0);
+        // Should clamp to index 2 (first inactive index) and not cross into active
+        Assert.Equal(2, vm.Singers.IndexOf(s3));
+
+        // Try to move s1 (active) to index 2 (inactive partition)
+        vm.MoveSingerToPosition(s1, 2);
+        // Should clamp to max active index (1)
+        Assert.Equal(1, vm.Singers.IndexOf(s1));
+    }
+
+    [Fact]
+    public void MoveSingerToPosition_MaintainsLinkedPartnerAdjacency()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var s1 = new SingerEntry { Name = "Alice", Id = id1, LinkedSingerId = id2 };
+        var s2 = new SingerEntry { Name = "Bob", Id = id2, LinkedSingerId = id1 };
+        var s3 = new SingerEntry { Name = "Charlie", Id = Guid.NewGuid() };
+        var s4 = new SingerEntry { Name = "Dave", Id = Guid.NewGuid() };
+        var s5 = new SingerEntry { Name = "Eve", Id = Guid.NewGuid() };
+
+        vm.Singers.Add(s1);
+        vm.Singers.Add(s2);
+        vm.Singers.Add(s3);
+        vm.Singers.Add(s4);
+        vm.Singers.Add(s5);
+
+        // Drag Eve (index 4) between Alice and Bob (to index 1)
+        vm.MoveSingerToPosition(s5, 1);
+
+        // EnforceLinkedAdjacency brings Bob adjacent to Alice
+        int aliceIdx = vm.Singers.IndexOf(s1);
+        int bobIdx = vm.Singers.IndexOf(s2);
+        Assert.Equal(1, Math.Abs(aliceIdx - bobIdx));
+    }
+}
+
+
 
 
 

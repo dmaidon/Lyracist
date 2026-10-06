@@ -1,8 +1,30 @@
-<!-- Edited on Oct 6, 2026 @ 10:24:30 -> Document Single-Instance Enforcement in KSRotation CHANGELOG -->
+<!-- Edited on Oct 6, 2026 @ 12:23:00 -> Document mouse drag-and-drop rotation reordering in KSRotation CHANGELOG -->
 
 # Changelog
 
 ## 2026-10-06
+
+- **Mouse Drag-and-Drop Rotation Queue Reordering (`MainWindow.xaml`, `MainWindow.xaml.cs`, `ViewModels/MainViewModel.cs`)**:
+  - Full Mouse Drag-and-Drop Reordering: Hosts can grab and move any performer row directly within the rotation queue using the mouse to reposition singers instantly.
+  - Dedicated Drag Grip Handle (⋮⋮): Added a dedicated drag handle column on the left edge with a 4-way move cursor (`SizeAll`) and tooltip hint ("Drag to reorder singer in rotation").
+  - Protected Interactive Controls: Textboxes (Name, Duet Partner, Song, Artist) and buttons/checkboxes remain protected for standard editing and typing, while dragging from the grip handle or row background smoothly initiates reordering.
+  - Midpoint Precision: Dropping on the top half of a target row inserts the singer above that row; dropping on the bottom half inserts them below. Dropping into empty list space below the queue moves the singer to the end of the rotation.
+  - Partition & Partner Safety: Enforces active/inactive boundaries so inactive performers cannot enter the active queue, and keeps linked duet partners strictly adjacent via `EnforceLinkedAdjacency`.
+  - Instant System Sync: Automatically recalculates estimated wait times, updates next-singer highlights, triggers TV display window updates, rebuilds the rotation JSON cache for mobile devices, and marks the database dirty for saving.
+  - Unit Tests: Added comprehensive test coverage in `KSRotation.Tests/RotationTests.cs`.
+
+- **Test Mode Settings GroupBox & Performer Count Options (3, 5, 10, 15) (`MainWindow.xaml`, `ViewModels/MainViewModel.cs`, `Models/AppSettings.cs`, `Shared/RotationHelpers.cs`)**:
+  - Added dedicated "Test Mode Settings" GroupBox (GBX) in the Settings tab, separating test controls from general session rotation settings.
+  - Added performer count dropdown selector supporting 3, 5, 10, and 15 sample singers.
+  - Replaced sample singers with 18 realistic performer names (Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling) randomly selected and paired with popular songs.
+  - Added 1-click "Load Test Singers Now" button to instantly populate the rotation queue on demand.
+  - Added unit test suite in `KSRotation.Tests/RotationTests.cs`.
+
+- **New Singer Placeholder Cleanup & Automatic Orphan Row Removal (`MainWindow.xaml.cs`, `Models/SingerEntry.cs`, `ViewModels/MainViewModel.cs`, `Shared/NameFormatting.cs`)**:
+  - Automatically deletes a newly added performer row from the rotation queue if focus leaves the name field while the placeholder text remains unchanged ("New Singer") or empty/whitespace, avoiding clutter without prompting for confirmation.
+  - Automatically cleans and strips "New Singer" if entered with additional text (e.g., transforming "New Singertom" into "Tom") and applies ProperCase formatting.
+  - Pressing Enter in the singer name field now cleanly commits the name and shifts focus to the next input field.
+  - Added unit test coverage in `KSRotation.Tests/RotationTests.cs`.
 
 - **Single-Instance Application Enforcement (`App.xaml.cs`, `KSRotation.csproj`, `Shared/SingleInstanceHelper.cs`)**:
   - Enforced single-instance application execution for KSRotation.

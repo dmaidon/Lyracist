@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 22:49:00 -> Add Move to Top of Rotation option to singer ContextMenu, row actions, and toolbar -->
+<!-- Edited on Oct 6, 2026 @ 12:14:00 -> Add drag grip handle and empty area drop to rotation list -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -217,11 +217,19 @@
                 </StackPanel>
 
                 <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
-                    <ListBox ItemsSource="{Binding Rotation}" SelectedItem="{Binding SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox ItemsSource="{Binding Rotation}"
+                             SelectedItem="{Binding SelectedSinger}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             AllowDrop="True"
+                             DragOver="ListBox_DragOver"
+                             Drop="ListBox_Drop"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                                 <Setter Property="AllowDrop" Value="True" />
                                 <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown" />
+                                <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListBoxItem_PreviewMouseLeftButtonUp" />
                                 <EventSetter Event="MouseMove" Handler="ListBoxItem_MouseMove" />
                                 <EventSetter Event="DragOver" Handler="ListBoxItem_DragOver" />
                                 <EventSetter Event="Drop" Handler="ListBoxItem_Drop" />
@@ -298,13 +306,26 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
+                                        <!-- Drag Grip Handle -->
+                                        <Border Grid.Column="0"
+                                                Background="Transparent"
+                                                Cursor="SizeAll"
+                                                ToolTip="Drag to reorder singer in rotation"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Margin="2,0,8,0"
+                                                Padding="2,4">
+                                            <TextBlock Text="⋮⋮" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.6" />
+                                        </Border>
+
                                         <!-- Current Performer Selector Star Box -->
-                                        <Border Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center">
+                                        <Border Grid.Column="1" Margin="0,0,10,0" VerticalAlignment="Center">
                                             <Button Padding="4" Background="Transparent" BorderThickness="1" BorderBrush="#33888888" Width="30" Height="30"
                                                     Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}"
@@ -328,7 +349,7 @@
                                         </Border>
 
                                         <!-- Name & Song Info -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Border Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="Rotation Anchor (marks where a round begins)">
                                                     <TextBlock Text="⚓ ANCHOR" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
@@ -378,7 +399,7 @@
                                         </StackPanel>
 
                                         <!-- 10 Completed Rotation CheckBoxes (standard size) -->
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=1, Mode=TwoWay}" Margin="1,0" ToolTip="Rotations completed" />
                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=2, Mode=TwoWay}" Margin="1,0" />
                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=3, Mode=TwoWay}" Margin="1,0" />
@@ -392,7 +413,7 @@
                                         </StackPanel>
 
                                         <!-- Key & Actions -->
-                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+                                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
                                             <Border CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="0,0,6,0">
                                                 <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}" />
                                             </Border>

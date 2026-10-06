@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 08:53:00 -> Trigger database change, display update, and JSON cache rebuild on DuetPartnerName/Partner change
+// Edited on Oct 6, 2026 @ 12:13:00 -> Add MoveSingerToPosition for mouse drag-and-drop rotation reordering
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -99,6 +99,21 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
+
+        [ObservableProperty]
+        public partial int TestSingerCount { get; set; } = 15;
+
+        partial void OnTestSingerCountChanged(int value)
+        {
+            if (value is not (3 or 5 or 10 or 15))
+            {
+                TestSingerCount = 15;
+                return;
+            }
+            QueueSaveSettings();
+        }
+
+        public IReadOnlyList<int> TestSingerCountOptions { get; } = [3, 5, 10, 15];
 
         [ObservableProperty]
         public partial bool BlockDuplicateSongsInSession { get; set; }
@@ -1462,6 +1477,7 @@ namespace KSRotation.ViewModels
 
             MarqueeSpeed = Math.Clamp(settings.MarqueeSpeed, 20, 200);
             IsTestMode = settings.IsTestMode;
+            TestSingerCount = settings.TestSingerCount is 3 or 5 or 10 or 15 ? settings.TestSingerCount : 15;
             EmailRecipient = settings.EmailRecipient ?? string.Empty;
             SendEmailOnSave = settings.SendEmailOnSave;
             WatermarkOpacity = Math.Clamp(settings.WatermarkOpacity, 0.0, 1.0);
@@ -1585,12 +1601,7 @@ namespace KSRotation.ViewModels
             LoadKnownSingers();
             if (IsTestMode)
             {
-                AddKnownSinger("Alice Smith");
-                AddKnownSinger("Bob Jones");
-                AddKnownSinger("Charlie Miller");
-                AddKnownSinger("David Taylor");
-                AddKnownSinger("Eve Anderson");
-                LoadTestData();
+                LoadTestData(TestSingerCount);
             }
             else
             {
@@ -1821,6 +1832,7 @@ namespace KSRotation.ViewModels
                 Name = "New Singer",
                 Song = string.Empty,
                 Artist = string.Empty,
+                IsNewPlaceholder = true,
             });
         }
 
@@ -1928,6 +1940,19 @@ namespace KSRotation.ViewModels
                 return;
             }
 
+            RemoveSingerDirectly(entry);
+        }
+
+        /// <summary>
+        /// Deletes a singer directly without prompting for confirmation (e.g. for placeholder singers with empty/abandoned names).
+        /// </summary>
+        public void RemoveSingerDirectly(SingerEntry entry)
+        {
+            if (entry == null || !Singers.Contains(entry))
+            {
+                return;
+            }
+
             if (entry.IsRotationStart)
             {
                 RotationHelpers.HandleSingerRetiredOrRemoved(Singers, entry);
@@ -1947,6 +1972,7 @@ namespace KSRotation.ViewModels
             Singers.Remove(entry);
             RotationHelpers.UnlinkSinger(Singers, entry);
             if (PendingLinkSinger == entry) PendingLinkSinger = null;
+            if (LastInsertedSinger == entry) LastInsertedSinger = null;
             RefreshLinkedPartnerNames();
             RotationHelpers.EnsureRotationStartFlag(Singers);
             RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
@@ -2053,7 +2079,7 @@ namespace KSRotation.ViewModels
 
         public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "", bool isSpecial = false)
         {
-            string trimmedName = name?.Trim() ?? string.Empty;
+            string trimmedName = NameFormatting.CleanSingerName(name);
             if (string.IsNullOrWhiteSpace(trimmedName))
             {
                 return false;
@@ -2537,6 +2563,77 @@ namespace KSRotation.ViewModels
 
         [RelayCommand]
         private void MoveToTop(SingerEntry entry) => MoveSingerToTop(entry);
+
+        /// <summary>
+        /// Moves a singer directly to a target position in the rotation list (drag and drop).
+        /// Enforces active/inactive boundaries, linked pair adjacency, rotation anchor integrity,
+        /// and updates wait times, billboard state, display window, and database persistence.
+        /// </summary>
+        public bool MoveSingerToPosition(SingerEntry entry, int targetIndex)
+        {
+            if (entry == null || Singers.Count == 0) return false;
+
+            int oldIndex = Singers.IndexOf(entry);
+            if (oldIndex < 0) return false;
+
+            targetIndex = Math.Clamp(targetIndex, 0, Singers.Count - 1);
+            if (oldIndex == targetIndex) return false;
+
+            // Inactive singers cannot be moved into active partition
+            if (entry.IsInactive)
+            {
+                int firstInactive = Singers.TakeWhile(s => !s.IsInactive).Count();
+                if (targetIndex < firstInactive)
+                {
+                    targetIndex = firstInactive;
+                }
+            }
+            else
+            {
+                // Active singers cannot be moved into inactive partition
+                int firstInactive = Singers.TakeWhile(s => !s.IsInactive).Count();
+                int maxActiveIndex = Math.Max(0, firstInactive - 1);
+                if (targetIndex > maxActiveIndex)
+                {
+                    targetIndex = maxActiveIndex;
+                }
+            }
+
+            if (FloatCurrentSingerToTop && Singers.Count > 0 && Singers[0].IsCurrent)
+            {
+                if (entry != Singers[0] && targetIndex == 0)
+                {
+                    targetIndex = 1;
+                }
+                else if (entry == Singers[0] && targetIndex > 0)
+                {
+                    targetIndex = 0;
+                }
+            }
+
+            if (oldIndex == targetIndex) return false;
+
+            Singers.Move(oldIndex, targetIndex);
+
+            // Re-enforce linked pair adjacency if either this singer or affected neighbors are linked
+            RotationHelpers.EnforceLinkedAdjacency(Singers);
+            RefreshLinkedPartnerNames();
+
+            // Ensure valid rotation start anchor remains set
+            RotationHelpers.EnsureRotationStartFlag(Singers);
+
+            UpdateNextSingerHighlight();
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            RefreshBillboardState();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+
+            return true;
+        }
 
         /// <summary>Promotes the chosen singer to current, reactivating them first if paused.</summary>
         [RelayCommand]
@@ -3353,6 +3450,7 @@ namespace KSRotation.ViewModels
                 CrawlBannerText = string.IsNullOrWhiteSpace(CrawlBannerText) ? AppSettings.DefaultCrawlBannerText : CrawlBannerText.Trim(),
                 MarqueeSpeed = Math.Clamp(MarqueeSpeed, 20, 200),
                 IsTestMode = IsTestMode,
+                TestSingerCount = TestSingerCount is 3 or 5 or 10 or 15 ? TestSingerCount : 15,
                 EmailRecipient = EmailRecipient.Trim(),
                 SendEmailOnSave = SendEmailOnSave,
                 ProjectionView = SelectedProjectionView,
@@ -3658,30 +3756,21 @@ namespace KSRotation.ViewModels
             return normalizedTheme;
         }
 
-        private void LoadTestData()
+        [RelayCommand]
+        public void LoadTestSingersNow()
+        {
+            LoadTestData(TestSingerCount);
+        }
+
+        private void LoadTestData() => LoadTestData(TestSingerCount);
+
+        public void LoadTestData(int count)
         {
             Singers.Clear();
 
-            (string Name, string Song, string Artist)[] testData =
-            [
-                ("Dennis Maidon",    "I will Be Alright", "Dennis Maidon"),
-                ("Marie Carter",     "Livin' on a Prayer",         "Bon Jovi"),
-                ("Brenda Maidon",   "End of the World",     "Ann Murray"),
-                ("Carlos Watson",   "Rap God",             "Eminem"),
-                ("Amy Banks",     "Don't Stop Believin'",       "Journey"),
-                ("Mike Hatton",    "Bohemian Rhapsody",          "Queen"),
-                ("Stephen Rayner",     "Remember",        "Dennis Maidon"),
-                ("Tim Honeycutt",    "Piano Man",                  "Billy Joel"),
-                ("Sharon Jernigan",   "Since U Been Gone",          "Kelly Clarkson"),
-                ("Randy Jernigan",      "Mr. Brightside",             "The Killers"),
-                ("Todd Stowe",    "Dancing Queen",              "ABBA"),
-                ("Wendy Stowe",      "Africa",                     "Toto"),
-                ("Wendy Tart",    "Take It to the Limit",    "Eagles"),
-                ("Sandra Moore",     "Somebody That I Used to Know", "Gotye"),
-                ("Artie Davis",    "Wonderwall",                 "Oasis"),
-            ];
+            var sampleSingers = RotationHelpers.GenerateRandomTestSingers(count, _random);
 
-            foreach ((string name, string song, string artist) in testData)
+            foreach (var (name, song, artist) in sampleSingers)
             {
                 Singers.Add(new SingerEntry
                 {
@@ -3689,11 +3778,13 @@ namespace KSRotation.ViewModels
                     Song = song,
                     Artist = artist,
                 });
+                AddKnownSinger(name);
             }
 
             // Guarantees someone holds the "1st singer" (IsRotationStart) badge - defaults to
             // whoever was entered first, since this loop bypasses InsertNewSinger.
             RotationHelpers.EnsureRotationStartFlag(Singers);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
         }
 
         /// <summary>

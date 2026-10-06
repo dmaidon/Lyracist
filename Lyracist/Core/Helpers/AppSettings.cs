@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement standard special event configuration
+// Edited on Oct 6, 2026 @ 11:41:00 -> Add TestSingerCount setting for test mode
 using System;
 using System.IO;
 using System.Text.Json;
@@ -176,6 +176,12 @@ public static class AppSettings
     {
         get => _data.IsTestMode;
         set { _data.IsTestMode = value; Save(); }
+    }
+
+    public static int TestSingerCount
+    {
+        get => _data.TestSingerCount is 3 or 5 or 10 or 15 ? _data.TestSingerCount : 15;
+        set { _data.TestSingerCount = value; Save(); }
     }
 
     public static string YouTubeApiKey
@@ -1220,6 +1226,7 @@ public static class AppSettings
         public bool EnableReverb { get; set; } = false;
         public int SelectedBufferSize { get; set; } = 256;
         public bool IsTestMode { get; set; } = false;
+        public int TestSingerCount { get; set; } = 15;
 
         public string YouTubeApiKey { get; set; } = string.Empty;
         public string SpotifyClientId { get; set; } = string.Empty;

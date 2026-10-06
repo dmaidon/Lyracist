@@ -1,3 +1,4 @@
+// Edited on Oct 6, 2026 @ 12:14:00 -> Add mouse drag-and-drop reordering with midpoint positioning and empty area drop
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,6 +14,7 @@ using DragDropEffects = System.Windows.DragDropEffects;
 using DependencyObject = System.Windows.DependencyObject;
 using SystemParameters = System.Windows.SystemParameters;
 using CheckBox = System.Windows.Controls.CheckBox;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Lyracist.Views.Pages;
 
@@ -36,7 +38,9 @@ public partial class RotationPage : Page
         var dep = e.OriginalSource as DependencyObject;
         while (dep != null && dep is not ListBoxItem)
         {
-            if (dep is System.Windows.Controls.Primitives.ButtonBase || dep is CheckBox)
+            if (dep is System.Windows.Controls.Primitives.ButtonBase ||
+                dep is CheckBox ||
+                dep is TextBox)
             {
                 _draggedItem = null;
                 return;
@@ -51,6 +55,11 @@ public partial class RotationPage : Page
         }
     }
 
+    private void ListBoxItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _draggedItem = null;
+    }
+
     private void ListBoxItem_MouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null)
@@ -63,7 +72,9 @@ public partial class RotationPage : Page
             {
                 if (sender is ListBoxItem item)
                 {
-                    DragDrop.DoDragDrop(item, _draggedItem, DragDropEffects.Move);
+                    var singer = _draggedItem;
+                    DragDrop.DoDragDrop(item, singer, DragDropEffects.Move);
+                    _draggedItem = null;
                 }
             }
         }
@@ -94,13 +105,72 @@ public partial class RotationPage : Page
 
                 if (sourceIndex >= 0 && targetIndex >= 0)
                 {
-                    rotation.RemoveAt(sourceIndex);
-                    rotation.Insert(targetIndex, sourceSinger);
-                    ViewModel.SelectedSinger = sourceSinger;
-                    ViewModel.NotifyRotationReordered();
+                    Point pos = e.GetPosition(targetItem);
+                    bool dropAfter = pos.Y >= (targetItem.ActualHeight / 2.0);
+
+                    int insertIndex;
+                    if (dropAfter)
+                    {
+                        insertIndex = (sourceIndex < targetIndex) ? targetIndex : targetIndex + 1;
+                    }
+                    else
+                    {
+                        insertIndex = (sourceIndex < targetIndex) ? targetIndex - 1 : targetIndex;
+                    }
+
+                    insertIndex = Math.Clamp(insertIndex, 0, rotation.Count - 1);
+                    if (ViewModel.FloatCurrentSingerToTop && rotation.Count > 0 && rotation[0].IsCurrent)
+                    {
+                        if (sourceSinger != rotation[0] && insertIndex == 0)
+                        {
+                            insertIndex = 1;
+                        }
+                        else if (sourceSinger == rotation[0] && insertIndex > 0)
+                        {
+                            insertIndex = 0;
+                        }
+                    }
+
+                    if (insertIndex != sourceIndex)
+                    {
+                        rotation.Move(sourceIndex, insertIndex);
+                        ViewModel.SelectedSinger = sourceSinger;
+                        ViewModel.NotifyRotationReordered();
+                    }
                 }
             }
         }
         _draggedItem = null;
+        e.Handled = true;
+    }
+
+    private void ListBox_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(typeof(Lyracist.Models.Singer)))
+        {
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+    }
+
+    private void ListBox_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(typeof(Lyracist.Models.Singer)) is Lyracist.Models.Singer sourceSinger)
+        {
+            var rotation = ViewModel.Rotation;
+            int sourceIndex = rotation.IndexOf(sourceSinger);
+            if (sourceIndex >= 0 && sourceIndex != rotation.Count - 1)
+            {
+                rotation.Move(sourceIndex, rotation.Count - 1);
+                ViewModel.SelectedSinger = sourceSinger;
+                ViewModel.NotifyRotationReordered();
+            }
+        }
+        _draggedItem = null;
+        e.Handled = true;
     }
 }

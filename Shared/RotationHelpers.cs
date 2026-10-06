@@ -1,7 +1,8 @@
-// Edited on Oct 5, 2026 @ 22:48:00 -> Add MoveSingerToTop helper preserving rotation anchor and unskipping performer
+// Edited on Oct 6, 2026 @ 11:40:00 -> Add SampleSingerNames pool and GenerateRandomTestSingers helper
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Lyracist.Shared
@@ -1517,6 +1518,93 @@ namespace Lyracist.Shared
                 SummaryText = summary,
                 ShortSummaryText = shortSummary
             };
+        }
+
+        /// <summary>
+        /// Curated list of 18 test singer names for pre-populating test rotation queues.
+        /// </summary>
+        public static readonly string[] SampleSingerNames =
+        [
+            "Brenda Bumps",
+            "James Smith",
+            "Raymond Carter",
+            "Sharon Roberts",
+            "Ami Anderson",
+            "Ali Davis",
+            "Randy Davis",
+            "Larry Strickland",
+            "Robert Roberts",
+            "Cynthis Nix",
+            "David Wayne",
+            "Danny Hinnant",
+            "Cerrina Culbert",
+            "Julia Stanton",
+            "Carol Henderson",
+            "Joe Bob Briggs",
+            "Craven Counts",
+            "Dennis Starling"
+        ];
+
+        /// <summary>
+        /// Curated popular song pool for test performer seeding.
+        /// </summary>
+        public static readonly (string Song, string Artist)[] SampleSongPool =
+        [
+            ("Billie Jean", "Michael Jackson"),
+            ("Hotel California", "Eagles"),
+            ("Hey Jude", "The Beatles"),
+            ("Stayin' Alive", "Bee Gees"),
+            ("Take On Me", "A-ha"),
+            ("Sweet Child O' Mine", "Guns N' Roses"),
+            ("Smells Like Teen Spirit", "Nirvana"),
+            ("Bad Romance", "Lady Gaga"),
+            ("Uptown Funk", "Mark Ronson ft. Bruno Mars"),
+            ("Thriller", "Michael Jackson"),
+            ("Wonderwall", "Oasis"),
+            ("Bohemian Rhapsody", "Queen"),
+            ("Karma Chameleon", "Culture Club"),
+            ("Careless Whisper", "George Michael"),
+            ("Eye of the Tiger", "Survivor"),
+            ("Purple Rain", "Prince"),
+            ("Beat It", "Michael Jackson"),
+            ("All Star", "Smash Mouth"),
+            ("Toxic", "Britney Spears"),
+            ("Single Ladies", "Beyoncé"),
+            ("Rolling in the Deep", "Adele"),
+            ("I Will Survive", "Gloria Gaynor"),
+            ("Dancing Queen", "ABBA"),
+            ("Livin' on a Prayer", "Bon Jovi"),
+            ("Don't Stop Believin'", "Journey"),
+            ("Like a Prayer", "Madonna"),
+            ("I Wanna Dance with Somebody", "Whitney Houston"),
+            ("I'll Leave This World Loving You", "Ricky Van Shelton")
+        ];
+
+        /// <summary>
+        /// Generates a randomized list of test singers (3, 5, 10, or 15) using unique names from <see cref="SampleSingerNames"/>
+        /// and songs from <see cref="SampleSongPool"/>.
+        /// </summary>
+        public static List<(string Name, string Song, string Artist)> GenerateRandomTestSingers(int count, Random? random = null)
+        {
+            count = count switch
+            {
+                <= 3 => 3,
+                <= 5 => 5,
+                <= 10 => 10,
+                _ => 15
+            };
+
+            var rnd = random ?? Random.Shared;
+            var shuffledNames = SampleSingerNames.OrderBy(_ => rnd.Next()).Take(count).ToList();
+            var shuffledSongs = SampleSongPool.OrderBy(_ => rnd.Next()).Take(count).ToList();
+
+            var result = new List<(string Name, string Song, string Artist)>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var songInfo = i < shuffledSongs.Count ? shuffledSongs[i] : SampleSongPool[i % SampleSongPool.Length];
+                result.Add((shuffledNames[i], songInfo.Song, songInfo.Artist));
+            }
+            return result;
         }
     }
 

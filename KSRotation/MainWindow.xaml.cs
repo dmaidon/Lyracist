@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 17:55:00 -> Add OnDeviceHandoffButtonClicked to open DeviceHandoffWindow
+// Edited on Oct 6, 2026 @ 12:13:00 -> Add mouse drag-and-drop event handlers for rotation list reordering
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -12,6 +12,11 @@ using WpfBorder = System.Windows.Controls.Border;
 using WpfListBox = System.Windows.Controls.ListBox;
 using WpfListBoxItem = System.Windows.Controls.ListBoxItem;
 using WpfPopup = System.Windows.Controls.Primitives.Popup;
+using WpfPoint = System.Windows.Point;
+using WpfMouseEventArgs = System.Windows.Input.MouseEventArgs;
+using WpfDragEventArgs = System.Windows.DragEventArgs;
+using WpfDragDrop = System.Windows.DragDrop;
+using WpfDragDropEffects = System.Windows.DragDropEffects;
 
 namespace KSRotation
 {
@@ -149,6 +154,19 @@ namespace KSRotation
             if (sender is not WpfTextBox textBox) return;
 
             var (popup, listBox) = GetSuggestionControls(textBox);
+
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                if (popup?.IsOpen == true)
+                {
+                    popup.IsOpen = false;
+                }
+                var request = new TraversalRequest(FocusNavigationDirection.Next);
+                textBox.MoveFocus(request);
+                return;
+            }
+
             if (popup?.IsOpen != true || listBox == null) return;
 
             if (e.Key == Key.Down)
@@ -172,13 +190,41 @@ namespace KSRotation
             if (sender is not WpfTextBox textBox) return;
 
             var (popup, _) = GetSuggestionControls(textBox);
-            if (popup == null) return;
 
             Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
             {
                 var (_, lb) = GetSuggestionControls(textBox);
-                if (lb?.IsKeyboardFocusWithin == false && !textBox.IsFocused)
+                if (lb?.IsKeyboardFocusWithin == true || textBox.IsFocused)
+                {
+                    return;
+                }
+
+                if (popup != null)
+                {
                     popup.IsOpen = false;
+                }
+
+                if (textBox.DataContext is Models.SingerEntry entry && DataContext is ViewModels.MainViewModel vm)
+                {
+                    string rawText = textBox.Text?.Trim() ?? string.Empty;
+                    string cleaned = Lyracist.Shared.NameFormatting.CleanSingerName(rawText);
+
+                    if (string.IsNullOrWhiteSpace(cleaned))
+                    {
+                        // If "New Singer" was the only text in the box (or box was left empty/whitespace)
+                        if (entry.IsNewPlaceholder || string.Equals(rawText, "New Singer", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(rawText))
+                        {
+                            vm.RemoveSingerDirectly(entry);
+                        }
+                    }
+                    else
+                    {
+                        // If "New Singer" was present alongside more text (e.g. "New Singertom" -> "Tom")
+                        entry.Name = cleaned;
+                        textBox.Text = entry.Name;
+                        entry.IsNewPlaceholder = false;
+                    }
+                }
             }));
         }
 
@@ -418,5 +464,142 @@ namespace KSRotation
 
             return null;
         }
+
+        #region Singer Drag and Drop Reordering
+
+        private WpfPoint _singerDragStartPoint;
+        private Models.SingerEntry? _draggedSinger;
+
+        private void SingersListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var dep = e.OriginalSource as DependencyObject;
+            while (dep != null && dep is not WpfListViewItem)
+            {
+                if (dep is System.Windows.Controls.Primitives.TextBoxBase ||
+                    dep is System.Windows.Controls.Primitives.ButtonBase ||
+                    dep is System.Windows.Controls.CheckBox ||
+                    dep is System.Windows.Controls.ComboBox ||
+                    dep is System.Windows.Controls.Primitives.ScrollBar ||
+                    dep is WpfPopup ||
+                    dep is WpfListBox)
+                {
+                    _draggedSinger = null;
+                    return;
+                }
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (sender is WpfListViewItem item && item.DataContext is Models.SingerEntry singer)
+            {
+                _singerDragStartPoint = e.GetPosition(null);
+                _draggedSinger = singer;
+            }
+        }
+
+        private void SingersListViewItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _draggedSinger = null;
+        }
+
+        private void SingersListViewItem_MouseMove(object sender, WpfMouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && _draggedSinger != null)
+            {
+                WpfPoint currentPosition = e.GetPosition(null);
+                Vector diff = _singerDragStartPoint - currentPosition;
+
+                if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+                {
+                    if (sender is WpfListViewItem item)
+                    {
+                        var singer = _draggedSinger;
+                        WpfDragDrop.DoDragDrop(item, singer, WpfDragDropEffects.Move);
+                        _draggedSinger = null;
+                    }
+                }
+            }
+        }
+
+        private void SingersListViewItem_DragOver(object sender, WpfDragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Models.SingerEntry)))
+            {
+                e.Effects = WpfDragDropEffects.Move;
+                e.Handled = true;
+            }
+            else
+            {
+                e.Effects = WpfDragDropEffects.None;
+            }
+        }
+
+        private void SingersListViewItem_Drop(object sender, WpfDragEventArgs e)
+        {
+            if (sender is WpfListViewItem targetItem &&
+                e.Data.GetData(typeof(Models.SingerEntry)) is Models.SingerEntry sourceSinger &&
+                DataContext is ViewModels.MainViewModel vm)
+            {
+                if (targetItem.DataContext is Models.SingerEntry targetSinger && sourceSinger != targetSinger)
+                {
+                    int sourceIndex = vm.Singers.IndexOf(sourceSinger);
+                    int targetIndex = vm.Singers.IndexOf(targetSinger);
+
+                    if (sourceIndex >= 0 && targetIndex >= 0)
+                    {
+                        WpfPoint pos = e.GetPosition(targetItem);
+                        bool dropAfter = pos.Y >= (targetItem.ActualHeight / 2.0);
+
+                        int insertIndex;
+                        if (dropAfter)
+                        {
+                            insertIndex = (sourceIndex < targetIndex) ? targetIndex : targetIndex + 1;
+                        }
+                        else
+                        {
+                            insertIndex = (sourceIndex < targetIndex) ? targetIndex - 1 : targetIndex;
+                        }
+
+                        insertIndex = Math.Clamp(insertIndex, 0, vm.Singers.Count - 1);
+                        if (insertIndex != sourceIndex)
+                        {
+                            vm.MoveSingerToPosition(sourceSinger, insertIndex);
+                        }
+                    }
+                }
+            }
+            _draggedSinger = null;
+            e.Handled = true;
+        }
+
+        private void SingersListView_DragOver(object sender, WpfDragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Models.SingerEntry)))
+            {
+                e.Effects = WpfDragDropEffects.Move;
+                e.Handled = true;
+            }
+            else
+            {
+                e.Effects = WpfDragDropEffects.None;
+            }
+        }
+
+        private void SingersListView_Drop(object sender, WpfDragEventArgs e)
+        {
+            if (e.Data.GetData(typeof(Models.SingerEntry)) is Models.SingerEntry sourceSinger &&
+                DataContext is ViewModels.MainViewModel vm)
+            {
+                int sourceIndex = vm.Singers.IndexOf(sourceSinger);
+                if (sourceIndex >= 0)
+                {
+                    vm.MoveSingerToPosition(sourceSinger, vm.Singers.Count - 1);
+                }
+            }
+            _draggedSinger = null;
+            e.Handled = true;
+        }
+
+        #endregion
     }
 }
