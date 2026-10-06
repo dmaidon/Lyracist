@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:13:00 -> Add MoveSingerToPosition for mouse drag-and-drop rotation reordering
+// Edited on Oct 6, 2026 @ 12:58:00 -> Remove OnPlaceholderSingerRenamed call from property changed
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2880,9 +2880,6 @@ namespace KSRotation.ViewModels
 
             if (e.PropertyName == nameof(SingerEntry.Name))
             {
-#if !MAUI
-                OnPlaceholderSingerRenamed(entry);
-#endif
                 if (_lastSingerNames.TryGetValue(entry, out string? oldName) && oldName != entry.Name)
                 {
                     lock (_performanceHistoryLock)

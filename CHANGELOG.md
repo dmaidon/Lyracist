@@ -1,5 +1,5 @@
-<!-- Edited on Oct 6, 2026 @ 12:23:00 -> Document mouse drag-and-drop rotation reordering in CHANGELOG -->
-Last Edit: Oct 6, 2026 - Mouse Drag-and-Drop Rotation Reordering
+<!-- Edited on Oct 6, 2026 @ 13:06:00 -> Document new singer welcome screen trigger on name box lost focus in CHANGELOG -->
+Last Edit: Oct 6, 2026 - New Singer Welcome Screen Trigger on Name Box Lost Focus
 
 # Changelog
 
@@ -8,6 +8,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-06
 
 ### Added
+- **New Singer Welcome Screen Trigger on Name Entry Lost Focus (`KSRotation/MainWindow.xaml.cs`, `KSRotation/ViewModels/MainViewModel.Welcome.cs`, `KSRotation/ViewModels/MainViewModel.cs`)**:
+  - Replaced the previous 2.5-second settle timer after typing with immediate welcome screen triggering when the singer name entry box loses focus (`LostFocus`).
+  - Ensures the "Welcome to our new performer" screen is displayed only after the DJ has finished entering the performer's name and navigated away from the input box, eliminating untimely interruptions while actively typing.
+  - Added unit test coverage in `KSRotation.Tests/RotationTests.cs`.
 - **Mouse Drag-and-Drop Rotation Queue Reordering (`KSRotation/MainWindow.xaml`, `KSRotation/MainWindow.xaml.cs`, `KSRotation/ViewModels/MainViewModel.cs`, `Lyracist/Views/Pages/RotationPage.xaml`, `Lyracist/Views/Pages/RotationPage.xaml.cs`, `Lyracist/ViewModels/RotationViewModel.cs`)**:
   - Full Mouse Drag-and-Drop Support: Hosts can now click and drag any performer in the active rotation queue and drop them at any desired position using the mouse in both KSRotation and Lyracist desktop applications. (Remote DJ screens retain standard button-based queue controls and do not require mouse dragging).
   - Dedicated Drag Grip Handle (⋮⋮): Each performer row features a dedicated drag grip handle on the left edge with a 4-way move cursor (`SizeAll`) and tooltip hint ("Drag to reorder singer in rotation").

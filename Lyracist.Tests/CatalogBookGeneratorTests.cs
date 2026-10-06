@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:22:00 -> Add User Manual update test for mouse drag-and-drop rotation reordering
+// Edited on Oct 6, 2026 @ 13:07:00 -> Add User Manual update test for new singer welcome screen on name box lost focus
 using System;
 using System.IO;
 using Xunit;
@@ -4483,6 +4483,126 @@ Hosts and KJs frequently need to manually adjust queue order during a live show 
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " MouseDragAndDropRotationReordering";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForNewSingerWelcomeOnNameBoxLostFocus()
+        {
+            string baseDir = AppContext.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            if (!Directory.Exists(docDir))
+            {
+                return;
+            }
+
+            string updateText = @"
+Section: KSRotation / New Singer Welcome Screen / Focus-Based Activation (October 2026)
+
+[Overview & Purpose]
+When the 'Show Welcome to our new performer screen when a new singer joins' feature is enabled in Settings, KSRotation celebrates newcomers with an animated, full-screen welcome broadcast across rotation and DJ banner projection screens. Previously, a 2.5-second settle timer evaluated keystrokes while the host was typing. The activation trigger has now been updated to fire when the singer name entry box loses focus.
+
+[Focus-Based Activation Behavior]
+1. Typing Interruption Elimination: The 2.5-second keystroke timer has been eliminated. The DJ can take as much time as needed to enter the singer's name without being interrupted mid-keystroke by premature welcome screen popups.
+2. Natural Completion Detection: Moving focus away from the singer name text box (by pressing Tab, pressing Enter to advance to the song field, or clicking another row/control) signals that performer name entry is complete and immediately triggers the welcome screen.
+3. Empty / Canceled Row Protection: If a new row is added and left blank or unaltered as 'New Singer', losing focus cleanly deletes the unused row without triggering a welcome screen.
+4. Duplicate Protection: Once a singer is welcomed upon name entry completion, subsequent focus changes on that performer row do not re-trigger welcome screens.
+";
+
+            // 1. Update text file
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingText = File.ReadAllText(updatesTxtPath);
+                if (!existingText.Contains("New Singer Welcome Screen / Focus-Based Activation"))
+                {
+                    File.AppendAllText(updatesTxtPath, Environment.NewLine + updateText);
+                }
+            }
+
+            // 2. Update docx file
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var textElem in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (textElem.Text.Contains("New Singer Welcome Screen / Focus-Based Activation"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: New Singer Welcome Screen / Focus-Based Activation")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("NewSingerWelcomeFocusActivation"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: New Singer Welcome Screen / Focus-Based Activation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " NewSingerWelcomeFocusActivation";
                             doc.Save(pdfPath);
                         }
                     }

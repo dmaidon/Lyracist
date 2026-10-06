@@ -1,10 +1,9 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign selection and persistence
+// Edited on Oct 6, 2026 @ 12:58:00 -> Trigger welcome screen when singer name entry box loses focus instead of settle timer
 // Windows-only (not linked into KSRotation.Maui): the welcome overlay is WPF.
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -14,13 +13,8 @@ namespace KSRotation.ViewModels
 {
     public partial class MainViewModel
     {
-        // How long the DJ must stop typing a new singer's name before it counts as committed. The Name
-        // property updates on every keystroke, so greeting immediately would welcome "J", then "Jo"...
-        private static readonly TimeSpan WelcomeNameSettleDelay = TimeSpan.FromSeconds(2.5);
-
-        // A list (not a set) so several names entered in a row are welcomed in the order they were added.
+        // Tracks newly added placeholder singer rows awaiting name completion when the name entry box loses focus.
         private readonly List<SingerEntry> _pendingWelcomeSingers = [];
-        private DispatcherTimer? _welcomeNameSettleTimer;
 
         [ObservableProperty]
         public partial bool WelcomeScreenEnabled { get; set; } = true;
@@ -104,7 +98,7 @@ namespace KSRotation.ViewModels
         /// <summary>
         /// Called for every singer added to the rotation. Named singers (patron requests, user history,
         /// DJ quick-add) are welcomed straight away; a "New Singer" placeholder is welcomed once the DJ
-        /// has finished typing a real name (see <see cref="OnPlaceholderSingerRenamed"/>).
+        /// has finished typing a real name and the name entry box loses focus (see <see cref="CommitSingerWelcome"/>).
         /// </summary>
         private void OnSingerAddedForWelcome(SingerEntry singer)
         {
@@ -121,37 +115,20 @@ namespace KSRotation.ViewModels
             TryWelcomeSinger(singer);
         }
 
-        /// <summary>Called when a singer's Name changes; only rows added as placeholders are tracked.</summary>
-        private void OnPlaceholderSingerRenamed(SingerEntry singer)
+        /// <summary>
+        /// Welcomes a singer whose name was just finished (e.g. when the singer name entry box loses focus).
+        /// </summary>
+        public void CommitSingerWelcome(SingerEntry singer)
         {
-            if (!_pendingWelcomeSingers.Contains(singer)) return;
+            if (singer.IsSpecial || singer.IsMusic) return;
 
-            if (_welcomeNameSettleTimer == null)
-            {
-                _welcomeNameSettleTimer = new DispatcherTimer { Interval = WelcomeNameSettleDelay };
-                _welcomeNameSettleTimer.Tick += OnWelcomeNameSettled;
-            }
-            _welcomeNameSettleTimer.Stop();
-            _welcomeNameSettleTimer.Start();
-        }
+            // Only welcome if this singer was a pending placeholder awaiting name entry
+            if (!_pendingWelcomeSingers.Remove(singer)) return;
 
-        private void OnWelcomeNameSettled(object? sender, EventArgs e)
-        {
-            _welcomeNameSettleTimer?.Stop();
+            if (!Singers.Contains(singer)) return;
+            if (WelcomeScreenService.IsPlaceholderName(singer.Name)) return;
 
-            foreach (var singer in _pendingWelcomeSingers.ToList())
-            {
-                if (!Singers.Contains(singer))
-                {
-                    _pendingWelcomeSingers.Remove(singer); // removed before it was ever named
-                    continue;
-                }
-
-                if (WelcomeScreenService.IsPlaceholderName(singer.Name)) continue; // still unnamed
-
-                _pendingWelcomeSingers.Remove(singer);
-                TryWelcomeSinger(singer);
-            }
+            TryWelcomeSinger(singer);
         }
 
         private void TryWelcomeSinger(SingerEntry singer)

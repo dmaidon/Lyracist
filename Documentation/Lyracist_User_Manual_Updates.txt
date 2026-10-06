@@ -2459,3 +2459,15 @@ Hosts and KJs frequently need to manually adjust queue order during a live show 
 3. Partition Boundary Enforcement: Active and inactive partitions are strictly protected. Inactive singers cannot be dragged into the active queue, and active singers cannot be dragged into the inactive section.
 4. Linked Duet Partner Integrity: If a linked performer is reordered, EnforceLinkedAdjacency automatically keeps linked duet partners adjacent.
 5. Live Real-Time Propagation: Dropping a performer immediately recalculates wait times, updates next-singer blue highlights, refreshes audience billboard displays, rebuilds rotation JSON caches, and saves changes to the database.
+
+
+Section: KSRotation / New Singer Welcome Screen / Focus-Based Activation (October 2026)
+
+[Overview & Purpose]
+When the 'Show Welcome to our new performer screen when a new singer joins' feature is enabled in Settings, KSRotation celebrates newcomers with an animated, full-screen welcome broadcast across rotation and DJ banner projection screens. Previously, a 2.5-second settle timer evaluated keystrokes while the host was typing. The activation trigger has now been updated to fire when the singer name entry box loses focus.
+
+[Focus-Based Activation Behavior]
+1. Typing Interruption Elimination: The 2.5-second keystroke timer has been eliminated. The DJ can take as much time as needed to enter the singer's name without being interrupted mid-keystroke by premature welcome screen popups.
+2. Natural Completion Detection: Moving focus away from the singer name text box (by pressing Tab, pressing Enter to advance to the song field, or clicking another row/control) signals that performer name entry is complete and immediately triggers the welcome screen.
+3. Empty / Canceled Row Protection: If a new row is added and left blank or unaltered as 'New Singer', losing focus cleanly deletes the unused row without triggering a welcome screen.
+4. Duplicate Protection: Once a singer is welcomed upon name entry completion, subsequent focus changes on that performer row do not re-trigger welcome screens.

@@ -1,8 +1,13 @@
-<!-- Edited on Oct 6, 2026 @ 12:23:00 -> Document mouse drag-and-drop rotation reordering in KSRotation CHANGELOG -->
+<!-- Edited on Oct 6, 2026 @ 13:06:00 -> Document new singer welcome screen trigger on name box lost focus in KSRotation CHANGELOG -->
 
 # Changelog
 
 ## 2026-10-06
+
+- **New Singer Welcome Screen Trigger on Name Entry Lost Focus (`MainWindow.xaml.cs`, `ViewModels/MainViewModel.Welcome.cs`, `ViewModels/MainViewModel.cs`)**:
+  - Replaced the previous 2.5-second settle timer after typing with immediate welcome screen triggering when the singer name entry box loses focus (`LostFocus`).
+  - Ensures the "Welcome to our new performer" screen is displayed only after the DJ has finished entering the performer's name and moved away from the input box, eliminating untimely interruptions while typing.
+  - Added unit test coverage in `KSRotation.Tests/RotationTests.cs`.
 
 - **Mouse Drag-and-Drop Rotation Queue Reordering (`MainWindow.xaml`, `MainWindow.xaml.cs`, `ViewModels/MainViewModel.cs`)**:
   - Full Mouse Drag-and-Drop Reordering: Hosts can grab and move any performer row directly within the rotation queue using the mouse to reposition singers instantly.

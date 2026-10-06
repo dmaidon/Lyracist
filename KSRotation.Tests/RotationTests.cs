@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:15:00 -> Add unit tests for MoveSingerToPosition drag-and-drop reordering
+// Edited on Oct 6, 2026 @ 13:03:00 -> Add unit tests for CommitSingerWelcome on name entry lost focus
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2367,6 +2367,30 @@ public class SampleSingerTests
         int aliceIdx = vm.Singers.IndexOf(s1);
         int bobIdx = vm.Singers.IndexOf(s2);
         Assert.Equal(1, Math.Abs(aliceIdx - bobIdx));
+    }
+
+    [Fact]
+    public void CommitSingerWelcome_WelcomesSingerOnNameBoxLostFocus_AndPreventsDuplicateWelcomes()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.AddSingerCommand.Execute(null);
+
+        var placeholder = vm.Singers.Last();
+        Assert.Equal("New Singer", placeholder.Name);
+
+        // Calling Commit while still a placeholder does not trigger welcome and keeps placeholder safe
+        vm.CommitSingerWelcome(placeholder);
+
+        // User finishes typing real name into text box
+        placeholder.Name = "Brenda Bumps";
+        placeholder.IsNewPlaceholder = false;
+
+        // Name entry box loses focus
+        vm.CommitSingerWelcome(placeholder);
+
+        // Subsequent lost focus events on the same singer do not re-trigger welcome
+        vm.CommitSingerWelcome(placeholder);
     }
 }
 

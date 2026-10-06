@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 12:23:00 -> Document mouse drag-and-drop rotation reordering in README -->
+<!-- Edited on Oct 6, 2026 @ 13:06:00 -> Document new singer welcome screen trigger on name box lost focus in README -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,10 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🌟 New Singer Welcome Screen Trigger on Name Entry Lost Focus (`KSRotation`)
+- **Focus-Based Welcome Triggering**: Replaced the legacy 2.5-second settle timer after typing with immediate welcome screen activation triggered when the singer name text box loses focus (`LostFocus`).
+- **Typing Interruption Prevention**: Guarantees that the "Welcome to our new performer" screen only appears once the host has completely finished typing the performer's name and moved away (via Tab, Enter, or mouse click), preventing unwanted popups mid-keystroke.
 
 ### 🖱️ Mouse Drag-and-Drop Rotation Queue Reordering (`KSRotation`, `Lyracist`)
 - **Direct Drag-and-Drop Positioning**: Hosts can grab and move performers anywhere in the active rotation queue using the mouse to instantly reposition performers, accommodate singers temporarily stepping away, or adjust queue pacing. (Remote DJ screens retain standard button controls and do not require mouse dragging).

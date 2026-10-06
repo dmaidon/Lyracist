@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:13:00 -> Add mouse drag-and-drop event handlers for rotation list reordering
+// Edited on Oct 6, 2026 @ 12:58:00 -> Commit singer welcome on SingerNameTextBox lost focus
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -223,6 +223,7 @@ namespace KSRotation
                         entry.Name = cleaned;
                         textBox.Text = entry.Name;
                         entry.IsNewPlaceholder = false;
+                        vm.CommitSingerWelcome(entry);
                     }
                 }
             }));

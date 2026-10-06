@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 11:40:00 -> Add SampleSingerNames pool and GenerateRandomTestSingers helper
+// Edited on Oct 6, 2026 @ 13:02:00 -> Correct XML doc comments on ComputeDropIndex and EnsureRotationStartFlag
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -250,12 +250,6 @@ namespace Lyracist.Shared
         }
 
         /// <summary>
-        /// Ensures exactly one active singer in <paramref name="singers"/> has <see cref="IRotationSinger.IsRotationStart"/> set.
-        /// If no singer has the flag, sets it on the first active singer (or first singer in list).
-        /// If an inactive or paused singer has the flag, clears it and reassigns to the first active singer.
-        /// If multiple singers have the flag, clears duplicates and preserves only the first.
-        /// </summary>
-        /// <summary>
         /// Converts a drop onto a target row (upper or lower half) into the final index for a
         /// "remove then insert" / ObservableCollection.Move of the source item.
         /// </summary>
@@ -267,6 +261,12 @@ namespace Lyracist.Shared
             return Math.Clamp(insertIndex, 0, Math.Max(0, count - 1));
         }
 
+        /// <summary>
+        /// Ensures exactly one active singer in <paramref name="singers"/> has <see cref="IRotationSinger.IsRotationStart"/> set.
+        /// If no singer has the flag, sets it on the first active singer (or first singer in list).
+        /// If an inactive or paused singer has the flag, clears it and reassigns to the first active singer.
+        /// If multiple singers have the flag, clears duplicates and preserves only the first.
+        /// </summary>
         public static void EnsureRotationStartFlag<T>(IList<T> singers) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
