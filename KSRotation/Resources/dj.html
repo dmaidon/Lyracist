@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 07:53:00 -> Make DONE (LAST ROUND) badge clickable to clear last-round-done flag -->
+<!-- Edited on Oct 6, 2026 @ 08:53:30 -> Support duet partner display via duetPartnerName or partner fallback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1419,8 +1419,9 @@
 
                         const nameStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
                         let nameWithDuet = escapeHtml(s.name);
-                        if (s.duetPartnerName && s.duetPartnerName !== "None" && !s.isMusic) {
-                            nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(s.duetPartnerName)})</span>`;
+                        const duetName = s.duetPartnerName || s.partner;
+                        if (duetName && duetName !== "None" && !s.isMusic) {
+                            nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(duetName)})</span>`;
                         }
 
                         const innerHTML = `
@@ -1509,8 +1510,9 @@
                         const badgeHtml = `<span class="badge" style="background-color: ${badgeColor}; color: white; margin-left: 8px; font-size: 0.65rem; vertical-align: middle;">${badgeText}</span>`;
 
                         let reqNameDisplay = escapeHtml(r.name);
-                        if (r.duetPartnerName && r.duetPartnerName !== "None" && !isMusic) {
-                            reqNameDisplay += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(r.duetPartnerName)})</span>`;
+                        const reqDuet = r.duetPartnerName || r.duetPartner || r.partner;
+                        if (reqDuet && reqDuet !== "None" && !isMusic) {
+                            reqNameDisplay += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(reqDuet)})</span>`;
                         }
 
                         html += `

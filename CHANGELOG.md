@@ -1,11 +1,22 @@
-<!-- Edited on Oct 5, 2026 @ 22:58:00 -> Document Move to Top of Rotation feature in CHANGELOG -->
-Last Edit: Oct 5, 2026 - Move to Top of Rotation & Performer Priority
+<!-- Edited on Oct 6, 2026 @ 08:59:00 -> Document Duet Partner Remote Sync & DJ Tablet Display fix -->
+Last Edit: Oct 6, 2026 - Duet Partner Remote Sync & DJ Tablet Display
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-05
+## [Unreleased] - 2026-10-06
+
+### Fixed
+- **Duet Partner Remote Sync & DJ Tablet Display (`KSRotation/Models/RotationItemDto.cs`, `MainViewModel.Requests.cs`, `MainViewModel.cs`, `dj.html`, `kiosk.html`, `PatronPortal.html`, `billboard.html`, `TabletLyricsServer.cs`, `KSRotationSyncService.cs`)**:
+  - Resolved an issue where adding or editing a duet partner on a performer in KSRotation desktop showed up on the local grid and TV screens (`billboard.html`), but did not appear on the DJ tablet (`dj.html`).
+  - DTO & Serialization Parity: Added `duetPartnerName` alongside `partner` to `RotationItemDto`, populated both fields in `RebuildRotationJsonCacheNow()`, and serialized both in rotation JSON feeds.
+  - Live Invalidation on Grid Edit: Updated `Singer_PropertyChanged` in `MainViewModel.cs` to detect `DuetPartnerName` and `Partner` property changes, triggering database dirty state, immediate display window refresh, and immediate rotation JSON cache rebuilding.
+  - DJ Tablet & Web Remote Fallback: Updated `dj.html`, `kiosk.html`, and `PatronPortal.html` to check `duetPartnerName || partner`, and updated `billboard.html` to check `partner || duetPartnerName`, guaranteeing cross-version compatibility regardless of field naming.
+  - Inter-App Sync Services: Updated `TabletLyricsServer.cs` to emit both `partner` and `duetPartnerName` in `BuildQueuePayload()`, and updated `KSRotationSyncService.cs` to sync duet partner data bidirectionally between Lyracist and KSRotation.
+  - Unit Tests: Added test coverage in `RotationTests.cs` verifying serialization of both `partner` and `duetPartnerName`.
+
+## [1.0.0] - 2026-10-05
 
 ### Added
 - **"Move to Top of Rotation" Performer Priority & Anchor Preservation (`Shared/RotationHelpers.cs`, `RotationViewModel.cs`, `RotationPage.xaml`, `KaraokePage.xaml`, `MainViewModel.cs`, `MainWindow.xaml`, `KSRotation.Maui/MainPage.xaml`, `MainViewModel.Requests.cs`, `HelpViewModel.cs`)**:

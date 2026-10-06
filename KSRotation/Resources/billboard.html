@@ -1,4 +1,4 @@
-<!-- Edited on Sep 22, 2026 @ 11:02:00 -> Upsize font by 2 sizes on right side upcoming queue and up next card in billboard.html -->
+<!-- Edited on Oct 6, 2026 @ 08:55:00 -> Support duet partner display via partner or duetPartnerName fallback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -791,8 +791,9 @@
                         nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
                         if (nowSpecialEl) nowSpecialEl.style.display = currentSinger.isSpecial ? "inline-block" : "none";
                         nowNameEl.textContent = currentSinger.name;
-                        if (currentSinger.partner) {
-                            nowDuetEl.textContent = `w/ ${currentSinger.partner}`;
+                        const curPartner = currentSinger.partner || currentSinger.duetPartnerName;
+                        if (curPartner && curPartner !== "None") {
+                            nowDuetEl.textContent = `w/ ${curPartner}`;
                             nowDuetEl.style.display = "inline";
                         } else {
                             nowDuetEl.style.display = "none";
@@ -826,8 +827,9 @@
                         nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
                         if (nextSpecialEl) nextSpecialEl.style.display = nextSinger.isSpecial ? "inline-block" : "none";
                         nextNameEl.textContent = nextSinger.name;
-                        if (nextSinger.partner) {
-                            nextDuetEl.textContent = `w/ ${nextSinger.partner}`;
+                        const nextPartner = nextSinger.partner || nextSinger.duetPartnerName;
+                        if (nextPartner && nextPartner !== "None") {
+                            nextDuetEl.textContent = `w/ ${nextPartner}`;
                             nextDuetEl.style.display = "inline";
                         } else {
                             nextDuetEl.style.display = "none";
@@ -861,7 +863,8 @@
                     } else {
                         let html = "";
                         upcoming.forEach((s, idx) => {
-                            const partnerText = s.partner ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(s.partner)}</span>` : "";
+                            const partner = s.partner || s.duetPartnerName;
+                            const partnerText = (partner && partner !== "None") ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(partner)}</span>` : "";
                             const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
                             const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
                             const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';

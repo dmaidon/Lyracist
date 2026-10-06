@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:50:30 -> Support move-to-top action in request server
+// Edited on Oct 6, 2026 @ 08:52:30 -> Populate duetPartnerName in RebuildRotationJsonCacheNow
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -442,6 +442,7 @@ namespace KSRotation.ViewModels
                 id = s.Id.ToString(),
                 name = s.Name,
                 partner = s.Partner,
+                duetPartnerName = s.DuetPartnerName,
                 song = s.Song,
                 artist = s.Artist,
                 isCurrent = s.IsCurrent,

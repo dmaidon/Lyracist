@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge to Patron Portal rotation display -->
+<!-- Edited on Oct 6, 2026 @ 08:54:30 -> Support duet partner display via duetPartnerName or partner fallback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -812,8 +812,9 @@
                     }
                     
                     let nameHtml = escapeHtml(singer.name);
-                    if (singer.duetPartnerName && singer.duetPartnerName !== "None" && !singer.isMusic) {
-                        nameHtml += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(singer.duetPartnerName)})</span>`;
+                    const pName = singer.duetPartnerName || singer.partner;
+                    if (pName && pName !== "None" && !singer.isMusic) {
+                        nameHtml += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(pName)})</span>`;
                     }
                     let songHtml = `${escapeHtml(singer.song)} - ${escapeHtml(singer.artist)}`;
 

@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:53:50 -> Add unit tests for MoveSingerToTop preserving anchor and unskipping performer
+// Edited on Oct 6, 2026 @ 08:58:30 -> Add unit test for duetPartnerName and partner serialization in RotationItemDto
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2112,6 +2112,29 @@ public class RoundEstimationTests
         Assert.Equal(alice, list[1]);
         Assert.True(alice.IsRotationStart); // Anchor unchanged
         Assert.False(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void RotationItemDto_SerializesBothPartnerAndDuetPartnerName()
+    {
+        var dto = new RotationItemDto
+        {
+            name = "John Doe",
+            partner = "Jane Smith",
+            duetPartnerName = "Jane Smith",
+            song = "Don't Go Breaking My Heart"
+        };
+
+        string json = System.Text.Json.JsonSerializer.Serialize(dto);
+
+        Assert.Contains("\"partner\":", json);
+        Assert.Contains("\"duetPartnerName\":", json);
+        Assert.Contains("Jane Smith", json);
+
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<RotationItemDto>(json);
+        Assert.NotNull(deserialized);
+        Assert.Equal("Jane Smith", deserialized.partner);
+        Assert.Equal("Jane Smith", deserialized.duetPartnerName);
     }
 }
 

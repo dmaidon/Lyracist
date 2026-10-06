@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add isSpecial property to RotationItemDto
+// Edited on Oct 6, 2026 @ 08:52:00 -> Add duetPartnerName to RotationItemDto for DJ tablet and web portal compatibility
 using System.Collections.Generic;
 
 namespace KSRotation.Models
@@ -16,6 +16,7 @@ namespace KSRotation.Models
         public string id { get; set; } = string.Empty;
         public string name { get; set; } = string.Empty;
         public string partner { get; set; } = string.Empty;
+        public string duetPartnerName { get; set; } = string.Empty;
         public string song { get; set; } = string.Empty;
         public string artist { get; set; } = string.Empty;
         public bool isCurrent { get; set; }

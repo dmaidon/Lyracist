@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Include isSpecial in KSRotationSyncService DTO and sync comparison
+// Edited on Oct 6, 2026 @ 08:56:00 -> Include partner and duetPartnerName in KSRotationSyncService
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -245,6 +245,9 @@ namespace Lyracist.Services.Integration
 
                     singer.SongTitle = item.song ?? string.Empty;
                     singer.Artist = item.artist ?? string.Empty;
+                    singer.DuetPartnerName = !string.IsNullOrWhiteSpace(item.duetPartnerName)
+                        ? item.duetPartnerName
+                        : (!string.IsNullOrWhiteSpace(item.partner) ? item.partner : string.Empty);
                     singer.IsCurrent = item.isCurrent;
                     singer.IsNext = item.isNext;
                     singer.IsInactive = item.isInactive;
@@ -294,7 +297,9 @@ namespace Lyracist.Services.Integration
             {
                 var s = synced[i];
                 var c = current[i];
+                string itemPartner = !string.IsNullOrWhiteSpace(s.duetPartnerName) ? s.duetPartnerName : (s.partner ?? string.Empty);
                 if (!string.Equals(s.name, c.Name, StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(itemPartner, c.DuetPartnerName, StringComparison.OrdinalIgnoreCase) ||
                     !string.Equals(s.song, c.SongTitle, StringComparison.OrdinalIgnoreCase) ||
                     !string.Equals(s.artist, c.Artist, StringComparison.OrdinalIgnoreCase) ||
                     s.isCurrent != c.IsCurrent ||
@@ -342,6 +347,8 @@ namespace Lyracist.Services.Integration
         private class RotationItemDto
         {
             public string name { get; set; } = string.Empty;
+            public string partner { get; set; } = string.Empty;
+            public string duetPartnerName { get; set; } = string.Empty;
             public string song { get; set; } = string.Empty;
             public string artist { get; set; } = string.Empty;
             public bool isCurrent { get; set; }

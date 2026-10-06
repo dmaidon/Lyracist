@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:50:00 -> Add MoveSingerToTop and MoveToTop commands to move singer to top of rotation without altering rotation anchor
+// Edited on Oct 6, 2026 @ 08:53:00 -> Trigger database change, display update, and JSON cache rebuild on DuetPartnerName/Partner change
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2880,7 +2880,10 @@ namespace KSRotation.ViewModels
                     }
                 }
             }
-            else if (e.PropertyName == nameof(SingerEntry.Song) || e.PropertyName == nameof(SingerEntry.Artist))
+            else if (e.PropertyName == nameof(SingerEntry.Song)
+                || e.PropertyName == nameof(SingerEntry.Artist)
+                || e.PropertyName == nameof(SingerEntry.DuetPartnerName)
+                || e.PropertyName == nameof(SingerEntry.Partner))
             {
                 // Disabled to prevent overwriting past performance history when current song/artist changes
                 // UpdatePerformanceForSinger(entry);
@@ -2981,7 +2984,9 @@ namespace KSRotation.ViewModels
                     || e.PropertyName == nameof(SingerEntry.IsInactive)
                     || e.PropertyName == nameof(SingerEntry.Name)
                     || e.PropertyName == nameof(SingerEntry.Song)
-                    || e.PropertyName == nameof(SingerEntry.Artist)))
+                    || e.PropertyName == nameof(SingerEntry.Artist)
+                    || e.PropertyName == nameof(SingerEntry.DuetPartnerName)
+                    || e.PropertyName == nameof(SingerEntry.Partner)))
             {
                 _displayWindowService.Update(Singers);
             }
@@ -2994,16 +2999,20 @@ namespace KSRotation.ViewModels
             if (e.PropertyName == nameof(SingerEntry.Name)
                 || e.PropertyName == nameof(SingerEntry.Song)
                 || e.PropertyName == nameof(SingerEntry.Artist)
+                || e.PropertyName == nameof(SingerEntry.DuetPartnerName)
+                || e.PropertyName == nameof(SingerEntry.Partner)
                 || e.PropertyName == nameof(SingerEntry.IsCurrent)
                 || e.PropertyName == nameof(SingerEntry.IsNext)
                 || e.PropertyName == nameof(SingerEntry.IsInactive)
                 || TryGetSongRound(e.PropertyName ?? string.Empty, out _))
             {
                 // IsCurrent/IsNext/IsInactive/RoundCompleted are single-shot toggles → rebuild immediately so the
-                // web view reflects rotation changes promptly. Name/Song/Artist stream per-keystroke → debounce.
+                // web view reflects rotation changes promptly. Name/Song/Artist/DuetPartnerName stream per-keystroke → debounce.
                 if (e.PropertyName == nameof(SingerEntry.Name)
                     || e.PropertyName == nameof(SingerEntry.Song)
-                    || e.PropertyName == nameof(SingerEntry.Artist))
+                    || e.PropertyName == nameof(SingerEntry.Artist)
+                    || e.PropertyName == nameof(SingerEntry.DuetPartnerName)
+                    || e.PropertyName == nameof(SingerEntry.Partner))
                 {
                     QueueRebuildRotationJsonCache();
                 }

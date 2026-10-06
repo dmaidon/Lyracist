@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge to kiosk queue display -->
+<!-- Edited on Oct 6, 2026 @ 08:54:00 -> Support duet partner display via duetPartnerName or partner fallback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1505,8 +1505,9 @@
 
             if (currentSinger) {
                 let name = currentSinger.name;
-                if (currentSinger.duetPartnerName && currentSinger.duetPartnerName !== "None") {
-                    name += ` (with ${currentSinger.duetPartnerName})`;
+                const curDuet = currentSinger.duetPartnerName || currentSinger.partner;
+                if (curDuet && curDuet !== "None") {
+                    name += ` (with ${curDuet})`;
                 }
                 const currentSongTitle = currentSinger.song || currentSinger.songTitle || '';
                 spotlightCurrentName.textContent = currentSinger.isMusic ? currentSongTitle : name;
@@ -1520,8 +1521,9 @@
 
             if (nextSinger) {
                 let name = nextSinger.name;
-                if (nextSinger.duetPartnerName && nextSinger.duetPartnerName !== "None") {
-                    name += ` (with ${nextSinger.duetPartnerName})`;
+                const nextDuet = nextSinger.duetPartnerName || nextSinger.partner;
+                if (nextDuet && nextDuet !== "None") {
+                    name += ` (with ${nextDuet})`;
                 }
                 const nextSongTitle = nextSinger.song || nextSinger.songTitle || '';
                 spotlightNextName.textContent = nextSinger.isMusic ? nextSongTitle : name;
@@ -1578,8 +1580,9 @@
                 }
 
                 let displayName = escapeHtml(singer.name);
-                if (singer.duetPartnerName && singer.duetPartnerName !== "None" && !singer.isMusic) {
-                    displayName += ` <span style="font-size: 0.8em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(singer.duetPartnerName)})</span>`;
+                const sDuet = singer.duetPartnerName || singer.partner;
+                if (sDuet && sDuet !== "None" && !singer.isMusic) {
+                    displayName += ` <span style="font-size: 0.8em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(sDuet)})</span>`;
                 }
 
                 const sTitle = singer.song || singer.songTitle || '';

@@ -1,6 +1,15 @@
-<!-- Edited on Oct 5, 2026 @ 22:58:30 -> Add Move to Top of Rotation documentation to KSRotation CHANGELOG -->
+<!-- Edited on Oct 6, 2026 @ 08:59:30 -> Add Duet Partner Remote Sync & DJ Tablet Display fix to KSRotation CHANGELOG -->
 
 # Changelog
+
+## 2026-10-06
+
+- **Duet Partner Remote Sync & DJ Tablet Display (`Models/RotationItemDto.cs`, `ViewModels/MainViewModel.Requests.cs`, `ViewModels/MainViewModel.cs`, `Resources/dj.html`, `Resources/kiosk.html`, `Resources/PatronPortal.html`, `Resources/billboard.html`)**:
+  - Fixed an issue where duet partners added or edited on performers showed up on the desktop grid and TV screens (`billboard.html`), but did not appear on the DJ tablet (`dj.html`).
+  - Added `duetPartnerName` alongside `partner` in `RotationItemDto` and `RebuildRotationJsonCacheNow()`.
+  - Added `DuetPartnerName` and `Partner` handling to `Singer_PropertyChanged` in `MainViewModel.cs` so desktop edits immediately trigger dirty state, TV window display refresh, and JSON cache invalidation.
+  - Updated `dj.html`, `kiosk.html`, `PatronPortal.html`, and `billboard.html` with dual-property fallback (`duetPartnerName || partner`).
+  - Added unit test in `RotationTests.cs` verifying serialization of both duet partner properties.
 
 ## 2026-10-05
 

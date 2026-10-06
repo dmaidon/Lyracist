@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:36:00 -> Normalize avatar image bytes and EXIF orientation on tablet upload
+// Edited on Oct 6, 2026 @ 08:55:30 -> Include partner and duetPartnerName in BuildQueuePayload for tablet queue compatibility
 using System;
 using System.IO;
 using System.Linq;
@@ -986,6 +986,8 @@ public class TabletLyricsServer(
         return _rotation.Rotation.Select(s => new
         {
             name = s.Name,
+            partner = s.DuetPartnerName,
+            duetPartnerName = s.DuetPartnerName,
             song = s.SongTitle,
             songTitle = s.SongTitle,
             artist = s.Artist,
