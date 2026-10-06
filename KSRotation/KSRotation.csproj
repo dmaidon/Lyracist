@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.6.740</AssemblyVersion>
-    <FileVersion>26.10.6.740</FileVersion>
+    <AssemblyVersion>26.10.6.741</AssemblyVersion>
+    <FileVersion>26.10.6.741</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -147,6 +147,7 @@
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
+    <Compile Include="..\Shared\DragReorderVisuals.cs" Link="DragReorderVisuals.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />

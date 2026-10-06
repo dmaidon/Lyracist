@@ -16,12 +16,9 @@ namespace Lyracist.Shared;
 public static class SingleInstanceHelper
 {
     private static readonly List<Mutex> _heldMutexes = new();
-    private static bool _processExitHooked;
 
-    private const int SW_SHOWNORMAL = 1;
     private const int SW_SHOW = 5;
     private const int SW_RESTORE = 9;
-    private const uint ASFW_ANY = unchecked((uint)-1);
 
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
@@ -49,7 +46,7 @@ public static class SingleInstanceHelper
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
-    [DllImport("user32.dll")]
+    [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
     [DllImport("user32.dll")]
@@ -107,12 +104,6 @@ public static class SingleInstanceHelper
         lock (_heldMutexes)
         {
             _heldMutexes.Add(mutex);
-
-            if (!_processExitHooked)
-            {
-                _processExitHooked = true;
-                AppDomain.CurrentDomain.ProcessExit += (_, _) => Cleanup();
-            }
         }
 
         return true;
@@ -169,10 +160,11 @@ public static class SingleInstanceHelper
     /// </summary>
     public static void ActivateExistingInstance(string appName)
     {
+        Process[]? candidateProcesses = null;
         try
         {
-            var current = Process.GetCurrentProcess();
-            var candidateProcesses = Process.GetProcessesByName(current.ProcessName);
+            using var current = Process.GetCurrentProcess();
+            candidateProcesses = Process.GetProcessesByName(current.ProcessName);
 
             // If launched under a runner or test host where process name differs from appName, try appName
             if (candidateProcesses.Length <= 1 && !string.Equals(current.ProcessName, appName, StringComparison.OrdinalIgnoreCase))
@@ -180,7 +172,12 @@ public static class SingleInstanceHelper
                 var byName = Process.GetProcessesByName(appName);
                 if (byName.Length > 0)
                 {
+                    foreach (var p in candidateProcesses) p.Dispose();
                     candidateProcesses = byName;
+                }
+                else
+                {
+                    foreach (var p in byName) p.Dispose();
                 }
             }
 
@@ -189,15 +186,12 @@ public static class SingleInstanceHelper
                 if (proc.Id == current.Id)
                     continue;
 
+                // Skip same-named processes running from a different install location
+                if (!IsSameExecutable(current, proc))
+                    continue;
+
                 // Grant foreground activation permission to the target process
-                try
-                {
-                    AllowSetForegroundWindow((uint)proc.Id);
-                }
-                catch
-                {
-                    AllowSetForegroundWindow(ASFW_ANY);
-                }
+                AllowSetForegroundWindow((uint)proc.Id);
 
                 IntPtr handle = proc.MainWindowHandle;
                 if (handle == IntPtr.Zero)
@@ -215,6 +209,13 @@ public static class SingleInstanceHelper
         catch
         {
             // Best-effort window activation
+        }
+        finally
+        {
+            if (candidateProcesses != null)
+            {
+                foreach (var p in candidateProcesses) p.Dispose();
+            }
         }
     }
 
@@ -250,6 +251,26 @@ public static class SingleInstanceHelper
         {
             BringWindowToTop(hWnd);
             SetForegroundWindow(hWnd);
+        }
+    }
+
+    /// <summary>
+    /// True when both processes run the same executable file. If either path can't be read
+    /// (access denied, process exited), assume a match so activation stays best-effort.
+    /// </summary>
+    private static bool IsSameExecutable(Process a, Process b)
+    {
+        try
+        {
+            string? pathA = a.MainModule?.FileName;
+            string? pathB = b.MainModule?.FileName;
+            if (pathA == null || pathB == null)
+                return true;
+            return string.Equals(pathA, pathB, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return true;
         }
     }
 

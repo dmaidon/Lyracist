@@ -74,6 +74,7 @@ public partial class RotationPage : Page
                 {
                     var singer = _draggedItem;
                     DragDrop.DoDragDrop(item, singer, DragDropEffects.Move);
+                    Lyracist.Shared.DragReorderVisuals.ClearIndicator();
                     _draggedItem = null;
                 }
             }
@@ -84,6 +85,15 @@ public partial class RotationPage : Page
     {
         if (e.Data.GetDataPresent(typeof(Lyracist.Models.Singer)))
         {
+            if (sender is ListBoxItem hover)
+            {
+                Lyracist.Shared.DragReorderVisuals.ShowIndicator(hover, e.GetPosition(hover).Y >= hover.ActualHeight / 2.0);
+                if (ItemsControl.ItemsControlFromItemContainer(hover) is ItemsControl owner)
+                {
+                    Lyracist.Shared.DragReorderVisuals.AutoScroll(owner, e);
+                }
+            }
+
             e.Effects = DragDropEffects.Move;
             e.Handled = true;
         }
@@ -95,6 +105,7 @@ public partial class RotationPage : Page
 
     private void ListBoxItem_Drop(object sender, DragEventArgs e)
     {
+        Lyracist.Shared.DragReorderVisuals.ClearIndicator();
         if (sender is ListBoxItem targetItem && e.Data.GetData(typeof(Lyracist.Models.Singer)) is Lyracist.Models.Singer sourceSinger)
         {
             if (targetItem.DataContext is Lyracist.Models.Singer targetSinger && sourceSinger != targetSinger)
@@ -108,17 +119,7 @@ public partial class RotationPage : Page
                     Point pos = e.GetPosition(targetItem);
                     bool dropAfter = pos.Y >= (targetItem.ActualHeight / 2.0);
 
-                    int insertIndex;
-                    if (dropAfter)
-                    {
-                        insertIndex = (sourceIndex < targetIndex) ? targetIndex : targetIndex + 1;
-                    }
-                    else
-                    {
-                        insertIndex = (sourceIndex < targetIndex) ? targetIndex - 1 : targetIndex;
-                    }
-
-                    insertIndex = Math.Clamp(insertIndex, 0, rotation.Count - 1);
+                    int insertIndex = Lyracist.Shared.RotationHelpers.ComputeDropIndex(rotation.Count, sourceIndex, targetIndex, dropAfter);
                     if (ViewModel.FloatCurrentSingerToTop && rotation.Count > 0 && rotation[0].IsCurrent)
                     {
                         if (sourceSinger != rotation[0] && insertIndex == 0)
@@ -146,6 +147,11 @@ public partial class RotationPage : Page
 
     private void ListBox_DragOver(object sender, DragEventArgs e)
     {
+        if (sender is ItemsControl list)
+        {
+            Lyracist.Shared.DragReorderVisuals.AutoScroll(list, e);
+        }
+
         if (e.Data.GetDataPresent(typeof(Lyracist.Models.Singer)))
         {
             e.Effects = DragDropEffects.Move;
@@ -159,6 +165,7 @@ public partial class RotationPage : Page
 
     private void ListBox_Drop(object sender, DragEventArgs e)
     {
+        Lyracist.Shared.DragReorderVisuals.ClearIndicator();
         if (e.Data.GetData(typeof(Lyracist.Models.Singer)) is Lyracist.Models.Singer sourceSinger)
         {
             var rotation = ViewModel.Rotation;

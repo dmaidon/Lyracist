@@ -255,6 +255,18 @@ namespace Lyracist.Shared
         /// If an inactive or paused singer has the flag, clears it and reassigns to the first active singer.
         /// If multiple singers have the flag, clears duplicates and preserves only the first.
         /// </summary>
+        /// <summary>
+        /// Converts a drop onto a target row (upper or lower half) into the final index for a
+        /// "remove then insert" / ObservableCollection.Move of the source item.
+        /// </summary>
+        public static int ComputeDropIndex(int count, int sourceIndex, int targetIndex, bool dropAfter)
+        {
+            int insertIndex = dropAfter
+                ? (sourceIndex < targetIndex ? targetIndex : targetIndex + 1)
+                : (sourceIndex < targetIndex ? targetIndex - 1 : targetIndex);
+            return Math.Clamp(insertIndex, 0, Math.Max(0, count - 1));
+        }
+
         public static void EnsureRotationStartFlag<T>(IList<T> singers) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
@@ -1534,7 +1546,7 @@ namespace Lyracist.Shared
             "Randy Davis",
             "Larry Strickland",
             "Robert Roberts",
-            "Cynthis Nix",
+            "Cynthia Nix",
             "David Wayne",
             "Danny Hinnant",
             "Cerrina Culbert",

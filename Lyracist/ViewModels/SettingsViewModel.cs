@@ -46,11 +46,13 @@ public partial class SettingsViewModel : BaseViewModel
 
     partial void OnTestSingerCountChanged(int value)
     {
-        AppSettings.TestSingerCount = value;
-        if (IsTestMode)
+        if (value is not (3 or 5 or 10 or 15))
         {
-            _rotation.SeedSingers(value);
+            TestSingerCount = 15;
+            return;
         }
+
+        AppSettings.TestSingerCount = value;
     }
 
     public IReadOnlyList<int> TestSingerCountOptions { get; } = [3, 5, 10, 15];

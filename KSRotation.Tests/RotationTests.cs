@@ -2223,7 +2223,7 @@ public class SampleSingerTests
             "Randy Davis",
             "Larry Strickland",
             "Robert Roberts",
-            "Cynthis Nix",
+            "Cynthia Nix",
             "David Wayne",
             "Danny Hinnant",
             "Cerrina Culbert",
@@ -2377,3 +2377,30 @@ public class SampleSingerTests
 
 
 
+public class DragReorderHelperTests
+{
+    [Theory]
+    [InlineData(5, 0, 3, true, 3)]
+    [InlineData(5, 0, 3, false, 2)]
+    [InlineData(5, 4, 1, true, 2)]
+    [InlineData(5, 4, 1, false, 1)]
+    [InlineData(5, 0, 4, true, 4)]
+    [InlineData(5, 4, 0, false, 0)]
+    public void ComputeDropIndex_ReturnsFinalIndexAfterMove(int count, int source, int target, bool after, int expected)
+    {
+        Assert.Equal(expected, RotationHelpers.ComputeDropIndex(count, source, target, after));
+    }
+
+    [Theory]
+    [InlineData(0, 3)]
+    [InlineData(4, 5)]
+    [InlineData(7, 10)]
+    [InlineData(99, 15)]
+    public void GenerateRandomTestSingers_SnapsCountAndUsesUniqueNames(int requested, int expected)
+    {
+        var singers = RotationHelpers.GenerateRandomTestSingers(requested, new Random(1));
+        Assert.Equal(expected, singers.Count);
+        Assert.Equal(expected, singers.Select(s => s.Name).Distinct().Count());
+        Assert.All(singers, s => Assert.False(string.IsNullOrWhiteSpace(s.Song)));
+    }
+}

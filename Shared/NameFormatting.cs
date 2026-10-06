@@ -34,8 +34,8 @@ namespace Lyracist.Shared
             if (trimmed.Equals("New Singer", StringComparison.OrdinalIgnoreCase))
                 return string.Empty;
 
-            // Remove any occurrence of "New Singer" (case-insensitive, with optional whitespace between words)
-            string stripped = Regex.Replace(trimmed, @"(?i)new\s*singer", string.Empty);
+            // Remove any occurrence of "New Singer" (case-insensitive, requiring the single space between words)
+            string stripped = Regex.Replace(trimmed, @"(?i)\bnew singer", string.Empty);
 
             // Clean up any leftover punctuation or whitespace (e.g. leading/trailing dashes, colons)
             stripped = stripped.Trim(' ', '-', ':', ',', '.');

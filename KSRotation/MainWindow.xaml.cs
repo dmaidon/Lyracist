@@ -515,6 +515,7 @@ namespace KSRotation
                     {
                         var singer = _draggedSinger;
                         WpfDragDrop.DoDragDrop(item, singer, WpfDragDropEffects.Move);
+                        Lyracist.Shared.DragReorderVisuals.ClearIndicator();
                         _draggedSinger = null;
                     }
                 }
@@ -523,6 +524,11 @@ namespace KSRotation
 
         private void SingersListViewItem_DragOver(object sender, WpfDragEventArgs e)
         {
+            if (sender is WpfListViewItem hover)
+            {
+                Lyracist.Shared.DragReorderVisuals.ShowIndicator(hover, e.GetPosition(hover).Y >= hover.ActualHeight / 2.0);
+                Lyracist.Shared.DragReorderVisuals.AutoScroll(SingersListView, e);
+            }
             if (e.Data.GetDataPresent(typeof(Models.SingerEntry)))
             {
                 e.Effects = WpfDragDropEffects.Move;
@@ -536,6 +542,7 @@ namespace KSRotation
 
         private void SingersListViewItem_Drop(object sender, WpfDragEventArgs e)
         {
+            Lyracist.Shared.DragReorderVisuals.ClearIndicator();
             if (sender is WpfListViewItem targetItem &&
                 e.Data.GetData(typeof(Models.SingerEntry)) is Models.SingerEntry sourceSinger &&
                 DataContext is ViewModels.MainViewModel vm)
@@ -550,17 +557,7 @@ namespace KSRotation
                         WpfPoint pos = e.GetPosition(targetItem);
                         bool dropAfter = pos.Y >= (targetItem.ActualHeight / 2.0);
 
-                        int insertIndex;
-                        if (dropAfter)
-                        {
-                            insertIndex = (sourceIndex < targetIndex) ? targetIndex : targetIndex + 1;
-                        }
-                        else
-                        {
-                            insertIndex = (sourceIndex < targetIndex) ? targetIndex - 1 : targetIndex;
-                        }
-
-                        insertIndex = Math.Clamp(insertIndex, 0, vm.Singers.Count - 1);
+                        int insertIndex = Lyracist.Shared.RotationHelpers.ComputeDropIndex(vm.Singers.Count, sourceIndex, targetIndex, dropAfter);
                         if (insertIndex != sourceIndex)
                         {
                             vm.MoveSingerToPosition(sourceSinger, insertIndex);
@@ -574,6 +571,7 @@ namespace KSRotation
 
         private void SingersListView_DragOver(object sender, WpfDragEventArgs e)
         {
+            Lyracist.Shared.DragReorderVisuals.AutoScroll(SingersListView, e);
             if (e.Data.GetDataPresent(typeof(Models.SingerEntry)))
             {
                 e.Effects = WpfDragDropEffects.Move;
@@ -587,6 +585,7 @@ namespace KSRotation
 
         private void SingersListView_Drop(object sender, WpfDragEventArgs e)
         {
+            Lyracist.Shared.DragReorderVisuals.ClearIndicator();
             if (e.Data.GetData(typeof(Models.SingerEntry)) is Models.SingerEntry sourceSinger &&
                 DataContext is ViewModels.MainViewModel vm)
             {

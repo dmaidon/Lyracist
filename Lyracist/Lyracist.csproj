@@ -131,6 +131,7 @@
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
+    <Compile Include="..\Shared\DragReorderVisuals.cs" Link="DragReorderVisuals.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />

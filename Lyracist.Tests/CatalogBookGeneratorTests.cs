@@ -4270,7 +4270,7 @@ Hosts can now select exactly how many sample performers to load from a dedicated
 - Preservation of Session Settings: General session settings (e.g. 'Block Duplicate Songs in Session') remain in 'Rotation Settings', keeping operational controls distinct from testing tools.
 
 [Randomized Performer Names & Song Pool]
-The test generator utilizes a curated pool of 18 realistic performer names (Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling) paired randomly with popular karaoke tracks, guaranteeing varied and realistic practice sessions.";
+The test generator utilizes a curated pool of 18 realistic performer names (Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthia Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling) paired randomly with popular karaoke tracks, guaranteeing varied and realistic practice sessions.";
 
             // 1. Append to updates log text file if not already present
             if (File.Exists(updatesTxtPath))
