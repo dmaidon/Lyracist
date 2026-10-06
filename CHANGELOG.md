@@ -1,11 +1,19 @@
-<!-- Edited on Oct 6, 2026 @ 08:59:00 -> Document Duet Partner Remote Sync & DJ Tablet Display fix -->
-Last Edit: Oct 6, 2026 - Duet Partner Remote Sync & DJ Tablet Display
+<!-- Edited on Oct 6, 2026 @ 10:24:00 -> Document Single-Instance Enforcement across suite applications in CHANGELOG -->
+Last Edit: Oct 6, 2026 - Single-Instance Application Enforcement
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] - 2026-10-06
+
+### Added
+- **Single-Instance Application Enforcement Across All Suite Apps (`Shared/SingleInstanceHelper.cs`, `Lyracist`, `KSRotation`, `KnockoutTrivia`, `Lyracist.Trivia`, `ScaryokeWheel`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`)**:
+  - Configured all applications across the suite as strictly single-instance applications, preventing duplicate processes, audio device conflicts, database concurrency locks, and port binding collisions.
+  - Session-Scoped Mutex: Utilizes session-scoped named mutexes (`Local\Lyracist_SingleInstance_{appName}`) preventing standard-user elevation conflicts and isolating multi-user Terminal Services sessions.
+  - Automatic Window Restoration & Focus: When a second instance of an app is launched (e.g., from desktop shortcuts or taskbar), the second instance automatically detects the running process, grants foreground permission (`AllowSetForegroundWindow`), un-minimizes/restores the existing window via `ShowWindowAsync(SW_RESTORE)`, attaches thread inputs, and brings the existing window to the foreground before exiting cleanly.
+  - Clean Lifetime Disposal: Registered process exit and application shutdown hooks releasing and disposing mutex handles cleanly.
+  - Comprehensive Unit Tests: Added test suite in `SingleInstanceHelperTests.cs` verifying single-instance locking, running instance queries, and clean handle disposal.
 
 ### Fixed
 - **Duet Partner Remote Sync & DJ Tablet Display (`KSRotation/Models/RotationItemDto.cs`, `MainViewModel.Requests.cs`, `MainViewModel.cs`, `dj.html`, `kiosk.html`, `PatronPortal.html`, `billboard.html`, `TabletLyricsServer.cs`, `KSRotationSyncService.cs`)**:

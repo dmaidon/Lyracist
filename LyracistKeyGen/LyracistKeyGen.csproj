@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
+<!-- Edited on Oct 6, 2026 @ 10:20:00 -> Link Shared\SingleInstanceHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\EncryptionHelper.cs" Link="EncryptionHelper.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Oct 6, 2026 @ 10:23:30 -> Enforce single-instance application execution using SingleInstanceHelper
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -13,8 +13,19 @@ namespace LyracistDbEditor
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (!SingleInstanceHelper.EnsureSingleInstance("LyracistDbEditor"))
+            {
+                return;
+            }
+
             TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             base.OnStartup(e);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            SingleInstanceHelper.Cleanup();
+            base.OnExit(e);
         }
     }
 }

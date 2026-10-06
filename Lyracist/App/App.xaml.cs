@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:14:00 -> Register IAudioSpectrumService in DI container
+// Edited on Oct 6, 2026 @ 10:20:30 -> Enforce single-instance application execution using SingleInstanceHelper
 using System;
 using System.Linq;
 using System.Windows;
@@ -231,6 +231,11 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        if (!SingleInstanceHelper.EnsureSingleInstance("Lyracist"))
+        {
+            return;
+        }
+
         // Subscribe to theme changes to apply Lyracist custom brushes
         Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
         {
@@ -396,6 +401,7 @@ public partial class App : System.Windows.Application
             }
         }
 
+        SingleInstanceHelper.Cleanup();
         base.OnExit(e);
     }
 

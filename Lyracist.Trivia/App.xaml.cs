@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Oct 6, 2026 @ 10:22:00 -> Enforce single-instance application execution using SingleInstanceHelper
 using System.IO;
 using System.Windows;
 using Lyracist.Shared;
@@ -11,6 +11,11 @@ public partial class App : System.Windows.Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!SingleInstanceHelper.EnsureSingleInstance("LyracistTrivia"))
+        {
+            return;
+        }
+
         TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
@@ -37,6 +42,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SingleInstanceHelper.Cleanup();
         base.OnExit(e);
         Environment.Exit(0);
     }

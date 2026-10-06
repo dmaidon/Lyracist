@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Oct 6, 2026 @ 10:24:00 -> Enforce single-instance application execution using SingleInstanceHelper
 using System.Windows;
 using Lyracist.Shared;
 
@@ -8,9 +8,20 @@ namespace LyracistKeyGen
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (!SingleInstanceHelper.EnsureSingleInstance("LyracistKeyGen"))
+            {
+                return;
+            }
+
             TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             base.OnStartup(e);
             Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            SingleInstanceHelper.Cleanup();
+            base.OnExit(e);
         }
     }
 }

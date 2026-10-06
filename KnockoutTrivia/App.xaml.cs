@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:48:00 -> Registered SimulatorService and SimulatorViewModel in App.xaml.cs
+// Edited on Oct 6, 2026 @ 10:21:30 -> Enforce single-instance application execution using SingleInstanceHelper
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,6 +26,11 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        if (!SingleInstanceHelper.EnsureSingleInstance("KnockoutTrivia"))
+        {
+            return;
+        }
+
         base.OnStartup(e);
 
         try
@@ -105,6 +110,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SingleInstanceHelper.Cleanup();
         base.OnExit(e);
         _webServer?.Dispose();
         _gameStateService?.Dispose();

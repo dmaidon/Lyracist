@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 6, 2026 @ 10:19:00 -> Link Shared\SingleInstanceHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -40,6 +40,7 @@
     <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
     <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="Shared\SingleInstanceHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 6, 2026 @ 10:19:45 -> Link Shared\SingleInstanceHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
   </ItemGroup>
 

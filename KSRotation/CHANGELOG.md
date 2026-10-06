@@ -1,8 +1,13 @@
-<!-- Edited on Oct 6, 2026 @ 08:59:30 -> Add Duet Partner Remote Sync & DJ Tablet Display fix to KSRotation CHANGELOG -->
+<!-- Edited on Oct 6, 2026 @ 10:24:30 -> Document Single-Instance Enforcement in KSRotation CHANGELOG -->
 
 # Changelog
 
 ## 2026-10-06
+
+- **Single-Instance Application Enforcement (`App.xaml.cs`, `KSRotation.csproj`, `Shared/SingleInstanceHelper.cs`)**:
+  - Enforced single-instance application execution for KSRotation.
+  - Automatically brings the existing running KSRotation window to the front and restores it from minimized state if the user launches a second instance, then closes the duplicate instance immediately.
+  - Added unit test coverage in `KSRotation.Tests/SingleInstanceHelperTests.cs`.
 
 - **Duet Partner Remote Sync & DJ Tablet Display (`Models/RotationItemDto.cs`, `ViewModels/MainViewModel.Requests.cs`, `ViewModels/MainViewModel.cs`, `Resources/dj.html`, `Resources/kiosk.html`, `Resources/PatronPortal.html`, `Resources/billboard.html`)**:
   - Fixed an issue where duet partners added or edited on performers showed up on the desktop grid and TV screens (`billboard.html`), but did not appear on the DJ tablet (`dj.html`).

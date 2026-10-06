@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Oct 6, 2026 @ 10:23:00 -> Enforce single-instance application execution using SingleInstanceHelper
 using System.Windows;
 using Lyracist.Shared;
 
@@ -8,8 +8,19 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!SingleInstanceHelper.EnsureSingleInstance("TriviaDbCreator"))
+        {
+            return;
+        }
+
         TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
         base.OnStartup(e);
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        SingleInstanceHelper.Cleanup();
+        base.OnExit(e);
     }
 }
 

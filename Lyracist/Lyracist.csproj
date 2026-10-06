@@ -1,4 +1,4 @@
-<!-- Edited on Oct 3, 2026 @ 12:54:00 -> Include mic_64.png and LyracistIcon.ico as compiled WPF resources in Lyracist.csproj -->
+<!-- Edited on Oct 6, 2026 @ 10:18:00 -> Link Shared\SingleInstanceHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -130,6 +130,7 @@
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />

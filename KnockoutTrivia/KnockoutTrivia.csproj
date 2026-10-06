@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 6, 2026 @ 10:18:45 -> Link Shared\SingleInstanceHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -55,6 +55,7 @@
     <Compile Include="..\Shared\MonitorEnumerator.cs" Link="Shared\MonitorEnumerator.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="Shared\WindowPositioner.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="Shared\SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="Shared\NameFormatting.cs" />
     <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
     <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />

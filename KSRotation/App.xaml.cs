@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Oct 6, 2026 @ 10:21:00 -> Enforce single-instance application execution using SingleInstanceHelper
 using KSRotation.Services;
 using System.Windows;
 using System.Windows.Threading;
@@ -15,6 +15,11 @@ namespace KSRotation
         /// <inheritdoc/>
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (!SingleInstanceHelper.EnsureSingleInstance("KSRotation"))
+            {
+                return;
+            }
+
             TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             LoggerService.LogAppStart();
@@ -48,6 +53,12 @@ namespace KSRotation
         {
             LoggerService.LogError("App.UnobservedTaskException", e.Exception);
             e.SetObserved();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            SingleInstanceHelper.Cleanup();
+            base.OnExit(e);
         }
     }
 }
