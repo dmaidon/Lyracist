@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:48:00 -> Add ClearLastRoundDone and ToggleLastRoundDone commands to restore accidental finished singers
+// Edited on Oct 5, 2026 @ 22:48:30 -> Add MoveToTop and MoveSingerToTop commands to move singer to top of rotation without altering rotation anchor
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -876,6 +876,35 @@ public partial class RotationViewModel : BaseViewModel
         RunRotationOrderChange(() =>
         {
             moved = Lyracist.Shared.RotationHelpers.MoveSingerDown(Rotation, singer);
+        });
+
+        if (moved)
+        {
+            SelectedSinger = singer;
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+        }
+    }
+
+    [RelayCommand]
+    private void MoveToTop()
+    {
+        if (SelectedSinger == null)
+            return;
+
+        MoveSingerToTop(SelectedSinger);
+    }
+
+    [RelayCommand]
+    private void MoveSingerToTop(Singer singer)
+    {
+        if (singer == null)
+            return;
+
+        bool moved = false;
+        RunRotationOrderChange(() =>
+        {
+            moved = Lyracist.Shared.RotationHelpers.MoveSingerToTop(Rotation, singer, FloatCurrentSingerToTop);
         });
 
         if (moved)

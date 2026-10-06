@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 11:58:00 -> Add CalculateRoundEstimation and RoundEstimationInfo for round duration and completion ETA calculations
+// Edited on Oct 5, 2026 @ 22:48:00 -> Add MoveSingerToTop helper preserving rotation anchor and unskipping performer
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1271,6 +1271,68 @@ namespace Lyracist.Shared
             // Normal move down 1 position
             MoveSingerInList(singers, index, index + 1);
             return true;
+        }
+
+        /// <summary>
+        /// Moves <paramref name="entry"/> to the top of the active rotation queue (index 0, or index 1
+        /// if an active performer is currently singing at index 0).
+        /// If <paramref name="entry"/> was skipped, paused, or inactive, clears those flags so they are
+        /// restored to the active queue. Does not in any way change the rotation anchor (<see cref="IRotationSinger.IsRotationStart"/>).
+        /// If <paramref name="entry"/> is linked to another singer, maintains their adjacency.
+        /// Returns true if the singer was moved or had status flags restored; false otherwise.
+        /// </summary>
+        public static bool MoveSingerToTop<T>(IList<T> singers, T entry, bool floatCurrentToTop = false) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            if (entry == null) return false;
+
+            int index = singers.IndexOf(entry);
+            if (index < 0) return false;
+
+            bool stateChanged = false;
+            if (entry.IsSkipped)
+            {
+                entry.IsSkipped = false;
+                stateChanged = true;
+            }
+            if (entry.IsInactive)
+            {
+                entry.IsInactive = false;
+                stateChanged = true;
+            }
+            if (entry.IsPaused)
+            {
+                entry.IsPaused = false;
+                stateChanged = true;
+            }
+            if (entry.HasSungInLastRound)
+            {
+                entry.HasSungInLastRound = false;
+                stateChanged = true;
+            }
+
+            var partner = GetActiveLinkedPartner(singers, entry);
+            if (partner != null && partner.IsSkipped)
+            {
+                partner.IsSkipped = false;
+                stateChanged = true;
+            }
+
+            int targetIndex = 0;
+            if (singers.Count > 0 && singers[0].IsCurrent && singers[0] != entry && !singers[0].IsInactive && !singers[0].IsPaused && !singers[0].IsSkipped)
+            {
+                targetIndex = 1;
+            }
+
+            if (index != targetIndex)
+            {
+                MoveSingerInList(singers, index, targetIndex);
+                stateChanged = true;
+            }
+
+            EnforceLinkedAdjacency(singers);
+            UpdateNextSingerHighlight(singers);
+            return stateChanged;
         }
 
         /// <summary>

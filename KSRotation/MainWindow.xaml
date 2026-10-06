@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 07:52:00 -> Add clickable DONE (LAST ROUND) badge and Clear Last Round Done context menu item -->
+<!-- Edited on Oct 5, 2026 @ 22:51:00 -> Add Move to Top of Rotation context menu item and list item button -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -152,6 +152,9 @@
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                         <MenuItem Header="Move Down"
                                   Command="{Binding Path=PlacementTarget.Tag.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Move to Top of Rotation"
+                                  Command="{Binding Path=PlacementTarget.Tag.MoveToTopCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                         <Separator />
                         <MenuItem ToolTip="Linked singers always stay adjacent in the rotation - no other singer can be inserted between them"
@@ -1121,6 +1124,14 @@
                                                             CommandParameter="{Binding}"
                                                             Width="32"
                                                             ToolTip="Move Singer Down" />
+
+                                                    <Button Content="⤒"
+                                                            Style="{StaticResource GridButtonStyle}"
+                                                            Command="{Binding DataContext.MoveToTopCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="32"
+                                                            Margin="4,0,0,0"
+                                                            ToolTip="Move to Top of Rotation" />
                                                 </StackPanel>
                                             </Grid>
                                         </Grid>
@@ -2438,7 +2449,7 @@
                                     </StackPanel>
                                     <ComboBox
                                             ItemsSource="{Binding AvailableMonitors}"
-                                            SelectedValue="{Binding DjBannerMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedValue="{Binding DjBannerMonitorDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             SelectedValuePath="DeviceName"
                                             DisplayMemberPath="FriendlyName"
                                             Style="{StaticResource ModernComboBoxStyle}"

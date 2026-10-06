@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 19:59:30 -> Add unit tests for DisplayViewModel ActiveSingerCountText
+// Edited on Oct 5, 2026 @ 22:53:50 -> Add unit tests for MoveSingerToTop preserving anchor and unskipping performer
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2077,6 +2077,41 @@ public class RoundEstimationTests
         dvm.UpdateFromRotation(singers);
         Assert.Equal(1, dvm.ActiveSingerCount);
         Assert.Equal("1 Singer in Rotation", dvm.ActiveSingerCountText);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_SingerEntry_MovesToSlot1WhenCurrentExistsAndPreservesAnchor()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var bob = new SingerEntry { Name = "Bob", IsRotationStart = true }; // Bob is anchor
+        var carol = new SingerEntry { Name = "Carol", IsSkipped = true };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        bool moved = RotationHelpers.MoveSingerToTop(list, carol, floatCurrentToTop: true);
+
+        Assert.True(moved);
+        Assert.False(carol.IsSkipped); // Skipped flag cleared
+        Assert.Equal(carol, list[1]);
+        Assert.Equal(bob, list[2]);
+        Assert.True(bob.IsRotationStart); // Anchor unchanged
+        Assert.False(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_SingerEntry_MovesToIndex0WhenNoCurrentSinger()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        bool moved = RotationHelpers.MoveSingerToTop(list, carol, floatCurrentToTop: false);
+
+        Assert.True(moved);
+        Assert.Equal(carol, list[0]);
+        Assert.Equal(alice, list[1]);
+        Assert.True(alice.IsRotationStart); // Anchor unchanged
+        Assert.False(carol.IsRotationStart);
     }
 }
 

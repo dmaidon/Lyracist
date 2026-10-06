@@ -39,6 +39,17 @@ public static class DjBannerFileManager
         return path;
     }
 
+    /// <summary>Deletes every generated announcement. Files still on screen can't be deleted yet; they go on the next call.</summary>
+    public static void DeleteGeneratedAnnouncements(string eventBannersDir)
+    {
+        string folder = Path.Combine(eventBannersDir, GeneratedFolder);
+        if (!Directory.Exists(folder)) return;
+        foreach (string file in Directory.GetFiles(folder, "Announcement-*.png"))
+        {
+            try { File.Delete(file); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        }
+    }
+
     /// <summary>The newest generated announcement, else the default Announcement.png, else null.</summary>
     public static string? GetCurrentAnnouncementPath(string eventBannersDir)
     {

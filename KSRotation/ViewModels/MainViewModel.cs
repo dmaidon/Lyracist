@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:51:00 -> Add ClearLastRoundDone and ToggleLastRoundDone commands to restore accidental finished singers
+// Edited on Oct 5, 2026 @ 22:50:00 -> Add MoveSingerToTop and MoveToTop commands to move singer to top of rotation without altering rotation anchor
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -36,6 +36,7 @@ namespace KSRotation.ViewModels
         private bool _isFinishingSong;
         private bool _djBannerWasAutoDisabled;
         private bool _isAutoDisablingDjBanner;
+        private bool _isRefreshingMonitors;
         private readonly Random _random = new();
         private PatronRequestServer? _requestServer;
         private int _activeServerPort = ServerPort;
@@ -364,6 +365,8 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(SelectedMonitorDevice):
+                    if (_isRefreshingMonitors || _isInitializing) break;
+                    if (string.IsNullOrEmpty(SelectedMonitorDevice)) break;
                     _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
                     if (IsDisplayEnabled)
                     {
@@ -429,6 +432,8 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(DjBannerMonitorDevice):
+                    if (_isRefreshingMonitors || _isInitializing) break;
+                    if (string.IsNullOrEmpty(DjBannerMonitorDevice)) break;
                     _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
                     if (IsDjBannerEnabled)
                     {
@@ -785,14 +790,42 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string SelectedMonitorDevice { get; set; } = string.Empty;
 
+        partial void OnSelectedMonitorDeviceChanged(string value)
+        {
+            if (_isRefreshingMonitors || _isInitializing) return;
+            if (string.IsNullOrEmpty(value)) return;
+            _displayWindowService.SetSelectedMonitor(value);
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.RepositionWindow();
+            }
+#if !MAUI
+            PositionTriviaDisplayWindow(value);
+#endif
+            QueueSaveSettings();
+        }
+
         [ObservableProperty]
         public partial string DjBannerMonitorDevice { get; set; } = string.Empty;
+
+        partial void OnDjBannerMonitorDeviceChanged(string value)
+        {
+            if (_isRefreshingMonitors || _isInitializing) return;
+            if (string.IsNullOrEmpty(value)) return;
+            _djBannerWindowService.SetSelectedMonitor(value);
+            if (IsDjBannerEnabled)
+            {
+                _djBannerWindowService.RepositionWindow();
+            }
+            QueueSaveSettings();
+        }
 
         [ObservableProperty]
         public partial string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
 
         partial void OnConnectInstructionsScreenChanged(string value)
         {
+            if (_isRefreshingMonitors || _isInitializing) return;
             QueueSaveSettings();
             RefreshConnectInstructionsBanner();
         }
@@ -814,6 +847,20 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string ActiveSpecialEvent { get; set; } = "None";
+
+#if WPF
+        // Closing an announcement deletes its banner. Deferred so the banner window has moved off the file first.
+        partial void OnActiveSpecialEventChanged(string oldValue, string newValue)
+        {
+            if (oldValue.Equals("Announcement", StringComparison.OrdinalIgnoreCase) &&
+                !newValue.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+            {
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(
+                    System.Windows.Threading.DispatcherPriority.Background,
+                    () => DjBannerFileManager.DeleteGeneratedAnnouncements(Globals.EventBannersDir));
+            }
+        }
+#endif
 
         public ObservableCollection<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; } = [];
         public ObservableCollection<string> AvailableEventBannerFiles { get; } = [];
@@ -1456,7 +1503,13 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetProjectionView(SelectedProjectionView);
 
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
+            DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
+            ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
+                ? "All Screens / Monitors"
+                : settings.ConnectInstructionsScreen;
+
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
+            _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
             RefreshAvailableMonitors();
 
             // Restores which target "Cast Rotation" will use next, but must NOT start casting
@@ -1468,13 +1521,8 @@ namespace KSRotation.ViewModels
                 _ = DiscoverChromecastsAsync();
             }
 
-// Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when running under Visual Studio Debugger, but retain in the field
-            DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
             SelectedJumbotronBannerPath = settings.SelectedJumbotronBannerPath ?? string.Empty;
-            ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
-                ? "All Screens / Monitors"
-                : settings.ConnectInstructionsScreen;
             IsDjBannerEnabled = !System.Diagnostics.Debugger.IsAttached && settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
 #if !MAUI
@@ -1486,7 +1534,10 @@ namespace KSRotation.ViewModels
             string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
             WifiPassword = System.Diagnostics.Debugger.IsAttached ? string.Empty : (!string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty));
             ShowWifiPasswordOnScreen = settings.ShowWifiPasswordOnScreen;
-            ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
+            // Announcements are one-night: clear leftovers from the last run and don't resume on a deleted one.
+            DjBannerFileManager.DeleteGeneratedAnnouncements(Globals.EventBannersDir);
+            string startupEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
+            ActiveSpecialEvent = startupEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase) ? "None" : startupEvent;
             // Not calling RefreshConnectInstructionsBanner() here — ConnectionUrl isn't set until
             // StartRequestServer() runs at the end of this constructor, which refreshes the banner
             // itself once the real URL is known.
@@ -2466,6 +2517,27 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         private void MoveDown(SingerEntry entry) => MoveSingerDown(entry);
 
+        [RelayCommand]
+        public void MoveSingerToTop(SingerEntry entry)
+        {
+            if (entry == null) return;
+            if (RotationHelpers.MoveSingerToTop(Singers, entry, FloatCurrentSingerToTop))
+            {
+                UpdateNextSingerHighlight();
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+                RebuildRotationJsonCacheNow();
+                QueueSaveDatabase();
+                RefreshBillboardState();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void MoveToTop(SingerEntry entry) => MoveSingerToTop(entry);
+
         /// <summary>Promotes the chosen singer to current, reactivating them first if paused.</summary>
         [RelayCommand]
         private void SetCurrentSinger(SingerEntry entry)
@@ -3435,48 +3507,108 @@ namespace KSRotation.ViewModels
         private void RefreshAvailableMonitors()
         {
 #if WPF
-            RefreshWelcomeScreenChoices();
-            var monitors = MonitorEnumerator.GetMonitors();
-            string currentSelection = SelectedMonitorDevice;
-
-            AvailableMonitors.Clear();
-            AvailableMonitorsWithAll.Clear();
-            AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "None", FriendlyName = "None" });
-            AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "All Screens / Monitors", FriendlyName = "All Screens / Monitors" });
-
-            foreach (var monitor in monitors)
+            _isRefreshingMonitors = true;
+            try
             {
-                string friendly = $"Monitor {monitor.Index + 1} ({monitor.Width}x{monitor.Height}){(monitor.IsPrimary ? " [Primary]" : "")}";
-                var item = new MonitorItem
+                RefreshWelcomeScreenChoices();
+                var monitors = MonitorEnumerator.GetMonitors();
+                string currentSelection = SelectedMonitorDevice;
+                string currentDjBannerSelection = DjBannerMonitorDevice;
+                string currentConnectSelection = ConnectInstructionsScreen;
+
+                AvailableMonitors.Clear();
+                AvailableMonitorsWithAll.Clear();
+                AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "None", FriendlyName = "None" });
+                AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "All Screens / Monitors", FriendlyName = "All Screens / Monitors" });
+
+                foreach (var monitor in monitors)
                 {
-                    DeviceName = monitor.DeviceName,
-                    FriendlyName = friendly
-                };
-                AvailableMonitors.Add(item);
-                AvailableMonitorsWithAll.Add(item);
-            }
-
-            if (!string.IsNullOrEmpty(currentSelection) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, currentSelection, StringComparison.OrdinalIgnoreCase)))
-            {
-                SelectedMonitorDevice = currentSelection;
-            }
-            else
-            {
-                if (monitors.Count > 1)
-                {
-                    SelectedMonitorDevice = monitors[1].DeviceName;
+                    string friendly = $"Monitor {monitor.Index + 1} ({monitor.Width}x{monitor.Height}){(monitor.IsPrimary ? " [Primary]" : "")}";
+                    var item = new MonitorItem
+                    {
+                        DeviceName = monitor.DeviceName,
+                        FriendlyName = friendly
+                    };
+                    AvailableMonitors.Add(item);
+                    AvailableMonitorsWithAll.Add(item);
                 }
-                else if (monitors.Count > 0)
+
+                // 1. Restore or default SelectedMonitorDevice
+                var matchedMonitor = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, currentSelection, StringComparison.OrdinalIgnoreCase));
+                if (matchedMonitor != null)
                 {
-                    SelectedMonitorDevice = monitors[0].DeviceName;
+                    SelectedMonitorDevice = matchedMonitor.DeviceName;
                 }
                 else
                 {
-                    SelectedMonitorDevice = string.Empty;
+                    if (monitors.Count > 1)
+                    {
+                        SelectedMonitorDevice = monitors[1].DeviceName;
+                    }
+                    else if (monitors.Count > 0)
+                    {
+                        SelectedMonitorDevice = monitors[0].DeviceName;
+                    }
+                    else
+                    {
+                        SelectedMonitorDevice = string.Empty;
+                    }
+                }
+                _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
+
+                // 2. Restore or default DjBannerMonitorDevice
+                var matchedDjBanner = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, currentDjBannerSelection, StringComparison.OrdinalIgnoreCase));
+                if (matchedDjBanner != null)
+                {
+                    DjBannerMonitorDevice = matchedDjBanner.DeviceName;
+                }
+                else
+                {
+                    // Default to SelectedMonitorDevice (typically same screen as rotation display) or primary/secondary
+                    if (!string.IsNullOrEmpty(SelectedMonitorDevice) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        DjBannerMonitorDevice = SelectedMonitorDevice;
+                    }
+                    else if (monitors.Count > 1)
+                    {
+                        DjBannerMonitorDevice = monitors[1].DeviceName;
+                    }
+                    else if (monitors.Count > 0)
+                    {
+                        DjBannerMonitorDevice = monitors[0].DeviceName;
+                    }
+                    else
+                    {
+                        DjBannerMonitorDevice = string.Empty;
+                    }
+                }
+                _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+
+                // 3. Restore or default ConnectInstructionsScreen
+                var matchedConnect = AvailableMonitorsWithAll.FirstOrDefault(m => string.Equals(m.DeviceName, currentConnectSelection, StringComparison.OrdinalIgnoreCase));
+                if (matchedConnect != null)
+                {
+                    ConnectInstructionsScreen = matchedConnect.DeviceName;
+                }
+                else
+                {
+                    ConnectInstructionsScreen = "All Screens / Monitors";
                 }
             }
+            finally
+            {
+                _isRefreshingMonitors = false;
+            }
 #else
-            AvailableMonitors.Clear();
+            _isRefreshingMonitors = true;
+            try
+            {
+                AvailableMonitors.Clear();
+            }
+            finally
+            {
+                _isRefreshingMonitors = false;
+            }
 #endif
         }
 
@@ -3636,7 +3768,7 @@ namespace KSRotation.ViewModels
                 }
 
                 var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
-                if (eventConfig != null)
+                if (eventConfig != null && !ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase)) // the configured "Announcement" entry is a static file; the generated one wins
                 {
                     string fullPath = Path.Combine(Globals.EventBannersDir, eventConfig.BannerFileName);
                     if (File.Exists(fullPath))
@@ -3751,6 +3883,8 @@ namespace KSRotation.ViewModels
 #endif
             }
             ActiveSpecialEvent = value;
+            // Re-launching the already-active announcement changes no property, so refresh the banner explicitly.
+            UpdateDjBannerPath();
         }
 
         private void SyncSpecialEventOptions(string eventName)

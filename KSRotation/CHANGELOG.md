@@ -1,8 +1,24 @@
-<!-- Edited on Oct 5, 2026 @ 07:57:00 -> Add Clear Last Round Done flag restoration feature to KSRotation CHANGELOG -->
+<!-- Edited on Oct 5, 2026 @ 22:58:30 -> Add Move to Top of Rotation documentation to KSRotation CHANGELOG -->
 
 # Changelog
 
 ## 2026-10-05
+
+- **"Move to Top of Rotation" Performer Priority & Anchor Preservation (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `KSRotation.Maui/MainPage.xaml`, `Shared/RotationHelpers.cs`)**:
+  - Added "Move to Top of Rotation" option to each performer across KSRotation desktop and KSRotation.Maui.
+  - Re-queues the performer at slot 1 when an active singer is currently singing, or at index 0 when no one is singing.
+  - Strict Anchor Preservation: Moving a performer to the top does not in any way change, reassign, or clear the rotation anchor (`IsRotationStart`). The anchor singer marks round progression and remains strictly preserved; re-anchoring still requires manual assignment if desired.
+  - Automatically clears skipped (`IsSkipped`), paused (`IsPaused`), inactive (`IsInactive`), and last-round completed (`HasSungInLastRound`) flags upon moving so the performer is restored to active eligibility. Duet partners remain adjacent.
+  - Added "Move to Top of Rotation" to performer ContextMenu in `MainWindow.xaml`, added a dedicated `⤒` button on each performer row, and added a dedicated `⤒` button on Maui performer cards.
+  - Added `move-to-top` and `move-top` action handling in `MainViewModel.Requests.cs` for remote DJ requests.
+  - Added unit test coverage in `RotationTests.cs`.
+
+- **DJ & Special Event Banner Monitor Selection Persistence (`MainWindow.xaml`, `MainViewModel.cs`)**:
+  - Resolved an issue where the selected monitor device in the "DJ & Special Event Banners" settings ComboBox did not stay visible.
+  - Added explicit two-way binding (`Mode=TwoWay`) on `DjBannerMonitorDevice` in `MainWindow.xaml`.
+  - Updated `RefreshAvailableMonitors()` in `MainViewModel.cs` to capture, preserve, and restore `DjBannerMonitorDevice` (as well as `ConnectInstructionsScreen`) across monitor re-scans, preventing collection clears from resetting the selection to blank.
+  - Implemented intelligent fallback defaulting to `SelectedMonitorDevice` or the primary/secondary monitor when unassigned or unavailable.
+  - Added monitor refresh guard (`_isRefreshingMonitors`) across both WPF and MAUI compilation paths to suppress transient `null` values and unwanted settings overrides while monitor devices are enumerated.
 
 - **Clear "Last Round Done" Flag & Restore Accidental Finished Singers (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `KSRotation.Maui`, `dj.html`)**:
   - Added the ability to clear the `HasSungInLastRound` completion flag when a singer was marked finished on the last round by accident.

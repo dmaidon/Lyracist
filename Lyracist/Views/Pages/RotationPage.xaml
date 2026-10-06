@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 07:48:00 -> Add clickable DONE (LAST ROUND) badge and ContextMenu to remove last round done flag -->
+<!-- Edited on Oct 5, 2026 @ 22:49:00 -> Add Move to Top of Rotation option to singer ContextMenu, row actions, and toolbar -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -149,6 +149,7 @@
                         <CheckBox Content="Float Current to Top" IsChecked="{Binding FloatCurrentSingerToTop}" Margin="0,0,12,0" VerticalAlignment="Center" ToolTip="When checked, the current performer always floats to the top of the rotation list." />
                         <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
                         <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                        <ui:Button Icon="{ui:SymbolIcon ArrowUpload24}" Command="{Binding MoveToTopCommand}" Margin="0,0,4,0" ToolTip="Move Selected Singer to Top of Rotation" />
                         <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSingerCommand}" Appearance="Danger" Margin="0,0,8,0" ToolTip="Remove Selected Singer" />
 
                         <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
@@ -269,6 +270,7 @@
                                                     </Style>
                                                 </MenuItem.Style>
                                             </MenuItem>
+                                            <MenuItem Header="Move to Top of Rotation" Command="{Binding Path=PlacementTarget.Tag.MoveSingerToTopCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                             <MenuItem Header="Edit Singer..." Command="{Binding Path=PlacementTarget.Tag.EditSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                         </ContextMenu>
                                     </Border.ContextMenu>
@@ -414,6 +416,15 @@
                                                     </Style>
                                                 </ui:Button.Style>
                                             </ui:Button>
+
+                                            <!-- Move to Top of Rotation Button -->
+                                            <ui:Button Icon="{ui:SymbolIcon ArrowUpload20}"
+                                                       Command="{Binding DataContext.MoveSingerToTopCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Appearance="Secondary"
+                                                       Margin="0,0,2,0"
+                                                       Padding="4"
+                                                       ToolTip="Move to Top of Rotation" />
 
                                             <!-- Edit Button -->
                                             <ui:Button Icon="{ui:SymbolIcon Edit20}"

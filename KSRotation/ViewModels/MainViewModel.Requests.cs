@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:52:00 -> Support clear-last-round-done action in request server
+// Edited on Oct 5, 2026 @ 22:50:30 -> Support move-to-top action in request server
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -715,6 +715,14 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
                         MoveSingerDown(singer);
+                        return "";
+                    }
+                case "move-to-top":
+                case "move-top":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+                        MoveSingerToTop(singer);
                         return "";
                     }
                 case "toggle-inactive":

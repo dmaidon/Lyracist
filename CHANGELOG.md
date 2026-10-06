@@ -1,5 +1,5 @@
-<!-- Edited on Oct 5, 2026 @ 07:56:00 -> Document Clear Last Round Done flag restoration feature in CHANGELOG -->
-Last Edit: Oct 5, 2026 - Clear "Last Round Done" Accidental Flag & Restore Performer to Final Round
+<!-- Edited on Oct 5, 2026 @ 22:58:00 -> Document Move to Top of Rotation feature in CHANGELOG -->
+Last Edit: Oct 5, 2026 - Move to Top of Rotation & Performer Priority
 
 # Changelog
 
@@ -8,6 +8,18 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-05
 
 ### Added
+- **"Move to Top of Rotation" Performer Priority & Anchor Preservation (`Shared/RotationHelpers.cs`, `RotationViewModel.cs`, `RotationPage.xaml`, `KaraokePage.xaml`, `MainViewModel.cs`, `MainWindow.xaml`, `KSRotation.Maui/MainPage.xaml`, `MainViewModel.Requests.cs`, `HelpViewModel.cs`)**:
+  - Added an option to each singer across Lyracist and KSRotation to "Move to Top of Rotation", allowing hosts to immediately reinsert a performer at the head of the rotation queue if they were skipped or stepped away.
+  - Smart Queue Positioning: When an active singer is currently singing on stage, the moved performer is placed at slot 1 (immediately next up) and highlighted as Next; when no performer is currently singing, the performer is placed at index 0.
+  - Strict Anchor Preservation: Moving a performer to the top does not in any way change, reassign, or alter the rotation anchor (`IsRotationStart`). The anchor singer marks the logical round start and tracks full-cycle completion; whoever holds the anchor continues holding it regardless of queue moves, and can still be changed manually whenever desired.
+  - Automatic Flag Clearance & Restoration: If the performer being moved to the top was previously skipped (`IsSkipped`), paused (`IsPaused`), or inactive (`IsInactive`), those flags are automatically cleared so they are restored to active eligibility. If marked completed in the final round (`HasSungInLastRound`), that flag is cleared. Duet/linked partners remain adjacent.
+  - Multiple Access Points Across Apps:
+    * Lyracist Desktop: Added "Move to Top of Rotation" to performer context menus in `RotationPage` and `KaraokePage`, added dedicated upload-arrow action buttons on each performer row, and added a toolbar button next to Move Down.
+    * KSRotation Desktop: Added "Move to Top of Rotation" to performer context menu in `MainWindow.xaml` and added a dedicated `⤒` button on each performer row.
+    * KSRotation.Maui: Added a dedicated `⤒` button on each performer card in `MainPage.xaml`.
+    * Remote DJ Web Board: Added `move-to-top` and `move-top` action support in `MainViewModel.Requests.cs`.
+  - Comprehensive unit test coverage in `RotationHelpersSingerTests.cs` and `RotationTests.cs`.
+  - Updated in-app help documentation in `HelpViewModel.cs`, user manual test suite in `CatalogBookGeneratorTests.cs`, and exported user manual files (`Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, `Lyracist_User_Manual_Updates.txt`).
 - **Clear "Last Round Done" Flag & Restore Accidental Finished Singers (`RotationViewModel.cs`, `EditSingerViewModel.cs`, `EditSingerWindow.xaml`, `RotationPage.xaml`, `KaraokePage.xaml`, `MainViewModel.cs`, `MainWindow.xaml`, `KSRotation.Maui`, `dj.html`)**:
   - Added the ability to clear the `HasSungInLastRound` completion flag when a singer was marked finished on the last round by accident.
   - Interactive Singer Badge: Replaced the static "DONE (LAST ROUND)" badge with a clickable button badge (`DONE (LAST ROUND) ✕`) in the rotation queues of Lyracist, KSRotation desktop, KSRotation.Maui, and the Remote DJ portal (`dj.html`). Clicking or tapping this badge immediately removes the last-round done flag, restores the singer to active eligibility, recalculates wait times and round estimations, updates Next Singer highlights, and syncs to audience billboard and remote devices.
@@ -33,8 +45,13 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Shared Spectrum Analyzer (`Shared/SpectrumAnalyzer.cs`, `MonoSampleConverter.cs`, `SpectrumBarStyles.cs`)**: FFT/band logic extracted from Lyracist's `AudioSpectrumService` into shared code, with unit tests (`SpectrumAnalyzerTests.cs`).
 - **KSRotation Line-In Spectrum (`LineInSpectrumService.cs`, `Controls/`)**: Spectrum visualizer for the singer display and DJ banner windows, with new settings in `AppSettings.cs` and controls in `MainWindow.xaml`.
 
-### Changed
-- Lyracist `AudioSpectrumService` and `LyricsWindow` now use the shared analyzer.
+### Fixed
+- **DJ & Special Event Banner Monitor Selection Persistence (`KSRotation/ViewModels/MainViewModel.cs`, `KSRotation/MainWindow.xaml`)**:
+  - Resolved an issue where the selected monitor device in the "DJ & Special Event Banners" settings ComboBox did not remain visible.
+  - Added two-way binding (`Mode=TwoWay`) on `DjBannerMonitorDevice` in `MainWindow.xaml`.
+  - Updated `RefreshAvailableMonitors()` in `MainViewModel.cs` to capture, preserve, and restore `DjBannerMonitorDevice` (as well as `ConnectInstructionsScreen`), preventing the ComboBox from coercing the value to `null` or empty string when clearing and repopulating `AvailableMonitors`.
+  - Added intelligent fallback defaulting to `SelectedMonitorDevice` or the primary/secondary monitor when unassigned or unavailable.
+  - Added monitor refresh guard (`_isRefreshingMonitors`) across both WPF and MAUI compilation paths to suppress transient `null` values and unwanted settings overrides while monitor devices are enumerated.
 
 ## [26.10.1.0] - 2026-10-03
 

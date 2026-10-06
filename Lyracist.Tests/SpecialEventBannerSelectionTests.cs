@@ -221,6 +221,33 @@ public class SpecialEventBannerSelectionTests
     }
 
     [Fact]
+    public void AnnouncementBanners_UseFreshPathEachTime_AndAreDeleted()
+    {
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"announcements_{Guid.NewGuid():N}");
+        try
+        {
+            string first = Lyracist.Shared.DjBannerFileManager.CreateAnnouncementBanner(dir, "First");
+            System.Threading.Thread.Sleep(20);
+            string second = Lyracist.Shared.DjBannerFileManager.CreateAnnouncementBanner(dir, "Second");
+
+            Assert.NotEqual(first, second);
+            Assert.False(System.IO.File.Exists(first));
+            Assert.Equal(second, Lyracist.Shared.DjBannerFileManager.GetCurrentAnnouncementPath(dir));
+
+            // Generated files live in a subfolder, so the banner picker never lists them.
+            Assert.DoesNotContain(Lyracist.Shared.DjBannerFileManager.ScanBanners(dir), b => b.FullPath == second);
+
+            Lyracist.Shared.DjBannerFileManager.DeleteGeneratedAnnouncements(dir);
+            Assert.False(System.IO.File.Exists(second));
+            Assert.Null(Lyracist.Shared.DjBannerFileManager.GetCurrentAnnouncementPath(dir));
+        }
+        finally
+        {
+            if (System.IO.Directory.Exists(dir)) System.IO.Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
     public void UpdateActiveSpecialEventFromSync_WithAnnouncement_QuietlyUpdatesSelection()
     {
         var vm = CreateTestKaraokeViewModel(out var mockDisplay);

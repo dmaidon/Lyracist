@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:56:00 -> Add unit tests for restoring accidental finished singers during last round
+// Edited on Oct 5, 2026 @ 22:53:30 -> Add unit tests for MoveSingerToTop preserving anchor and unskipping performer
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -1073,6 +1073,114 @@ public class RotationHelpersSingerTests
         bob.HasSungInLastRound = false;
         RotationHelpers.RecalculateEstimatedWaits(singers, isLastRound: true, defaultEstimatedPerformanceSeconds: 300, enabled: true);
         Assert.True(bob.EstimatedWaitMinutes > 0);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_NoCurrentSinger_MovesSingerToIndex0()
+    {
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol" };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, carol);
+
+        Assert.True(result);
+        Assert.Equal(carol, singers[0]);
+        Assert.Equal(alice, singers[1]);
+        Assert.Equal(bob, singers[2]);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_WithCurrentSingerAtTop_MovesSingerToIndex1AndMarksAsNext()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = new Singer { Name = "Bob", IsNext = true };
+        var carol = new Singer { Name = "Carol" };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, carol, floatCurrentToTop: true);
+
+        Assert.True(result);
+        Assert.Equal(alice, singers[0]);
+        Assert.Equal(carol, singers[1]);
+        Assert.Equal(bob, singers[2]);
+        Assert.True(alice.IsCurrent);
+        Assert.True(carol.IsNext);
+        Assert.False(bob.IsNext);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_DoesNotChangeAnchorSinger()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = new Singer { Name = "Bob", IsRotationStart = true }; // Bob is the anchor
+        var carol = new Singer { Name = "Carol" };
+        var david = new Singer { Name = "David" };
+        var singers = new List<Singer> { alice, bob, carol, david };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, david, floatCurrentToTop: true);
+
+        Assert.True(result);
+        Assert.Equal(david, singers[1]);
+        // Anchor singer MUST remain Bob and NOT change
+        Assert.True(bob.IsRotationStart);
+        Assert.False(david.IsRotationStart);
+        Assert.False(alice.IsRotationStart);
+        Assert.False(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_SkippedSinger_ClearsSkippedFlagAndRestoresToRotation()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol", IsSkipped = true };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, carol, floatCurrentToTop: true);
+
+        Assert.True(result);
+        Assert.False(carol.IsSkipped);
+        Assert.Equal(carol, singers[1]);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_WhenAnchorSingerItselfIsMoved_RetainsAnchorFlag()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol", IsRotationStart = true };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, carol, floatCurrentToTop: true);
+
+        Assert.True(result);
+        Assert.Equal(carol, singers[1]);
+        Assert.True(carol.IsRotationStart);
+        Assert.False(alice.IsRotationStart);
+        Assert.False(bob.IsRotationStart);
+    }
+
+    [Fact]
+    public void MoveSingerToTop_LinkedPartner_PreservesAdjacency()
+    {
+        var carolId = Guid.NewGuid();
+        var daveId = Guid.NewGuid();
+        var alice = new Singer { Name = "Alice", Id = Guid.NewGuid(), IsCurrent = true };
+        var bob = new Singer { Name = "Bob", Id = Guid.NewGuid() };
+        var carol = new Singer { Name = "Carol", Id = carolId, LinkedSingerId = daveId };
+        var dave = new Singer { Name = "Dave", Id = daveId, LinkedSingerId = carolId };
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        bool result = RotationHelpers.MoveSingerToTop(singers, carol, floatCurrentToTop: true);
+
+        Assert.True(result);
+        Assert.Equal(alice, singers[0]);
+        Assert.Equal(carol, singers[1]);
+        Assert.Equal(dave, singers[2]); // Dave pulled adjacent right after Carol
+        Assert.Equal(bob, singers[3]);
     }
 }
 

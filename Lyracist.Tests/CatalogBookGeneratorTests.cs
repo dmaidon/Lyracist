@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 07:58:00 -> Add User Manual update test for Clear Last Round Done Accidental Flag
+// Edited on Oct 5, 2026 @ 22:56:30 -> Add User Manual update test for Move to Top of Rotation
 using System;
 using System.IO;
 using Xunit;
@@ -3970,6 +3970,141 @@ During the final round of the evening (when 'Last Round' is engaged), performers
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " ClearLastRoundDoneFlag";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManuals_MoveToTopOfRotation()
+        {
+            string docDir = @"C:\VB26\Lyracist\Documentation";
+            if (!Directory.Exists(docDir)) return;
+
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            string updateText = @"
+Lyracist Pro Suite & KSRotation: Move to Top of Rotation (`RotationViewModel.cs`, `RotationPage.xaml`, `KaraokePage.xaml`, `MainViewModel.cs`, `MainWindow.xaml`, `KSRotation.Maui`) - (October 2026)
+
+Section: Lyracist & KSRotation / Rotation Management / Queue Ordering & Performer Priority
+
+[Overview & Purpose]
+Hosts frequently encounter scenarios where a scheduled performer was temporarily away (e.g. in the restroom, stepping outside, or getting a drink) and was skipped or displaced. Once the performer returns, the host needs to reinsert them at the very top of the queue so they perform next, without disrupting current active playback or having to manually drag/click 'Move Up' repeatedly through dozens of queue slots.
+
+The new 'Move to Top of Rotation' feature instantly relocates any performer to the head of the waiting queue. If an active singer is currently singing on stage, the moved performer is placed at slot 1 (the 'Up Next' position) and highlighted in blue. If no singer is currently performing, they are placed at index 0.
+
+[Anchor Preservation Guarantee]
+Crucially, moving a performer to the top of the rotation queue does NOT in any way change, reassign, or alter the Rotation Anchor ('⚓ ANCHOR' / IsRotationStart). The anchor singer marks the logical start of a rotation round and tracks full-cycle completion. Moving a performer to the top preserves the existing anchor singer wherever they are in the list. The anchor can still be changed manually at any time using the 'Set as Rotation Anchor' button or context menu option.
+
+[Automatic Flag Clearing & Restoration]
+If the performer being moved to the top was previously skipped ('IsSkipped'), paused ('IsPaused'), or marked inactive ('IsInactive'), those flags are automatically cleared upon moving. If they were marked done in the final round ('HasSungInLastRound'), that flag is also cleared so they are immediately restored to full active eligibility. Duet/linked partners remain strictly adjacent.
+
+[Multiple Access Points Across Apps]
+1. Lyracist Desktop:
+   - Singer ContextMenu: Right-click any singer row in RotationPage or KaraokePage and select 'Move to Top of Rotation'.
+   - Performer Row Button: Click the dedicated 'Move to Top of Rotation' button (upload arrow icon) on any singer row.
+   - Queue Toolbar: Select a performer and click the 'Move Selected Singer to Top of Rotation' button on the toolbar next to Move Down.
+2. KSRotation Desktop:
+   - Performer ContextMenu: Right-click any performer row and select 'Move to Top of Rotation'.
+   - Performer List Button: Click the dedicated '⤒' button on any performer row next to the Move Down button.
+3. KSRotation.Maui:
+   - Tap the dedicated '⤒' button on any performer card in the active rotation queue.
+4. Remote DJ Web Portal (/dj):
+   - Supports 'move-to-top' and 'move-top' remote control actions.";
+
+            // 1. Append to updates log text file if not already present
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingUpdates = File.ReadAllText(updatesTxtPath);
+                if (!existingUpdates.Contains("Move to Top of Rotation (`RotationViewModel.cs`"))
+                {
+                    File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                }
+            }
+
+            // 2. Update docx file if not already present
+            if (File.Exists(docxPath))
+            {
+                using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                            {
+                                if (p.InnerText.Contains("Section: Move to Top of Rotation"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Move to Top of Rotation & Performer Priority")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("MoveToTopOfRotation"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Move to Top of Rotation & Performer Priority", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " MoveToTopOfRotation";
                             doc.Save(pdfPath);
                         }
                     }

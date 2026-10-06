@@ -266,7 +266,7 @@ public class DisplayService : IDisplayService
             }
 
             var eventConfig = Lyracist.Core.Helpers.AppSettings.SpecialEvents.FirstOrDefault(e => e.EventName.Equals(_preferences.SelectedSpecialEvent, StringComparison.OrdinalIgnoreCase));
-            if (eventConfig != null)
+            if (eventConfig != null && !_preferences.SelectedSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase)) // the configured "Announcement" entry is a static file; the generated one wins
             {
                 string fullPath = System.IO.Path.Combine(Globals.EventBannersDir, eventConfig.BannerFileName);
                 if (System.IO.File.Exists(fullPath))

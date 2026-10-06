@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 23:35:00 -> Add dynamic announcement banner prompt and event handling
+// Edited on Oct 5, 2026 @ 22:46:50 -> Fix CS8611 nullable parameter warning in OnActiveSpecialEventChanged
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -115,6 +115,12 @@ public partial class KaraokeViewModel
     public void InitializeSpecialEvents()
     {
         var prefs = _displayService.GetPreferences();
+        // Announcements are one-night: clear leftovers from the last run and don't resume on a deleted one.
+        DjBannerFileManager.DeleteGeneratedAnnouncements(Globals.EventBannersDir);
+        if (string.Equals(prefs.SelectedSpecialEvent, "Announcement", StringComparison.OrdinalIgnoreCase))
+        {
+            _displayService.UpdateSpecialEvent("None");
+        }
         ActiveSpecialEvent = string.IsNullOrWhiteSpace(prefs.SelectedSpecialEvent) ? "None" : prefs.SelectedSpecialEvent;
 
         var currentEvents = Lyracist.Core.Helpers.AppSettings.SpecialEvents;
@@ -235,6 +241,19 @@ public partial class KaraokeViewModel
         if (BirthdayPromptHandler != null) return BirthdayPromptHandler(defaultName);
         if (System.Windows.Application.Current == null) return defaultName;
         return TextPromptDialog.ShowBirthday(defaultName);
+    }
+
+    // Closing an announcement deletes its banner. Deferred so the banner window has moved off the file first.
+    partial void OnActiveSpecialEventChanged(string? oldValue, string newValue)
+    {
+        if (oldValue != null &&
+            oldValue.Equals("Announcement", StringComparison.OrdinalIgnoreCase) &&
+            !newValue.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Background,
+                () => DjBannerFileManager.DeleteGeneratedAnnouncements(Globals.EventBannersDir));
+        }
     }
 
     partial void OnActiveSpecialEventChanged(string value)
