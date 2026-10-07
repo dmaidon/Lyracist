@@ -760,31 +760,11 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
-            static string AsPrefix(string dir) => dir.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
-            string prefix = AsPrefix(path);
-
-            // Other registered directories (nested inside or containing this one) keep their songs.
-            var otherPrefixes = LibraryDirectories
-                .Where(d => !string.Equals(d, path, StringComparison.OrdinalIgnoreCase))
-                .Select(AsPrefix)
-                .ToList();
-
+            // Shared with Lyracist itself (Lyracist.Data), so both apps pick the same songs:
+            // songs also owned by another registered directory are kept.
             using var context = new LyracistDbContext();
-
-            // Match in memory with OrdinalIgnoreCase rather than relying on how the provider
-            // translates StartsWith (case sensitivity, escaping of backslashes).
-            var candidates = await context.Songs
-                .AsNoTracking()
-                .Select(s => new { s.SongId, s.FilePath })
-                .ToListAsync();
-
-            var ids = candidates
-                .Where(c => c.FilePath != null
-                            && c.FilePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                            && !otherPrefixes.Any(o => c.FilePath.StartsWith(o, StringComparison.OrdinalIgnoreCase)))
-                .Select(c => c.SongId)
-                .ToList();
+            var maintenance = new LibraryMaintenanceService(context);
+            var ids = await maintenance.FindSongIdsUnderDirectoryAsync(path, LibraryDirectories);
 
             var confirm = System.Windows.MessageBox.Show(
                 $"Remove '{path}' from the scan list?\n\n{ids.Count:N0} indexed song(s) from this folder will also be removed from the database. A backup is made first.",
@@ -796,20 +776,7 @@ public partial class MainViewModel : ObservableObject
 
             if (ids.Count > 0 && !await DatabaseBackup.EnsureBackupAsync("RemoveDirectory")) return;
 
-            var orphaned = ids.Count == 0
-                ? []
-                : await context.Songs.Where(s => ids.Contains(s.SongId)).ToListAsync();
-
-            if (orphaned.Count > 0)
-            {
-                var searchService = new SearchService(context);
-                context.Songs.RemoveRange(orphaned);
-                await context.SaveChangesAsync();
-                foreach (var s in orphaned)
-                {
-                    await searchService.RemoveSongFromIndex(s.SongId);
-                }
-            }
+            int removedCount = await maintenance.RemoveSongsAsync(ids);
 
             LibraryDirectories.Remove(path);
             LibraryDirectoryStore.Save(LibraryDirectories.ToList());
@@ -818,7 +785,7 @@ public partial class MainViewModel : ObservableObject
             RefreshStats();
             Search();
 
-            AppendLog($"Removed directory '{path}' and {orphaned.Count} associated song(s).");
+            AppendLog($"Removed directory '{path}' and {removedCount} associated song(s).");
         }
         catch (Exception ex)
         {

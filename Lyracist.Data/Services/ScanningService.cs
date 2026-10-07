@@ -673,9 +673,7 @@ namespace Lyracist.Data.Services
         /// </summary>
         private static bool IsPathUnderDirectory(string filePath, string directoryPath)
         {
-            string normalizedDir = directoryPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                + Path.DirectorySeparatorChar;
-            return filePath.StartsWith(normalizedDir, StringComparison.OrdinalIgnoreCase);
+            return LibraryMaintenanceService.IsPathUnderDirectory(filePath, directoryPath);
         }
 
         private static List<string> SafeEnumerateFiles(string path)

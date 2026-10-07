@@ -113,18 +113,17 @@ public class LibraryService : ILibraryService
 
         try
         {
-            // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
-            string prefix = path.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
-
+            // Shared with LyracistDbEditor: songs also owned by another registered directory are
+            // kept, and removed songs are dropped from the search index too.
             using var context = new LyracistDbContext();
-            var orphaned = context.Songs
-                .Where(s => s.FilePath.StartsWith(prefix))
-                .ToList();
+            var maintenance = new LibraryMaintenanceService(context);
 
-            if (orphaned.Count == 0) return;
+            var ids = maintenance
+                .FindSongIdsUnderDirectoryAsync(path, AppSettings.LibraryDirectories)
+                .GetAwaiter().GetResult();
+            if (ids.Count == 0) return;
 
-            context.Songs.RemoveRange(orphaned);
-            context.SaveChanges();
+            maintenance.RemoveSongsAsync(ids).GetAwaiter().GetResult();
 
             LibraryUpdated?.Invoke(this, EventArgs.Empty);
         }
