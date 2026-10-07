@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
@@ -43,9 +44,70 @@ public class LibraryService : ILibraryService
         RunScan(dirs);
     }
 
+    // Only one scan runs at a time. A request that arrives mid-scan is queued (merged with any
+    // other queued folders) and runs as soon as the current scan finishes, so nothing is dropped
+    // and two scans never write to the library concurrently.
+    private readonly object _scanGate = new();
+    private bool _scanRunning;
+    private CancellationTokenSource? _scanCts;
+    private List<string>? _pendingDirs;
+
+    /// <summary>Stops the running scan/probe (if any) and discards queued requests; used on app exit.</summary>
+    public void CancelScan()
+    {
+        lock (_scanGate)
+        {
+            _pendingDirs = null;
+            try { _scanCts?.Cancel(); } catch (ObjectDisposedException) { }
+        }
+    }
+
     private void RunScan(IEnumerable<string> dirs)
     {
-        Task.Run(async () =>
+        var dirList = dirs.ToList();
+        CancellationTokenSource cts;
+
+        lock (_scanGate)
+        {
+            if (_scanRunning)
+            {
+                _pendingDirs ??= [];
+                foreach (var d in dirList)
+                {
+                    if (!_pendingDirs.Contains(d, StringComparer.OrdinalIgnoreCase)) _pendingDirs.Add(d);
+                }
+                return;
+            }
+
+            _scanRunning = true;
+            cts = _scanCts = new CancellationTokenSource();
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await RunScanCoreAsync(dirList, cts.Token);
+            }
+            finally
+            {
+                List<string>? next;
+                lock (_scanGate)
+                {
+                    _scanRunning = false;
+                    if (ReferenceEquals(_scanCts, cts)) _scanCts = null;
+                    next = cts.IsCancellationRequested ? null : _pendingDirs;
+                    _pendingDirs = null;
+                }
+                cts.Dispose();
+
+                if (next is { Count: > 0 }) RunScan(next);
+            }
+        });
+    }
+
+    private async Task RunScanCoreAsync(List<string> dirs, CancellationToken token)
+    {
         {
             using var context = new LyracistDbContext();
             var scanningService = new ScanningService(context);
@@ -60,7 +122,7 @@ public class LibraryService : ILibraryService
                     }
                     catch (OperationCanceledException) { }
                 });
-                await scanningService.ScanDirectories(dirs, scanProgress);
+                await scanningService.ScanDirectories(dirs, scanProgress, token);
             }
             catch (OperationCanceledException)
             {
@@ -92,7 +154,7 @@ public class LibraryService : ILibraryService
                     }
                     catch (OperationCanceledException) { }
                 });
-                await scanningService.ProbeMissingMetadataAsync(probeProgress);
+                await scanningService.ProbeMissingMetadataAsync(probeProgress, token);
                 MetadataProbeCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (OperationCanceledException)
@@ -104,7 +166,7 @@ public class LibraryService : ILibraryService
                 Lyracist.Shared.Globals.LogError("Lyracist", "Background metadata probing failed", ex);
                 ScanFailed?.Invoke(this, $"Metadata fill-in error: {ex.Message}");
             }
-        });
+        }
     }
 
     public void RemoveSongsUnderDirectory(string path)

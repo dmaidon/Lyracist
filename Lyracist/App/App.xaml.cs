@@ -366,6 +366,10 @@ public partial class App : System.Windows.Application
         // exiting) isn't lost when the process ends before the debounce timer fires.
         AppSettings.Flush();
 
+        // Stop any in-flight library scan so it isn't still writing to the database (or raising
+        // events into a dispatcher that is shutting down) while the process tears down.
+        try { Host?.Services.GetService<ILibraryService>()?.CancelScan(); } catch { }
+
         foreach (var djBannerWindow in Windows.OfType<DjBannerWindow>())
         {
             djBannerWindow.IsShuttingDown = true;

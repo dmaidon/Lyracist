@@ -10,6 +10,10 @@ public interface ILibraryService
 {
     void ScanDirectory(string path);
     void RescanAllDirectories();
+
+    /// <summary>Stops the running library scan/metadata probe and discards any queued scans (called on app exit).</summary>
+    void CancelScan();
+
     void RemoveSongsUnderDirectory(string path);
     int GetSongCount();
     IEnumerable<KaraokeSong> Search(string query, bool isMusic = false);

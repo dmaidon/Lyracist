@@ -60,6 +60,27 @@ public class ScanningServiceTests : IDisposable
         return await context.Songs.AsNoTracking().SingleAsync(s => s.FilePath == path);
     }
 
+    // A cancelled scan stops at a batch boundary with OperationCanceledException instead of
+    // running to completion (Lyracist and the DbEditor cancel scans on shutdown).
+    [Fact]
+    public async Task Scan_WithCancelledToken_ThrowsAndStopsBeforeProcessingFiles()
+    {
+        string path = Path.Combine(_tempDir, "Toto - Africa.mp3");
+        File.WriteAllBytes(path, [0, 1, 2]);
+
+        using var cts = new System.Threading.CancellationTokenSource();
+        cts.Cancel();
+
+        using (var context = new LyracistDbContext())
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => new ScanningService(context).ScanDirectories([_tempDir], null, cts.Token));
+        }
+
+        using var verify = new LyracistDbContext();
+        Assert.False(await verify.Songs.AnyAsync(s => s.FilePath == path, TestContext.Current.CancellationToken));
+    }
+
     // A scan that includes a missing path (unmounted drive) alongside a real folder must not treat
     // every song under the missing path as "deleted" and remove it from the library.
     [Fact]

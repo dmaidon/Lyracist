@@ -247,7 +247,7 @@ namespace Lyracist.Data.Services
         // CORE SCAN ENGINE (HIGH-PERFORMANCE BATCH SCAN)
         // ==========================================
 
-        public async Task ScanDirectories(IEnumerable<string> paths, IProgress<ScanProgress>? progress = null)
+        public async Task ScanDirectories(IEnumerable<string> paths, IProgress<ScanProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             var pathList = paths.ToList();
             // Only directories that actually exist right now were crawled; a missing path is most
@@ -285,7 +285,7 @@ namespace Lyracist.Data.Services
             // rows are re-attached explicitly in ProcessBatchAsync instead.
             var existingSongsMap = await _context.Songs
                 .AsNoTracking()
-                .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase);
+                .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
             // Clean up dead records for files that no longer exist under the scanned directory paths.
             var songsToRemove = existingSongsMap.Values
@@ -435,6 +435,10 @@ namespace Lyracist.Data.Services
 
             foreach (var file in candidateFiles)
             {
+                // Cancellation is only honoured between batches: each batch is saved and indexed
+                // in one transaction, so stopping here never leaves a half-written batch.
+                if (batch.Count == 0) cancellationToken.ThrowIfCancellationRequested();
+
                 batch.Add(file);
                 processed++;
 
@@ -469,11 +473,11 @@ namespace Lyracist.Data.Services
         // BACKGROUND METADATA FILL-IN (HIGH-SPEED IN-MEMORY TAGLIB PROBING)
         // ==========================================
 
-        public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null)
+        public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             var songsNeedingProbe = await _context.Songs
                 .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             int totalFiles = songsNeedingProbe.Count;
             if (totalFiles == 0) return;
@@ -486,6 +490,9 @@ namespace Lyracist.Data.Services
 
             for (int i = 0; i < songsNeedingProbe.Count; i += batchSize)
             {
+                // Checked between batches only, so a batch that has been probed is always saved.
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var batch = songsNeedingProbe.Skip(i).Take(batchSize).ToList();
 
                 var semaphore = new System.Threading.SemaphoreSlim(maxConcurrency);
@@ -494,6 +501,7 @@ namespace Lyracist.Data.Services
                     await semaphore.WaitAsync();
                     try
                     {
+                        if (cancellationToken.IsCancellationRequested) return;
                         await ProbeSongMetadataAsync(song);
                     }
                     catch (Exception ex)
