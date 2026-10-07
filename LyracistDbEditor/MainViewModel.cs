@@ -86,6 +86,8 @@ public partial class MainViewModel : ObservableObject
     private string? _selectedLibraryDirectory;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRemoveDirectory))]
+    [NotifyPropertyChangedFor(nameof(CanRescanDirectory))]
     private bool _isLibraryScanning;
 
     [ObservableProperty]
@@ -115,6 +117,57 @@ public partial class MainViewModel : ObservableObject
         RefreshStats();
         Search();
         RefreshReadinessCounts();
+    }
+
+    // Marshals to the UI thread, but quietly does nothing once the app is shutting down
+    // (Application.Current can be null or the dispatcher can throw TaskCanceledException).
+    private static void RunOnUi(Action action)
+    {
+        try
+        {
+            if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+            {
+                disp.Invoke(action);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    /// <summary>Cancels every cancellable background operation; called when the window closes.</summary>
+    public void CancelAllOperations()
+    {
+        try { _scanCts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { _renameCts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { _readinessCts?.Cancel(); } catch (ObjectDisposedException) { }
+    }
+
+    // Extracts tags via FFprobe; for a .zip, the first mp3/wav inside is extracted to a temp file
+    // that is always cleaned up, even if the probe throws.
+    private static async Task<(string Artist, string Title, string Genre)> ProbeTagsAsync(string filePath)
+    {
+        if (!string.Equals(Path.GetExtension(filePath), ".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            var direct = await FFprobeRunner.ProbeFile(filePath);
+            return (direct.ArtistTag, direct.TitleTag, direct.GenreTag);
+        }
+
+        using var archive = ZipFile.OpenRead(filePath);
+        var audioEntry = archive.Entries.FirstOrDefault(e =>
+            e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+            e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+        if (audioEntry == null) return (string.Empty, string.Empty, string.Empty);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntry.FullName));
+        try
+        {
+            audioEntry.ExtractToFile(tempFile, overwrite: true);
+            var probe = await FFprobeRunner.ProbeFile(tempFile);
+            return (probe.ArtistTag, probe.TitleTag, probe.GenreTag);
+        }
+        finally
+        {
+            try { File.Delete(tempFile); } catch { }
+        }
     }
 
     [RelayCommand]
@@ -241,84 +294,57 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            string resolvedArtist = string.Empty;
-            string resolvedTitle = string.Empty;
-            string resolvedGenre = string.Empty;
-
             if (!File.Exists(song.FilePath))
             {
                 System.Windows.MessageBox.Show("The physical file does not exist on disk.", "File Not Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
-            string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
-            if (ext == ".zip")
-            {
-                using var archive = ZipFile.OpenRead(song.FilePath);
-                var audioEntry = archive.Entries.FirstOrDefault(e => 
-                    e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || 
-                    e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
-                
-                if (audioEntry != null)
-                {
-                    string tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntry.FullName));
-                    audioEntry.ExtractToFile(tempFile, overwrite: true);
-                    
-                    var probeResult = await FFprobeRunner.ProbeFile(tempFile);
-                    resolvedArtist = probeResult.ArtistTag;
-                    resolvedTitle = probeResult.TitleTag;
-                    resolvedGenre = probeResult.GenreTag;
-                    
-                    try { File.Delete(tempFile); } catch {}
-                }
-            }
-            else
-            {
-                var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
-                resolvedArtist = probeResult.ArtistTag;
-                resolvedTitle = probeResult.TitleTag;
-                resolvedGenre = probeResult.GenreTag;
-            }
+            // Work on local copies so the bound list item isn't left showing values that were
+            // never saved when no artist can be resolved.
+            string artist = song.Artist ?? string.Empty;
+            string title = song.Title ?? string.Empty;
+            string genre = song.Genre ?? string.Empty;
+            string? tags = song.Tags;
+
+            var (resolvedArtist, resolvedTitle, resolvedGenre) = await ProbeTagsAsync(song.FilePath);
 
             // Update using local file tag resolution if resolved
             if (!string.IsNullOrWhiteSpace(resolvedArtist) && resolvedArtist.Trim() != "Unknown Artist")
             {
-                song.Artist = resolvedArtist.Trim();
+                artist = resolvedArtist.Trim();
                 if (!string.IsNullOrWhiteSpace(resolvedTitle))
                 {
-                    song.Title = resolvedTitle.Trim();
+                    title = resolvedTitle.Trim();
                 }
-                song.Genre = resolvedGenre;
+                genre = resolvedGenre;
             }
 
             // Query online service for missing artist and tags
             try
             {
-                var onlineMeta = await MetadataFetchService.FetchMetadataAsync(song.Title, song.Artist, CancellationToken.None);
+                var onlineMeta = await MetadataFetchService.FetchMetadataAsync(title, artist, CancellationToken.None);
                 if (onlineMeta != null)
                 {
-                    if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
+                    if ((artist == "Unknown Artist" || string.IsNullOrEmpty(artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
                     {
-                        song.Artist = onlineMeta.Artist;
+                        artist = onlineMeta.Artist;
                         if (!string.IsNullOrEmpty(onlineMeta.Title))
                         {
-                            song.Title = onlineMeta.Title;
+                            title = onlineMeta.Title;
                         }
                     }
 
-                    if (onlineMeta.Tags.Count > 0)
-                    {
-                        song.Tags = string.Join(", ", onlineMeta.Tags);
-                    }
-                    else
-                    {
-                        song.Tags = "none";
-                    }
+                    tags = onlineMeta.Tags.Count > 0 ? string.Join(", ", onlineMeta.Tags) : "none";
                 }
                 else
                 {
-                    song.Tags = "none";
+                    tags = "none";
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -326,16 +352,16 @@ public partial class MainViewModel : ObservableObject
             }
 
             // If tags or artist resolved successfully, update the DB record
-            if (!string.IsNullOrWhiteSpace(song.Artist) && song.Artist != "Unknown Artist")
+            if (!string.IsNullOrWhiteSpace(artist) && artist != "Unknown Artist")
             {
                 using var context = new LyracistDbContext();
                 var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == song.SongId);
                 if (dbSong != null)
                 {
-                    dbSong.Artist = song.Artist;
-                    dbSong.Title = song.Title;
-                    dbSong.Genre = song.Genre;
-                    dbSong.Tags = song.Tags;
+                    dbSong.Artist = artist;
+                    dbSong.Title = title;
+                    dbSong.Genre = genre;
+                    dbSong.Tags = tags;
 
                     await context.SaveChangesAsync();
 
@@ -363,25 +389,40 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void StartScan()
     {
-        if (IsScanning) return;
-        
+        // Rename shares the log/progress display, so the two never run together.
+        if (IsScanning || IsRenaming) return;
+
         IsScanning = true;
-        _scanCts = new CancellationTokenSource();
+        var cts = new CancellationTokenSource();
+        _scanCts = cts;
         ScanLog.Clear();
         ScanProgressPercent = 0;
         ScanProgressText = "Initializing background scan...";
-        
-        Task.Run(() => RunSlowScanAsync(_scanCts.Token));
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await RunSlowScanAsync(cts.Token);
+            }
+            finally
+            {
+                // IsScanning stays true until the task has really finished, so a new scan can't
+                // start while the old one is still winding down.
+                RunOnUi(() => IsScanning = false);
+                if (ReferenceEquals(_scanCts, cts)) _scanCts = null;
+                cts.Dispose();
+            }
+        });
     }
 
     [RelayCommand]
     private void StopScan()
     {
         if (!IsScanning) return;
-        
+
         _scanCts?.Cancel();
-        IsScanning = false;
-        ScanProgressText = "Scan stopped by host.";
+        ScanProgressText = "Stopping scan...";
     }
 
     private async Task RunSlowScanAsync(CancellationToken token)
@@ -401,7 +442,7 @@ public partial class MainViewModel : ObservableObject
                     File.WriteAllLines(filePath, failedFiles);
                     
                     string logMsg = $"[{DateTime.Now:HH:mm:ss}] Exported {failedFiles.Count} unresolved tracks to: {filePath}";
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    RunOnUi(() =>
                     {
                         ScanLog.Insert(0, logMsg);
                         if (ScanLog.Count > 100) ScanLog.RemoveAt(ScanLog.Count - 1);
@@ -426,7 +467,7 @@ public partial class MainViewModel : ObservableObject
             int total = targetSongs.Count;
             if (total == 0)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                RunOnUi(() =>
                 {
                     ScanProgressText = "No songs with missing artists found.";
                     IsScanning = false;
@@ -445,7 +486,7 @@ public partial class MainViewModel : ObservableObject
                 double percentage = (double)processed / total * 100;
                 string currentFile = Path.GetFileName(song.FilePath);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                RunOnUi(() =>
                 {
                     ScanProgressPercent = percentage;
                     ScanProgressText = $"Processing {processed}/{total}: {currentFile}";
@@ -459,44 +500,17 @@ public partial class MainViewModel : ObservableObject
                     continue;
                 }
 
-                string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
                 string resolvedArtist = string.Empty;
                 string resolvedTitle = string.Empty;
                 string resolvedGenre = string.Empty;
 
-                if (ext == ".zip")
+                try
                 {
-                    try
-                    {
-                        using var archive = ZipFile.OpenRead(song.FilePath);
-                        var audioEntry = archive.Entries.FirstOrDefault(e => 
-                            e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || 
-                            e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
-                        
-                        if (audioEntry != null)
-                        {
-                            string tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntry.FullName));
-                            audioEntry.ExtractToFile(tempFile, overwrite: true);
-                            
-                            var probeResult = await FFprobeRunner.ProbeFile(tempFile);
-                            resolvedArtist = probeResult.ArtistTag;
-                            resolvedTitle = probeResult.TitleTag;
-                            resolvedGenre = probeResult.GenreTag;
-                            
-                            try { File.Delete(tempFile); } catch {}
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to parse zip tags", ex);
-                    }
+                    (resolvedArtist, resolvedTitle, resolvedGenre) = await ProbeTagsAsync(song.FilePath);
                 }
-                else
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
-                    resolvedArtist = probeResult.ArtistTag;
-                    resolvedTitle = probeResult.TitleTag;
-                    resolvedGenre = probeResult.GenreTag;
+                    Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to read tags for " + song.FilePath, ex);
                 }
 
                 // Update using local file tag resolution if resolved
@@ -541,7 +555,7 @@ public partial class MainViewModel : ObservableObject
                             song.Tags = "none";
                         }
                     }
-                    catch
+                    catch (Exception) when (!token.IsCancellationRequested)
                     {
                         // Preserve empty tags to try again later
                     }
@@ -567,7 +581,7 @@ public partial class MainViewModel : ObservableObject
                     updatedCount++;
 
                     string logMsg = $"[{DateTime.Now:HH:mm:ss}] Updated: {currentFile} -> Artist: {song.Artist}";
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    RunOnUi(() =>
                     {
                         ScanLog.Insert(0, logMsg);
                         if (ScanLog.Count > 100) ScanLog.RemoveAt(ScanLog.Count - 1);
@@ -583,9 +597,11 @@ public partial class MainViewModel : ObservableObject
 
             ExportFailedFiles();
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
-                ScanProgressText = $"Scan finished. Updated {updatedCount} tracks.";
+                ScanProgressText = token.IsCancellationRequested
+                    ? $"Scan stopped. Updated {updatedCount} tracks."
+                    : $"Scan finished. Updated {updatedCount} tracks.";
                 IsScanning = false;
                 RefreshStats();
                 Search(); // Sync updates list
@@ -594,7 +610,7 @@ public partial class MainViewModel : ObservableObject
         catch (OperationCanceledException)
         {
             ExportFailedFiles();
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
                 ScanProgressText = "Scan canceled.";
                 IsScanning = false;
@@ -603,7 +619,7 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             ExportFailedFiles();
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
                 ScanProgressText = $"Error: {ex.Message}";
                 IsScanning = false;
@@ -662,6 +678,7 @@ public partial class MainViewModel : ObservableObject
     private async Task RemoveLibraryDirectory()
     {
         if (string.IsNullOrWhiteSpace(SelectedLibraryDirectory)) return;
+        if (IsLibraryScanning) return; // the scanner would be re-inserting rows while we delete them
         string path = SelectedLibraryDirectory;
 
         var confirm = System.Windows.MessageBox.Show(
@@ -675,10 +692,34 @@ public partial class MainViewModel : ObservableObject
         try
         {
             // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
-            string prefix = path.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+            static string AsPrefix(string dir) => dir.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+            string prefix = AsPrefix(path);
+
+            // Other registered directories (nested inside or containing this one) keep their songs.
+            var otherPrefixes = LibraryDirectories
+                .Where(d => !string.Equals(d, path, StringComparison.OrdinalIgnoreCase))
+                .Select(AsPrefix)
+                .ToList();
 
             using var context = new LyracistDbContext();
-            var orphaned = await context.Songs.Where(s => s.FilePath.StartsWith(prefix)).ToListAsync();
+
+            // Match in memory with OrdinalIgnoreCase rather than relying on how the provider
+            // translates StartsWith (case sensitivity, escaping of backslashes).
+            var candidates = await context.Songs
+                .AsNoTracking()
+                .Select(s => new { s.SongId, s.FilePath })
+                .ToListAsync();
+
+            var ids = candidates
+                .Where(c => c.FilePath != null
+                            && c.FilePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                            && !otherPrefixes.Any(o => c.FilePath.StartsWith(o, StringComparison.OrdinalIgnoreCase)))
+                .Select(c => c.SongId)
+                .ToList();
+
+            var orphaned = ids.Count == 0
+                ? []
+                : await context.Songs.Where(s => ids.Contains(s.SongId)).ToListAsync();
 
             if (orphaned.Count > 0)
             {
@@ -739,7 +780,7 @@ public partial class MainViewModel : ObservableObject
             {
                 var scanProgress = new Progress<ScanProgress>(p =>
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    RunOnUi(() =>
                     {
                         LibraryScanProgressPercent = p.Percentage;
                         LibraryScanStatusText = $"Scanning… {p.FilesProcessed:N0} / {p.TotalFilesFound:N0} files";
@@ -751,7 +792,7 @@ public partial class MainViewModel : ObservableObject
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor library scan failed", ex);
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                RunOnUi(() =>
                 {
                     LibraryScanStatusText = $"Scan failed: {ex.Message}";
                     IsLibraryScanning = false;
@@ -760,9 +801,10 @@ public partial class MainViewModel : ObservableObject
                 return;
             }
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            // IsLibraryScanning stays true through the metadata fill-in below so a second scan (or a
+            // Remove Directory) can't overlap it; it's cleared once that phase has ended.
+            RunOnUi(() =>
             {
-                IsLibraryScanning = false;
                 LibraryScanStatusText = "Scan complete. Filling in song details in the background...";
                 RefreshStats();
                 Search();
@@ -833,6 +875,8 @@ public partial class MainViewModel : ObservableObject
                 }
                 catch (OperationCanceledException) { }
             }
+
+            RunOnUi(() => IsLibraryScanning = false);
         });
     }
 
@@ -855,164 +899,183 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task RenameFiles()
     {
+        if (IsRenaming) return;
+
         if (string.IsNullOrWhiteSpace(RenameFolderPath) || !Directory.Exists(RenameFolderPath))
         {
             System.Windows.MessageBox.Show("Please select a valid folder first.", "Invalid Path", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
+        // The rename shares the log and progress display with the slow metadata scan.
+        if (IsScanning)
+        {
+            System.Windows.MessageBox.Show("Please wait for (or stop) the metadata scan before renaming files.", "Scan In Progress", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
         IsRenaming = true;
-        _renameCts = new CancellationTokenSource();
-        var token = _renameCts.Token;
+        var cts = new CancellationTokenSource();
+        _renameCts = cts;
+        var token = cts.Token;
+        string folder = RenameFolderPath;
 
         ScanLog.Clear();
-        ScanLog.Add($"[START] Renaming files in folder: {RenameFolderPath}");
+        ScanLog.Add($"[START] Renaming files in folder: {folder}");
         ScanProgressText = "Preparing directory scan...";
         ScanProgressPercent = 0;
 
+        void Log(string message) => RunOnUi(() => ScanLog.Add(message));
+
         try
         {
-            // Scan for all files in the directory
-            string[] allFiles = await Task.Run(() => Directory.GetFiles(RenameFolderPath, "*.*", SearchOption.TopDirectoryOnly), token);
-            
-            // Filter files that we can process: standard audio/video formats and zip archives.
-            // Exclude matching .cdg files since they don't contain tag metadata; they are renamed dynamically in sync with their matching audio files.
-            var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            // All file I/O and tag reading runs off the UI thread so the window stays responsive
+            // and Cancel can be clicked.
+            await Task.Run(async () =>
             {
-                ".mp3", ".mp4", ".m4a", ".wma", ".flac", ".wav", ".zip"
-            };
+                string[] allFiles = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly);
 
-            var targetFiles = allFiles
-                .Where(f => supportedExtensions.Contains(Path.GetExtension(f)))
-                .ToList();
-
-            if (targetFiles.Count == 0)
-            {
-                ScanLog.Add("No supported audio, video, or zip files found in the folder.");
-                ScanProgressText = "No supported files found.";
-                IsRenaming = false;
-                return;
-            }
-
-            int processedCount = 0;
-            int renameSuccessCount = 0;
-
-            foreach (string filePath in targetFiles)
-            {
-                if (token.IsCancellationRequested)
+                // Filter files that we can process: standard audio/video formats and zip archives.
+                // Exclude matching .cdg files since they don't contain tag metadata; they are renamed dynamically in sync with their matching audio files.
+                var supportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    ScanLog.Add("[CANCEL] Operation cancelled by user.");
-                    break;
+                    ".mp3", ".mp4", ".m4a", ".wma", ".flac", ".wav", ".zip"
+                };
+
+                var targetFiles = allFiles
+                    .Where(f => supportedExtensions.Contains(Path.GetExtension(f)))
+                    .ToList();
+
+                if (targetFiles.Count == 0)
+                {
+                    Log("No supported audio, video, or zip files found in the folder.");
+                    RunOnUi(() => ScanProgressText = "No supported files found.");
+                    return;
                 }
 
-                processedCount++;
-                double percent = (double)processedCount / targetFiles.Count * 100;
-                ScanProgressPercent = percent;
-                ScanProgressText = $"Processing file {processedCount} of {targetFiles.Count}";
+                int processedCount = 0;
+                int renameSuccessCount = 0;
 
-                string fileName = Path.GetFileName(filePath);
-                string ext = Path.GetExtension(filePath).ToLowerInvariant();
-
-                try
+                foreach (string filePath in targetFiles)
                 {
-                    string? title = null;
-
-                    if (ext == ".zip")
+                    if (token.IsCancellationRequested)
                     {
-                        // Open zip to extract the main audio file metadata
-                        using var archive = ZipFile.OpenRead(filePath);
-                        var audioEntry = archive.Entries.FirstOrDefault(e =>
-                            e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
-                            e.FullName.EndsWith(".m4a", StringComparison.OrdinalIgnoreCase) ||
-                            e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
-                            e.FullName.EndsWith(".wma", StringComparison.OrdinalIgnoreCase));
-
-                        if (audioEntry != null)
-                        {
-                            string tempFile = Path.Combine(Path.GetTempPath(), $"lyra_rename_{Guid.NewGuid()}_{audioEntry.Name}");
-                            audioEntry.ExtractToFile(tempFile, true);
-                            try
-                            {
-                                using var tagFile = TagLib.File.Create(tempFile);
-                                title = tagFile.Tag.Title;
-                            }
-                            finally
-                            {
-                                if (File.Exists(tempFile))
-                                {
-                                    File.Delete(tempFile);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Direct audio file metadata
-                        using var tagFile = TagLib.File.Create(filePath);
-                        title = tagFile.Tag.Title;
+                        Log("[CANCEL] Operation cancelled by user.");
+                        break;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(title))
+                    processedCount++;
+                    double percent = (double)processedCount / targetFiles.Count * 100;
+                    int current = processedCount;
+                    RunOnUi(() =>
                     {
-                        string sanitizedTitle = SanitizeFileName(title);
-                        if (!string.IsNullOrWhiteSpace(sanitizedTitle))
+                        ScanProgressPercent = percent;
+                        ScanProgressText = $"Processing file {current} of {targetFiles.Count}";
+                    });
+
+                    string fileName = Path.GetFileName(filePath);
+                    string ext = Path.GetExtension(filePath).ToLowerInvariant();
+
+                    try
+                    {
+                        string? title = null;
+
+                        if (ext == ".zip")
                         {
-                            string directory = Path.GetDirectoryName(filePath) ?? RenameFolderPath;
-                            string baseNewPath = Path.Combine(directory, sanitizedTitle);
-                            string newPath = baseNewPath + ext;
+                            // Open zip to extract the main audio file metadata
+                            using var archive = ZipFile.OpenRead(filePath);
+                            var audioEntry = archive.Entries.FirstOrDefault(e =>
+                                e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                                e.FullName.EndsWith(".m4a", StringComparison.OrdinalIgnoreCase) ||
+                                e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
+                                e.FullName.EndsWith(".wma", StringComparison.OrdinalIgnoreCase));
 
-                            // Prevent duplicate filename overwrites
-                            // A path equal to the current file (ignoring case) is not a collision - the
-                            // file is already correctly named.
-                            int suffix = 1;
-                            while (!string.Equals(newPath, filePath, StringComparison.OrdinalIgnoreCase)
-                                   && (File.Exists(newPath) || File.Exists(Path.ChangeExtension(newPath, ".cdg"))))
+                            if (audioEntry != null)
                             {
-                                suffix++;
-                                newPath = $"{baseNewPath} ({suffix}){ext}";
-                            }
-
-                            string newFileName = Path.GetFileName(newPath);
-
-                            if (!string.Equals(fileName, newFileName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Rename matching .cdg file if it exists (crucial for keeping CDG graphics synced)
-                                string oldCdgPath = Path.ChangeExtension(filePath, ".cdg");
-                                if (File.Exists(oldCdgPath))
+                                string tempFile = Path.Combine(Path.GetTempPath(), $"lyra_rename_{Guid.NewGuid()}_{audioEntry.Name}");
+                                audioEntry.ExtractToFile(tempFile, true);
+                                try
                                 {
-                                    string newCdgPath = Path.ChangeExtension(newPath, ".cdg");
-                                    File.Move(oldCdgPath, newCdgPath);
-                                    ScanLog.Add($"Renamed CDG: {Path.GetFileName(oldCdgPath)} -> {Path.GetFileName(newCdgPath)}");
+                                    using var tagFile = TagLib.File.Create(tempFile);
+                                    title = tagFile.Tag.Title;
                                 }
-
-                                File.Move(filePath, newPath);
-                                renameSuccessCount++;
-                                await UpdateRenamedSongPathAsync(filePath, newPath);
-                                ScanLog.Add($"Renamed: {fileName} -> {newFileName}");
-                            }
-                            else
-                            {
-                                ScanLog.Add($"Skipped (Name matches): {fileName}");
+                                finally
+                                {
+                                    if (File.Exists(tempFile))
+                                    {
+                                        File.Delete(tempFile);
+                                    }
+                                }
                             }
                         }
                         else
                         {
-                            ScanLog.Add($"Skipped (Sanitization empty): {fileName}");
+                            // Direct audio file metadata
+                            using var tagFile = TagLib.File.Create(filePath);
+                            title = tagFile.Tag.Title;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(title))
+                        {
+                            string sanitizedTitle = SanitizeFileName(title);
+                            if (!string.IsNullOrWhiteSpace(sanitizedTitle))
+                            {
+                                string directory = Path.GetDirectoryName(filePath) ?? folder;
+                                string baseNewPath = Path.Combine(directory, sanitizedTitle);
+                                string newPath = baseNewPath + ext;
+
+                                // Prevent duplicate filename overwrites. A path equal to the current file
+                                // (ignoring case) is not a collision - the file is already correctly named.
+                                int suffix = 1;
+                                while (!string.Equals(newPath, filePath, StringComparison.OrdinalIgnoreCase)
+                                       && (File.Exists(newPath) || File.Exists(Path.ChangeExtension(newPath, ".cdg"))))
+                                {
+                                    suffix++;
+                                    newPath = $"{baseNewPath} ({suffix}){ext}";
+                                }
+
+                                string newFileName = Path.GetFileName(newPath);
+
+                                if (!string.Equals(fileName, newFileName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Rename matching .cdg file if it exists (crucial for keeping CDG graphics synced)
+                                    string oldCdgPath = Path.ChangeExtension(filePath, ".cdg");
+                                    if (File.Exists(oldCdgPath))
+                                    {
+                                        string newCdgPath = Path.ChangeExtension(newPath, ".cdg");
+                                        File.Move(oldCdgPath, newCdgPath);
+                                        Log($"Renamed CDG: {Path.GetFileName(oldCdgPath)} -> {Path.GetFileName(newCdgPath)}");
+                                    }
+
+                                    File.Move(filePath, newPath);
+                                    renameSuccessCount++;
+                                    await UpdateRenamedSongPathAsync(filePath, newPath);
+                                    Log($"Renamed: {fileName} -> {newFileName}");
+                                }
+                                else
+                                {
+                                    Log($"Skipped (Name matches): {fileName}");
+                                }
+                            }
+                            else
+                            {
+                                Log($"Skipped (Sanitization empty): {fileName}");
+                            }
+                        }
+                        else
+                        {
+                            Log($"Skipped (No Title tag): {fileName}");
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ScanLog.Add($"Skipped (No Title tag): {fileName}");
+                        Log($"Error parsing '{fileName}': {ex.Message}");
                     }
                 }
-                catch (Exception ex)
-                {
-                    ScanLog.Add($"Error parsing '{fileName}': {ex.Message}");
-                }
-            }
 
-            ScanProgressText = token.IsCancellationRequested ? "Cancelled" : "Completed";
-            ScanLog.Add($"[FINISHED] Renamed {renameSuccessCount} files successfully.");
+                RunOnUi(() => ScanProgressText = token.IsCancellationRequested ? "Cancelled" : "Completed");
+                Log($"[FINISHED] Renamed {renameSuccessCount} files successfully.");
+            });
         }
         catch (Exception ex)
         {
@@ -1022,6 +1085,8 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsRenaming = false;
+            if (ReferenceEquals(_renameCts, cts)) _renameCts = null;
+            cts.Dispose();
         }
     }
 
@@ -1047,7 +1112,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ScanLog.Add($"Warning: renamed on disk but database path not updated for '{Path.GetFileName(newPath)}': {ex.Message}");
+            RunOnUi(() => ScanLog.Add($"Warning: renamed on disk but database path not updated for '{Path.GetFileName(newPath)}': {ex.Message}"));
             Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to update FilePath after rename", ex);
         }
     }

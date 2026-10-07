@@ -16,6 +16,13 @@ namespace LyracistDbEditor
             DataContext = new MainViewModel();
         }
 
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            // Stop background scans/renames so they don't touch the dispatcher during shutdown.
+            (DataContext as MainViewModel)?.CancelAllOperations();
+            base.OnClosing(e);
+        }
+
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             if (sender is System.Windows.Controls.TextBox textBox)

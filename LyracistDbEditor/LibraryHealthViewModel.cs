@@ -298,12 +298,27 @@ public partial class MainViewModel
         if (IsRunningReadinessAudit) return;
 
         IsRunningReadinessAudit = true;
-        _readinessCts = new CancellationTokenSource();
+        var cts = new CancellationTokenSource();
+        _readinessCts = cts;
         ReadinessAuditLog.Clear();
         ReadinessAuditProgressPercent = 0;
         ReadinessAuditStatusText = "Preparing readiness audit...";
 
-        Task.Run(() => RunReadinessAuditAsync(_readinessCts.Token));
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await RunReadinessAuditAsync(cts.Token);
+            }
+            finally
+            {
+                // The flag only clears once the task has really finished, so a new audit can't
+                // overlap one that is still winding down.
+                RunOnUi(() => IsRunningReadinessAudit = false);
+                if (ReferenceEquals(_readinessCts, cts)) _readinessCts = null;
+                cts.Dispose();
+            }
+        });
     }
 
     [RelayCommand]
@@ -311,8 +326,7 @@ public partial class MainViewModel
     {
         if (!IsRunningReadinessAudit) return;
         _readinessCts?.Cancel();
-        IsRunningReadinessAudit = false;
-        ReadinessAuditStatusText = "Audit stopped by host.";
+        ReadinessAuditStatusText = "Stopping audit...";
     }
 
     private async Task RunReadinessAuditAsync(CancellationToken token)
@@ -332,7 +346,7 @@ public partial class MainViewModel
             int total = targets.Count;
             if (total == 0)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                RunOnUi(() =>
                 {
                     ReadinessAuditStatusText = "Nothing to process — library is fully audited.";
                     IsRunningReadinessAudit = false;
@@ -351,7 +365,7 @@ public partial class MainViewModel
                 double percentage = (double)processed / total * 100;
                 string currentFile = Path.GetFileName(song.FilePath);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                RunOnUi(() =>
                 {
                     ReadinessAuditProgressPercent = percentage;
                     ReadinessAuditStatusText = $"Processing {processed}/{total}: {currentFile}";
@@ -388,7 +402,7 @@ public partial class MainViewModel
                 }
             }
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
                 ReadinessAuditStatusText = token.IsCancellationRequested
                     ? $"Audit canceled. Updated {updatedCount}/{processed} track(s)."
@@ -399,7 +413,7 @@ public partial class MainViewModel
         }
         catch (OperationCanceledException)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
                 ReadinessAuditStatusText = "Audit canceled.";
                 IsRunningReadinessAudit = false;
@@ -408,7 +422,7 @@ public partial class MainViewModel
         catch (Exception ex)
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Readiness audit failed", ex);
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            RunOnUi(() =>
             {
                 ReadinessAuditStatusText = $"Error: {ex.Message}";
                 IsRunningReadinessAudit = false;
@@ -418,7 +432,7 @@ public partial class MainViewModel
 
     private void LogReadiness(string message)
     {
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        RunOnUi(() =>
         {
             ReadinessAuditLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
             if (ReadinessAuditLog.Count > 100) ReadinessAuditLog.RemoveAt(ReadinessAuditLog.Count - 1);

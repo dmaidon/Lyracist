@@ -236,8 +236,8 @@
 
                             <Grid Margin="0,0,0,10" ColumnDefinitions="1.2*, 8, *, 8, 1.1*">
                                 <ui:Button Grid.Column="0" Content="Add Folder..." Icon="{ui:SymbolIcon FolderAdd24}" Command="{Binding AddLibraryDirectoryCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsLibraryScanning, Converter={StaticResource InvertBoolConverter}}" />
-                                <ui:Button Grid.Column="2" Content="Remove" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveLibraryDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding SelectedLibraryDirectory, Converter={StaticResource NullToBoolConverter}}" />
-                                <ui:Button Grid.Column="4" Content="Rescan" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RescanSelectedDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding SelectedLibraryDirectory, Converter={StaticResource NullToBoolConverter}}" ToolTip="Rescan the selected directory" />
+                                <ui:Button Grid.Column="2" Content="Remove" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveLibraryDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRemoveDirectory}" />
+                                <ui:Button Grid.Column="4" Content="Rescan" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RescanSelectedDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRescanDirectory}" ToolTip="Rescan the selected directory" />
                             </Grid>
 
                             <ui:Button Content="Scan / Rescan All Directories" Icon="{ui:SymbolIcon Play24}" Command="{Binding RescanAllLibraryDirectoriesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" Margin="0,0,0,10" IsEnabled="{Binding IsLibraryScanning, Converter={StaticResource InvertBoolConverter}}" />
