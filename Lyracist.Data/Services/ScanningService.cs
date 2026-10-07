@@ -249,10 +249,14 @@ namespace Lyracist.Data.Services
 
         public async Task ScanDirectories(IEnumerable<string> paths, IProgress<ScanProgress>? progress = null)
         {
+            var pathList = paths.ToList();
+            // Only directories that actually exist right now were crawled; a missing path is most
+            // likely an unmounted drive or share, so its songs must never be treated as deleted.
+            var scannedPaths = new List<string>();
             var candidateFiles = new List<string>();
 
             // 1. Gather all files recursively from directories
-            foreach (var path in paths)
+            foreach (var path in pathList)
             {
                 if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
                     continue;
@@ -260,6 +264,7 @@ namespace Lyracist.Data.Services
                 try
                 {
                     var files = SafeEnumerateFiles(path);
+                    scannedPaths.Add(path);
                     candidateFiles.AddRange(files);
                 }
                 catch (Exception ex)
@@ -275,12 +280,16 @@ namespace Lyracist.Data.Services
             int processed = 0;
 
             // Query existing song paths for fast local duplicate checks
+            // Loaded untracked: ChangeTracker.Clear() runs after every batch below, which would
+            // silently detach tracked entities for later batches and drop their updates. Changed
+            // rows are re-attached explicitly in ProcessBatchAsync instead.
             var existingSongsMap = await _context.Songs
+                .AsNoTracking()
                 .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase);
 
             // Clean up dead records for files that no longer exist under the scanned directory paths.
             var songsToRemove = existingSongsMap.Values
-                .Where(s => paths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
+                .Where(s => scannedPaths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
                 .ToList();
 
             if (songsToRemove.Count > 0)
@@ -300,7 +309,7 @@ namespace Lyracist.Data.Services
             // .cdg row is an unplayable duplicate of the real song.
             var duplicateCdgSongs = existingSongsMap.Values
                 .Where(s => s.FilePath.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase)
-                    && paths.Any(p => IsPathUnderDirectory(s.FilePath, p))
+                    && scannedPaths.Any(p => IsPathUnderDirectory(s.FilePath, p))
                     && existingSongsMap.ContainsKey(Path.ChangeExtension(s.FilePath, ".mp3")))
                 .ToList();
 
@@ -328,6 +337,7 @@ namespace Lyracist.Data.Services
                 // Modified regardless of whether they changed) and then reindexed into FTS,
                 // turning every rescan of an unchanged library into a full rewrite + full reindex.
                 var songsToReindex = new List<Song>();
+                var songsToUpdate = new List<Song>();
 
                 foreach (var file in filesBatch)
                 {
@@ -337,17 +347,36 @@ namespace Lyracist.Data.Services
 
                     if (existingSongsMap.TryGetValue(file, out var existing))
                     {
-                        bool changed = existing.Title != parsed.Title
-                            || existing.Artist != parsed.Artist
-                            || existing.IsKaraoke != parsed.IsKaraoke
-                            || existing.KaraokeType != typeLabel;
+                        bool changed = false;
+
+                        // Title/artist come from the filename, which is only a guess. Once a song has a
+                        // real artist (from tags, an online lookup, or a manual edit in LyracistDbEditor)
+                        // a rescan must not revert it, so the filename only fills in unresolved songs
+                        // and never replaces a known artist with "Unknown Artist".
+                        if (string.IsNullOrEmpty(existing.Artist) || existing.Artist == UnknownArtist)
+                        {
+                            if (parsed.Artist != UnknownArtist && existing.Artist != parsed.Artist)
+                            {
+                                existing.Artist = parsed.Artist;
+                                changed = true;
+                            }
+                            if (existing.Title != parsed.Title)
+                            {
+                                existing.Title = parsed.Title;
+                                changed = true;
+                            }
+                        }
+
+                        if (existing.IsKaraoke != parsed.IsKaraoke || existing.KaraokeType != typeLabel)
+                        {
+                            existing.IsKaraoke = parsed.IsKaraoke;
+                            existing.KaraokeType = typeLabel;
+                            changed = true;
+                        }
 
                         if (changed)
                         {
-                            existing.Title = parsed.Title;
-                            existing.Artist = parsed.Artist;
-                            existing.IsKaraoke = parsed.IsKaraoke;
-                            existing.KaraokeType = typeLabel;
+                            songsToUpdate.Add(existing);
                             songsToReindex.Add(existing);
                         }
                     }
@@ -382,6 +411,15 @@ namespace Lyracist.Data.Services
                     // upserts (IndexSongsBatch joins the ambient transaction when one exists),
                     // instead of an implicit commit for every single row.
                     await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                    foreach (var song in songsToUpdate)
+                    {
+                        var entry = _context.Songs.Attach(song);
+                        entry.Property(s => s.Title).IsModified = true;
+                        entry.Property(s => s.Artist).IsModified = true;
+                        entry.Property(s => s.IsKaraoke).IsModified = true;
+                        entry.Property(s => s.KaraokeType).IsModified = true;
+                    }
 
                     await _context.SaveChangesAsync();
                     await searchService.IndexSongsBatch(songsToReindex);
