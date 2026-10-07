@@ -19,7 +19,7 @@ public class DuplicateGroup
 {
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
-    public List<Song> Songs { get; set; } = [];
+    public ObservableCollection<Song> Songs { get; set; } = [];
     public int Count => Songs.Count;
 }
 
@@ -64,7 +64,7 @@ public partial class MainViewModel
                     {
                         Title = g.First().Title,
                         Artist = g.First().Artist,
-                        Songs = g.OrderBy(s => s.FilePath).ToList()
+                        Songs = new ObservableCollection<Song>(g.OrderBy(s => s.FilePath))
                     })
                     .OrderByDescending(g => g.Count)
                     .ThenBy(g => g.Title)
@@ -93,9 +93,12 @@ public partial class MainViewModel
     [RelayCommand]
     private async Task RemoveDuplicateSong()
     {
-        if (SelectedDuplicateSong == null || SelectedDuplicateGroup == null) return;
+        if (SelectedDuplicateSong == null) return;
 
         var song = SelectedDuplicateSong;
+        // The inner song list doesn't select its parent group, so find the owner from the song itself.
+        var group = DuplicateGroups.FirstOrDefault(g => g.Songs.Contains(song));
+        if (group == null) return;
         var confirm = System.Windows.MessageBox.Show(
             $"Remove '{song.Title}' by '{song.Artist}' ({song.FilePath}) from the database?\nThis will not delete the physical file.",
             "Confirm Remove Duplicate",
@@ -116,12 +119,13 @@ public partial class MainViewModel
                 await searchService.RemoveSongFromIndex(dbSong.SongId);
             }
 
-            SelectedDuplicateGroup.Songs.Remove(song);
-            if (SelectedDuplicateGroup.Songs.Count <= 1)
-            {
-                DuplicateGroups.Remove(SelectedDuplicateGroup);
-            }
             SelectedDuplicateSong = null;
+            group.Songs.Remove(song);
+            if (group.Songs.Count <= 1)
+            {
+                DuplicateGroups.Remove(group);
+                if (SelectedDuplicateGroup == group) SelectedDuplicateGroup = null;
+            }
 
             RefreshStats();
             Search();
@@ -156,23 +160,46 @@ public partial class MainViewModel
 
         try
         {
+            int skippedUnavailable = 0;
             var orphans = await Task.Run(() =>
             {
                 using var context = new LyracistDbContext();
-                return context.Songs
-                    .AsNoTracking()
-                    .ToList()
-                    .Where(s => string.IsNullOrWhiteSpace(s.FilePath) || !File.Exists(s.FilePath))
-                    .OrderBy(s => s.Artist).ThenBy(s => s.Title)
-                    .ToList();
+                // A drive/share that isn't mounted would make every song on it look orphaned, so
+                // songs whose root is unreachable are skipped rather than reported.
+                var rootAvailable = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                bool RootIsAvailable(string path)
+                {
+                    string root;
+                    try { root = Path.GetPathRoot(path) ?? string.Empty; }
+                    catch { return true; }
+                    if (root.Length == 0) return true;
+                    if (!rootAvailable.TryGetValue(root, out bool ok))
+                    {
+                        try { ok = Directory.Exists(root); } catch { ok = false; }
+                        rootAvailable[root] = ok;
+                    }
+                    return ok;
+                }
+
+                var list = new List<Song>();
+                foreach (var s in context.Songs.AsNoTracking().ToList())
+                {
+                    if (string.IsNullOrWhiteSpace(s.FilePath)) { list.Add(s); continue; }
+                    if (!RootIsAvailable(s.FilePath)) { skippedUnavailable++; continue; }
+                    if (!File.Exists(s.FilePath)) list.Add(s);
+                }
+                return list.OrderBy(s => s.Artist).ThenBy(s => s.Title).ToList();
             });
 
             OrphanedSongs.Clear();
             foreach (var s in orphans) OrphanedSongs.Add(s);
 
-            OrphanStatusText = orphans.Count == 0
-                ? "No orphaned entries found. Every song row points to a file on disk."
-                : $"Found {orphans.Count} orphaned entry(ies) with missing files.";
+            string skippedNote = skippedUnavailable > 0
+                ? $" Skipped {skippedUnavailable} song(s) on drives/shares that aren't currently available - reconnect them and scan again."
+                : string.Empty;
+            OrphanStatusText = (orphans.Count == 0
+                ? "No orphaned entries found. Every reachable song row points to a file on disk."
+                : $"Found {orphans.Count} orphaned entry(ies) with missing files.") + skippedNote;
         }
         catch (Exception ex)
         {

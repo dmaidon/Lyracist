@@ -962,8 +962,11 @@ public partial class MainViewModel : ObservableObject
                             string newPath = baseNewPath + ext;
 
                             // Prevent duplicate filename overwrites
+                            // A path equal to the current file (ignoring case) is not a collision - the
+                            // file is already correctly named.
                             int suffix = 1;
-                            while (File.Exists(newPath))
+                            while (!string.Equals(newPath, filePath, StringComparison.OrdinalIgnoreCase)
+                                   && (File.Exists(newPath) || File.Exists(Path.ChangeExtension(newPath, ".cdg"))))
                             {
                                 suffix++;
                                 newPath = $"{baseNewPath} ({suffix}){ext}";
@@ -984,6 +987,7 @@ public partial class MainViewModel : ObservableObject
 
                                 File.Move(filePath, newPath);
                                 renameSuccessCount++;
+                                await UpdateRenamedSongPathAsync(filePath, newPath);
                                 ScanLog.Add($"Renamed: {fileName} -> {newFileName}");
                             }
                             else
@@ -1018,6 +1022,33 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsRenaming = false;
+        }
+    }
+
+    // Keeps the database in step with a renamed file so the row doesn't become an orphan.
+    private async Task UpdateRenamedSongPathAsync(string oldPath, string newPath)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSongs = await context.Songs.Where(s => s.FilePath == oldPath).ToListAsync();
+            if (dbSongs.Count == 0) return;
+
+            var searchService = new SearchService(context);
+            foreach (var dbSong in dbSongs)
+            {
+                dbSong.FilePath = newPath;
+            }
+            await context.SaveChangesAsync();
+            foreach (var dbSong in dbSongs)
+            {
+                await searchService.IndexSong(dbSong);
+            }
+        }
+        catch (Exception ex)
+        {
+            ScanLog.Add($"Warning: renamed on disk but database path not updated for '{Path.GetFileName(newPath)}': {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to update FilePath after rename", ex);
         }
     }
 
