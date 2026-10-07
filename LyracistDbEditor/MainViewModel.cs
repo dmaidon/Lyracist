@@ -61,6 +61,30 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnOnlyShowMissingArtistChanged(bool value)
     {
+        _resultLimit = PageSize;
+        Search();
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        _resultLimit = PageSize;
+    }
+
+    // Browse mode (no search text) shows PageSize rows at a time; Load More grows the window.
+    private const int PageSize = 100;
+    private const int FtsResultCap = 150; // SearchService.Search/SearchSync's internal limit
+    private int _resultLimit = PageSize;
+
+    [ObservableProperty]
+    private bool _hasMoreResults;
+
+    [ObservableProperty]
+    private string _resultSummaryText = string.Empty;
+
+    [RelayCommand]
+    private void LoadMoreResults()
+    {
+        _resultLimit += PageSize;
         Search();
     }
 
@@ -184,7 +208,10 @@ public partial class MainViewModel : ObservableObject
                 {
                     query = query.Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
                 }
-                songs = query.OrderBy(s => s.Artist).ThenBy(s => s.Title).Take(100).ToList();
+                int total = query.Count();
+                songs = query.OrderBy(s => s.Artist).ThenBy(s => s.Title).Take(_resultLimit).ToList();
+                HasMoreResults = total > songs.Count;
+                ResultSummaryText = total == 0 ? "No songs." : $"Showing {songs.Count:N0} of {total:N0}";
             }
             else
             {
@@ -197,6 +224,14 @@ public partial class MainViewModel : ObservableObject
                 {
                     songs = songs.Where(s => s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
                 }
+
+                // Text search comes from the FTS index, which caps its own result set, so it can't be paged.
+                HasMoreResults = false;
+                ResultSummaryText = songs.Count == 0
+                    ? "No matches."
+                    : songs.Count >= FtsResultCap
+                        ? $"Showing the first {songs.Count:N0} matches - refine your search to narrow them."
+                        : $"{songs.Count:N0} match(es)";
             }
 
             SearchResults.Clear();
@@ -210,6 +245,13 @@ public partial class MainViewModel : ObservableObject
             Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Search failed", ex);
         }
     }
+
+    private const string ScanSlotName = "Metadata scan";
+    private readonly OperationState _operation = new();
+
+    // Non-blocking feedback shown under the editor (replaces success pop-ups that blocked every edit).
+    [ObservableProperty]
+    private string _statusMessage = string.Empty;
 
     [ObservableProperty]
     private bool _applyProperCase = true;
@@ -267,7 +309,7 @@ public partial class MainViewModel : ObservableObject
                 RefreshStats();
                 Search();
 
-                System.Windows.MessageBox.Show("Song details updated successfully.", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                StatusMessage = $"Saved '{dbSong.Title}' by {dbSong.Artist}.";
             }
         }
         catch (Exception ex)
@@ -305,7 +347,7 @@ public partial class MainViewModel : ObservableObject
                 RefreshStats();
                 Search();
 
-                System.Windows.MessageBox.Show("Song deleted from index.", "Deleted", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                StatusMessage = "Song deleted from the database.";
             }
         }
         catch (Exception ex)
@@ -400,12 +442,12 @@ public partial class MainViewModel : ObservableObject
                     RefreshStats();
                     Search();
 
-                    System.Windows.MessageBox.Show($"Metadata updated: {dbSong.Artist} - {dbSong.Title}", "Metadata Scanned", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                    StatusMessage = $"Metadata updated: {dbSong.Artist} - {dbSong.Title}";
                 }
             }
             else
             {
-                System.Windows.MessageBox.Show("No artist metadata could be found for this file.", "No Metadata Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                StatusMessage = "No artist metadata could be found for this file.";
             }
         }
         catch (Exception ex)
@@ -417,8 +459,14 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void StartScan()
     {
-        // Rename shares the log/progress display, so the two never run together.
-        if (IsScanning || IsRenaming) return;
+        if (IsScanning) return;
+
+        // Shares the log/progress display and the database with rename and the readiness audit.
+        if (!_operation.TryBegin(ScanSlotName))
+        {
+            StatusMessage = $"Can't start: {_operation.Current} is already running.";
+            return;
+        }
 
         IsScanning = true;
         var cts = new CancellationTokenSource();
@@ -438,6 +486,7 @@ public partial class MainViewModel : ObservableObject
                 // IsScanning stays true until the task has really finished, so a new scan can't
                 // start while the old one is still winding down.
                 RunOnUi(() => IsScanning = false);
+                _operation.End(ScanSlotName);
                 if (ReferenceEquals(_scanCts, cts)) _scanCts = null;
                 cts.Dispose();
             }
@@ -878,7 +927,7 @@ public partial class MainViewModel : ObservableObject
                             // scan and duration/genre fill-in are both done — but only if the app is
                             // actually idle (not already scanning or mid-rename), so this never steals
                             // a run the user started themselves.
-                            if (!IsScanning && !IsRenaming)
+                            if (!IsScanning && _operation.Current == null)
                             {
                                 AppendLog("Starting slow metadata scan for songs with an unknown artist...");
                                 StartScan();
@@ -927,7 +976,13 @@ public partial class MainViewModel : ObservableObject
     private CancellationTokenSource? _renameCts;
 
     [RelayCommand]
-    private async Task RenameFiles()
+    private Task RenameFiles() => RunRenameAsync(dryRun: false);
+
+    // Lists what Rename Files would do (old name -> new name) without touching any file or the database.
+    [RelayCommand]
+    private Task PreviewRename() => RunRenameAsync(dryRun: true);
+
+    private async Task RunRenameAsync(bool dryRun)
     {
         if (IsRenaming) return;
 
@@ -937,33 +992,41 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // The rename shares the log and progress display with the slow metadata scan.
-        if (IsScanning)
+        if (!dryRun)
         {
-            System.Windows.MessageBox.Show("Please wait for (or stop) the metadata scan before renaming files.", "Scan In Progress", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            var proceed = System.Windows.MessageBox.Show(
+                $"Rename audio/zip files in '{RenameFolderPath}' to match their Title tags?\nMatching database rows are updated too. A database backup is made first.\n\nTip: use Preview first to see exactly what will change.",
+                "Confirm Rename",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+            if (proceed != System.Windows.MessageBoxResult.Yes) return;
+        }
+
+        // Shares the log/progress display and the database with the metadata scan and audit.
+        const string slotName = "Rename";
+        if (!_operation.TryBegin(slotName))
+        {
+            StatusMessage = $"Can't start: {_operation.Current} is already running.";
             return;
         }
 
-        var proceed = System.Windows.MessageBox.Show(
-            $"Rename audio/zip files in '{RenameFolderPath}' to match their Title tags?\nMatching database rows are updated too. A database backup is made first.",
-            "Confirm Rename",
-            System.Windows.MessageBoxButton.YesNo,
-            System.Windows.MessageBoxImage.Question);
-        if (proceed != System.Windows.MessageBoxResult.Yes) return;
-
         IsRenaming = true;
-        if (!await DatabaseBackup.EnsureBackupAsync("Rename"))
+        if (!dryRun && !await DatabaseBackup.EnsureBackupAsync("Rename"))
         {
             IsRenaming = false;
+            _operation.End(slotName);
             return;
         }
         var cts = new CancellationTokenSource();
         _renameCts = cts;
         var token = cts.Token;
         string folder = RenameFolderPath;
+        var planned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         ScanLog.Clear();
-        ScanLog.Add($"[START] Renaming files in folder: {folder}");
+        ScanLog.Add(dryRun
+            ? $"[PREVIEW] No files will be changed. Folder: {folder}"
+            : $"[START] Renaming files in folder: {folder}");
         ScanProgressText = "Preparing directory scan...";
         ScanProgressPercent = 0;
 
@@ -1070,7 +1133,8 @@ public partial class MainViewModel : ObservableObject
                                 // (ignoring case) is not a collision - the file is already correctly named.
                                 int suffix = 1;
                                 while (!string.Equals(newPath, filePath, StringComparison.OrdinalIgnoreCase)
-                                       && (File.Exists(newPath) || File.Exists(Path.ChangeExtension(newPath, ".cdg"))))
+                                       && (File.Exists(newPath) || File.Exists(Path.ChangeExtension(newPath, ".cdg"))
+                                           || planned.Contains(newPath)))
                                 {
                                     suffix++;
                                     newPath = $"{baseNewPath} ({suffix}){ext}";
@@ -1082,9 +1146,19 @@ public partial class MainViewModel : ObservableObject
                                 {
                                     // Rename matching .cdg file if it exists (crucial for keeping CDG graphics synced)
                                     string oldCdgPath = Path.ChangeExtension(filePath, ".cdg");
-                                    if (File.Exists(oldCdgPath))
+                                    bool hasCdg = File.Exists(oldCdgPath);
+                                    string newCdgPath = Path.ChangeExtension(newPath, ".cdg");
+
+                                    if (dryRun)
                                     {
-                                        string newCdgPath = Path.ChangeExtension(newPath, ".cdg");
+                                        planned.Add(newPath);
+                                        renameSuccessCount++;
+                                        Log($"Would rename: {fileName} -> {newFileName}" + (hasCdg ? " (+ .cdg)" : string.Empty));
+                                        continue;
+                                    }
+
+                                    if (hasCdg)
+                                    {
                                         File.Move(oldCdgPath, newCdgPath);
                                         Log($"Renamed CDG: {Path.GetFileName(oldCdgPath)} -> {Path.GetFileName(newCdgPath)}");
                                     }
@@ -1116,7 +1190,9 @@ public partial class MainViewModel : ObservableObject
                 }
 
                 RunOnUi(() => ScanProgressText = token.IsCancellationRequested ? "Cancelled" : "Completed");
-                Log($"[FINISHED] Renamed {renameSuccessCount} files successfully.");
+                Log(dryRun
+                    ? $"[PREVIEW DONE] {renameSuccessCount} file(s) would be renamed. Nothing was changed."
+                    : $"[FINISHED] Renamed {renameSuccessCount} files successfully.");
             });
         }
         catch (Exception ex)
@@ -1127,6 +1203,7 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsRenaming = false;
+            _operation.End(slotName);
             if (ReferenceEquals(_renameCts, cts)) _renameCts = null;
             cts.Dispose();
         }

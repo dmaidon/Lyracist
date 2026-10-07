@@ -19,6 +19,8 @@
         </Style>
 
         <local:NullToBoolConverter x:Key="NullToBoolConverter" />
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <local:InvertBoolConverter x:Key="InvertBoolConverter" />
     </Window.Resources>
 
@@ -109,6 +111,8 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="6" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <CheckBox Grid.Row="0" Content="Only show songs missing an artist ('Unknown Artist')" IsChecked="{Binding OnlyShowMissingArtist, Mode=TwoWay}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
@@ -174,6 +178,15 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding ResultSummaryText}" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ui:Button Grid.Column="1" Content="Load more" Command="{Binding LoadMoreResultsCommand}" Appearance="Secondary" Height="30" Visibility="{Binding HasMoreResults, Converter={StaticResource BoolToVis}}" />
+                        </Grid>
                     </Grid>
 
                     <!-- Edit Frame -->
@@ -201,6 +214,7 @@
 
                             <CheckBox Content="Auto-capitalize changed Title/Artist" IsChecked="{Binding ApplyProperCase}" Margin="0,0,0,8" ToolTip="When off, edited text is saved exactly as typed (e.g. AC/DC). Unchanged fields are never re-cased." />
                             <ui:Button Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" HorizontalAlignment="Right" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -288,9 +302,10 @@
                                 <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseRenameFolderClicked" Height="35" Width="90" IsEnabled="{Binding IsRenaming, Converter={StaticResource InvertBoolConverter}}" />
                             </Grid>
 
-                            <Grid ColumnDefinitions="*, 10, *">
-                                <ui:Button Grid.Column="0" Content="Rename Files" Icon="{ui:SymbolIcon Edit24}" Command="{Binding RenameFilesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" />
-                                <ui:Button Grid.Column="2" Content="Cancel" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRenaming}" />
+                            <Grid ColumnDefinitions="*, 10, *, 10, *">
+                                <ui:Button Grid.Column="0" Content="Preview" Icon="{ui:SymbolIcon Eye24}" Command="{Binding PreviewRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" ToolTip="List what would be renamed without changing anything" />
+                                <ui:Button Grid.Column="2" Content="Rename Files" Icon="{ui:SymbolIcon Edit24}" Command="{Binding RenameFilesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" />
+                                <ui:Button Grid.Column="4" Content="Cancel" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRenaming}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -364,6 +379,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="10" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
@@ -387,6 +404,7 @@
                                 <Expander Header="{Binding Title}" Margin="0,2">
                                     <StackPanel Margin="16,4,0,4">
                                         <TextBlock Text="{Binding Artist}" FontSize="11" FontStyle="Italic" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding KeeperText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                         <ListBox ItemsSource="{Binding Songs}" SelectedItem="{Binding DataContext.SelectedDuplicateSong, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" BorderThickness="0" Background="Transparent">
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>
@@ -394,6 +412,11 @@
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
                                         </ListBox>
+
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *">
+                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveDuplicateSongCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the song selected inside a group from the database" />
+                        <ui:Button Grid.Column="2" Content="Remove All But Suggested" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllButSuggestedDuplicatesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Keep one copy per group (existing file, longest, largest) and remove the rest" />
+                    </Grid>
                                     </StackPanel>
                                 </Expander>
                             </DataTemplate>

@@ -21,6 +21,10 @@ public class DuplicateGroup
     public string Artist { get; set; } = string.Empty;
     public ObservableCollection<Song> Songs { get; set; } = [];
     public int Count => Songs.Count;
+
+    /// <summary>The copy a bulk clean-up would keep: file exists, then longest duration, then largest file.</summary>
+    public Song? Keeper { get; set; }
+    public string KeeperText => Keeper == null ? string.Empty : "Suggested keep: " + System.IO.Path.GetFileName(Keeper.FilePath);
 }
 
 public partial class MainViewModel
@@ -71,6 +75,8 @@ public partial class MainViewModel
                     .ToList();
             });
 
+            foreach (var g in groups) g.Keeper = PickKeeper(g.Songs);
+
             DuplicateGroups.Clear();
             foreach (var g in groups) DuplicateGroups.Add(g);
 
@@ -87,6 +93,69 @@ public partial class MainViewModel
         finally
         {
             IsFindingDuplicates = false;
+        }
+    }
+
+    private static Song PickKeeper(System.Collections.Generic.IEnumerable<Song> songs)
+    {
+        static long SizeOf(string path)
+        {
+            try { return new FileInfo(path).Length; } catch { return -1; }
+        }
+
+        // Real file first, then longest duration, then largest file (a rough stand-in for bitrate).
+        return songs
+            .Select(s => (Song: s, Exists: File.Exists(s.FilePath), Size: SizeOf(s.FilePath)))
+            .OrderByDescending(x => x.Exists)
+            .ThenByDescending(x => x.Song.Duration)
+            .ThenByDescending(x => x.Size)
+            .ThenBy(x => x.Song.FilePath, StringComparer.OrdinalIgnoreCase)
+            .First().Song;
+    }
+
+    [RelayCommand]
+    private async Task RemoveAllButSuggestedDuplicates()
+    {
+        var targets = DuplicateGroups
+            .Where(g => g.Keeper != null)
+            .SelectMany(g => g.Songs.Where(s => s.SongId != g.Keeper!.SongId))
+            .ToList();
+        if (targets.Count == 0) return;
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Remove {targets.Count:N0} redundant song(s) from the database, keeping one copy per group?\n\nThe kept copy is the one whose file exists, then the longest duration, then the largest file. No physical files are deleted. A backup is made first.",
+            "Confirm Bulk Duplicate Removal",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        if (!await DatabaseBackup.EnsureBackupAsync("RemoveDuplicates")) return;
+
+        try
+        {
+            var ids = targets.Select(s => s.SongId).ToList();
+            using var context = new LyracistDbContext();
+            var searchService = new SearchService(context);
+            var dbSongs = await context.Songs.Where(s => ids.Contains(s.SongId)).ToListAsync();
+            context.Songs.RemoveRange(dbSongs);
+            await context.SaveChangesAsync();
+            foreach (var id in ids)
+            {
+                await searchService.RemoveSongFromIndex(id);
+            }
+
+            DuplicateGroups.Clear();
+            SelectedDuplicateGroup = null;
+            SelectedDuplicateSong = null;
+            DuplicateStatusText = $"Removed {dbSongs.Count:N0} redundant song(s). Scan again to re-check.";
+            StatusMessage = DuplicateStatusText;
+
+            RefreshStats();
+            Search();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to remove duplicates: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 
@@ -277,6 +346,7 @@ public partial class MainViewModel
     public ObservableCollection<string> ReadinessAuditLog { get; } = [];
 
     private CancellationTokenSource? _readinessCts;
+    private const string AuditSlotName = "Readiness audit";
 
     [RelayCommand]
     private void RefreshReadinessCounts()
@@ -299,6 +369,12 @@ public partial class MainViewModel
     {
         if (IsRunningReadinessAudit) return;
 
+        if (!_operation.TryBegin(AuditSlotName))
+        {
+            StatusMessage = $"Can't start: {_operation.Current} is already running.";
+            return;
+        }
+
         IsRunningReadinessAudit = true;
         var cts = new CancellationTokenSource();
         _readinessCts = cts;
@@ -317,6 +393,7 @@ public partial class MainViewModel
                 // The flag only clears once the task has really finished, so a new audit can't
                 // overlap one that is still winding down.
                 RunOnUi(() => IsRunningReadinessAudit = false);
+                _operation.End(AuditSlotName);
                 if (ReferenceEquals(_readinessCts, cts)) _readinessCts = null;
                 cts.Dispose();
             }
