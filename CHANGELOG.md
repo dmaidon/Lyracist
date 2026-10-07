@@ -1,11 +1,11 @@
-<!-- Edited on Oct 6, 2026 @ 14:48:00 -> Update build versions and sync repository -->
-Last Edit: Oct 6, 2026 - Build Versions & Sync
+<!-- Edited on Oct 7, 2026 @ 13:50:00 -> Document LyracistDbEditor hardening, shared library maintenance, and scan cancellation -->
+Last Edit: Oct 7, 2026 - LyracistDbEditor Hardening & Shared Library Maintenance
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-06
+## [Unreleased] - 2026-10-07
 
 ### Added
 - **New Singer Welcome Screen Trigger on Name Entry Lost Focus (`KSRotation/MainWindow.xaml.cs`, `KSRotation/ViewModels/MainViewModel.Welcome.cs`, `KSRotation/ViewModels/MainViewModel.cs`)**:
@@ -41,7 +41,32 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Clean Lifetime Disposal: Registered process exit and application shutdown hooks releasing and disposing mutex handles cleanly.
   - Comprehensive Unit Tests: Added test suite in `SingleInstanceHelperTests.cs` verifying single-instance locking, running instance queries, and clean handle disposal.
 
+- **LyracistDbEditor Safety, Editing & Library-Health Enhancements (`LyracistDbEditor/MainViewModel.cs`, `LibraryHealthViewModel.cs`, `DatabaseBackup.cs`, `OperationState.cs`, `MainWindow.xaml`)**:
+  - Automatic Pre-Operation Backups: Remove Directory, Remove All Orphaned Entries, Remove All But Suggested (duplicates), and Rename Files now snapshot the database first (`VACUUM INTO`, same method as Lyracist's Settings backup) into `Data\Backups\lyracist_<timestamp>_<operation>.db`, keeping the newest 10. If a backup fails, the host is asked whether to continue.
+  - Bulk-Delete Confirmations With Counts: Remove Directory now computes and shows how many songs will be removed before asking for confirmation; orphan and duplicate bulk removals show their counts too.
+  - Save Validation: Title and Artist are trimmed on save, an empty Title is rejected, and an empty Artist is saved as "Unknown Artist".
+  - Smarter Re-Casing: Proper-casing is applied only to a field the user actually changed, with an "Auto-capitalize changed Title/Artist" checkbox to opt out (e.g. to save "AC/DC" exactly as typed).
+  - Non-Blocking Status Line: Saving, deleting, and single-song metadata scans report on a status line under the editor instead of modal pop-ups.
+  - Search Paging: Browsing shows 100 songs at a time with a "Showing N of M" summary and a "Load more" button; text searches (capped by the search index at 150) now say so instead of silently truncating.
+  - Rename Preview (Dry Run): A new Preview button lists "Would rename: old -> new" (including planned collisions and companion `.cdg` files) without touching any file or the database.
+  - Duplicate Clean-Up Helper: Each duplicate group shows a suggested keeper (file exists, then longest duration, then largest file), and "Remove All But Suggested" removes the rest after confirmation. Added the previously missing "Remove Selected" button for single-duplicate removal.
+  - Single Foreground Operation Guard (`OperationState`): The slow metadata scan, Rename Files (and its preview), and the readiness audit can no longer run at the same time; a blocked start explains which operation is running.
+  - Shared Directory Removal (`Lyracist.Data/Services/LibraryMaintenanceService.cs`): Both Lyracist and LyracistDbEditor now remove a library folder's songs through one shared routine that matches paths case-insensitively, never matches sibling folders sharing a prefix (`Music` vs `Music2`), keeps songs still owned by another registered directory, and clears the search index.
+  - Scan Cancellation & Guard in Lyracist (`Lyracist/Services/Media/LibraryService.cs`, `ILibraryService.CancelScan()`): Library scans run one at a time (requests arriving mid-scan are queued and merged, not dropped) and are cancelled cleanly on application exit. `ScanDirectories` and `ProbeMissingMetadataAsync` accept a `CancellationToken`, honored between batches so a saved batch is never split. The DbEditor's library scan is cancelled when its window closes.
+  - Test Coverage: Added `ScanningServiceTests.cs` and `LibraryMaintenanceServiceTests.cs` (full suite: 343 tests).
+
 ### Fixed
+- **LyracistDbEditor & ScanningService Data-Integrity and Reliability Fixes (`LyracistDbEditor/*`, `Lyracist.Data/Services/ScanningService.cs`)**:
+  - Library Scan Deleted Songs On Unmounted Drives: The dead-record cleanup considered every path passed to the scan, including folders skipped because they did not exist, so a rescan with an unplugged external drive removed all of that drive's songs. Cleanup is now limited to directories actually crawled.
+  - Library Scan Lost Updates After The First Batch: `ChangeTracker.Clear()` after each 200-file batch detached the tracked rows still waiting for later batches, so title/artist/type updates only persisted for the first batch while the search index was updated anyway. Existing songs are now loaded untracked and re-attached per batch.
+  - Rescan Overwrote Resolved Artists: A rescan re-parsed the filename and replaced tag-resolved, online-resolved, or hand-edited artists/titles (and reset renamed files to "Unknown Artist"). Filename parsing now only fills in songs that still lack a real artist.
+  - Orphan Audit Wiped Unmounted Drives: Songs on a drive or share that is not currently available were reported as orphaned and removable in one click; they are now skipped with a "reconnect and scan again" note.
+  - Rename Files Re-Renamed Correct Files: Already-correct names were treated as collisions and became `Title (2).mp3` on every rerun; collisions with the file itself are now ignored and companion `.cdg` targets are checked.
+  - Rename Files Orphaned Database Rows: Renames now update `Song.FilePath` and the search index, and run off the UI thread so the window stays responsive and Cancel works.
+  - Remove Duplicate Did Nothing: The removal relied on an outer group selection the inner song list never set, and the list never refreshed; groups now use an `ObservableCollection` and the owning group is found from the selected song.
+  - Overlapping Operations: Stop Scan / Stop Audit no longer clear the running flag before the task ends (which allowed overlapping runs); the library scan stays "running" through the metadata fill-in; Remove/Rescan buttons now reflect `CanRemoveDirectory`/`CanRescanDirectory`.
+  - Temp-File Leaks & Shutdown Crashes: Zip audio extracted for probing is always cleaned up in a `finally`; dispatcher calls are guarded during shutdown and closing the window cancels background work.
+  - Single-Song Metadata Scan: Works on local copies so the list never shows values that were not saved, and no longer swallows cancellation.
 - **Duet Partner Remote Sync & DJ Tablet Display (`KSRotation/Models/RotationItemDto.cs`, `MainViewModel.Requests.cs`, `MainViewModel.cs`, `dj.html`, `kiosk.html`, `PatronPortal.html`, `billboard.html`, `TabletLyricsServer.cs`, `KSRotationSyncService.cs`)**:
   - Resolved an issue where adding or editing a duet partner on a performer in KSRotation desktop showed up on the local grid and TV screens (`billboard.html`), but did not appear on the DJ tablet (`dj.html`).
   - DTO & Serialization Parity: Added `duetPartnerName` alongside `partner` to `RotationItemDto`, populated both fields in `RebuildRotationJsonCacheNow()`, and serialized both in rotation JSON feeds.
