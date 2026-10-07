@@ -218,12 +218,14 @@ public partial class MainViewModel
         if (OrphanedSongs.Count == 0) return;
 
         var confirm = System.Windows.MessageBox.Show(
-            $"Remove all {OrphanedSongs.Count} orphaned entry(ies) from the database?\nThis only removes database rows; no physical files are touched.",
+            $"Remove all {OrphanedSongs.Count:N0} orphaned entry(ies) from the database?\nThis only removes database rows; no physical files are touched. A backup is made first.",
             "Confirm Remove Orphaned Entries",
             System.Windows.MessageBoxButton.YesNo,
             System.Windows.MessageBoxImage.Warning);
 
         if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        if (!await DatabaseBackup.EnsureBackupAsync("RemoveOrphans")) return;
 
         try
         {

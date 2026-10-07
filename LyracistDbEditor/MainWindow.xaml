@@ -199,6 +199,7 @@
                                 </StackPanel>
                             </Grid>
 
+                            <CheckBox Content="Auto-capitalize changed Title/Artist" IsChecked="{Binding ApplyProperCase}" Margin="0,0,0,8" ToolTip="When off, edited text is saved exactly as typed (e.g. AC/DC). Unchanged fields are never re-cased." />
                             <ui:Button Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" HorizontalAlignment="Right" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
                         </StackPanel>
                     </Border>

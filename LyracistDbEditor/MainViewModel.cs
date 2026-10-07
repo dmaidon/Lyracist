@@ -211,10 +211,35 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    private bool _applyProperCase = true;
+
+    private string RecaseIfChanged(string edited, string? stored)
+    {
+        if (string.Equals(edited, (stored ?? string.Empty).Trim(), StringComparison.Ordinal))
+        {
+            return stored ?? edited;
+        }
+        return ApplyProperCase ? NameFormatting.ProperCase(edited) : edited;
+    }
+
     [RelayCommand]
     private async Task SaveSong()
     {
         if (SelectedSong == null) return;
+
+        string newTitle = (EditTitle ?? string.Empty).Trim();
+        string newArtist = (EditArtist ?? string.Empty).Trim();
+
+        if (newTitle.Length == 0)
+        {
+            System.Windows.MessageBox.Show("The title can't be empty.", "Title Required", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+        if (newArtist.Length == 0)
+        {
+            newArtist = "Unknown Artist";
+        }
 
         try
         {
@@ -222,8 +247,11 @@ public partial class MainViewModel : ObservableObject
             var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == SelectedSong.SongId);
             if (dbSong != null)
             {
-                dbSong.Artist = NameFormatting.ProperCase(EditArtist);
-                dbSong.Title = NameFormatting.ProperCase(EditTitle);
+                // Only re-case a field the user actually changed (and only if they haven't turned
+                // re-casing off), so titles like "AC/DC" or "(I Can't Get No) Satisfaction" that are
+                // saved untouched - or typed deliberately - aren't mangled by ProperCase.
+                dbSong.Artist = RecaseIfChanged(newArtist, dbSong.Artist);
+                dbSong.Title = RecaseIfChanged(newTitle, dbSong.Title);
                 dbSong.Genre = SelectedSong.Genre;
                 dbSong.Tags = SelectedSong.Tags;
                 dbSong.Duration = SelectedSong.Duration;
@@ -681,14 +709,6 @@ public partial class MainViewModel : ObservableObject
         if (IsLibraryScanning) return; // the scanner would be re-inserting rows while we delete them
         string path = SelectedLibraryDirectory;
 
-        var confirm = System.Windows.MessageBox.Show(
-            $"Remove '{path}' from the scan list? Songs already indexed from this folder will also be removed from the database.",
-            "Confirm Remove Directory",
-            System.Windows.MessageBoxButton.YesNo,
-            System.Windows.MessageBoxImage.Warning);
-
-        if (confirm != System.Windows.MessageBoxResult.Yes) return;
-
         try
         {
             // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
@@ -716,6 +736,16 @@ public partial class MainViewModel : ObservableObject
                             && !otherPrefixes.Any(o => c.FilePath.StartsWith(o, StringComparison.OrdinalIgnoreCase)))
                 .Select(c => c.SongId)
                 .ToList();
+
+            var confirm = System.Windows.MessageBox.Show(
+                $"Remove '{path}' from the scan list?\n\n{ids.Count:N0} indexed song(s) from this folder will also be removed from the database. A backup is made first.",
+                "Confirm Remove Directory",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+            if (ids.Count > 0 && !await DatabaseBackup.EnsureBackupAsync("RemoveDirectory")) return;
 
             var orphaned = ids.Count == 0
                 ? []
@@ -914,7 +944,19 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        var proceed = System.Windows.MessageBox.Show(
+            $"Rename audio/zip files in '{RenameFolderPath}' to match their Title tags?\nMatching database rows are updated too. A database backup is made first.",
+            "Confirm Rename",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+        if (proceed != System.Windows.MessageBoxResult.Yes) return;
+
         IsRenaming = true;
+        if (!await DatabaseBackup.EnsureBackupAsync("Rename"))
+        {
+            IsRenaming = false;
+            return;
+        }
         var cts = new CancellationTokenSource();
         _renameCts = cts;
         var token = cts.Token;
