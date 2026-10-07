@@ -162,6 +162,7 @@ public partial class MainViewModel : ObservableObject
     {
         try { _scanCts?.Cancel(); } catch (ObjectDisposedException) { }
         try { _renameCts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { _libraryScanCts?.Cancel(); } catch (ObjectDisposedException) { }
         try { _readinessCts?.Cancel(); } catch (ObjectDisposedException) { }
     }
 
@@ -807,11 +808,16 @@ public partial class MainViewModel : ObservableObject
         RunLibraryScan(LibraryDirectories.ToList());
     }
 
+    private CancellationTokenSource? _libraryScanCts;
+
     private void RunLibraryScan(IEnumerable<string> dirs)
     {
         if (IsLibraryScanning) return;
 
         var dirList = dirs.ToList();
+        var scanCts = new CancellationTokenSource();
+        _libraryScanCts = scanCts;
+        var token = scanCts.Token;
         IsLibraryScanning = true;
         LibraryScanProgressPercent = 0;
         LibraryScanStatusText = "Scanning folders...";
@@ -833,7 +839,14 @@ public partial class MainViewModel : ObservableObject
                     });
                 });
 
-                await scanner.ScanDirectories(dirList, scanProgress);
+                await scanner.ScanDirectories(dirList, scanProgress, token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Window closing - nothing left to report to.
+                RunOnUi(() => IsLibraryScanning = false);
+                FinishLibraryScan(scanCts);
+                return;
             }
             catch (Exception ex)
             {
@@ -844,6 +857,7 @@ public partial class MainViewModel : ObservableObject
                     IsLibraryScanning = false;
                     AppendLog($"Scan failed: {ex.Message}");
                 });
+                FinishLibraryScan(scanCts);
                 return;
             }
 
@@ -877,7 +891,7 @@ public partial class MainViewModel : ObservableObject
                     catch (OperationCanceledException) { }
                 });
 
-                await scanner.ProbeMissingMetadataAsync(probeProgress);
+                await scanner.ProbeMissingMetadataAsync(probeProgress, token);
 
                 try
                 {
@@ -894,7 +908,7 @@ public partial class MainViewModel : ObservableObject
                             // scan and duration/genre fill-in are both done — but only if the app is
                             // actually idle (not already scanning or mid-rename), so this never steals
                             // a run the user started themselves.
-                            if (!IsScanning && _operation.Current == null)
+                            if (!token.IsCancellationRequested && !IsScanning && _operation.Current == null)
                             {
                                 AppendLog("Starting slow metadata scan for songs with an unknown artist...");
                                 StartScan();
@@ -923,7 +937,14 @@ public partial class MainViewModel : ObservableObject
             }
 
             RunOnUi(() => IsLibraryScanning = false);
+            FinishLibraryScan(scanCts);
         });
+    }
+
+    private void FinishLibraryScan(CancellationTokenSource cts)
+    {
+        if (ReferenceEquals(_libraryScanCts, cts)) _libraryScanCts = null;
+        cts.Dispose();
     }
 
     // ==========================================
