@@ -18,6 +18,7 @@
     <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <PackageIcon>Glove-128.png</PackageIcon>
+    <PackageTags>pub-trivia; trivia; pub-games</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
