@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:14:00 -> Update NotifyRotationReordered with anchor, float current, and wait time sync
+// Edited on Oct 8, 2026 @ 11:47:00 -> Default empty music track performer names to Music Request and propagate IsMusic
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,6 +37,9 @@ public partial class PendingSong : ObservableObject
 
     [ObservableProperty]
     private string _externalLink = string.Empty;
+
+    [ObservableProperty]
+    private bool _isMusic;
 }
 
 public partial class RotationViewModel : BaseViewModel
@@ -526,8 +529,13 @@ public partial class RotationViewModel : BaseViewModel
             }
         }
 
-        if (isMusic)
+        bool isAnonymousMusic = isMusic && (string.IsNullOrWhiteSpace(name) || string.Equals(name, "Music Request", StringComparison.OrdinalIgnoreCase) || string.Equals(name, "Music", StringComparison.OrdinalIgnoreCase));
+        if (isAnonymousMusic)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = "Music Request";
+            }
             Rotation.Add(new Singer
             {
                 Name = name,
@@ -543,7 +551,8 @@ public partial class RotationViewModel : BaseViewModel
                 AverageRating = 0,
                 RatingCount = 0,
                 TotalSongsSung = 0,
-                IsMusic = true
+                IsMusic = true,
+                IsSpecial = isSpecial
             });
 
             RotationStateChanged?.Invoke();
@@ -614,7 +623,8 @@ public partial class RotationViewModel : BaseViewModel
                     Tempo = tempo,
                     Notes = notes,
                     Source = source,
-                    ExternalLink = externalLink
+                    ExternalLink = externalLink,
+                    IsMusic = isMusic
                 });
 
                 if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
@@ -837,7 +847,8 @@ public partial class RotationViewModel : BaseViewModel
                     Tempo = nextSong.Tempo,
                     Notes = nextSong.Notes,
                     Source = nextSong.Source,
-                    ExternalLink = nextSong.ExternalLink
+                    ExternalLink = nextSong.ExternalLink,
+                    IsMusic = nextSong.IsMusic
                 });
             }
 
@@ -1082,6 +1093,7 @@ public partial class RotationViewModel : BaseViewModel
             singer.Notes = nextSong.Notes;
             singer.Source = nextSong.Source;
             singer.ExternalLink = nextSong.ExternalLink;
+            singer.IsMusic = nextSong.IsMusic;
         }
         else
         {

@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:07:00 -> Add ActiveSongTitle, ActiveSongArtist, IsMusicTrack to MediaEngine
+// Edited on Oct 8, 2026 @ 13:20:00 -> Dynamic SongPathResolver integration for LoadSong and zip extraction
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -41,6 +41,9 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     public event Action? Stopped;
     public event Action? SongEnded;
     public event Action? PositionChanged;
+
+    public string CurrentSongPath => _currentSongPath;
+    public bool IsPlaying => _isPlaying;
 
     public double Volume
     {
@@ -179,6 +182,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     public string? ActiveSongTitle { get; set; }
     public string? ActiveSongArtist { get; set; }
     public bool IsMusicTrack { get; set; }
+    public bool IsAdHocTrack { get; set; }
 
     public string? ActiveDuetPartnerName
     {
@@ -339,12 +343,13 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
 
         if (string.IsNullOrEmpty(path)) return;
 
-        _currentSongPath = path;
+        string resolvedPath = SongPathResolver.ResolveSongPath(path);
+        _currentSongPath = resolvedPath;
 
-        string audioToLoad = path;
+        string audioToLoad = resolvedPath;
         string cdgToLoad = string.Empty;
-        bool isZip = path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
-        _isMp4Mode = path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
+        bool isZip = resolvedPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+        _isMp4Mode = resolvedPath.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
 
         if (isZip)
         {
@@ -359,7 +364,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                     _tempDir = Path.Combine(Path.GetTempPath(), "LyracistPlayback_" + Guid.NewGuid().ToString("N"));
                     Directory.CreateDirectory(_tempDir);
 
-                    using var archive = ZipFile.OpenRead(path);
+                    using var archive = ZipFile.OpenRead(resolvedPath);
                     var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
                     var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
 
@@ -378,13 +383,13 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                 catch (Exception ex)
                 {
                     Lyracist.Shared.Globals.LogError("Lyracist", "Error extracting ZIP playback", ex);
-                    audioToLoad = path;
+                    audioToLoad = resolvedPath;
                 }
             });
         }
         else if (!_isMp4Mode)
         {
-            cdgToLoad = Path.ChangeExtension(path, ".cdg");
+            cdgToLoad = Path.ChangeExtension(resolvedPath, ".cdg");
         }
 
         // Apply dynamic settings merging (Song -> Singer -> Defaults)
@@ -404,6 +409,8 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                 _scheduler.Reset();
             }
         }
+
+        PositionChanged?.Invoke();
     }
 
     public async Task Play()

@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 18:03:00 -> Add SearchBox_KeyDown to trigger SearchDatabaseCommand on Enter
+// Edited on Oct 8, 2026 @ 11:42:00 -> Play music track on double-click in Music Library and play performer on rotation double-click
 using System.Windows;
 using System.Windows.Controls;
 using Lyracist.ViewModels;
@@ -36,7 +36,22 @@ public partial class KaraokePage : Page
     {
         if (DataContext is KaraokeViewModel vm && vm.SelectedSong != null)
         {
-            vm.AddSongToRotationCommand.Execute(vm.SelectedSong);
+            if (vm.SelectedSearchTabIndex == 1 || !vm.SelectedSong.IsKaraoke)
+            {
+                vm.PlaySongCommand.Execute(vm.SelectedSong);
+            }
+            else
+            {
+                vm.AddSongToRotationCommand.Execute(vm.SelectedSong);
+            }
+        }
+    }
+
+    private void OnRotationQueueDoubleClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (DataContext is KaraokeViewModel vm)
+        {
+            vm.LoadAndPlaySelectedPerformerCommand.Execute(null);
         }
     }
 

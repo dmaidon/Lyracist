@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 16:34:00 -> Apply MasterOutputBoostDb preamp, 200% volume ceiling, and anti-clipping limiter
+// Edited on Oct 8, 2026 @ 13:22:00 -> Dynamic SongPathResolver integration for LoadAsync
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -218,14 +218,20 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
     public Task LoadAsync(string path)
     {
-        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        if (string.IsNullOrEmpty(path))
+        {
+            return Task.CompletedTask;
+        }
+
+        string resolvedPath = Lyracist.Core.Helpers.SongPathResolver.ResolveSongPath(path);
+        if (!File.Exists(resolvedPath))
         {
             return Task.CompletedTask;
         }
 
         if (_mediaPlayer != null && _libVLC != null)
         {
-            var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
+            var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(resolvedPath));
 
             // VLC's audio-filter chain is set once per Media, not live-adjustable mid-playback
             // (same constraint the existing pitch-shift option below already has) - so all active

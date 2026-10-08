@@ -1,4 +1,4 @@
-// Created on Aug 20, 2026 @ 09:55:00 -> Add PlaybackEngine service wrapper for IMediaEngine and OnSongEnded event
+// Edited on Oct 8, 2026 @ 12:05:00 -> Forward IsPlaying property from IMediaEngine
 using System;
 using System.Threading.Tasks;
 using Lyracist.Core.Interfaces;
@@ -24,6 +24,8 @@ public class PlaybackEngine
         _mediaEngine.SongEnded += () => OnSongEnded?.Invoke();
     }
 
+    public string CurrentSongPath => _mediaEngine.CurrentSongPath;
+    public bool IsPlaying => _mediaEngine.IsPlaying;
     public Task LoadSong(string path) => _mediaEngine.LoadSong(path);
     public Task Play() => _mediaEngine.Play();
     public Task Pause() => _mediaEngine.Pause();

@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:57:00 -> Add GetMixInMs and GetMixOutMs cue point methods
+// Edited on Oct 8, 2026 @ 13:18:00 -> Dynamic SongPathResolver integration for MapToKaraokeSong
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -288,16 +288,17 @@ public class LibraryService : ILibraryService
 
     private KaraokeSong MapToKaraokeSong(Song song)
     {
+        string resolvedPath = SongPathResolver.ResolveSongPath(song.FilePath);
         string? cdgPath = null;
         if (song.IsKaraoke)
         {
             if (song.KaraokeType == "MP3G")
             {
-                cdgPath = Path.ChangeExtension(song.FilePath, ".cdg");
+                cdgPath = Path.ChangeExtension(resolvedPath, ".cdg");
             }
             else
             {
-                cdgPath = song.FilePath; // ZIPCDG or MP4
+                cdgPath = resolvedPath; // ZIPCDG or MP4
             }
         }
 
@@ -305,7 +306,7 @@ public class LibraryService : ILibraryService
         {
             Title = song.Title,
             Artist = song.Artist,
-            AudioPath = song.FilePath,
+            AudioPath = resolvedPath,
             CdgPath = cdgPath,
             IsKaraoke = song.IsKaraoke
         };

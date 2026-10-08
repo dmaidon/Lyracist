@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:30:00 -> On song completion return projection to Rotation screen and wait in ReadyToStart for DJ manual start
+// Edited on Oct 8, 2026 @ 13:24:00 -> Dynamic SongPathResolver integration for LoadSingerSong
 using System;
 using System.IO;
 using System.Linq;
@@ -193,6 +193,15 @@ public class AutoAdvanceManager
             {
                 return;
             }
+        }
+
+        // DJ played a library track on demand: it is not a rotation performance, so leave the rotation alone.
+        if (_mediaEngine.IsAdHocTrack)
+        {
+            _mediaEngine.IsAdHocTrack = false;
+            _displayService.IsLyricsActive = false;
+            _displayService.ShowRotationWindow();
+            return;
         }
 
         StopGraceTimer();
@@ -467,6 +476,12 @@ public class AutoAdvanceManager
 
         _mediaEngine.ActiveSingerName = singer.Name;
         _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
+        _mediaEngine.ActivePerformerKey = singer.Key;
+        _mediaEngine.ActivePerformerTempo = singer.Tempo;
+        _mediaEngine.ActiveSongTitle = singer.SongTitle;
+        _mediaEngine.ActiveSongArtist = singer.Artist;
+        _mediaEngine.IsMusicTrack = singer.IsMusic;
+        _mediaEngine.IsAdHocTrack = false;
 
         string songPath = string.Empty;
 
@@ -491,9 +506,10 @@ public class AutoAdvanceManager
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(songPath) && File.Exists(songPath))
+        string resolvedSongPath = SongPathResolver.ResolveSongPath(songPath);
+        if (!string.IsNullOrWhiteSpace(resolvedSongPath) && File.Exists(resolvedSongPath))
         {
-            await _mediaEngine.LoadSong(songPath);
+            await _mediaEngine.LoadSong(resolvedSongPath);
         }
     }
 

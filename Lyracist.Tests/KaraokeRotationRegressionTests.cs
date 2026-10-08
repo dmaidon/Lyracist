@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 14:02:00 -> Explicitly initialize FloatCurrentSingerToTop to false in test helper
+// Edited on Oct 8, 2026 @ 13:16:00 -> Add SongPathResolver tests for shifted drive and relative folders
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
@@ -557,5 +557,94 @@ public class KaraokeRotationRegressionTests
         Assert.NotEmpty(rotationVm.Rotation);
         Assert.Single(rotationVm.Rotation, s => s.IsRotationStart);
         Assert.True(rotationVm.Rotation[0].IsRotationStart);
+    }
+
+    [Fact]
+    public void AddSinger_MusicTrack_WithPerformerName_SetsPerformerAndIsMusic()
+    {
+        var rotationVm = CreateRotationViewModel();
+
+        rotationVm.AddSinger("DJ Dave", "Awesome Song", "Awesome Artist", "0", "DJ notes", "Local", "C:\\Music\\song.mp3", isMusic: true);
+
+        Assert.Single(rotationVm.Rotation);
+        var singer = rotationVm.Rotation[0];
+        Assert.Equal("DJ Dave", singer.Name);
+        Assert.Equal("Awesome Song", singer.SongTitle);
+        Assert.Equal("Awesome Artist", singer.Artist);
+        Assert.Equal("C:\\Music\\song.mp3", singer.ExternalLink);
+        Assert.True(singer.IsMusic);
+    }
+
+    [Fact]
+    public void AddSinger_MusicTrack_ToExistingSingerWithoutSong_AssignsSongAndIsMusic()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var existing = MakeSinger("Alice");
+        rotationVm.Rotation.Add(existing);
+
+        rotationVm.AddSinger("Alice", "Party Track", "Cool DJ", "0", "", "Local", "C:\\Music\\party.mp3", isMusic: true);
+
+        Assert.Single(rotationVm.Rotation);
+        Assert.Same(existing, rotationVm.Rotation[0]);
+        Assert.Equal("Party Track", existing.SongTitle);
+        Assert.Equal("Cool DJ", existing.Artist);
+        Assert.Equal("C:\\Music\\party.mp3", existing.ExternalLink);
+        Assert.True(existing.IsMusic);
+    }
+
+    [Fact]
+    public void AddSinger_MusicTrack_ToExistingSingerWithSong_BuffersPendingSongAndPropagatesOnDone()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var existing = MakeSinger("Bob");
+        existing.SongTitle = "Karaoke Song 1";
+        existing.Artist = "Singer 1";
+        existing.ExternalLink = "C:\\Karaoke\\song1.cdg";
+        existing.IsMusic = false;
+        existing.IsCurrent = true;
+        rotationVm.Rotation.Add(existing);
+        rotationVm.SelectedSinger = existing;
+
+        // Add music track for Bob who already has a song
+        rotationVm.AddSinger("Bob", "Intermission Music", "DJ Bob", "0", "", "Local", "C:\\Music\\intermission.mp3", isMusic: true);
+
+        Assert.Single(rotationVm.Rotation);
+        Assert.Equal("Karaoke Song 1", existing.SongTitle);
+        Assert.False(existing.IsMusic);
+        Assert.Single(rotationVm.SelectedSingerQueue);
+        var pending = rotationVm.SelectedSingerQueue[0];
+        Assert.Equal("Intermission Music", pending.Title);
+        Assert.Equal("DJ Bob", pending.Artist);
+        Assert.True(pending.IsMusic);
+
+        // When Bob's turn finishes, the pending music track should be promoted to current song and IsMusic preserved
+        rotationVm.DoneSingerCommand.Execute(existing);
+
+        Assert.Equal("Intermission Music", existing.SongTitle);
+        Assert.Equal("DJ Bob", existing.Artist);
+        Assert.Equal("C:\\Music\\intermission.mp3", existing.ExternalLink);
+        Assert.True(existing.IsMusic);
+    }
+
+    [Fact]
+    public void SongPathResolver_ResolvesShiftedDriveAndFolders()
+    {
+        // 1. Missing file should return original path
+        string nonExistent = @"Z:\NonExistent\FakeSong.mp3";
+        Assert.Equal(nonExistent, Lyracist.Core.Helpers.SongPathResolver.ResolveSongPath(nonExistent));
+
+        // 2. If F:\ is connected, verify E:\ -> F:\ resolution for Music and Karaoke
+        if (System.IO.Directory.Exists(@"F:\Music"))
+        {
+            string oldMusicPath = @"E:\Eagles\Take It Easy.mp3";
+            string resolvedMusic = Lyracist.Core.Helpers.SongPathResolver.ResolveSongPath(oldMusicPath);
+            Assert.True(System.IO.File.Exists(resolvedMusic), $"Resolved music path should exist: {resolvedMusic}");
+            Assert.StartsWith(@"F:\Music\", resolvedMusic, StringComparison.OrdinalIgnoreCase);
+
+            string oldKaraokePath = @"E:\Karaoke\BKD\Aldean, Jason - Whiskey Me Away.MP3";
+            string resolvedKaraoke = Lyracist.Core.Helpers.SongPathResolver.ResolveSongPath(oldKaraokePath);
+            Assert.True(System.IO.File.Exists(resolvedKaraoke), $"Resolved karaoke path should exist: {resolvedKaraoke}");
+            Assert.StartsWith(@"F:\Karaoke\", resolvedKaraoke, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

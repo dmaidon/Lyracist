@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:08:00 -> Set ActiveSongTitle, ActiveSongArtist, IsMusicTrack on MediaEngine for performance recording
+// Edited on Oct 8, 2026 @ 13:26:00 -> Prioritize selected song in Play and integrate SongPathResolver in playback flows
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -133,6 +133,7 @@ public partial class KaraokeViewModel : BaseViewModel
     public string SeekPositionText => FormatSeekTime(SeekPosition);
     public string DurationText => FormatSeekTime(Duration);
     public bool HasSeekableDuration => Duration > 0;
+    public double DurationSliderMaximum => Duration > 0 ? Duration : 1.0;
 
     private static string FormatSeekTime(double seconds) =>
         TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
@@ -148,6 +149,7 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         OnPropertyChanged(nameof(DurationText));
         OnPropertyChanged(nameof(HasSeekableDuration));
+        OnPropertyChanged(nameof(DurationSliderMaximum));
     }
 
     /// <summary>Called from KaraokePage's Thumb.DragStarted handler on the seek slider.</summary>
@@ -175,10 +177,13 @@ public partial class KaraokeViewModel : BaseViewModel
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
         {
             IsPlaying = false;
+            _currentPlayingMusicSinger = null;
             _suppressSeekPositionCallback = true;
             SeekPosition = 0;
             Duration = 0;
             _suppressSeekPositionCallback = false;
+
+            _displayService.SetLyricsFallbackText("Lyracist — Ready");
 
             // Return host view to Karaoke screen
             _navigation.Navigate(typeof(Views.Pages.KaraokePage));
@@ -266,10 +271,18 @@ public partial class KaraokeViewModel : BaseViewModel
 
     partial void OnSelectedSongChanged(KaraokeSong? value)
     {
+        _selectionPending = value != null;
         if (value != null)
         {
             SelectedExternalTrack = null;
             SelectedHistoryEntry = null;
+            if (!value.IsKaraoke && !string.IsNullOrEmpty(value.AudioPath))
+            {
+                SelectedSongPath = value.AudioPath;
+                CurrentSongName = !string.IsNullOrWhiteSpace(value.Artist)
+                    ? $"{value.Artist} - {value.Title}"
+                    : value.Title;
+            }
         }
     }
 
@@ -632,6 +645,8 @@ public partial class KaraokeViewModel : BaseViewModel
         _mediaEngine.FrameReady += OnFrameReady;
         _mediaEngine.PositionChanged += OnMediaPositionChanged;
         _mediaEngine.SongEnded += OnSongEnded;
+        _mediaEngine.Started += OnMediaStarted;
+        _mediaEngine.Stopped += OnMediaStopped;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
         LoadSingerNames();
         RefreshQrCode();
@@ -697,6 +712,34 @@ public partial class KaraokeViewModel : BaseViewModel
     private void OnFrameReady(ImageSource frame)
     {
         CurrentFrame = frame;
+    }
+
+    private void OnMediaStarted()
+    {
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            IsPlaying = true;
+            if (!string.IsNullOrEmpty(_mediaEngine.ActiveSongTitle))
+            {
+                CurrentSongName = !string.IsNullOrWhiteSpace(_mediaEngine.ActiveSongArtist)
+                    ? $"{_mediaEngine.ActiveSongArtist} - {_mediaEngine.ActiveSongTitle}"
+                    : _mediaEngine.ActiveSongTitle;
+            }
+            if (!string.IsNullOrEmpty(_mediaEngine.CurrentSongPath))
+            {
+                SelectedSongPath = _mediaEngine.CurrentSongPath;
+            }
+            NotifyAudioPropertiesChanged();
+        }));
+    }
+
+    private void OnMediaStopped()
+    {
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            IsPlaying = false;
+            _currentPlayingMusicSinger = null;
+        }));
     }
 
     private void OnLibraryUpdated(object? sender, EventArgs e)
@@ -874,11 +917,19 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     private System.Threading.CancellationTokenSource? _musicAutoPlayCts;
+    private bool _isPlayingPerformerRequest;
+    private bool _selectionPending;
+    private Singer? _currentPlayingMusicSinger;
 
     private void CheckAutoPlayMusicTrack(Singer? current)
     {
         _musicAutoPlayCts?.Cancel();
         _musicAutoPlayCts = null;
+
+        if (_isPlayingPerformerRequest)
+        {
+            return;
+        }
 
         if (current == null || !current.IsMusic || !AutoPlayRotationMusic)
         {
@@ -887,7 +938,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         // Only auto-play if this music track is not already the loaded/playing track
         // to prevent infinite load loops when properties update.
-        if (SelectedSongPath == current.ExternalLink && IsPlaying)
+        if (IsPlaying && (_currentPlayingMusicSinger == current || (!string.IsNullOrEmpty(current.ExternalLink) && string.Equals(SelectedSongPath, current.ExternalLink, StringComparison.OrdinalIgnoreCase))))
         {
             return;
         }
@@ -909,9 +960,9 @@ public partial class KaraokeViewModel : BaseViewModel
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
-                    if (token.IsCancellationRequested) return;
+                    if (token.IsCancellationRequested || _isPlayingPerformerRequest) return;
                     var activeCurrent = Rotation.Rotation.FirstOrDefault(s => s.IsCurrent);
-                    if (activeCurrent != null && activeCurrent.IsMusic && activeCurrent.Name == current.Name && activeCurrent.SongTitle == current.SongTitle)
+                    if (activeCurrent != null && activeCurrent.IsMusic && (activeCurrent == current || (activeCurrent.Name == current.Name && activeCurrent.SongTitle == current.SongTitle)))
                     {
                         await PlayPerformerRequest(activeCurrent);
                     }
@@ -940,21 +991,89 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Play()
     {
-        if (!string.IsNullOrEmpty(SelectedSongPath))
+        // A paused track whose library selection was already consumed resumes instead of restarting.
+        if (!_selectionPending && !_mediaEngine.IsPlaying && !string.IsNullOrEmpty(_mediaEngine.CurrentSongPath) && _mediaEngine.Position > 0)
         {
+            _showFlow.OnKaraokeTrackStarted();
             await _mediaEngine.Play();
             IsPlaying = true;
+            return;
         }
-        else
+
+        // 1. Selected song from library has direct user priority
+        if (SelectedSong != null && !string.IsNullOrEmpty(SelectedSong.AudioPath))
         {
-            _showFlow.ResumeBackgroundMusic();
+            await PlaySong(SelectedSong);
+            return;
         }
+
+        // 2. Selected performer in rotation
+        if (Rotation.SelectedSinger != null && (!string.IsNullOrWhiteSpace(Rotation.SelectedSinger.SongTitle) || !string.IsNullOrWhiteSpace(Rotation.SelectedSinger.ExternalLink)))
+        {
+            await PlayPerformerRequest(Rotation.SelectedSinger);
+            return;
+        }
+
+        // 3. If already loaded and paused mid-track, resume playback
+        if (!string.IsNullOrEmpty(_mediaEngine.CurrentSongPath) && _mediaEngine.Position > 0)
+        {
+            _showFlow.OnKaraokeTrackStarted();
+            await _mediaEngine.Play();
+            IsPlaying = true;
+            return;
+        }
+
+        // 4. If currently playing and nothing new is selected, nothing to do
+        if (IsPlaying && _mediaEngine.IsPlaying)
+        {
+            return;
+        }
+
+        // 5. Current performer in active rotation
+        var currentSinger = Rotation.GetCurrentSinger();
+        if (currentSinger != null && (!string.IsNullOrWhiteSpace(currentSinger.SongTitle) || !string.IsNullOrWhiteSpace(currentSinger.ExternalLink)))
+        {
+            await PlayPerformerRequest(currentSinger);
+            return;
+        }
+
+        // 6. First active performer in rotation with a song or link ready to play
+        var firstActive = Rotation.Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!string.IsNullOrWhiteSpace(s.SongTitle) || !string.IsNullOrWhiteSpace(s.ExternalLink)));
+        if (firstActive != null)
+        {
+            await PlayPerformerRequest(firstActive);
+            return;
+        }
+
+        string resolvedSelected = SongPathResolver.ResolveSongPath(SelectedSongPath);
+        if (!string.IsNullOrEmpty(resolvedSelected) && System.IO.File.Exists(resolvedSelected))
+        {
+            SelectedSongPath = resolvedSelected;
+            _showFlow.OnKaraokeTrackStarted();
+            if (_mediaEngine.CurrentSongPath != resolvedSelected)
+            {
+                await _mediaEngine.LoadSong(resolvedSelected);
+            }
+
+            string label = !string.IsNullOrWhiteSpace(CurrentSongName) && CurrentSongName != "No Song Loaded"
+                ? CurrentSongName
+                : System.IO.Path.GetFileNameWithoutExtension(SelectedSongPath);
+            _displayService.SetLyricsFallbackText(label);
+            _displayService.ShowLyricsWindow();
+            await _mediaEngine.Play();
+            IsPlaying = true;
+            NotifyAudioPropertiesChanged();
+            return;
+        }
+
+        // Fallback: If nothing is queued or selected, resume background music
+        _showFlow.ResumeBackgroundMusic();
     }
 
     [RelayCommand]
     private async Task Pause()
     {
-        if (!string.IsNullOrEmpty(SelectedSongPath))
+        if (!string.IsNullOrEmpty(SelectedSongPath) || _mediaEngine.IsPlaying)
         {
             await _mediaEngine.Pause();
             IsPlaying = false;
@@ -968,10 +1087,12 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Stop()
     {
-        if (!string.IsNullOrEmpty(SelectedSongPath))
+        if (!string.IsNullOrEmpty(SelectedSongPath) || !string.IsNullOrEmpty(_mediaEngine.CurrentSongPath))
         {
             await _mediaEngine.Stop();
             IsPlaying = false;
+
+            _displayService.SetLyricsFallbackText("Lyracist — Ready");
 
             // Reset the display only - do not route through the normal SeekPosition setter, which
             // would issue a live Seek(0) call against a backend that Stop() just tore down.
@@ -1051,27 +1172,44 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (song == null) return;
 
-        SelectedSongPath = song.AudioPath;
-        CurrentSongName = $"{song.Artist} - {song.Title}";
+        string resolvedPath = SongPathResolver.ResolveSongPath(song.AudioPath);
+        if (string.IsNullOrWhiteSpace(resolvedPath) || !File.Exists(resolvedPath))
+        {
+            IsPlaying = false;
+            System.Windows.MessageBox.Show(
+                $"Could not locate audio file at '{song.AudioPath}'. Please verify the drive is connected.",
+                "File Not Found",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        song.AudioPath = resolvedPath;
+        SelectedSongPath = resolvedPath;
+        CurrentSongName = !string.IsNullOrWhiteSpace(song.Artist)
+            ? $"{song.Artist} - {song.Title}"
+            : song.Title;
 
         IsExternalPerformanceActive = false;
         ExternalPerformanceSource = string.Empty;
         ExternalPerformanceUrl = string.Empty;
 
-        await _mediaEngine.LoadSong(song.AudioPath);
+        _mediaEngine.ActiveSongTitle = song.Title;
+        _mediaEngine.ActiveSongArtist = song.Artist;
+        _mediaEngine.IsMusicTrack = !song.IsKaraoke;
+        _mediaEngine.IsAdHocTrack = true;
+        _selectionPending = false;
+
+        _showFlow.OnKaraokeTrackStarted();
+
+        await _mediaEngine.LoadSong(resolvedPath);
+        _displayService.SetLyricsFallbackText(CurrentSongName);
         _displayService.ShowLyricsWindow();
         await _mediaEngine.Play();
         IsPlaying = true;
 
         // Sync states to the view
-        OnPropertyChanged(nameof(Volume));
-        OnPropertyChanged(nameof(Speed));
-        OnPropertyChanged(nameof(Pitch));
-        OnPropertyChanged(nameof(Treble));
-        OnPropertyChanged(nameof(Mid));
-        OnPropertyChanged(nameof(Bass));
-        OnPropertyChanged(nameof(Compressor));
-        OnPropertyChanged(nameof(Limiter));
+        NotifyAudioPropertiesChanged();
     }
 
     [RelayCommand]
@@ -1079,29 +1217,20 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (song == null) return;
 
-        if (!song.IsKaraoke)
+        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(targetSingerName))
         {
-            // Background music tracks are not queued for anyone.
-            // Add them as a "Music Request" track directly.
-            Rotation.AddSinger("Music Request", song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath, string.Empty, isMusic: true);
-        }
-        else
-        {
-            string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(targetSingerName))
+            if (Rotation.SelectedSinger != null)
             {
-                if (Rotation.SelectedSinger != null)
-                {
-                    targetSingerName = Rotation.SelectedSinger.Name;
-                }
-                else
-                {
-                    targetSingerName = "Singer";
-                }
+                targetSingerName = Rotation.SelectedSinger.Name;
             }
-
-            Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath, NewDuetPartnerName, isMusic: false);
+            else
+            {
+                targetSingerName = song.IsKaraoke ? "Singer" : "Music Request";
+            }
         }
+
+        Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath, NewDuetPartnerName, isMusic: !song.IsKaraoke);
 
         // Reset inputs
         NewSingerName = string.Empty;
@@ -1231,6 +1360,10 @@ public partial class KaraokeViewModel : BaseViewModel
             {
                 targetSingerName = Rotation.SelectedSinger.Name;
             }
+            else if (SelectedSong != null && !SelectedSong.IsKaraoke)
+            {
+                targetSingerName = "Music Request";
+            }
             else
             {
                 return;
@@ -1239,7 +1372,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         if (SelectedSong != null)
         {
-            Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath, NewDuetPartnerName);
+            Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath, NewDuetPartnerName, isMusic: !SelectedSong.IsKaraoke);
         }
         else if (SelectedExternalTrack != null)
         {
@@ -1474,93 +1607,139 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private async Task PlayPerformerRequest(Singer singer)
     {
-        if (singer == null) return;
+        if (singer == null || _isPlayingPerformerRequest) return;
+        _isPlayingPerformerRequest = true;
 
-        // Mark this singer as current in the static list
-        foreach (var s in Rotation.Rotation)
+        try
         {
-            s.IsCurrent = s.Name.Equals(singer.Name, StringComparison.OrdinalIgnoreCase);
-        }
-        UpdateNowNext();
-
-        // Check if it's an external link
-        if (singer.Source == "Spotify" || singer.Source == "YouTube" || singer.Source == "Amazon")
-        {
-            IsPlaying = false;
-            CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [{singer.Source}]";
-            _mediaEngine.ActiveSingerName = singer.Name;
-            _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
-            await _mediaEngine.Stop();
-
-            // Stop background music as performance is launching externally
-            _showFlow.OnKaraokeTrackStarted();
-
-            IsExternalPerformanceActive = true;
-            ExternalPerformanceSource = singer.Source;
-            ExternalPerformanceUrl = singer.ExternalLink;
-
-            try
+            // Mark this singer as current in the static list
+            foreach (var s in Rotation.Rotation)
             {
-                if (!string.IsNullOrWhiteSpace(singer.ExternalLink))
+                s.IsCurrent = ReferenceEquals(s, singer);
+            }
+            UpdateNowNext();
+
+            // Check if it's an external link
+            if (singer.Source == "Spotify" || singer.Source == "YouTube" || singer.Source == "Amazon")
+            {
+                IsPlaying = false;
+                _currentPlayingMusicSinger = null;
+                CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [{singer.Source}]";
+                _mediaEngine.ActiveSingerName = singer.Name;
+                _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
+                await _mediaEngine.Stop();
+
+                // Stop background music as performance is launching externally
+                _showFlow.OnKaraokeTrackStarted();
+
+                IsExternalPerformanceActive = true;
+                ExternalPerformanceSource = singer.Source;
+                ExternalPerformanceUrl = singer.ExternalLink;
+
+                try
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(singer.ExternalLink) { UseShellExecute = true });
+                    if (!string.IsNullOrWhiteSpace(singer.ExternalLink))
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(singer.ExternalLink) { UseShellExecute = true });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Playback Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+                return;
+            }
+
+            string localPath = string.Empty;
+            string resolvedLink = SongPathResolver.ResolveSongPath(singer.ExternalLink);
+            if (!string.IsNullOrWhiteSpace(resolvedLink) && System.IO.File.Exists(resolvedLink))
+            {
+                localPath = resolvedLink;
+                singer.ExternalLink = resolvedLink;
+            }
+            else
+            {
+                var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}", singer.IsMusic).FirstOrDefault();
+                if (localMatch == null && !string.IsNullOrWhiteSpace(singer.SongTitle))
+                {
+                    localMatch = _libraryService.Search(singer.SongTitle, singer.IsMusic).FirstOrDefault();
+                }
+
+                // If not found in the primary category (e.g. music vs karaoke), search the other library
+                if (localMatch == null)
+                {
+                    localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}", !singer.IsMusic).FirstOrDefault();
+                    if (localMatch == null && !string.IsNullOrWhiteSpace(singer.SongTitle))
+                    {
+                        localMatch = _libraryService.Search(singer.SongTitle, !singer.IsMusic).FirstOrDefault();
+                    }
+                }
+
+                if (localMatch != null)
+                {
+                    localPath = SongPathResolver.ResolveSongPath(localMatch.AudioPath);
+                    if (string.IsNullOrEmpty(singer.ExternalLink) || !System.IO.File.Exists(singer.ExternalLink))
+                    {
+                        singer.ExternalLink = localPath;
+                    }
                 }
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(localPath) && System.IO.File.Exists(localPath))
             {
-                System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Playback Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                IsPlaying = false;
+                CurrentSongName = $"{singer.Artist} - {singer.SongTitle}";
+                _mediaEngine.ActiveSingerName = singer.Name;
+                _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
+                _mediaEngine.ActivePerformerKey = singer.Key;
+                _mediaEngine.ActivePerformerTempo = singer.Tempo;
+                _mediaEngine.ActiveSongTitle = singer.SongTitle;
+                _mediaEngine.ActiveSongArtist = singer.Artist;
+                _mediaEngine.IsMusicTrack = singer.IsMusic;
+                _mediaEngine.IsAdHocTrack = false;
+                _selectionPending = false;
+
+                IsExternalPerformanceActive = false;
+                ExternalPerformanceSource = string.Empty;
+                ExternalPerformanceUrl = string.Empty;
+
+                SelectedSongPath = localPath;
+                if (singer.IsMusic)
+                {
+                    _currentPlayingMusicSinger = singer;
+                }
+                else
+                {
+                    _currentPlayingMusicSinger = null;
+                }
+
+                _showFlow.OnKaraokeTrackStarted();
+
+                await _mediaEngine.LoadSong(localPath);
+
+                string songLabel = !string.IsNullOrWhiteSpace(singer.Artist)
+                    ? $"{singer.Artist} - {singer.SongTitle}"
+                    : singer.SongTitle;
+                _displayService.SetLyricsFallbackText(songLabel);
+                _displayService.ShowLyricsWindow();
+
+                await _mediaEngine.Play();
+                IsPlaying = true;
+                NotifyAudioPropertiesChanged();
             }
-            return;
-        }
-
-
-
-        string localPath = string.Empty;
-        if (singer.Source == "Local" && !string.IsNullOrWhiteSpace(singer.ExternalLink) && System.IO.File.Exists(singer.ExternalLink))
-        {
-            localPath = singer.ExternalLink;
-        }
-        else
-        {
-            var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}", singer.IsMusic).FirstOrDefault();
-            if (localMatch == null && !string.IsNullOrWhiteSpace(singer.SongTitle))
+            else
             {
-                localMatch = _libraryService.Search(singer.SongTitle, singer.IsMusic).FirstOrDefault();
-            }
-
-            if (localMatch != null)
-            {
-                localPath = localMatch.AudioPath;
+                IsPlaying = false;
+                System.Windows.MessageBox.Show(
+                    $"Could not locate file matching '{singer.SongTitle}' by '{singer.Artist}'. Please verify the drive is connected.",
+                    "Song Not Found",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
             }
         }
-
-        if (!string.IsNullOrEmpty(localPath))
+        finally
         {
-            IsPlaying = false;
-            CurrentSongName = $"{singer.Artist} - {singer.SongTitle}";
-            _mediaEngine.ActiveSingerName = singer.Name;
-            _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
-            _mediaEngine.ActivePerformerKey = singer.Key;
-            _mediaEngine.ActivePerformerTempo = singer.Tempo;
-
-            IsExternalPerformanceActive = false;
-            ExternalPerformanceSource = string.Empty;
-            ExternalPerformanceUrl = string.Empty;
-
-            SelectedSongPath = localPath;
-            await _mediaEngine.LoadSong(localPath);
-            _displayService.ShowLyricsWindow();
-            await _mediaEngine.Play();
-            IsPlaying = true;
-            NotifyAudioPropertiesChanged();
-        }
-        else
-        {
-            System.Windows.MessageBox.Show(
-                $"Could not locate file matching '{singer.SongTitle}' by '{singer.Artist}'. Please load it manually.",
-                "Song Not Found",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning);
+            _isPlayingPerformerRequest = false;
         }
     }
 
@@ -1572,6 +1751,11 @@ public partial class KaraokeViewModel : BaseViewModel
         if (targetSinger == null && !string.IsNullOrEmpty(NowSingingName) && !NowSingingName.Equals("None", StringComparison.OrdinalIgnoreCase))
         {
             targetSinger = Rotation.Rotation.FirstOrDefault(s => s.Name.Equals(NowSingingName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (targetSinger == null)
+        {
+            targetSinger = Rotation.Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!string.IsNullOrWhiteSpace(s.SongTitle) || !string.IsNullOrWhiteSpace(s.ExternalLink)));
         }
 
         if (targetSinger == null) return;

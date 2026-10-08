@@ -1,7 +1,9 @@
+<!-- Edited on Oct 8, 2026 @ 12:51:00 -> Add global NotEmptyToVisibilityConverter and EmptyStringToVisibilityConverter resources -->
 <Application x:Class="Lyracist.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:Lyracist.Core.Helpers">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -13,6 +15,9 @@
                 <!-- Lyracist Theme -->
                 <ResourceDictionary Source="pack://application:,,,/Themes/LyracistTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <helpers:NotEmptyToVisibilityConverter x:Key="NotEmptyToVisibilityConverter" />
+            <helpers:NotEmptyToVisibilityConverter x:Key="EmptyStringToVisibilityConverter" />
 
             <!-- Global Styles -->
             <!-- Buttons -->

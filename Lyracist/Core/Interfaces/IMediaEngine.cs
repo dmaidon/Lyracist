@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:07:00 -> Add ActiveSongTitle, ActiveSongArtist, IsMusicTrack to IMediaEngine
+// Edited on Oct 8, 2026 @ 12:05:00 -> Add IsPlaying property to IMediaEngine
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -7,6 +7,8 @@ namespace Lyracist.Core.Interfaces;
 
 public interface IMediaEngine
 {
+    string CurrentSongPath { get; }
+    bool IsPlaying { get; }
     Task LoadSong(string path);
     Task Play();
     Task Pause();
@@ -47,6 +49,8 @@ public interface IMediaEngine
     string? ActiveSongTitle { get; set; }
     string? ActiveSongArtist { get; set; }
     bool IsMusicTrack { get; set; }
+    /// <summary>True when the DJ played a library track on demand (not a rotation performance); its end must not advance the rotation.</summary>
+    bool IsAdHocTrack { get; set; }
     string? ActiveDuetPartnerName { get; set; }
     string? ActivePerformerKey { get; set; }
     double ActivePerformerTempo { get; set; }

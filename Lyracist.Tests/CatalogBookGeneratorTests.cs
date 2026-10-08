@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:09:00 -> Add UpdateUserManualsForFillerAutomixSamplePadAndRecording test to document filler automix and recording
+// Edited on Oct 8, 2026 @ 13:28:00 -> Add graceful IOException handling for open manual docx in UpdateUserManuals
 using System;
 using System.IO;
 using Xunit;
@@ -4033,46 +4033,53 @@ If the performer being moved to the top was previously skipped ('IsSkipped'), pa
             // 2. Update docx file if not already present
             if (File.Exists(docxPath))
             {
-                using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                try
                 {
-                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
-                        var body = doc.MainDocumentPart?.Document?.Body;
-                        if (body != null)
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
                         {
-                            bool alreadyAppended = false;
-                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
                             {
-                                if (p.InnerText.Contains("Section: Move to Top of Rotation"))
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
                                 {
-                                    alreadyAppended = true;
-                                    break;
+                                    if (p.InnerText.Contains("Section: Move to Top of Rotation"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if (!alreadyAppended)
-                            {
-                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
-                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
-                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Move to Top of Rotation & Performer Priority")
-                                    )
-                                ));
-
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                if (!alreadyAppended)
                                 {
-                                    if (line.StartsWith("Section:")) continue;
                                     body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
                                         new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
-                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Move to Top of Rotation & Performer Priority")
                                         )
                                     ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
                                 }
-                                doc.Save();
                             }
                         }
                     }
+                }
+                catch (IOException)
+                {
+                    // Ignore if word manual docx is currently open in Word
                 }
             }
 

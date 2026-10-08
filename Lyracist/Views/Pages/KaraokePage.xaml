@@ -1,4 +1,4 @@
-<!-- Edited on Oct 5, 2026 @ 22:49:30 -> Add Move to Top of Rotation context menu option, row action, and toolbar button -->
+<!-- Edited on Oct 8, 2026 @ 11:42:00 -> Add Play button to Music Library rows and double-click to play rotation item -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -440,20 +440,33 @@
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Song" Binding="{Binding Title}" Width="*" />
                                         <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
-                                        <DataGridTemplateColumn Width="52" MinWidth="52" CanUserResize="False">
+                                        <DataGridTemplateColumn Width="84" MinWidth="84" CanUserResize="False">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <ui:Button Icon="{ui:SymbolIcon Add24}"
-                                                           Command="{Binding DataContext.AddSongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                           CommandParameter="{Binding}"
-                                                           ToolTip="Add to Rotation"
-                                                           Appearance="Primary"
-                                                           Width="36"
-                                                           Height="32"
-                                                           Padding="4"
-                                                           Margin="2"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center" />
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <ui:Button Icon="{ui:SymbolIcon Play24}"
+                                                               Command="{Binding DataContext.PlaySongCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                               CommandParameter="{Binding}"
+                                                               ToolTip="Play Music Track"
+                                                               Appearance="Secondary"
+                                                               Width="34"
+                                                               Height="30"
+                                                               Padding="4"
+                                                               Margin="1,0"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                        <ui:Button Icon="{ui:SymbolIcon Add24}"
+                                                               Command="{Binding DataContext.AddSongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                               CommandParameter="{Binding}"
+                                                               ToolTip="Add to Rotation"
+                                                               Appearance="Primary"
+                                                               Width="34"
+                                                               Height="30"
+                                                               Padding="4"
+                                                               Margin="1,0"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -822,6 +835,7 @@
                                 <Setter Property="Margin" Value="0,0,0,2" />
                                 <Setter Property="Visibility" Value="Visible" />
                                 <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown" />
+                                <EventSetter Event="MouseDoubleClick" Handler="OnRotationQueueDoubleClicked" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
