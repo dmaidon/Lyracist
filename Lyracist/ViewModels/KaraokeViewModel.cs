@@ -1,4 +1,4 @@
-// Edited on Oct 8, 2026 @ 13:26:00 -> Prioritize selected song in Play and integrate SongPathResolver in playback flows
+﻿// Edited on Oct 8, 2026 @ 13:26:00 -> Prioritize selected song in Play and integrate SongPathResolver in playback flows
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -919,6 +919,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private System.Threading.CancellationTokenSource? _musicAutoPlayCts;
     private bool _isPlayingPerformerRequest;
     private bool _selectionPending;
+    private readonly System.Threading.SemaphoreSlim _playSongGate = new(1, 1);
     private Singer? _currentPlayingMusicSinger;
 
     private void CheckAutoPlayMusicTrack(Singer? current)
@@ -1198,15 +1199,30 @@ public partial class KaraokeViewModel : BaseViewModel
         _mediaEngine.ActiveSongArtist = song.Artist;
         _mediaEngine.IsMusicTrack = !song.IsKaraoke;
         _mediaEngine.IsAdHocTrack = true;
+        _mediaEngine.ActiveSingerName = null;
+        _mediaEngine.ActiveDuetPartnerName = null;
+        _mediaEngine.ActivePerformerKey = null;
+        _mediaEngine.ActivePerformerTempo = 0;
         _selectionPending = false;
 
         _showFlow.OnKaraokeTrackStarted();
 
-        await _mediaEngine.LoadSong(resolvedPath);
-        _displayService.SetLyricsFallbackText(CurrentSongName);
-        _displayService.ShowLyricsWindow();
-        await _mediaEngine.Play();
-        IsPlaying = true;
+        // Serialize load+play: a double-click (row double-click plus the row's Play button) otherwise
+        // interleaves two LoadSong/Play calls, and the second Play() sees _isPlaying already true and
+        // returns early after the first call's media was swapped out -> loaded but silent.
+        await _playSongGate.WaitAsync();
+        try
+        {
+            await _mediaEngine.LoadSong(resolvedPath);
+            _displayService.SetLyricsFallbackText(CurrentSongName);
+            _displayService.ShowLyricsWindow();
+            await _mediaEngine.Play();
+            IsPlaying = true;
+        }
+        finally
+        {
+            _playSongGate.Release();
+        }
 
         // Sync states to the view
         NotifyAudioPropertiesChanged();
