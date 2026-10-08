@@ -622,8 +622,7 @@ public partial class SettingsViewModel : BaseViewModel
     {
         try
         {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string recordingsDir = Path.Combine(baseDir, "Recordings");
+            string recordingsDir = Lyracist.Services.Media.PerformanceRecorderService.RecordingsRoot;
             Directory.CreateDirectory(recordingsDir);
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {

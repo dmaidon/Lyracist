@@ -21,10 +21,17 @@ public class SamplePadService : ISamplePadService
     private const int SampleRate = 44100;
     private const int Channels = 2;
 
+    // Clips are decoded fully into RAM as 32-bit float stereo (~0.35 MB per second); longer files are cut
+    // so 16 pads can never balloon into hundreds of MB. Pads are meant for short stingers anyway.
+    private const int MaxClipSeconds = 60;
+    private static readonly TimeSpan DecodeTimeout = TimeSpan.FromSeconds(30);
+
     private readonly IShowFlowService _showFlow;
     private readonly List<SamplePadItem> _pads = [];
     private readonly Dictionary<int, float[]> _cachedAudioBuffers = new();
-    private readonly HashSet<int> _activePlayingSlots = [];
+    // Voices currently sounding per pad. A count (not a flag) so retriggering a pad while it is still
+    // playing doesn't mark it idle - and un-duck the music - when the first instance finishes.
+    private readonly Dictionary<int, int> _activeVoiceCounts = new();
     private readonly object _stateLock = new();
 
     private readonly WaveFormat _waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(SampleRate, Channels);
@@ -41,7 +48,7 @@ public class SamplePadService : ISamplePadService
 
     public bool IsPlaying
     {
-        get { lock (_stateLock) { return _activePlayingSlots.Count > 0; } }
+        get { lock (_stateLock) { return _activeVoiceCounts.Count > 0; } }
     }
 
     public event EventHandler? StateChanged;
@@ -90,10 +97,28 @@ public class SamplePadService : ISamplePadService
         }
     }
 
-    public async Task InitializeAsync()
+    private Task? _initTask;
+
+    /// <summary>Loads the pad config and opens the audio output. Safe to call repeatedly - only the first call does the work.</summary>
+    public Task InitializeAsync()
     {
-        await LoadConfigAsync();
-        EnsureAudioEngine();
+        lock (_stateLock)
+        {
+            return _initTask ??= InitializeCoreAsync();
+        }
+    }
+
+    private async Task InitializeCoreAsync()
+    {
+        try
+        {
+            await LoadConfigAsync().ConfigureAwait(false);
+            EnsureAudioEngine();
+        }
+        catch (Exception ex)
+        {
+            Globals.LogError("SamplePadService", "Initialization failed", ex);
+        }
     }
 
     private static string GetConfigPath()
@@ -167,12 +192,17 @@ public class SamplePadService : ISamplePadService
             return;
         }
 
-        float[]? samples = await DecodeAudioToFloatPcmAsync(filePath);
+        float[]? samples = await DecodeAudioToFloatPcmAsync(filePath).ConfigureAwait(false);
         if (samples != null)
         {
             lock (_stateLock)
             {
-                _cachedAudioBuffers[slotIndex] = samples;
+                // The pad may have been re-assigned or cleared while this decode was running; don't let a
+                // slow decode of the old file overwrite the newer clip's buffer.
+                if (string.Equals(_pads[slotIndex].FilePath, filePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    _cachedAudioBuffers[slotIndex] = samples;
+                }
             }
         }
     }
@@ -202,21 +232,36 @@ public class SamplePadService : ISamplePadService
             startInfo.ArgumentList.Add(Channels.ToString());
             startInfo.ArgumentList.Add("-ar");
             startInfo.ArgumentList.Add(SampleRate.ToString());
+            startInfo.ArgumentList.Add("-t");
+            startInfo.ArgumentList.Add(MaxClipSeconds.ToString());
             startInfo.ArgumentList.Add("-");
 
             using var process = new Process { StartInfo = startInfo };
             process.Start();
 
-            using var ms = new MemoryStream();
-            await process.StandardOutput.BaseStream.CopyToAsync(ms);
-            await process.WaitForExitAsync();
+            using var cts = new System.Threading.CancellationTokenSource(DecodeTimeout);
+            try
+            {
+                using var ms = new MemoryStream();
+                // stderr must be drained concurrently: a corrupt file can fill the pipe and stall ffmpeg forever.
+                var stderrTask = process.StandardError.ReadToEndAsync();
+                await process.StandardOutput.BaseStream.CopyToAsync(ms, cts.Token).ConfigureAwait(false);
+                await process.WaitForExitAsync(cts.Token).ConfigureAwait(false);
+                await stderrTask.ConfigureAwait(false);
 
-            byte[] bytes = ms.ToArray();
-            if (bytes.Length == 0) return null;
+                int usable = (int)(ms.Length - ms.Length % (sizeof(float) * Channels));
+                if (usable <= 0) return null;
 
-            float[] samples = new float[bytes.Length / sizeof(float)];
-            Buffer.BlockCopy(bytes, 0, samples, 0, bytes.Length);
-            return samples;
+                float[] samples = new float[usable / sizeof(float)];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, samples, 0, usable);
+                return samples;
+            }
+            catch (OperationCanceledException)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { }
+                Globals.LogError("SamplePadService", $"Decoding timed out: {filePath}", "SamplePadService");
+                return null;
+            }
         }
         catch (Exception ex)
         {
@@ -238,6 +283,7 @@ public class SamplePadService : ISamplePadService
 
             if (!string.IsNullOrEmpty(color)) pad.Color = color;
             if (hotkey != null) pad.HotKey = hotkey;
+            _cachedAudioBuffers.Remove(slotIndex); // until the new clip finishes decoding
         }
 
         SaveConfig();
@@ -275,6 +321,11 @@ public class SamplePadService : ISamplePadService
             var existing = _pads[item.SlotIndex];
             pathChanged = !string.Equals(existing.FilePath, item.FilePath, StringComparison.OrdinalIgnoreCase);
             _pads[item.SlotIndex] = item;
+            if (pathChanged)
+            {
+                // The old clip must not keep playing from the cache once the pad points elsewhere (or nowhere).
+                _cachedAudioBuffers.Remove(item.SlotIndex);
+            }
         }
 
         SaveConfig();
@@ -340,6 +391,7 @@ public class SamplePadService : ISamplePadService
     {
         try
         {
+            AppSettings.SamplePadOutputDevice = deviceId ?? string.Empty;
             StopAll();
             _wasapiOut?.Stop();
             _wasapiOut?.Dispose();
@@ -356,7 +408,7 @@ public class SamplePadService : ISamplePadService
 
     public void PlayPad(int slotIndex)
     {
-        if (slotIndex < 0 || slotIndex >= TotalPadCount) return;
+        if (_isDisposed || slotIndex < 0 || slotIndex >= TotalPadCount) return;
 
         SamplePadItem pad;
         float[]? buffer;
@@ -377,8 +429,8 @@ public class SamplePadService : ISamplePadService
         bool wasPlayingBefore;
         lock (_stateLock)
         {
-            wasPlayingBefore = _activePlayingSlots.Count > 0;
-            _activePlayingSlots.Add(slotIndex);
+            wasPlayingBefore = _activeVoiceCounts.Count > 0;
+            _activeVoiceCounts[slotIndex] = _activeVoiceCounts.GetValueOrDefault(slotIndex) + 1;
         }
 
         PadPlayingChanged?.Invoke(slotIndex, true);
@@ -387,30 +439,52 @@ public class SamplePadService : ISamplePadService
             _showFlow.DuckFillIn();
         }
 
-        var voice = new MemoryAudioVoice(buffer, _waveFormat, pad.Volume, () =>
-        {
-            bool hasRemainingVoices;
-            lock (_stateLock)
-            {
-                _activePlayingSlots.Remove(slotIndex);
-                hasRemainingVoices = _activePlayingSlots.Count > 0;
-            }
-
-            PadPlayingChanged?.Invoke(slotIndex, false);
-            if (!hasRemainingVoices)
-            {
-                _showFlow.UnduckFillIn();
-            }
-        });
+        // The end callback is raised by the audio render thread, which must never block or touch UI/LibVLC
+        // objects: bounce the bookkeeping to the thread pool, and the un-duck on to the UI thread.
+        var voice = new MemoryAudioVoice(buffer, _waveFormat, pad.Volume,
+            () => System.Threading.Tasks.Task.Run(() => OnVoiceEnded(slotIndex)));
 
         _mixer.AddInput(voice);
+    }
+
+    private void OnVoiceEnded(int slotIndex)
+    {
+        if (_isDisposed) return;
+
+        bool slotIdle;
+        bool allIdle;
+        lock (_stateLock)
+        {
+            int remaining = _activeVoiceCounts.GetValueOrDefault(slotIndex) - 1;
+            if (remaining > 0)
+            {
+                _activeVoiceCounts[slotIndex] = remaining;
+                slotIdle = false;
+            }
+            else
+            {
+                _activeVoiceCounts.Remove(slotIndex);
+                slotIdle = true;
+            }
+            allIdle = _activeVoiceCounts.Count == 0;
+        }
+
+        if (slotIdle) PadPlayingChanged?.Invoke(slotIndex, false);
+        if (allIdle) PostToUi(() => _showFlow.UnduckFillIn());
+    }
+
+    private static void PostToUi(Action action)
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null || dispatcher.HasShutdownStarted) return;
+        try { dispatcher.BeginInvoke(action); } catch (OperationCanceledException) { }
     }
 
     public void StopAll()
     {
         lock (_stateLock)
         {
-            _activePlayingSlots.Clear();
+            _activeVoiceCounts.Clear();
         }
 
         _mixer?.RemoveAllInputs();
@@ -462,8 +536,7 @@ public class SamplePadService : ISamplePadService
             int available = _samples.Length - _position;
             if (available <= 0)
             {
-                NotifyEnded();
-                return 0;
+                return 0; // the mixer removes this voice and then calls NotifyEnded() outside its lock
             }
 
             int samplesToRead = Math.Min(available, buffer.Length);
@@ -472,16 +545,10 @@ public class SamplePadService : ISamplePadService
                 buffer[i] = (float)(_samples[_position + i] * _volume);
             }
             _position += samplesToRead;
-
-            if (_position >= _samples.Length)
-            {
-                NotifyEnded();
-            }
-
             return samplesToRead;
         }
 
-        private void NotifyEnded()
+        public void NotifyEnded()
         {
             if (!_endedNotified)
             {
@@ -493,8 +560,9 @@ public class SamplePadService : ISamplePadService
 
     private sealed class MemoryMixerSampleProvider : ISampleProvider
     {
-        private readonly List<ISampleProvider> _inputs = [];
+        private readonly List<MemoryAudioVoice> _inputs = [];
         private readonly object _lock = new();
+        private float[] _scratch = new float[4096]; // reused: the render callback must not allocate
 
         public WaveFormat WaveFormat { get; }
 
@@ -503,7 +571,7 @@ public class SamplePadService : ISamplePadService
             WaveFormat = waveFormat;
         }
 
-        public void AddInput(ISampleProvider input)
+        public void AddInput(MemoryAudioVoice input)
         {
             lock (_lock)
             {
@@ -522,6 +590,7 @@ public class SamplePadService : ISamplePadService
         public int Read(Span<float> buffer)
         {
             buffer.Clear();
+            List<MemoryAudioVoice>? finished = null;
             lock (_lock)
             {
                 if (_inputs.Count == 0)
@@ -529,7 +598,9 @@ public class SamplePadService : ISamplePadService
                     return buffer.Length;
                 }
 
-                float[] temp = new float[buffer.Length];
+                if (_scratch.Length < buffer.Length) _scratch = new float[buffer.Length];
+                var temp = _scratch.AsSpan(0, buffer.Length);
+
                 for (int i = _inputs.Count - 1; i >= 0; i--)
                 {
                     int read = _inputs[i].Read(temp);
@@ -539,9 +610,16 @@ public class SamplePadService : ISamplePadService
                     }
                     if (read == 0)
                     {
+                        (finished ??= []).Add(_inputs[i]);
                         _inputs.RemoveAt(i);
                     }
                 }
+            }
+
+            // Notify outside the lock so a callback can never deadlock against AddInput/RemoveAllInputs.
+            if (finished != null)
+            {
+                foreach (var voice in finished) voice.NotifyEnded();
             }
             return buffer.Length;
         }
@@ -557,12 +635,14 @@ public class SamplePadService : ISamplePadService
             _source = source;
         }
 
+        private float[] _scratch = new float[4096];
+
         public int Read(Span<byte> buffer)
         {
             int floatCount = buffer.Length / sizeof(float);
-            float[] floatBuffer = new float[floatCount];
-            int readSamples = _source.Read(floatBuffer);
-            var byteSpan = System.Runtime.InteropServices.MemoryMarshal.AsBytes(floatBuffer.AsSpan(0, readSamples));
+            if (_scratch.Length < floatCount) _scratch = new float[floatCount];
+            int readSamples = _source.Read(_scratch.AsSpan(0, floatCount));
+            var byteSpan = System.Runtime.InteropServices.MemoryMarshal.AsBytes(_scratch.AsSpan(0, readSamples));
             byteSpan.CopyTo(buffer);
             return byteSpan.Length;
         }

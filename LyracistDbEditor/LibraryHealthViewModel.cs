@@ -360,7 +360,8 @@ public partial class MainViewModel
             MissingReadinessCount = context.Songs.Count(s =>
                 s.IsKaraoke && (s.Key == null || s.BPM == null || s.Difficulty == null));
             MissingLoudnessCount = context.Songs.Count(s => s.MeasuredLoudnessLufs == null);
-            MissingBpmCount = context.Songs.Count(s => !s.IsKaraoke && s.BPM == null);
+            var fillerIds = GetFillerSongIds(context);
+            MissingBpmCount = context.Songs.Count(s => !s.IsKaraoke && s.BPM == null && fillerIds.Contains(s.SongId));
         }
         catch (Exception ex)
         {
@@ -412,19 +413,33 @@ public partial class MainViewModel
         ReadinessAuditStatusText = "Stopping audit...";
     }
 
+    // BPM and cue-point analysis only matter for tracks that can actually play as background music, so the
+    // audit is limited to songs in the Opening / Fill-In / End-of-Rotation playlists instead of every
+    // non-karaoke track in the library (each analysis decodes audio, which is slow on a big library).
+    private static List<int> GetFillerSongIds(LyracistDbContext context)
+    {
+        return context.OpeningPlaylistItems.Select(i => i.SongId)
+            .Concat(context.FillInPlaylistItems.Select(i => i.SongId))
+            .Concat(context.EndRotationPlaylistItems.Select(i => i.SongId))
+            .Distinct()
+            .ToList();
+    }
+
     private async Task RunReadinessAuditAsync(CancellationToken token)
     {
         try
         {
             using var context = new LyracistDbContext();
+            var fillerIds = GetFillerSongIds(context);
+            var fillerSet = fillerIds.ToHashSet();
 
             // Audits key/BPM/difficulty for karaoke tracks, integrated loudness for any track,
             // and BPM analysis / mix-in/mix-out cue point detection for background filler tracks.
             var targets = await context.Songs
                 .Where(s => (s.IsKaraoke && (s.Key == null || s.BPM == null || s.Difficulty == null))
                             || s.MeasuredLoudnessLufs == null
-                            || (!s.IsKaraoke && s.BPM == null)
-                            || (!s.IsKaraoke && (s.MixInMs == null && s.MixOutMs == null)))
+                            || (!s.IsKaraoke && fillerIds.Contains(s.SongId)
+                                && (s.BPM == null || (s.MixInMs == null && s.MixOutMs == null))))
                 .ToListAsync(token);
 
             int total = targets.Count;
@@ -479,7 +494,7 @@ public partial class MainViewModel
                 }
 
                 // Filler BPM analysis (Feature D): check tags first, then audio analysis
-                if (!song.IsKaraoke && song.BPM == null)
+                if (!song.IsKaraoke && fillerSet.Contains(song.SongId) && song.BPM == null)
                 {
                     var probe = await FFprobeRunner.ProbeFile(song.FilePath);
                     double? tagBpm = FFmpegService.DetectBpm(probe);
@@ -500,15 +515,15 @@ public partial class MainViewModel
                 }
 
                 // Filler cue points detection (Feature E): silencedetect
-                if (!song.IsKaraoke && song.MixInMs == null && song.MixOutMs == null)
+                if (!song.IsKaraoke && fillerSet.Contains(song.SongId) && song.MixInMs == null && song.MixOutMs == null)
                 {
                     var (mixIn, mixOut) = await FFmpegService.DetectCuePointsAsync(song.FilePath, song.Duration, token);
-                    if (mixIn.HasValue || mixOut.HasValue)
-                    {
-                        song.MixInMs = mixIn;
-                        song.MixOutMs = mixOut;
-                        changed = true;
-                    }
+
+                    // Nothing found (no leading/trailing silence) is recorded as 0/0 - the player ignores cue
+                    // points <= 0 - so a clean track isn't re-decoded in full on every future audit.
+                    song.MixInMs = mixIn ?? 0;
+                    song.MixOutMs = mixOut ?? 0;
+                    changed = true;
                 }
 
                 if (changed)

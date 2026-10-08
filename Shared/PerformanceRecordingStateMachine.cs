@@ -26,16 +26,20 @@ public static class PerformanceRecordingStateMachine
             fileName = fileName.Replace("__", "_");
         }
 
-        fileName = fileName.Trim(' ', '_');
+        // Windows silently strips trailing dots/spaces, which would make the saved name differ from the one we track.
+        fileName = fileName.Trim(' ', '_', '.');
         return string.IsNullOrWhiteSpace(fileName) ? "Unknown" : fileName;
     }
 
-    public static string GetRecordingRelativePath(DateTime date, string singerName, string songTitle, string ext = ".wav")
+    /// <param name="date">Local date of the show; used for the day folder (callers pass local time).</param>
+    /// <param name="takeNumber">1 for the first take; later takes of the same singer/song get a " (2)", " (3)"... suffix so they never overwrite.</param>
+    public static string GetRecordingRelativePath(DateTime date, string singerName, string songTitle, string ext = ".wav", int takeNumber = 1)
     {
         string dateFolder = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         string safeSinger = SanitizeFileName(singerName);
         string safeTitle = SanitizeFileName(songTitle);
-        string file = $"{safeSinger} - {safeTitle}{ext}";
+        string take = takeNumber > 1 ? $" ({takeNumber})" : string.Empty;
+        string file = $"{safeSinger} - {safeTitle}{take}{ext}";
         return Path.Combine("Recordings", dateFolder, file);
     }
 
@@ -56,13 +60,14 @@ public static class PerformanceRecordingStateMachine
         return true;
     }
 
-    public static List<string> GetExpiredDirectories(string recordingsRootDir, int retentionDays, DateTime nowUtc)
+    /// <param name="today">Today's date in the same (local) calendar the day folders were named with.</param>
+    public static List<string> GetExpiredDirectories(string recordingsRootDir, int retentionDays, DateTime today)
     {
         var expiredDirs = new List<string>();
         if (retentionDays <= 0 || !Directory.Exists(recordingsRootDir))
             return expiredDirs;
 
-        DateTime cutoff = nowUtc.Date.AddDays(-retentionDays);
+        DateTime cutoff = today.Date.AddDays(-retentionDays);
 
         foreach (string dir in Directory.GetDirectories(recordingsRootDir))
         {
@@ -89,14 +94,19 @@ public class PerformanceRecordingSession
     public string RelativeWavPath { get; }
     public string RelativeMp3Path { get; }
 
-    public PerformanceRecordingSession(string singerName, string songTitle, string artist, DateTime startedUtc)
+    public int TakeNumber { get; }
+
+    public PerformanceRecordingSession(string singerName, string songTitle, string artist, DateTime startedUtc, int takeNumber = 1)
     {
+        TakeNumber = takeNumber;
         SingerName = singerName;
         SongTitle = songTitle;
         Artist = artist;
         StartedUtc = startedUtc;
-        RelativeWavPath = PerformanceRecordingStateMachine.GetRecordingRelativePath(startedUtc, singerName, songTitle, ".wav");
-        RelativeMp3Path = PerformanceRecordingStateMachine.GetRecordingRelativePath(startedUtc, singerName, songTitle, ".mp3");
+        // Day folders use the host's local calendar day, not UTC (an evening show would otherwise land in tomorrow's folder).
+        DateTime localDay = startedUtc.Kind == DateTimeKind.Utc ? startedUtc.ToLocalTime() : startedUtc;
+        RelativeWavPath = PerformanceRecordingStateMachine.GetRecordingRelativePath(localDay, singerName, songTitle, ".wav", takeNumber);
+        RelativeMp3Path = PerformanceRecordingStateMachine.GetRecordingRelativePath(localDay, singerName, songTitle, ".mp3", takeNumber);
     }
 
     public (bool Keep, double DurationSeconds) Complete(DateTime stoppedUtc)

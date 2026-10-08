@@ -779,12 +779,15 @@ public partial class KaraokeViewModel : BaseViewModel
             NextUpName = "None";
             NextUpSong = "No Song";
 
+            // Song metadata is refreshed unconditionally: the performance recorder names takes from it,
+            // and it can change without the singer changing (a singer's next queued song).
+            _mediaEngine.ActiveSongTitle = null;
+            _mediaEngine.ActiveSongArtist = null;
+            _mediaEngine.IsMusicTrack = false;
+
             if (NowSingingName != oldSinger)
             {
                 _mediaEngine.ActiveSingerName = NowSingingName;
-                _mediaEngine.ActiveSongTitle = null;
-                _mediaEngine.ActiveSongArtist = null;
-                _mediaEngine.IsMusicTrack = false;
                 _mediaEngine.ActiveDuetPartnerName = "None";
                 NotifyAudioPropertiesChanged();
             }
@@ -854,12 +857,15 @@ public partial class KaraokeViewModel : BaseViewModel
         }
 
         string partnerName = current?.DuetPartnerName ?? string.Empty;
+
+        // Always keep the song metadata current (see note above) - it must not depend on the singer changing.
+        _mediaEngine.ActiveSongTitle = current?.SongTitle;
+        _mediaEngine.ActiveSongArtist = current?.Artist;
+        _mediaEngine.IsMusicTrack = current?.IsMusic ?? false;
+
         if (NowSingingName != oldSinger || _mediaEngine.ActiveDuetPartnerName != partnerName)
         {
             _mediaEngine.ActiveSingerName = NowSingingName;
-            _mediaEngine.ActiveSongTitle = current?.SongTitle;
-            _mediaEngine.ActiveSongArtist = current?.Artist;
-            _mediaEngine.IsMusicTrack = current?.IsMusic ?? false;
             _mediaEngine.ActiveDuetPartnerName = partnerName;
             NotifyAudioPropertiesChanged();
         }

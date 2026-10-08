@@ -329,6 +329,13 @@ public partial class App : System.Windows.Application
         var syncService = Host.Services.GetRequiredService<IKSRotationSyncService>();
         syncService.Start();
 
+        // Load the sample pad config and open its audio output now, so the F-key pad hotkeys work from
+        // startup instead of only after the Sample Pad page has been opened once.
+        _ = Host.Services.GetRequiredService<ISamplePadService>().InitializeAsync();
+
+        // Create the performance recorder up front too, so it is already listening for songs starting.
+        _ = Host.Services.GetRequiredService<IPerformanceRecorderService>();
+
         // Initialize AutoAdvanceManager
         var autoAdvance = Host.Services.GetRequiredService<AutoAdvanceManager>();
         var karaokeVm = Host.Services.GetRequiredService<KaraokeViewModel>();

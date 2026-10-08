@@ -154,23 +154,36 @@ public class ShowFlowService : IShowFlowService
         _occasion.FillInSmartShuffle = false;
     }
 
-    private static (int? MixIn, int? MixOut) GetSongCuePoints(string path)
+    // Cue points are read from the database once per track and cached until the playlists are refreshed;
+    // the players ask for them on every track change (and the mix-in/out lookups used to hit the DB repeatedly).
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (int? MixIn, int? MixOut)> _cuePointCache =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private (int? MixIn, int? MixOut) GetSongCuePoints(string path)
     {
+        if (string.IsNullOrEmpty(path)) return (null, null);
+        if (_cuePointCache.TryGetValue(path, out var cached)) return cached;
+
         try
         {
             using var context = new Lyracist.Data.LyracistDbContext();
             var s = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AsNoTracking(context.Songs)
-                .FirstOrDefault(x => x.FilePath == path);
-            return (s?.MixInMs, s?.MixOutMs);
+                .Where(x => x.FilePath == path)
+                .Select(x => new { x.MixInMs, x.MixOutMs })
+                .FirstOrDefault();
+            var result = (s?.MixInMs, s?.MixOutMs);
+            _cuePointCache[path] = result;
+            return result;
         }
         catch
         {
-            return (null, null);
+            return (null, null); // not cached, so a transient DB error is retried next time
         }
     }
 
     public void RefreshPlaylists()
     {
+        _cuePointCache.Clear();
         var opening = _playlists.GetOpeningPlaylist();
         _opening.LoadPlaylist(opening.Select(t => new Lyracist.Shared.FillInTrack(t.AudioPath, t.Artist, t.Bpm)).ToList());
 

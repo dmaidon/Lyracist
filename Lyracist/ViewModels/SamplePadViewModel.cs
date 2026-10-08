@@ -131,7 +131,7 @@ public partial class SamplePadViewModel : ObservableObject
 
     private void OnServiceStateChanged(object? sender, EventArgs e)
     {
-        System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher?.BeginInvoke(() =>
         {
             foreach (var item in _service.Pads)
             {
@@ -146,7 +146,7 @@ public partial class SamplePadViewModel : ObservableObject
 
     private void OnPadPlayingChanged(int slotIndex, bool isPlaying)
     {
-        System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher?.BeginInvoke(() =>
         {
             if (slotIndex >= 0 && slotIndex < Slots.Count)
             {

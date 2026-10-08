@@ -48,6 +48,15 @@ public class BackgroundMusicPlayer : IDisposable
     private string? _activeTrackPath;
     private string? _inactiveTrackPath;
 
+    // Cue points are resolved once per track start (not on every 250 ms monitor tick - the lookups hit the database).
+    private int? _activeMixOutMs;
+    private int? _inactiveMixOutMs;
+    private long _activeStartMs;
+    private long _inactiveStartMs;
+
+    // Incremented on every LoadPlaylist so a slow background path-validation can't overwrite a newer playlist.
+    private int _playlistVersion;
+
     private readonly Queue<string> _recentHistory = new();
     private const int MaxHistoryCount = 5;
 
@@ -170,6 +179,7 @@ public class BackgroundMusicPlayer : IDisposable
 
     public void LoadPlaylist(IReadOnlyList<FillInTrack> tracks)
     {
+        int version = ++_playlistVersion;
         _tracks = [.. tracks];
         ShufflePlaylist();
         if (_currentIndex >= _tracks.Count)
@@ -184,6 +194,8 @@ public class BackgroundMusicPlayer : IDisposable
             var validTracks = tracksCopy.Where(t => File.Exists(t.Path)).ToList();
             System.Windows.Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
             {
+                if (version != _playlistVersion) return; // superseded by a newer LoadPlaylist
+
                 FillInTrack? currentTrack = _currentIndex >= 0 && _currentIndex < _tracks.Count ? _tracks[_currentIndex] : null;
 
                 _tracks = validTracks;
@@ -239,6 +251,8 @@ public class BackgroundMusicPlayer : IDisposable
         string path = _tracks[_currentIndex].Path;
         _activeTrackPath = path;
         _activeTrackGain = ComputeTrackGain(path);
+        _activeMixOutMs = MixOutLookup?.Invoke(path);
+        _activeStartMs = 0;
         PlayTrack(_active, path);
         _active.Volume = CurrentTargetVolume;
         RecordHistory(path);
@@ -259,10 +273,16 @@ public class BackgroundMusicPlayer : IDisposable
 
         IsPlaying = true;
         string path = _tracks[_currentIndex].Path;
-        _activeTrackPath = path;
-        _activeTrackGain = ComputeTrackGain(path);
+        _activeTrackPath ??= path;
+        _activeTrackGain = ComputeTrackGain(_activeTrackPath);
+        _activeMixOutMs ??= MixOutLookup?.Invoke(_activeTrackPath);
         _active.Volume = CurrentTargetVolume;
         _active.Play();
+        if (_isCrossfading)
+        {
+            // Pause() paused both players mid-crossfade; the incoming one must resume too.
+            _inactive.Play();
+        }
         _monitorTimer.Start();
     }
 
@@ -284,6 +304,8 @@ public class BackgroundMusicPlayer : IDisposable
         IsPlaying = false;
         _isCrossfading = false;
         _currentCrossfadeDurationMs = 0;
+        _activeMixOutMs = null;
+        _inactiveMixOutMs = null;
         _monitorTimer.Stop();
         _active.Stop();
         _inactive.Stop();
@@ -309,9 +331,15 @@ public class BackgroundMusicPlayer : IDisposable
         }
     }
 
-    private void PlayTrack(MediaPlayer player, string path)
+    private void PlayTrack(MediaPlayer player, string path, long startMs = 0)
     {
         var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
+        if (startMs > 0)
+        {
+            // Setting MediaPlayer.Time right after Play() is ignored until playback has actually begun,
+            // so the mix-in cue point is passed as a media option instead.
+            media.AddOption(":start-time=" + (startMs / 1000.0).ToString("F3", System.Globalization.CultureInfo.InvariantCulture));
+        }
         var oldMedia = player.Media;
         player.Media = media;
         oldMedia?.Dispose();
@@ -387,7 +415,9 @@ public class BackgroundMusicPlayer : IDisposable
 
         // Elapsed-time automix: if MaxTrackSeconds is enabled (> 0) and we are looping,
         // fade to next after MaxTrackSeconds elapsed time.
-        if (Loop && MaxTrackSeconds > 0 && time >= MaxTrackSeconds * 1000)
+        // (a floor keeps a mistyped tiny value from cycling tracks every few seconds)
+        int maxSeconds = MaxTrackSeconds > 0 ? Math.Max(30, MaxTrackSeconds) : 0;
+        if (Loop && maxSeconds > 0 && time - _activeStartMs >= maxSeconds * 1000L)
         {
             _currentCrossfadeDurationMs = effectiveCrossfadeMs;
             StartCrossfade();
@@ -397,12 +427,13 @@ public class BackgroundMusicPlayer : IDisposable
         // Mix-out cue point (Feature E): if MixOut is set, trigger crossfade at (MixOutMs - crossfade)
         // Otherwise trigger at (length - crossfade).
         long triggerPointMs = (long)(length - effectiveCrossfadeMs);
-        if (_currentIndex >= 0 && _currentIndex < _tracks.Count)
+        if (_activeMixOutMs is int mixOut && length > 0)
         {
-            int? mixOut = MixOutLookup?.Invoke(_tracks[_currentIndex].Path);
-            if (mixOut.HasValue && mixOut.Value > 0)
+            // Ignore nonsense cue points: past the end of the track, or so early the track would barely play.
+            long cue = mixOut - (long)effectiveCrossfadeMs;
+            if (mixOut < length && cue > _activeStartMs + 1000)
             {
-                triggerPointMs = (long)(mixOut.Value - effectiveCrossfadeMs);
+                triggerPointMs = Math.Min(triggerPointMs, cue);
             }
         }
 
@@ -432,15 +463,13 @@ public class BackgroundMusicPlayer : IDisposable
         _inactiveTrackPath = nextPath;
         _inactiveTrackGain = ComputeTrackGain(nextPath);
 
-        PlayTrack(_inactive, nextPath);
-        _inactive.Volume = 0;
-
-        // Cue point (MixIn): seek incoming track if cue point is set
+        // Cue points for the incoming track: start it at its mix-in point, remember its mix-out point.
         int? mixIn = MixInLookup?.Invoke(nextPath);
-        if (mixIn.HasValue && mixIn.Value > 0)
-        {
-            _inactive.Time = mixIn.Value;
-        }
+        _inactiveMixOutMs = MixOutLookup?.Invoke(nextPath);
+        _inactiveStartMs = mixIn.HasValue && mixIn.Value > 0 ? mixIn.Value : 0;
+
+        PlayTrack(_inactive, nextPath, _inactiveStartMs);
+        _inactive.Volume = 0;
 
         RecordHistory(nextPath);
         _isCrossfading = true;
@@ -465,6 +494,8 @@ public class BackgroundMusicPlayer : IDisposable
             _currentIndex = _pendingNextIndex;
             (_activeTrackPath, _inactiveTrackPath) = (_inactiveTrackPath, null);
             (_activeTrackGain, _inactiveTrackGain) = (_inactiveTrackGain, 1.0);
+            (_activeMixOutMs, _inactiveMixOutMs) = (_inactiveMixOutMs, null);
+            (_activeStartMs, _inactiveStartMs) = (_inactiveStartMs, 0);
             _isCrossfading = false;
             _currentCrossfadeDurationMs = 0;
         }
@@ -480,11 +511,16 @@ public class BackgroundMusicPlayer : IDisposable
         double? measured = LoudnessLookup?.Invoke(path);
         if (measured.HasValue)
         {
-            return LoudnessNormalizer.ComputeGainFactor(
-                measured,
-                Lyracist.Core.Helpers.AppSettings.TargetLoudnessLufs,
-                true,
-                false);
+            // Limit how far a very quiet/loud measurement can swing the level (about -16 dB .. +10 dB);
+            // beyond that the volume ceiling would clip anyway.
+            return Math.Clamp(
+                LoudnessNormalizer.ComputeGainFactor(
+                    measured,
+                    Lyracist.Core.Helpers.AppSettings.TargetLoudnessLufs,
+                    true,
+                    false),
+                0.15,
+                3.2);
         }
 
         RequestLoudnessMeasurement?.Invoke(path);
@@ -503,6 +539,14 @@ public class BackgroundMusicPlayer : IDisposable
     public void Dispose()
     {
         _monitorTimer.Stop();
+        _monitorTimer.Tick -= OnMonitorTick;
+        IsPlaying = false;
+        _playlistVersion++;
+
+        // MediaPlayer.Dispose does not release the Media it was last given.
+        try { _playerA.Stop(); _playerB.Stop(); } catch { }
+        try { _playerA.Media?.Dispose(); } catch { }
+        try { _playerB.Media?.Dispose(); } catch { }
         _playerA.Dispose();
         _playerB.Dispose();
         _equalizer.Dispose();

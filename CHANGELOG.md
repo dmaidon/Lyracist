@@ -1,11 +1,11 @@
-<!-- Edited on Oct 7, 2026 @ 20:08:00 -> Document Filler Automix, Sample Pad, BPM Analyzer, and Performance Recording features -->
-Last Edit: Oct 7, 2026 - Filler Automix, Sample Pad, BPM Analyzer & Performance Recording
+<!-- Edited on Oct 8, 2026 @ 10:30:00 -> Document review fixes for Filler Automix, Sample Pad, and Performance Recording -->
+Last Edit: Oct 8, 2026 - Review Fixes: Filler Automix, Sample Pad & Performance Recording
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-07
+## [Unreleased] - 2026-10-08
 
 ### Added
 - **Filler Automix & Loudness Normalization (`Lyracist/Media/Audio/BackgroundMusicPlayer.cs`, `Shared/LoudnessNormalizer.cs`, `Shared/NextTrackSelector.cs`, `Lyracist/Core/Helpers/AppSettings.cs`)**:
@@ -80,6 +80,16 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Test Coverage: Added `ScanningServiceTests.cs` and `LibraryMaintenanceServiceTests.cs` (full suite: 343 tests).
 
 ### Fixed
+- **Review Fixes For Filler Automix, Sample Pad & Performance Recording (`BackgroundMusicPlayer.cs`, `ShowFlowService.cs`, `SamplePadService.cs`, `PerformanceRecorderService.cs`, `KaraokeViewModel.cs`, `FFmpegService.cs`, `BpmAnalyzer.cs`, `LibraryHealthViewModel.cs`)**:
+  - Sample Pad Could Freeze The Audio Thread: the pad's end-of-clip callback ran inside the mixer lock and blocked on the UI dispatcher, so pressing a pad while another clip finished could deadlock. Callbacks now run after the lock is released, bookkeeping moves to the thread pool, and the un-duck is posted to the UI thread. The render path no longer allocates per buffer, and retriggering a pad no longer un-ducks the music early (per-pad voice counts).
+  - Pad Hotkeys Only Worked After Opening The Sample Pad Page: the service is now initialized at startup (idempotent), so F-key pads work immediately.
+  - Sample Pad Robustness: ffmpeg decode drains stderr and has a 30 s timeout (a corrupt file could hang forever), clips are capped at 60 s so 16 pads can't exhaust RAM, a slow decode can no longer overwrite a newer clip assigned to the same pad, and clearing/reassigning a pad drops the old cached audio.
+  - Mix-In / Mix-Out Cue Points Hit The Database 8 Times A Second: cue points are now resolved once per track (and cached per playlist load) instead of on every 250 ms monitor tick. Mix-in is applied with a `:start-time` media option because setting `Time` right after `Play()` is ignored. Nonsense mix-out points (past the end / too early) are ignored.
+  - Filler Player Fixes: resuming during a crossfade now resumes the incoming track too, a slow background path-validation can no longer overwrite a newer playlist, the elapsed-time automix has a 30 s floor and measures from the cue start, loudness gain is limited (about -16 dB..+10 dB), and Dispose releases the players' media and detaches the timer.
+  - Performance Recording: the WAV is finalized before ffmpeg reads it (the old 300 ms sleep was a race that could produce truncated MP3s); a resume after pause no longer splits a take; repeat takes get " (2)", " (3)" instead of overwriting; day folders use the local date (not UTC); the encode checks ffmpeg's exit code, drains stderr and times out; the WAV is kept (and recovered on next startup) if encoding fails or the app exits mid-encode; capture devices are disposed; the level meter now works with the usual WASAPI float/extensible format and 24-bit devices; the test clip waits for the capture to stop; and recordings are stored under the app `Data\Recordings` folder instead of the executable folder.
+  - Recording Used A Stale Song Title: the active song title/artist was only refreshed when the singer changed, so a singer's second song (or the same singer again) was filed under the previous title. They are now updated on every rotation change.
+  - Cue-Point & BPM Analysis: ffmpeg is killed when an audit is cancelled (it used to keep decoding), a negative `silence_start` no longer shifts the start/end pairs, and the DbEditor readiness audit analyzes only songs that are actually in the Opening / Fill-In / End-of-Rotation playlists and no longer re-decodes tracks that have no silence to cue on every run.
+  - Tests: added `FillerAndRecordingReviewTests.cs` (take naming, local-date folders, level meter formats, silencedetect parsing); full suite 391 tests.
 - **LyracistDbEditor & ScanningService Data-Integrity and Reliability Fixes (`LyracistDbEditor/*`, `Lyracist.Data/Services/ScanningService.cs`)**:
   - Library Scan Deleted Songs On Unmounted Drives: The dead-record cleanup considered every path passed to the scan, including folders skipped because they did not exist, so a rescan with an unplugged external drive removed all of that drive's songs. Cleanup is now limited to directories actually crawled.
   - Library Scan Lost Updates After The First Batch: `ChangeTracker.Clear()` after each 200-file batch detached the tracked rows still waiting for later batches, so title/artist/type updates only persisted for the first batch while the search index was updated anyway. Existing songs are now loaded untracked and re-attached per batch.

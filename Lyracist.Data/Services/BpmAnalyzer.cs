@@ -83,6 +83,12 @@ public static class BpmAnalyzer
             using var process = new Process { StartInfo = startInfo };
             process.Start();
 
+            // Cancelling the read/wait tasks does not stop ffmpeg itself - kill it so it can't keep decoding in the background.
+            using var killOnCancel = cancellationToken.Register(() =>
+            {
+                try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+            });
+
             using var ms = new MemoryStream();
             var stdoutTask = process.StandardOutput.BaseStream.CopyToAsync(ms, cancellationToken);
             var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);

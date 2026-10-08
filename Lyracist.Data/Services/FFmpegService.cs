@@ -135,8 +135,10 @@ namespace Lyracist.Data.Services
             if (string.IsNullOrWhiteSpace(output))
                 return (null, null);
 
-            var startMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_start:\s*([0-9.]+)");
-            var endMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_end:\s*([0-9.]+)");
+            // ffmpeg can print a slightly negative silence_start (e.g. -0.0013) when the decoder has a priming
+            // delay; the sign must be matched or the start/end lists fall out of step.
+            var startMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_start:\s*(-?[0-9.]+)");
+            var endMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_end:\s*(-?[0-9.]+)");
 
             int? mixInMs = null;
             int? mixOutMs = null;
@@ -229,6 +231,12 @@ namespace Lyracist.Data.Services
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
+
+                // Cancelling the read/wait tasks does not stop ffmpeg itself - kill it so it can't keep decoding in the background.
+                using var killOnCancel = cancellationToken.Register(() =>
+                {
+                    try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+                });
 
                 var outTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
                 var errTask = process.StandardError.ReadToEndAsync(cancellationToken);
