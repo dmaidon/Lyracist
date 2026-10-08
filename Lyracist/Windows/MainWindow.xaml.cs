@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Add TogglePreShowScreen hotkey action handling
+// Edited on Oct 7, 2026 @ 20:10:00 -> Wire IPerformanceRecorderService.RecordingStateChanged to IsRecordingActive
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -7,6 +7,7 @@ using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Controls;
 using Lyracist.Core.Helpers;
+using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.ViewModels;
 using Lyracist.Views.Pages;
@@ -56,6 +57,20 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         }
     }
 
+    private bool _isRecordingActive;
+    public bool IsRecordingActive
+    {
+        get => _isRecordingActive;
+        set
+        {
+            if (_isRecordingActive != value)
+            {
+                _isRecordingActive = value;
+                OnPropertyChanged(nameof(IsRecordingActive));
+            }
+        }
+    }
+
     public System.Windows.Media.Brush DriveStatusBrush
     {
         get => _driveStatusBrush;
@@ -77,7 +92,8 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         RotationViewModel rotationViewModel,
         SettingsViewModel settingsViewModel,
         HelpViewModel helpViewModel,
-        AboutViewModel aboutViewModel)
+        AboutViewModel aboutViewModel,
+        IPerformanceRecorderService performanceRecorder)
     {
         _navigationService = navigationService;
         _displayService = displayService;
@@ -86,6 +102,11 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         _settingsViewModel = settingsViewModel;
         _helpViewModel = helpViewModel;
         _aboutViewModel = aboutViewModel;
+
+        performanceRecorder.RecordingStateChanged += (s, isRec) =>
+        {
+            Dispatcher.BeginInvoke(() => IsRecordingActive = isRec);
+        };
 
         // Initialize display commands
         ShowRotationCommand = new RelayCommand(() => _displayService.ShowRotationWindow());
@@ -152,6 +173,23 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         {
             e.Handled = true;
             ExecuteHotkeyAction(action);
+            return;
+        }
+
+        // Check for Sample Pad hotkeys (F1..F12)
+        if (keyStr.StartsWith("F", StringComparison.OrdinalIgnoreCase) &&
+            int.TryParse(keyStr.AsSpan(1), out int fNum) && fNum >= 1 && fNum <= 12)
+        {
+            var samplePad = App.AppHost?.Services?.GetService(typeof(ISamplePadService)) as ISamplePadService;
+            if (samplePad != null)
+            {
+                var pad = samplePad.Pads.FirstOrDefault(p => string.Equals(p.HotKey, keyStr, StringComparison.OrdinalIgnoreCase));
+                if (pad != null && pad.IsAssigned && !pad.IsMissing)
+                {
+                    e.Handled = true;
+                    samplePad.PlayPad(pad.SlotIndex);
+                }
+            }
         }
     }
 

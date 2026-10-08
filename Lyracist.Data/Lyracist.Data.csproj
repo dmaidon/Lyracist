@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.312 with BpmAnalyzer, CuePoints, and PerformanceRecording -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.10.7.311</AssemblyVersion>
-    <FileVersion>26.10.7.311</FileVersion>
+    <AssemblyVersion>26.10.7.312</AssemblyVersion>
+    <FileVersion>26.10.7.312</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

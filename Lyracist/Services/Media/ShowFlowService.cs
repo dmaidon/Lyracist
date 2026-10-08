@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 16:33:00 -> Implement RefreshOutputSettings to update BGM player preamps
+// Edited on Oct 7, 2026 @ 19:45:00 -> Wire loudness leveling, cue points, and playback settings to BGM players
 using System;
 using System.Linq;
 using System.Threading;
@@ -29,6 +29,7 @@ public class ShowFlowService : IShowFlowService
     private readonly IPlaylistService _playlists;
     private readonly IDisplayService _display;
     private readonly RotationViewModel _rotation;
+    private readonly ILibraryService _libraryService;
 
     private System.Threading.CancellationTokenSource? _fillInDelayCts;
     private System.Threading.CancellationTokenSource? _endRotationDelayCts;
@@ -49,7 +50,8 @@ public class ShowFlowService : IShowFlowService
         IPlaylistService playlists,
         IMediaEngine mediaEngine,
         IDisplayService displayService,
-        RotationViewModel rotation)
+        RotationViewModel rotation,
+        ILibraryService libraryService)
     {
         _opening = opening;
         _fillIn = fillIn;
@@ -58,7 +60,27 @@ public class ShowFlowService : IShowFlowService
         _playlists = playlists;
         _display = displayService;
         _rotation = rotation;
+        _libraryService = libraryService;
 
+        // Wire loudness normalization lookup & measurement
+        _opening.LoudnessLookup = _libraryService.GetMeasuredLoudness;
+        _opening.RequestLoudnessMeasurement = path => _ = _libraryService.MeasureAndSaveLoudnessAsync(path);
+        _fillIn.LoudnessLookup = _libraryService.GetMeasuredLoudness;
+        _fillIn.RequestLoudnessMeasurement = path => _ = _libraryService.MeasureAndSaveLoudnessAsync(path);
+        _endRotation.LoudnessLookup = _libraryService.GetMeasuredLoudness;
+        _endRotation.RequestLoudnessMeasurement = path => _ = _libraryService.MeasureAndSaveLoudnessAsync(path);
+        _occasion.LoudnessLookup = _libraryService.GetMeasuredLoudness;
+        _occasion.RequestLoudnessMeasurement = path => _ = _libraryService.MeasureAndSaveLoudnessAsync(path);
+
+        // Wire cue points
+        _opening.MixInLookup = path => GetSongCuePoints(path).MixIn;
+        _opening.MixOutLookup = path => GetSongCuePoints(path).MixOut;
+        _fillIn.MixInLookup = path => GetSongCuePoints(path).MixIn;
+        _fillIn.MixOutLookup = path => GetSongCuePoints(path).MixOut;
+        _endRotation.MixInLookup = path => GetSongCuePoints(path).MixIn;
+        _endRotation.MixOutLookup = path => GetSongCuePoints(path).MixOut;
+
+        RefreshPlaybackSettings();
         RefreshPlaylists();
 
         _rotation.RotationStateChanged += OnRotationStateChanged;
@@ -106,18 +128,57 @@ public class ShowFlowService : IShowFlowService
         _fillIn.UpdatePreamp();
         _endRotation.UpdatePreamp();
         _occasion.UpdatePreamp();
+        RefreshPlaybackSettings();
+    }
+
+    public void RefreshPlaybackSettings()
+    {
+        var crossfade = TimeSpan.FromSeconds(Lyracist.Core.Helpers.AppSettings.FillInCrossfadeSeconds);
+        int maxSec = Lyracist.Core.Helpers.AppSettings.FillInMaxTrackSeconds;
+        bool smartShuffle = Lyracist.Core.Helpers.AppSettings.FillInSmartShuffle;
+
+        _opening.CrossfadeDuration = crossfade;
+        _opening.MaxTrackSeconds = maxSec;
+        _opening.FillInSmartShuffle = smartShuffle;
+
+        _fillIn.CrossfadeDuration = crossfade;
+        _fillIn.MaxTrackSeconds = maxSec;
+        _fillIn.FillInSmartShuffle = smartShuffle;
+
+        _endRotation.CrossfadeDuration = crossfade;
+        _endRotation.MaxTrackSeconds = maxSec;
+        _endRotation.FillInSmartShuffle = smartShuffle;
+
+        _occasion.CrossfadeDuration = crossfade;
+        _occasion.MaxTrackSeconds = 0;
+        _occasion.FillInSmartShuffle = false;
+    }
+
+    private static (int? MixIn, int? MixOut) GetSongCuePoints(string path)
+    {
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var s = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AsNoTracking(context.Songs)
+                .FirstOrDefault(x => x.FilePath == path);
+            return (s?.MixInMs, s?.MixOutMs);
+        }
+        catch
+        {
+            return (null, null);
+        }
     }
 
     public void RefreshPlaylists()
     {
         var opening = _playlists.GetOpeningPlaylist();
-        _opening.LoadPlaylist(opening.ConvertAll(t => t.AudioPath));
+        _opening.LoadPlaylist(opening.Select(t => new Lyracist.Shared.FillInTrack(t.AudioPath, t.Artist, t.Bpm)).ToList());
 
         var fillIn = _playlists.GetFillInPlaylist();
-        _fillIn.LoadPlaylist(fillIn.ConvertAll(t => t.AudioPath));
+        _fillIn.LoadPlaylist(fillIn.Select(t => new Lyracist.Shared.FillInTrack(t.AudioPath, t.Artist, t.Bpm)).ToList());
 
         var endRotation = _playlists.GetEndRotationPlaylist();
-        _endRotation.LoadPlaylist(endRotation.ConvertAll(t => t.AudioPath));
+        _endRotation.LoadPlaylist(endRotation.Select(t => new Lyracist.Shared.FillInTrack(t.AudioPath, t.Artist, t.Bpm)).ToList());
     }
 
     public void StartOpeningMusic(string? startTrackPath = null) => _opening.Play(startTrackPath);

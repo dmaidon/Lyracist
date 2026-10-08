@@ -1,5 +1,5 @@
-<!-- Edited on Oct 7, 2026 @ 13:50:00 -> Document LyracistDbEditor hardening, shared library maintenance, and scan cancellation -->
-Last Edit: Oct 7, 2026 - LyracistDbEditor Hardening & Shared Library Maintenance
+<!-- Edited on Oct 7, 2026 @ 20:08:00 -> Document Filler Automix, Sample Pad, BPM Analyzer, and Performance Recording features -->
+Last Edit: Oct 7, 2026 - Filler Automix, Sample Pad, BPM Analyzer & Performance Recording
 
 # Changelog
 
@@ -8,6 +8,30 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-07
 
 ### Added
+- **Filler Automix & Loudness Normalization (`Lyracist/Media/Audio/BackgroundMusicPlayer.cs`, `Shared/LoudnessNormalizer.cs`, `Shared/NextTrackSelector.cs`, `Lyracist/Core/Helpers/AppSettings.cs`)**:
+  - Per-Track Loudness Leveling: Scale filler playback volume per track based on EBU R128 integrated loudness (`MeasuredLoudnessLufs`), matching the primary `MediaEngine` standard (`normFactor = 10^((target - measured)/20)` clamped 0..200), honoring `NormalizeVolumeEnabled` and hardware mixer bypass.
+  - Configurable Crossfade & Max Track Duration Automix: Added `FillInCrossfadeSeconds` (1-15 seconds, default 5s) and `FillInMaxTrackSeconds` (0=off, e.g. 180s to fade to next track after 3 minutes) with short-track protection (`Math.Min(crossfade, length / 2)`).
+  - Cue-Point Aware Mixing (`Song.MixInMs`, `Song.MixOutMs`): Player automatically seeks incoming filler tracks to `MixInMs` and triggers crossfades at `MixOutMs - crossfade` when cue points are detected.
+  - Smart Shuffle: Automatically chooses the next filler track matching the current song's BPM within ±8% tolerance (with half/double tempo folding) while enforcing artist spacing and recent play fatigue protection.
+- **Sample & Jingle Pad (`Lyracist/Services/Media/SamplePadService.cs`, `Lyracist/Views/Pages/SamplePadPage.xaml`, `Lyracist/ViewModels/SamplePadViewModel.cs`)**:
+  - 16-pad soundboard with low-latency NAudio WASAPI output and overlapping clip playback.
+  - Preloaded in-memory decoded float PCM caching, per-pad volume, customizable colors, and custom labels.
+  - Drag-and-drop audio assignment from Windows Explorer, right-click context menu editing and clearing, and Stop All master control.
+  - Automatic ducking and unducking of filler background music during sample playback.
+  - Window-level F1-F12 hotkey triggers with focused `TextBox` protection to prevent misfires during text entry.
+  - Persistent JSON configuration stored in `Settings/samplepad.json`.
+- **Pure Managed BPM Audio Analysis & Cue Point Detection (`Lyracist.Data/Services/BpmAnalyzer.cs`, `Lyracist.Data/Services/FFmpegService.cs`, `LyracistDbEditor/LibraryHealthViewModel.cs`)**:
+  - Pure managed onset-strength envelope and zero-mean normalized autocorrelation analyzer folding candidates into 70-180 BPM with confidence thresholds and noise rejection.
+  - Integrated into LyracistDbEditor Library Health tab with "Missing Filler BPM" tracking and automated background analysis audit.
+  - FFmpeg `silencedetect` leading and trailing silence detection for automatic `MixInMs` and `MixOutMs` cue point calculation.
+- **Optional Gated Performance Recording (`Lyracist/Services/Media/PerformanceRecorderService.cs`, `Shared/PerformanceRecordingStateMachine.cs`, `Lyracist.Data/Models/PerformanceRecording.cs`)**:
+  - USB mixer and Windows recording input capture via NAudio `WasapiCapture` (shared mode, streaming direct to WAV).
+  - Per-singer opt-in gating (`Singer.AllowRecording`, default false) requiring explicit consent before any recording is initiated.
+  - Automatic recording start and stop synchronized with `MediaEngine` karaoke singer performance lifecycle.
+  - Short take (< 10 seconds) discard protection, background MP3 encoding via FFmpeg, and `PerformanceRecording` database history tracking.
+  - Automatic retention pruning (`RecordingRetentionDays`, default 30 days) and minimum disk space guard (500 MB).
+  - UI in Settings with audio input device picker, live VU peak meter, 5-second test clip recorder, and a dedicated "Recorded Performances" tab in Singer Profiles.
+  - Visual "REC" status indicator displayed in the main window during active recording sessions.
 - **New Singer Welcome Screen Trigger on Name Entry Lost Focus (`KSRotation/MainWindow.xaml.cs`, `KSRotation/ViewModels/MainViewModel.Welcome.cs`, `KSRotation/ViewModels/MainViewModel.cs`)**:
   - Replaced the previous 2.5-second settle timer after typing with immediate welcome screen triggering when the singer name entry box loses focus (`LostFocus`).
   - Ensures the "Welcome to our new performer" screen is displayed only after the DJ has finished entering the performer's name and navigated away from the input box, eliminating untimely interruptions while actively typing.

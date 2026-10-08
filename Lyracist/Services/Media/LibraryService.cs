@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:20:00 -> Guard against TaskCanceledException when Dispatcher is canceled or shutting down during library scan and probing
+// Edited on Oct 7, 2026 @ 19:57:00 -> Add GetMixInMs and GetMixOutMs cue point methods
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -513,6 +513,44 @@ public class LibraryService : ILibraryService
         finally
         {
             _loudnessMeasurementsInFlight.TryRemove(audioPath, out _);
+        }
+    }
+
+    public int? GetMixInMs(string audioPath)
+    {
+        if (string.IsNullOrEmpty(audioPath)) return null;
+        try
+        {
+            using var context = new LyracistDbContext();
+            return context.Songs
+                .AsNoTracking()
+                .Where(s => s.FilePath == audioPath)
+                .Select(s => s.MixInMs)
+                .FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get MixInMs", ex);
+            return null;
+        }
+    }
+
+    public int? GetMixOutMs(string audioPath)
+    {
+        if (string.IsNullOrEmpty(audioPath)) return null;
+        try
+        {
+            using var context = new LyracistDbContext();
+            return context.Songs
+                .AsNoTracking()
+                .Where(s => s.FilePath == audioPath)
+                .Select(s => s.MixOutMs)
+                .FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get MixOutMs", ex);
+            return null;
         }
     }
 }

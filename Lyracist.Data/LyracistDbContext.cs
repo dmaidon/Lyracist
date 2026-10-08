@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 18:13:00 -> Add ClearAbandonedMigrationLocks to prevent SQLite Error 11 malformed schema lock errors
+// Edited on Oct 7, 2026 @ 19:44:00 -> Add PerformanceRecordings DbSet
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -25,6 +25,7 @@ namespace Lyracist.Data
         public DbSet<OccasionCategory> OccasionCategories { get; set; } = null!;
         public DbSet<OccasionItem> OccasionItems { get; set; } = null!;
         public DbSet<SongSearch> SongSearches { get; set; } = null!;
+        public DbSet<PerformanceRecording> PerformanceRecordings { get; set; } = null!;
 
         public static string GetConnectionString()
         {

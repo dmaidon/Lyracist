@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.207 across tests -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.10.7.206</AssemblyVersion>
-    <FileVersion>26.10.7.206</FileVersion>
+    <AssemblyVersion>26.10.7.207</AssemblyVersion>
+    <FileVersion>26.10.7.207</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

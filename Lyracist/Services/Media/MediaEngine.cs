@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 16:36:00 -> Allow mergedVolume scaling up to 200% for hot output headroom
+// Edited on Oct 7, 2026 @ 20:07:00 -> Add ActiveSongTitle, ActiveSongArtist, IsMusicTrack to MediaEngine
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -175,6 +175,10 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             }
         }
     }
+
+    public string? ActiveSongTitle { get; set; }
+    public string? ActiveSongArtist { get; set; }
+    public bool IsMusicTrack { get; set; }
 
     public string? ActiveDuetPartnerName
     {

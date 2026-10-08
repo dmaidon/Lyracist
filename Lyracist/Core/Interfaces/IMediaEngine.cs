@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:33:00 -> Add ActivePerformerKey and ActivePerformerTempo to IMediaEngine for per-performer audio recall
+// Edited on Oct 7, 2026 @ 20:07:00 -> Add ActiveSongTitle, ActiveSongArtist, IsMusicTrack to IMediaEngine
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -44,6 +44,9 @@ public interface IMediaEngine
     double Limiter { get; set; }
 
     string? ActiveSingerName { get; set; }
+    string? ActiveSongTitle { get; set; }
+    string? ActiveSongArtist { get; set; }
+    bool IsMusicTrack { get; set; }
     string? ActiveDuetPartnerName { get; set; }
     string? ActivePerformerKey { get; set; }
     double ActivePerformerTempo { get; set; }

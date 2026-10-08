@@ -1,4 +1,4 @@
-// Created on Sep 19, 2026 @ 00:00:00 -> Library Health tab: duplicate detection, orphaned-file audit, and readiness/loudness backlog scan
+// Edited on Oct 7, 2026 @ 19:58:00 -> Add filler track BPM analysis and mix-in/mix-out cue point detection to readiness audit
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -335,6 +335,9 @@ public partial class MainViewModel
     private int _missingLoudnessCount;
 
     [ObservableProperty]
+    private int _missingBpmCount;
+
+    [ObservableProperty]
     private bool _isRunningReadinessAudit;
 
     [ObservableProperty]
@@ -357,6 +360,7 @@ public partial class MainViewModel
             MissingReadinessCount = context.Songs.Count(s =>
                 s.IsKaraoke && (s.Key == null || s.BPM == null || s.Difficulty == null));
             MissingLoudnessCount = context.Songs.Count(s => s.MeasuredLoudnessLufs == null);
+            MissingBpmCount = context.Songs.Count(s => !s.IsKaraoke && s.BPM == null);
         }
         catch (Exception ex)
         {
@@ -414,12 +418,13 @@ public partial class MainViewModel
         {
             using var context = new LyracistDbContext();
 
-            // Two independent backlogs share one pass: fill in Key/BPM/Difficulty for karaoke
-            // tracks missing them, and measure integrated loudness for anything never processed —
-            // both reuse the same FFmpegService probes Lyracist's own smart-import pipeline uses.
+            // Audits key/BPM/difficulty for karaoke tracks, integrated loudness for any track,
+            // and BPM analysis / mix-in/mix-out cue point detection for background filler tracks.
             var targets = await context.Songs
                 .Where(s => (s.IsKaraoke && (s.Key == null || s.BPM == null || s.Difficulty == null))
-                            || s.MeasuredLoudnessLufs == null)
+                            || s.MeasuredLoudnessLufs == null
+                            || (!s.IsKaraoke && s.BPM == null)
+                            || (!s.IsKaraoke && (s.MixInMs == null && s.MixOutMs == null)))
                 .ToListAsync(token);
 
             int total = targets.Count;
@@ -471,6 +476,39 @@ public partial class MainViewModel
                 {
                     song.MeasuredLoudnessLufs = await FFmpegService.MeasureIntegratedLoudness(song.FilePath);
                     changed = true;
+                }
+
+                // Filler BPM analysis (Feature D): check tags first, then audio analysis
+                if (!song.IsKaraoke && song.BPM == null)
+                {
+                    var probe = await FFprobeRunner.ProbeFile(song.FilePath);
+                    double? tagBpm = FFmpegService.DetectBpm(probe);
+                    if (tagBpm.HasValue)
+                    {
+                        song.BPM = tagBpm.Value;
+                        changed = true;
+                    }
+                    else
+                    {
+                        int? detected = await BpmAnalyzer.AnalyzeBpmAsync(song.FilePath, song.Duration, token);
+                        if (detected.HasValue)
+                        {
+                            song.BPM = detected.Value;
+                            changed = true;
+                        }
+                    }
+                }
+
+                // Filler cue points detection (Feature E): silencedetect
+                if (!song.IsKaraoke && song.MixInMs == null && song.MixOutMs == null)
+                {
+                    var (mixIn, mixOut) = await FFmpegService.DetectCuePointsAsync(song.FilePath, song.Duration, token);
+                    if (mixIn.HasValue || mixOut.HasValue)
+                    {
+                        song.MixInMs = mixIn;
+                        song.MixOutMs = mixOut;
+                        changed = true;
+                    }
                 }
 
                 if (changed)

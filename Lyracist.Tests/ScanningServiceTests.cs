@@ -1,4 +1,4 @@
-// Created on Oct 7, 2026 @ 12:00:00 -> Regression tests for ScanningService: unmounted-drive cleanup, multi-batch updates, rescan artist preservation
+// Edited on Oct 7, 2026 @ 19:51:00 -> Fix xUnit2029 warning using Assert.DoesNotContain
 using System;
 using System.IO;
 using System.Linq;
@@ -153,7 +153,7 @@ public class ScanningServiceTests : IDisposable
         using var verify = new LyracistDbContext();
         var after = await verify.Songs.AsNoTracking().Where(s => s.FilePath.StartsWith(_tempDir)).ToListAsync(TestContext.Current.CancellationToken);
         Assert.Equal(count, after.Count);
-        Assert.Empty(after.Where(s => s.Artist == "Unknown Artist" || s.Title == "stale"));
+        Assert.DoesNotContain(after, s => s.Artist == "Unknown Artist" || s.Title == "stale");
     }
 
     // A rescan re-parses the filename, which is only a guess. It must not revert an artist/title

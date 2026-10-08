@@ -1,4 +1,4 @@
-<!-- Edited on Aug 7, 2026 @ 09:02:00 -> Add alternating row colors to LBxSongSearch -->
+<!-- Edited on Oct 7, 2026 @ 19:58:00 -> Add Missing Filler BPM backlog metric to Library Health audit -->
 <Window x:Class="LyracistDbEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -487,7 +487,7 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="Queue-Readiness &amp; Loudness Backlog" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Fills in Key/BPM/Difficulty for karaoke tracks and integrated loudness for any track imported before those checks existed." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        <TextBlock Text="Fills in Key/BPM/Difficulty for karaoke tracks, integrated loudness, and filler track BPM &amp; cue points." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
 
                     <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
@@ -495,14 +495,19 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Missing Key/BPM/Difficulty" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="Missing Karaoke Key/BPM" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <TextBlock Text="{Binding MissingReadinessCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="Missing Loudness" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <TextBlock Text="{Binding MissingLoudnessCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Missing Filler BPM" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{Binding MissingBpmCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
                             </StackPanel>
                         </Grid>
                     </Border>

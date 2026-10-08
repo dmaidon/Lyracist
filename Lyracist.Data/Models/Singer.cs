@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:35 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
+// Edited on Oct 7, 2026 @ 19:44:00 -> Add AllowRecording property for optional performance recording
 using System;
 using System.Collections.Generic;
 
@@ -23,6 +23,7 @@ namespace Lyracist.Data.Models
         public string AvatarSource { get; set; } = string.Empty;
         public string VocalRange { get; set; } = string.Empty;
         public string CustomTitle { get; set; } = string.Empty;
+        public bool AllowRecording { get; set; } = false;
 
         // Navigation Properties
         public SingerAudioSettings? AudioSettings { get; set; }

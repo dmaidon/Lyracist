@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:22:00 -> Add Difficulty, Key, BPM, VocalPresence, and Quality properties
+// Edited on Oct 7, 2026 @ 19:44:00 -> Add MixInMs and MixOutMs cue points
 using System;
 using System.Collections.Generic;
 
@@ -23,6 +23,8 @@ namespace Lyracist.Data.Models
         public double? BPM { get; set; }
         public string? VocalPresence { get; set; }
         public string? Quality { get; set; }
+        public int? MixInMs { get; set; }
+        public int? MixOutMs { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public DateTime? LastPlayed { get; set; }
         public int PlayCount { get; set; }

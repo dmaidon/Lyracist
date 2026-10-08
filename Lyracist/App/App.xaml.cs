@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:20:30 -> Enforce single-instance application execution using SingleInstanceHelper
+// Edited on Oct 7, 2026 @ 20:10:00 -> Register IPerformanceRecorderService and PerformanceRecorderService
 using System;
 using System.Linq;
 using System.Windows;
@@ -153,6 +153,8 @@ public partial class App : System.Windows.Application
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("EndRotation");
                 services.AddKeyedSingleton("Occasion", (_, _) => new BackgroundMusicPlayer { Loop = false });
                 services.AddSingleton<IShowFlowService, ShowFlowService>();
+                services.AddSingleton<ISamplePadService, SamplePadService>();
+                services.AddSingleton<IPerformanceRecorderService, PerformanceRecorderService>();
                 services.AddSingleton<IKSRotationSyncService, KSRotationSyncService>();
                 services.AddSingleton<PurchasedTrackWatcherService>();
                 services.AddSingleton<PurchasedTrackSyncService>();
@@ -182,6 +184,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<TriviaViewModel>();
                 services.AddSingleton<TriviaSettingsViewModel>();
                 services.AddSingleton<PlaylistsViewModel>();
+                services.AddSingleton<SamplePadViewModel>();
                 services.AddSingleton<RequestsViewModel>();
                 services.AddSingleton<ScaryokeViewModel>();
                 services.AddSingleton<HelpViewModel>();
@@ -220,6 +223,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<TriviaSettingsPage>();
                 services.AddSingleton<CastingPage>();
                 services.AddSingleton<PlaylistsPage>();
+                services.AddSingleton<SamplePadPage>();
                 services.AddSingleton<RequestsPage>();
                 services.AddSingleton<UsersPage>();
                 services.AddSingleton<StorePage>();

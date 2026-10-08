@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 13:07:00 -> Add User Manual update test for new singer welcome screen on name box lost focus
+// Edited on Oct 7, 2026 @ 20:09:00 -> Add UpdateUserManualsForFillerAutomixSamplePadAndRecording test to document filler automix and recording
 using System;
 using System.IO;
 using Xunit;
@@ -864,7 +864,7 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
                 context.Database.Migrate();
 
                 var scanner = new Lyracist.Data.Services.ScanningService(context);
-                await scanner.ScanDirectories([tempDir]);
+                await scanner.ScanDirectories([tempDir], cancellationToken: TestContext.Current.CancellationToken);
 
                 var song = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
                     context.Songs, s => s.FilePath == mp3Path, TestContext.Current.CancellationToken);
@@ -4603,6 +4603,142 @@ When the 'Show Welcome to our new performer screen when a new singer joins' feat
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " NewSingerWelcomeFocusActivation";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForFillerAutomixSamplePadAndRecording()
+        {
+            string baseDir = AppContext.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+            string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+            string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+            if (!Directory.Exists(docDir))
+            {
+                return;
+            }
+
+            string updateText = @"
+Section: Filler Automix, Sample Pad & Performance Recording (October 2026)
+
+[Overview & Purpose]
+Lyracist v26.10.7 introduces comprehensive live performance tools:
+
+1. Filler Automix & Loudness Normalization:
+   - Per-Track Loudness Leveling: Matches the primary karaoke player standard using EBU R128 integrated loudness measurements, ensuring smooth background transitions without volume jumps. Honors NormalizeVolumeEnabled and is bypassed in hardware mixer mode.
+   - Configurable Crossfade: Adjust crossfade durations between 1 and 15 seconds (default 5s) in Settings.
+   - Max Track Duration Automix: Configure an optional track play limit (e.g. 180s for 3-minute automixing) to keep filler music moving dynamically. Tracks shorter than twice the crossfade duration are automatically protected from premature fadeout.
+   - Cue-Point Aware Mixing: Automatically skips leading silence on incoming tracks and triggers crossfades at MixOutMs - crossfade when cue points are detected.
+   - Smart Shuffle: Automatically picks the next filler track matching the current track's tempo (within +-8% BPM tolerance, including half/double tempo) while enforcing artist spacing and recent play fatigue protection.
+
+2. 16-Pad Sample & Jingle Soundboard:
+   - 16 low-latency pads in a 4x4 matrix accessible via the main navigation menu ('Sample Pad').
+   - Drag and drop audio files directly from Windows Explorer onto any pad to assign.
+   - Right-click to edit custom labels, pad colors, and volume levels or clear assignments.
+   - Automatic fill-in background music ducking while any sample or jingle is playing.
+   - Global F1-F12 hotkeys trigger pads instantly. Hotkeys are automatically guarded to prevent misfires while typing into text boxes.
+   - Settings persist automatically in Settings/samplepad.json.
+
+3. Optional Gated Performance Recording:
+   - Capture master stereo mixes directly from USB mixers (e.g. Yamaha MG10XU) or dedicated Windows audio recording inputs.
+   - Per-Singer Consent Gating: Only performers with the 'Allow Performance Recording' checkbox enabled in their Singer Profile will be recorded. Disabled by default.
+   - Automated Start/Stop: Automatically arms and records during active singer performances and stops on completion. Discards takes under 10 seconds.
+   - Background Processing: Converts WAV recordings to high-quality MP3 via FFmpeg in the background and indexes them in the database.
+   - Settings & Playback: Configure recording input device with live VU level meter, 5-second test clip recorder, and retention days in Settings. Singer profiles include a 'Recorded Performances' tab to play back, delete, or open the folder for saved takes. A visual 'REC' indicator illuminates in the main window while recording.
+";
+
+            // 1. Update text file
+            if (File.Exists(updatesTxtPath))
+            {
+                string existingText = File.ReadAllText(updatesTxtPath);
+                if (!existingText.Contains("Section: Filler Automix, Sample Pad & Performance Recording"))
+                {
+                    File.AppendAllText(updatesTxtPath, Environment.NewLine + updateText);
+                }
+            }
+
+            // 2. Update docx file
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var textElem in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (textElem.Text.Contains("Section: Filler Automix, Sample Pad & Performance Recording"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Filler Automix, Sample Pad & Performance Recording")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("FillerAutomixSamplePadRecording"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Filler Automix, Sample Pad & Performance Recording", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " FillerAutomixSamplePadRecording";
                             doc.Save(pdfPath);
                         }
                     }

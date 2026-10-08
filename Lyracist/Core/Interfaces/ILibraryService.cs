@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:33:00 -> Add NotifyLibraryUpdated method
+// Edited on Oct 7, 2026 @ 19:57:00 -> Add GetMixInMs and GetMixOutMs cue point methods
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,4 +42,10 @@ public interface ILibraryService
     /// path - a measurement already in flight for that path is not duplicated.
     /// </summary>
     Task MeasureAndSaveLoudnessAsync(string audioPath);
+
+    /// <summary>Leading silence end cue point in milliseconds, or null if none.</summary>
+    int? GetMixInMs(string audioPath);
+
+    /// <summary>Trailing silence start cue point in milliseconds, or null if none.</summary>
+    int? GetMixOutMs(string audioPath);
 }

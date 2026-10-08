@@ -2471,3 +2471,31 @@ When the 'Show Welcome to our new performer screen when a new singer joins' feat
 2. Natural Completion Detection: Moving focus away from the singer name text box (by pressing Tab, pressing Enter to advance to the song field, or clicking another row/control) signals that performer name entry is complete and immediately triggers the welcome screen.
 3. Empty / Canceled Row Protection: If a new row is added and left blank or unaltered as 'New Singer', losing focus cleanly deletes the unused row without triggering a welcome screen.
 4. Duplicate Protection: Once a singer is welcomed upon name entry completion, subsequent focus changes on that performer row do not re-trigger welcome screens.
+
+
+Section: Filler Automix, Sample Pad & Performance Recording (October 2026)
+
+[Overview & Purpose]
+Lyracist v26.10.7 introduces comprehensive live performance tools:
+
+1. Filler Automix & Loudness Normalization:
+   - Per-Track Loudness Leveling: Matches the primary karaoke player standard using EBU R128 integrated loudness measurements, ensuring smooth background transitions without volume jumps. Honors NormalizeVolumeEnabled and is bypassed in hardware mixer mode.
+   - Configurable Crossfade: Adjust crossfade durations between 1 and 15 seconds (default 5s) in Settings.
+   - Max Track Duration Automix: Configure an optional track play limit (e.g. 180s for 3-minute automixing) to keep filler music moving dynamically. Tracks shorter than twice the crossfade duration are automatically protected from premature fadeout.
+   - Cue-Point Aware Mixing: Automatically skips leading silence on incoming tracks and triggers crossfades at MixOutMs - crossfade when cue points are detected.
+   - Smart Shuffle: Automatically picks the next filler track matching the current track's tempo (within +-8% BPM tolerance, including half/double tempo) while enforcing artist spacing and recent play fatigue protection.
+
+2. 16-Pad Sample & Jingle Soundboard:
+   - 16 low-latency pads in a 4x4 matrix accessible via the main navigation menu ('Sample Pad').
+   - Drag and drop audio files directly from Windows Explorer onto any pad to assign.
+   - Right-click to edit custom labels, pad colors, and volume levels or clear assignments.
+   - Automatic fill-in background music ducking while any sample or jingle is playing.
+   - Global F1-F12 hotkeys trigger pads instantly. Hotkeys are automatically guarded to prevent misfires while typing into text boxes.
+   - Settings persist automatically in Settings/samplepad.json.
+
+3. Optional Gated Performance Recording:
+   - Capture master stereo mixes directly from USB mixers (e.g. Yamaha MG10XU) or dedicated Windows audio recording inputs.
+   - Per-Singer Consent Gating: Only performers with the 'Allow Performance Recording' checkbox enabled in their Singer Profile will be recorded. Disabled by default.
+   - Automated Start/Stop: Automatically arms and records during active singer performances and stops on completion. Discards takes under 10 seconds.
+   - Background Processing: Converts WAV recordings to high-quality MP3 via FFmpeg in the background and indexes them in the database.
+   - Settings & Playback: Configure recording input device with live VU level meter, 5-second test clip recorder, and retention days in Settings. Singer profiles include a 'Recorded Performances' tab to play back, delete, or open the folder for saved takes. A visual 'REC' indicator illuminates in the main window while recording.

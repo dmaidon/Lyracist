@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 12:14:00 -> Add 5s audio preview, spectrogram, and video preview generation for Track Preview Player
+// Edited on Oct 7, 2026 @ 19:55:00 -> Add silencedetect cue point detection (MixInMs and MixOutMs)
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -123,6 +123,129 @@ namespace Lyracist.Data.Services
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", $"Exception measuring loudness for {filePath}", ex);
                 return null;
+            }
+        }
+
+        // ==========================================
+        // CUE POINT DETECTION (SILENCEDETECT)
+        // ==========================================
+
+        public static (int? MixInMs, int? MixOutMs) ParseSilenceDetectOutput(string output, double? durationSeconds = null)
+        {
+            if (string.IsNullOrWhiteSpace(output))
+                return (null, null);
+
+            var startMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_start:\s*([0-9.]+)");
+            var endMatches = System.Text.RegularExpressions.Regex.Matches(output, @"silence_end:\s*([0-9.]+)");
+
+            int? mixInMs = null;
+            int? mixOutMs = null;
+
+            // 1. MixIn (Leading silence):
+            // Check if there is an initial silence segment starting at or near 0
+            if (endMatches.Count > 0)
+            {
+                if (double.TryParse(endMatches[0].Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double firstEnd))
+                {
+                    double firstStart = 0;
+                    if (startMatches.Count > 0 && double.TryParse(startMatches[0].Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double s0))
+                    {
+                        firstStart = s0;
+                    }
+
+                    if (firstStart <= 0.25 && firstEnd >= 0.1 && firstEnd < 30.0)
+                    {
+                        mixInMs = (int)Math.Round(firstEnd * 1000);
+                    }
+                }
+            }
+
+            // 2. MixOut (Trailing silence):
+            // Check the last silence_start
+            if (startMatches.Count > 0)
+            {
+                var lastStartMatch = startMatches[startMatches.Count - 1];
+                if (double.TryParse(lastStartMatch.Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double lastStart))
+                {
+                    bool isAtEnd = false;
+                    if (startMatches.Count > endMatches.Count)
+                    {
+                        isAtEnd = true;
+                    }
+                    else if (durationSeconds.HasValue && durationSeconds.Value > 0)
+                    {
+                        if (lastStart >= durationSeconds.Value - 30.0)
+                            isAtEnd = true;
+                    }
+                    else if (endMatches.Count > 0)
+                    {
+                        var lastEndMatch = endMatches[endMatches.Count - 1];
+                        if (double.TryParse(lastEndMatch.Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double lastEnd))
+                        {
+                            if (lastEnd >= lastStart) isAtEnd = true;
+                        }
+                    }
+
+                    if (isAtEnd && lastStart > 5.0)
+                    {
+                        mixOutMs = (int)Math.Round(lastStart * 1000);
+                    }
+                }
+            }
+
+            // Sanity check: MixOut must be significantly after MixIn
+            if (mixInMs.HasValue && mixOutMs.HasValue && mixOutMs.Value <= mixInMs.Value + 3000)
+            {
+                mixOutMs = null;
+            }
+
+            return (mixInMs, mixOutMs);
+        }
+
+        public static async Task<(int? MixInMs, int? MixOutMs)> DetectCuePointsAsync(string filePath, double? durationSeconds = null, System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return (null, null);
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-hide_banner");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(filePath);
+                startInfo.ArgumentList.Add("-af");
+                startInfo.ArgumentList.Add("silencedetect=noise=-50dB:d=0.5");
+                startInfo.ArgumentList.Add("-f");
+                startInfo.ArgumentList.Add("null");
+                startInfo.ArgumentList.Add("-");
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+
+                var outTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                var errTask = process.StandardError.ReadToEndAsync(cancellationToken);
+                await Task.WhenAll(outTask, errTask);
+                await process.WaitForExitAsync(cancellationToken);
+
+                string stderr = errTask.Result;
+                return ParseSilenceDetectOutput(stderr, durationSeconds);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to detect cue points for {filePath}", ex);
+                return (null, null);
             }
         }
 

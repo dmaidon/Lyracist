@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 11:41:00 -> Add TestSingerCount setting for test mode
+// Edited on Oct 7, 2026 @ 19:43:00 -> Add filler automix, sample pad, and performance recording settings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -706,6 +706,48 @@ public static class AppSettings
         set { _data.FillInDelaySeconds = value; Save(); }
     }
 
+    public static int FillInCrossfadeSeconds
+    {
+        get => _data.FillInCrossfadeSeconds;
+        set { _data.FillInCrossfadeSeconds = Math.Clamp(value, 1, 15); Save(); }
+    }
+
+    public static int FillInMaxTrackSeconds
+    {
+        get => _data.FillInMaxTrackSeconds;
+        set { _data.FillInMaxTrackSeconds = Math.Max(0, value); Save(); }
+    }
+
+    public static bool FillInSmartShuffle
+    {
+        get => _data.FillInSmartShuffle;
+        set { _data.FillInSmartShuffle = value; Save(); }
+    }
+
+    public static string SamplePadOutputDevice
+    {
+        get => _data.SamplePadOutputDevice;
+        set { _data.SamplePadOutputDevice = value; Save(); }
+    }
+
+    public static bool RecordPerformancesEnabled
+    {
+        get => _data.RecordPerformancesEnabled;
+        set { _data.RecordPerformancesEnabled = value; Save(); }
+    }
+
+    public static string RecordingInputDevice
+    {
+        get => _data.RecordingInputDevice;
+        set { _data.RecordingInputDevice = value; Save(); }
+    }
+
+    public static int RecordingRetentionDays
+    {
+        get => _data.RecordingRetentionDays;
+        set { _data.RecordingRetentionDays = Math.Max(0, value); Save(); }
+    }
+
     // ─── CDG Video Backdrop Settings ──────────────────────────────────────────
 
     public static string CdgBackdropMode
@@ -1309,6 +1351,13 @@ public static class AppSettings
         public double LyricsVisualizerOpacity { get; set; } = 0.8;
         public string LyricsVisualizerBarWidth { get; set; } = "Normal";
         public int FillInDelaySeconds { get; set; } = 5;
+        public int FillInCrossfadeSeconds { get; set; } = 5;
+        public int FillInMaxTrackSeconds { get; set; } = 0;
+        public bool FillInSmartShuffle { get; set; } = false;
+        public string SamplePadOutputDevice { get; set; } = string.Empty;
+        public bool RecordPerformancesEnabled { get; set; } = false;
+        public string RecordingInputDevice { get; set; } = string.Empty;
+        public int RecordingRetentionDays { get; set; } = 30;
         public Dictionary<string, List<string>> VenueGraphics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public bool EnableAutoAdvance { get; set; } = false;
         public int AutoAdvanceCountdownSeconds { get; set; } = 10;

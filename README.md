@@ -1,4 +1,4 @@
-<!-- Edited on Oct 7, 2026 @ 13:50:00 -> Document LyracistDbEditor library maintenance, backups, and shared directory removal -->
+<!-- Edited on Oct 7, 2026 @ 20:08:00 -> Document Filler Automix, Sample Pad, BPM Analyzer, and Performance Recording features -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,33 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🎛️ Filler Music Automix, Per-Track Loudness & Cue-Point Mixing (`Lyracist`)
+- **Per-Track Loudness Leveling**: Filler music playback now normalizes volume per track using EBU R128 integrated loudness metrics (`MeasuredLoudnessLufs`) based on the standard `normFactor = 10^((target - measured)/20)` clamped 0..200, matching the primary `MediaEngine` behavior. Adheres strictly to `NormalizeVolumeEnabled` and is safely bypassed in Hardware Mixer Mode.
+- **Configurable Crossfade & Max Track Duration Automix**: Hosts can set crossfade length from 1 to 15 seconds (default 5s) and configure maximum track play duration (`FillInMaxTrackSeconds`, e.g. 180s for 3-minute automixing) to keep background energy fresh without letting long tracks drag out. Short track guard protects tracks shorter than twice the crossfade duration from premature cutting.
+- **Cue-Point Aware Mixing**: Tracks with detected `MixInMs` and `MixOutMs` automatically start playback skipping leading silence and trigger crossfades into the next track at `MixOutMs - crossfade` rather than the physical file end.
+- **Smart Shuffle**: Automatically selects the next filler track matching the current song's BPM within ±8% tolerance (with half/double tempo folding), enforcing artist variety and preventing recent track fatigue.
+
+### 🎚️ 16-Pad Sample & Jingle Soundboard (`Lyracist`)
+- **16-Pad Hardware-Accelerated Soundboard**: Built-in 4x4 matrix for sound effects, DJ drops, applause, and intro jingles using low-latency NAudio WASAPI output with multi-clip overlapping playback and master Stop All control.
+- **Low-Latency RAM Caching**: Audio clips are preloaded into memory as 32-bit floating-point PCM buffers for instantaneous playback without disk latency.
+- **Drag-and-Drop & Customization**: Drag audio files directly from Windows Explorer onto any pad to assign. Right-click pads to customize labels, button colors, and volume levels or clear assignments.
+- **Automated Fill-In Ducking**: Filler background music automatically ducks when any sample or jingle pad is triggered and smoothly restores volume when all clips stop playing.
+- **Quick Keyboard Triggers**: Dedicated F1-F12 hotkeys trigger pads instantly from anywhere in the window. Hotkeys are automatically suppressed whenever a text box has input focus.
+- **Configuration Persistence**: Pad assignments and colors are saved in `Settings/samplepad.json`.
+
+### 🎙️ Gated Performance Recording & Singer Take Archive (`Lyracist`)
+- **USB Mixer & Windows Audio Input Capture**: Directly records master stereo mixes from USB mixers (such as Yamaha MG10XU) or dedicated recording inputs via shared NAudio `WasapiCapture` streaming to disk.
+- **Per-Singer Consent Gating**: Disabled by default. Only performers with the per-singer opt-in flag checked (`AllowRecording` in singer profiles) are recorded, ensuring singer consent and compliance with venue recording policies.
+- **Automated Lifecycle Synchronization**: Recording automatically arms and captures only during active karaoke performances driven by `MediaEngine` (ignoring filler music and sound effects).
+- **Background MP3 Processing & History Tracking**: Short takes (< 10 seconds) are automatically discarded. Valid recordings are encoded to MP3 via FFmpeg in the background, registered in the `PerformanceRecordings` database, and tagged by singer and timestamp.
+- **Retention & Safe Storage**: Configurable retention pruning (`RecordingRetentionDays`, default 30 days) and automatic disk-space protection halting recordings if available disk space falls below 500 MB.
+- **DJ Monitoring & Playback Controls**: Settings page features an audio input picker, real-time VU meter, 5-second test clip recorder, and singer profiles contain a dedicated "Recorded Performances" history list for playback, opening storage folders, and deletion. An on-screen "REC" indicator signals active recording.
+
+### 🩺 Managed BPM Analysis & Cue Points in Library Health (`LyracistDbEditor`)
+- **Pure Managed BPM Audio Analysis**: High-performance onset-strength envelope and zero-mean normalized autocorrelation analyzer detecting track tempo folded into 70-180 BPM with peak confidence validation and noise rejection.
+- **Silence & Cue Detection**: FFmpeg `silencedetect` audit identifies leading silence (`MixInMs`) and trailing silence (`MixOutMs`) for seamless gapless automix transitions.
+- **Library Health Audit Integration**: Added "Missing Filler BPM" tracking and automated background analysis audit alongside existing loudness and duplicate diagnostics.
 
 ### 🛠️ LyracistDbEditor Library Maintenance & Safety (`LyracistDbEditor`)
 - **Library Folder Management**: Add, remove, and rescan library folders. Removing a folder removes only the songs that belong to it (case-insensitive; never a sibling folder sharing a prefix, and never songs still owned by another registered folder) and clears their search-index entries. This routine is shared with Lyracist (`Lyracist.Data/Services/LibraryMaintenanceService.cs`), so both apps behave identically.

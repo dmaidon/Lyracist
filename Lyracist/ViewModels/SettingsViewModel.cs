@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 11:42:00 -> Add TestSingerCount and LoadTestSingersNow command to SettingsViewModel
+// Edited on Oct 7, 2026 @ 20:12:00 -> Add performance recording settings, device enumeration, live peak level, test recording, and retention configuration
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -31,6 +31,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly RotationWindowViewModel _rotationWindowVm;
     private readonly LyricsWindowViewModel? _lyricsWindowVm;
     private readonly IKSRotationSyncService _ksRotationSync;
+    private readonly IPerformanceRecorderService? _performanceRecorder;
 
     // Theme
     public List<string> ThemeModes { get; } = ["Light", "Dark", "System"];
@@ -151,6 +152,15 @@ public partial class SettingsViewModel : BaseViewModel
     private int _fillInDelaySeconds = AppSettings.FillInDelaySeconds;
 
     [ObservableProperty]
+    private int _fillInCrossfadeSeconds = AppSettings.FillInCrossfadeSeconds;
+
+    [ObservableProperty]
+    private int _fillInMaxTrackSeconds = AppSettings.FillInMaxTrackSeconds;
+
+    [ObservableProperty]
+    private bool _fillInSmartShuffle = AppSettings.FillInSmartShuffle;
+
+    [ObservableProperty]
     private int _endRotationVolume = AppSettings.EndRotationVolume;
 
     // ─── Background Music Channel Tone (–20 to +20 dB) ────────────────
@@ -190,7 +200,8 @@ public partial class SettingsViewModel : BaseViewModel
                              IKSRotationSyncService ksRotationSync,
                              IChromecastDiscoveryService chromecastDiscovery,
                              ICastingService casting,
-                             LyricsWindowViewModel? lyricsWindowVm = null)
+                             LyricsWindowViewModel? lyricsWindowVm = null,
+                             IPerformanceRecorderService? performanceRecorder = null)
     {
         _display = display;
         _tablet = tablet;
@@ -205,6 +216,14 @@ public partial class SettingsViewModel : BaseViewModel
         _ksRotationSync = ksRotationSync;
         _chromecastDiscovery = chromecastDiscovery;
         _casting = casting;
+        _performanceRecorder = performanceRecorder;
+        if (_performanceRecorder != null)
+        {
+            _performanceRecorder.PeakLevelChanged += (s, peak) =>
+            {
+                RecordingLivePeakLevel = peak;
+            };
+        }
 
         _library.LibraryUpdated += (_, _) =>
         {
@@ -361,6 +380,29 @@ public partial class SettingsViewModel : BaseViewModel
             Lyracist.Core.Helpers.AppSettings.SelectedBgmAudioDevice = "Default System Device";
         }
 
+        var recDevList = new List<AudioDeviceItem>
+        {
+            new() { DeviceIdentifier = "", Description = "None (Recording Disabled)" }
+        };
+        try
+        {
+            using var enumerator = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+            var captureDevices = enumerator.EnumerateAudioEndPoints(NAudio.CoreAudioApi.DataFlow.Capture, NAudio.CoreAudioApi.DeviceState.Active);
+            foreach (var d in captureDevices)
+            {
+                recDevList.Add(new AudioDeviceItem
+                {
+                    DeviceIdentifier = d.ID,
+                    Description = d.FriendlyName
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error enumerating recording capture devices", ex);
+        }
+        RecordingDevices = recDevList;
+
         // Seed list values
         CdgScalingModes = ["Nearest", "Linear"];
         Mp4Backends = ["LibVLC", "FFME"];
@@ -417,6 +459,29 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnFillInDelaySecondsChanged(int value)
     {
         AppSettings.FillInDelaySeconds = value;
+    }
+
+    partial void OnFillInCrossfadeSecondsChanged(int value)
+    {
+        AppSettings.FillInCrossfadeSeconds = value;
+        _showFlow.RefreshPlaybackSettings();
+    }
+
+    partial void OnFillInMaxTrackSecondsChanged(int value)
+    {
+        AppSettings.FillInMaxTrackSeconds = value;
+        OnPropertyChanged(nameof(FillInMaxTrackDisplay));
+        _showFlow.RefreshPlaybackSettings();
+    }
+
+    public string FillInMaxTrackDisplay => FillInMaxTrackSeconds == 0
+        ? "Off"
+        : $"{FillInMaxTrackSeconds / 60}m {FillInMaxTrackSeconds % 60}s";
+
+    partial void OnFillInSmartShuffleChanged(bool value)
+    {
+        AppSettings.FillInSmartShuffle = value;
+        _showFlow.RefreshPlaybackSettings();
     }
 
     partial void OnEndRotationVolumeChanged(int value)
@@ -491,6 +556,86 @@ public partial class SettingsViewModel : BaseViewModel
         _rotation.SeedSingers(TestSingerCount);
     }
 
+    // ==========================================
+    // PERFORMANCE RECORDING SETTINGS (FEATURE F)
+    // ==========================================
+
+    [ObservableProperty]
+    private List<AudioDeviceItem> _recordingDevices = [];
+
+    [ObservableProperty]
+    private string _selectedRecordingDevice = AppSettings.RecordingInputDevice;
+
+    partial void OnSelectedRecordingDeviceChanged(string value)
+    {
+        AppSettings.RecordingInputDevice = value ?? string.Empty;
+    }
+
+    [ObservableProperty]
+    private bool _recordPerformancesEnabled = AppSettings.RecordPerformancesEnabled;
+
+    partial void OnRecordPerformancesEnabledChanged(bool value)
+    {
+        AppSettings.RecordPerformancesEnabled = value;
+    }
+
+    [ObservableProperty]
+    private int _recordingRetentionDays = AppSettings.RecordingRetentionDays;
+
+    partial void OnRecordingRetentionDaysChanged(int value)
+    {
+        AppSettings.RecordingRetentionDays = value;
+    }
+
+    [ObservableProperty]
+    private float _recordingLivePeakLevel;
+
+    [ObservableProperty]
+    private bool _isTestRecordingRunning;
+
+    [ObservableProperty]
+    private string _testRecordingStatus = string.Empty;
+
+    [RelayCommand]
+    private async Task TestRecording()
+    {
+        if (IsTestRecordingRunning || _performanceRecorder == null) return;
+        IsTestRecordingRunning = true;
+        TestRecordingStatus = "Recording 5-second test clip...";
+        try
+        {
+            string? result = await _performanceRecorder.RecordTestClipAsync(5);
+            TestRecordingStatus = string.IsNullOrEmpty(result) ? "Test clip failed (no audio or device error)." : "Test clip captured successfully!";
+        }
+        catch (Exception ex)
+        {
+            TestRecordingStatus = $"Test failed: {ex.Message}";
+        }
+        finally
+        {
+            IsTestRecordingRunning = false;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenRecordingsFolder()
+    {
+        try
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string recordingsDir = Path.Combine(baseDir, "Recordings");
+            Directory.CreateDirectory(recordingsDir);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = recordingsDir,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to open recordings folder", ex);
+        }
+    }
 }
 
 public class AudioDeviceItem

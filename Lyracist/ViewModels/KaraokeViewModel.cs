@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:45:00 -> Add OpenAdjustSynthDisplay command to open synth display modal from KaraokePage
+// Edited on Oct 7, 2026 @ 20:08:00 -> Set ActiveSongTitle, ActiveSongArtist, IsMusicTrack on MediaEngine for performance recording
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -782,6 +782,9 @@ public partial class KaraokeViewModel : BaseViewModel
             if (NowSingingName != oldSinger)
             {
                 _mediaEngine.ActiveSingerName = NowSingingName;
+                _mediaEngine.ActiveSongTitle = null;
+                _mediaEngine.ActiveSongArtist = null;
+                _mediaEngine.IsMusicTrack = false;
                 _mediaEngine.ActiveDuetPartnerName = "None";
                 NotifyAudioPropertiesChanged();
             }
@@ -854,6 +857,9 @@ public partial class KaraokeViewModel : BaseViewModel
         if (NowSingingName != oldSinger || _mediaEngine.ActiveDuetPartnerName != partnerName)
         {
             _mediaEngine.ActiveSingerName = NowSingingName;
+            _mediaEngine.ActiveSongTitle = current?.SongTitle;
+            _mediaEngine.ActiveSongArtist = current?.Artist;
+            _mediaEngine.IsMusicTrack = current?.IsMusic ?? false;
             _mediaEngine.ActiveDuetPartnerName = partnerName;
             NotifyAudioPropertiesChanged();
         }

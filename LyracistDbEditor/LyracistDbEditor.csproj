@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:19:45 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.240 with BPM analysis and Cue points detection in library health -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.10.7.239</AssemblyVersion>
-    <FileVersion>26.10.7.239</FileVersion>
+    <AssemblyVersion>26.10.7.240</AssemblyVersion>
+    <FileVersion>26.10.7.240</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

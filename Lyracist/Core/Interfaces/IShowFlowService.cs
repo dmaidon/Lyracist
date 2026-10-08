@@ -1,10 +1,11 @@
-// Edited on Sep 9, 2026 @ 16:31:00 -> Add RefreshOutputSettings method to IShowFlowService
+// Edited on Oct 7, 2026 @ 19:45:00 -> Add RefreshPlaybackSettings method to IShowFlowService
 namespace Lyracist.Core.Interfaces;
 
 public interface IShowFlowService
 {
     void SetBgmAudioDevice(string deviceId);
     void RefreshOutputSettings();
+    void RefreshPlaybackSettings();
     bool IsOpeningPlaying { get; }
     bool IsFillInPlaying { get; }
     bool IsFillInDucked { get; }
@@ -46,10 +47,13 @@ public interface IShowFlowService
     void SetFillInTone(double bassDb, double trebleDb, double preampDb);
     void SetEndRotationTone(double bassDb, double trebleDb, double preampDb);
 
-    /// <summary>Stops opening/background music and pauses fill-in when a performance starts.</summary>
+    /// <summary>Immediately cuts fill-in/opening music when a karaoke track starts.</summary>
     void OnKaraokeTrackStarted();
 
+    /// <summary>Suspends whatever BGM player is currently running so another window can play audio.</summary>
     void PauseBackgroundMusic();
+
+    /// <summary>Resumes the BGM player that was running before <see cref="PauseBackgroundMusic"/>.</summary>
     void ResumeBackgroundMusic();
 
     event Action<int, bool>? AutoAdvanceCountdownTick;

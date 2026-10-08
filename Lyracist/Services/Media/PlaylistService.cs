@@ -1,3 +1,4 @@
+// Edited on Oct 7, 2026 @ 19:44:00 -> Map Song.BPM to PlaylistTrack.Bpm
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -201,7 +202,8 @@ public class PlaylistService : IPlaylistService
             Order = order,
             Title = song?.Title ?? "(missing song)",
             Artist = song?.Artist ?? string.Empty,
-            AudioPath = song?.FilePath ?? string.Empty
+            AudioPath = song?.FilePath ?? string.Empty,
+            Bpm = song?.BPM
         };
     }
 }

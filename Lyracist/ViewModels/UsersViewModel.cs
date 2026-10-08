@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 14:10:00 -> Rotate and clean up raw_ avatar copies
+// Edited on Oct 7, 2026 @ 20:15:00 -> Add singer AllowRecording opt-in and singer performance recordings list
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -74,6 +74,9 @@ namespace Lyracist.ViewModels
         [ObservableProperty]
         private ImageSource? _avatarImage;
 
+        [ObservableProperty]
+        private bool _allowRecording;
+
         public string LevelText { get => $"Lvl {SingerXpHelper.CalculateLevel(SingerXpHelper.CalculateXP(TotalSongsSung, Score))}"; set { } }
         public string SongsText { get => $"{TotalSongsSung} songs"; set { } }
     }
@@ -137,6 +140,8 @@ namespace Lyracist.ViewModels
         [ObservableProperty] private string _editAvatarType = "None";
         [ObservableProperty] private string _editAvatarSource = string.Empty;
         [ObservableProperty] private ImageSource? _editAvatarImage;
+        [ObservableProperty] private bool _editAllowRecording;
+        public ObservableCollection<PerformanceRecording> SingerRecordings { get; } = [];
 
         // Audio defaults
         [ObservableProperty] private double _editGain = 100.0;
@@ -224,7 +229,8 @@ namespace Lyracist.ViewModels
                         TotalSongsSung = s.TotalSongsSung,
                         AvatarType = s.AvatarType,
                         AvatarSource = s.AvatarSource,
-                        AvatarImage = ResolveAvatarImage(s.AvatarType, s.AvatarSource)
+                        AvatarImage = ResolveAvatarImage(s.AvatarType, s.AvatarSource),
+                        AllowRecording = s.AllowRecording
                     };
                     AllSingers.Add(item);
                 }
@@ -292,6 +298,8 @@ namespace Lyracist.ViewModels
 
             // Load song performance history
             LoadPerformanceHistory(singer.Name);
+            LoadSingerRecordings(singer.Name);
+            EditAllowRecording = singer.AllowRecording;
             ClearStatusMessage();
         }
 
@@ -305,6 +313,8 @@ namespace Lyracist.ViewModels
             EditNotes = string.Empty;
             EditScore = 0;
             EditTotalSongsSung = 0;
+            EditAllowRecording = false;
+            SingerRecordings.Clear();
             AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditAvatarSource);
             EditAvatarType = "None";
             EditAvatarSource = string.Empty;
@@ -398,6 +408,7 @@ namespace Lyracist.ViewModels
                 dbSinger.TotalSongsSung = EditTotalSongsSung;
                 dbSinger.AvatarType = EditAvatarType;
                 dbSinger.AvatarSource = EditAvatarSource;
+                dbSinger.AllowRecording = EditAllowRecording;
 
                 await context.SaveChangesAsync();
 
@@ -434,6 +445,7 @@ namespace Lyracist.ViewModels
                 SelectedSinger.AvatarType = dbSinger.AvatarType;
                 SelectedSinger.AvatarSource = dbSinger.AvatarSource;
                 SelectedSinger.AvatarImage = ResolveAvatarImage(dbSinger.AvatarType, dbSinger.AvatarSource);
+                SelectedSinger.AllowRecording = dbSinger.AllowRecording;
 
                 ShowStatus($"Successfully saved profile for '{cleanName}'.", true);
             }
@@ -902,6 +914,98 @@ namespace Lyracist.ViewModels
             }
 
             return null;
+        }
+
+        private void LoadSingerRecordings(string singerName)
+        {
+            SingerRecordings.Clear();
+            if (string.IsNullOrWhiteSpace(singerName)) return;
+
+            try
+            {
+                using var context = new LyracistDbContext();
+                var list = context.PerformanceRecordings
+                    .AsNoTracking()
+                    .Where(r => r.SingerName == singerName)
+                    .OrderByDescending(r => r.StartedUtc)
+                    .ToList();
+
+                foreach (var rec in list)
+                {
+                    SingerRecordings.Add(rec);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "UsersViewModel.LoadSingerRecordings");
+            }
+        }
+
+        [RelayCommand]
+        private void PlayRecording(PerformanceRecording? recording)
+        {
+            if (recording == null || !File.Exists(recording.FilePath)) return;
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = recording.FilePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "PlayRecording failed");
+            }
+        }
+
+        [RelayCommand]
+        private void OpenRecordingFolder(PerformanceRecording? recording)
+        {
+            if (recording == null) return;
+            try
+            {
+                string? folder = Path.GetDirectoryName(recording.FilePath);
+                if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = folder,
+                        UseShellExecute = true
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "OpenRecordingFolder failed");
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteRecordingAsync(PerformanceRecording? recording)
+        {
+            if (recording == null) return;
+            try
+            {
+                using var context = new LyracistDbContext();
+                var dbRec = await context.PerformanceRecordings.FindAsync(recording.Id);
+                if (dbRec != null)
+                {
+                    context.PerformanceRecordings.Remove(dbRec);
+                    await context.SaveChangesAsync();
+                }
+
+                if (File.Exists(recording.FilePath))
+                {
+                    File.Delete(recording.FilePath);
+                }
+
+                SingerRecordings.Remove(recording);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "DeleteRecordingAsync failed");
+            }
         }
     }
 }

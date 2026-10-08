@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 13:08:00 -> Add Center Face and Rotate buttons to Users avatar actions -->
+<!-- Edited on Oct 7, 2026 @ 20:15:00 -> Add singer AllowRecording opt-in and Recorded Performances tab -->
 <Page x:Class="Lyracist.Views.Pages.UsersPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -367,6 +367,17 @@
                                         <TextBlock Text="Performer Notes" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,4" />
                                         <ui:TextBox Text="{Binding EditNotes, UpdateSourceTrigger=PropertyChanged}"
                                                     AcceptsReturn="True" Height="70" TextWrapping="Wrap" Margin="0,0,0,14" />
+
+                                        <!-- Performance Recording Opt-In -->
+                                        <Border Background="#1A2433" BorderBrush="#333880F6" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <CheckBox Content="Allow Performance Audio Recording (Opt-In)"
+                                                          IsChecked="{Binding EditAllowRecording, Mode=TwoWay}"
+                                                          FontWeight="SemiBold" Margin="0,0,0,4" />
+                                                <TextBlock Text="When enabled and host mixer recording is active, this performer's karaoke songs will be captured."
+                                                           FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </ScrollViewer>
                             </TabItem>
@@ -539,6 +550,49 @@
                                                                        Command="{Binding DataContext.DeleteHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                        CommandParameter="{Binding}"
                                                                        ToolTip="Remove this record from history" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </TabItem>
+
+                            <!-- TAB 4: Recorded Performances -->
+                            <TabItem Header="Recorded Performances">
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Text="Captured live performances recorded from the mixer for this performer."
+                                               FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,10" />
+
+                                    <DataGrid Grid.Row="1" ItemsSource="{Binding SingerRecordings}"
+                                              AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                                              HeadersVisibility="Column" Background="Transparent" BorderThickness="1"
+                                              BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                              RowBackground="Transparent" GridLinesVisibility="Horizontal">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Date" Binding="{Binding StartedUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130" />
+                                            <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
+                                            <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
+                                            <DataGridTextColumn Header="Duration" Binding="{Binding DurationSeconds, StringFormat='{}{0:0}s'}" Width="75" />
+                                            <DataGridTemplateColumn Header="Actions" Width="210">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                            <ui:Button Content="Play" Icon="{ui:SymbolIcon Play20}" Appearance="Primary" Padding="6,2" Margin="0,0,4,0"
+                                                                       Command="{Binding DataContext.PlayRecordingCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                       CommandParameter="{Binding}" ToolTip="Play recording" />
+                                                            <ui:Button Content="Folder" Icon="{ui:SymbolIcon FolderOpen20}" Appearance="Secondary" Padding="6,2" Margin="0,0,4,0"
+                                                                       Command="{Binding DataContext.OpenRecordingFolderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                       CommandParameter="{Binding}" ToolTip="Open file location" />
+                                                            <ui:Button Content="Delete" Icon="{ui:SymbolIcon Delete20}" Appearance="Danger" Padding="6,2"
+                                                                       Command="{Binding DataContext.DeleteRecordingCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                       CommandParameter="{Binding}" ToolTip="Delete recording" />
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>

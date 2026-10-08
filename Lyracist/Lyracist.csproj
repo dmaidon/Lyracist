@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:18:00 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.572 with Filler Automix, Sample Pad, and Performance Recording -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.7.571</AssemblyVersion>
-    <FileVersion>26.10.7.571</FileVersion>
+    <AssemblyVersion>26.10.7.572</AssemblyVersion>
+    <FileVersion>26.10.7.572</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -141,6 +141,10 @@
     <Compile Include="..\Shared\VenueLocationStore.cs" Link="VenueLocationStore.cs" />
     <Compile Include="..\Shared\ILocationService.cs" Link="ILocationService.cs" />
     <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
+    <Compile Include="..\Shared\LoudnessNormalizer.cs" Link="LoudnessNormalizer.cs" />
+    <Compile Include="..\Shared\FillInTrack.cs" Link="FillInTrack.cs" />
+    <Compile Include="..\Shared\NextTrackSelector.cs" Link="NextTrackSelector.cs" />
+    <Compile Include="..\Shared\PerformanceRecordingStateMachine.cs" Link="PerformanceRecordingStateMachine.cs" />
   </ItemGroup>
 
   <ItemGroup>
