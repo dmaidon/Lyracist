@@ -319,4 +319,30 @@ public class AutoAdvanceManagerTests
         // 3. State is ready to start
         Assert.Equal(AutoAdvanceState.ReadyToStart, manager.CurrentState);
     }
+
+    [Fact]
+    public void HandleSongEnded_AdHocTrack_DoesNotAdvanceRotation_AndClearsFlag()
+    {
+        var (manager, rotation, mediaEngine, library) = CreateManager();
+        mediaEngine.SetupProperty(m => m.IsAdHocTrack, true);
+
+        var alice = new Singer { Name = "Alice", SongTitle = "Song A", IsCurrent = true };
+        var bob = new Singer { Name = "Bob", SongTitle = "Song B" };
+        rotation.Rotation.Add(alice);
+        rotation.Rotation.Add(bob);
+
+        // A DJ-played library track ends
+        manager.HandleSongEnded();
+
+        Assert.True(alice.IsCurrent);
+        Assert.False(bob.IsCurrent);
+        Assert.Equal(0, alice.CompletedCount);
+        Assert.False(mediaEngine.Object.IsAdHocTrack);
+
+        // The next end (a real performance) advances normally
+        manager.HandleSongEnded();
+
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(1, alice.CompletedCount);
+    }
 }
