@@ -1,4 +1,56 @@
-// Edited on Oct 2, 2026 @ 11:30:00 -> Document Dedicated New Performer Welcome Screen GroupBox on Display tab
+// Edited on Oct 11, 2026 @ 14:48:00 -> Document Settings Page 4-column balanced layout and scroll elimination
+
+
+Lyracist Pro Suite: Settings Page 4-Column Balanced Layout & Scroll Elimination (`Lyracist/Views/Pages/SettingsPage.xaml`) - (October 2026)
+
+Section: Lyracist / Settings & Configuration / Layout & Display
+
+[Overview & UI Reorganization]
+To improve usability and eliminate the need for vertical scrolling on standard laptop (1366x768 / 1920x1080) displays, the primary configuration tabs in Lyracist's Settings page (`Audio & Engine`, `Library & Ratings`, `Display`, and `Presentation & DJ`) have been redistributed across a 4-column balanced layout.
+
+Previously, several tabs piled GroupBoxes into Column 0 while leaving Columns 2, 4, or 6 sparsely populated or empty, causing long vertical lists that required extensive mouse scrolling to reach bottom controls. The new layout distributes cards evenly across all 4 content columns:
+
+1. Audio & Engine:
+   - Column 0: Audio & Equalizers (WASAPI devices, buffer latencies, hardware mixer bypass, master EQ sliders).
+   - Column 2: Performance Recording (Host Mixer Capture) (USB mixer input selection, real-time VU meter, 5s test recording, singer take folder).
+   - Column 4: Decoders & Layout (LibVLC hardware decoding, CDG frame rendering, video scaling mode).
+   - Column 6: APIs & Logins (MusicBrainz, Spotify, online integration credentials).
+
+2. Library & Ratings:
+   - Column 0: Music Library (Media folders, fast-path rescan, song count diagnostics).
+   - Column 2: Tablet Server Settings & KSRotation Sync Settings (Port binding, local network QR access, cross-app synchronization).
+   - Column 4: Performer Ratings Settings (5-star scoring thresholds, crowd reaction weighting).
+   - Column 6: Test Mode Settings (Simulated performer queue generator, mock audio engine).
+
+3. Display:
+   - Column 0: Monitors & Screen Assignments (Audience lyrics display, KJ confidence display, tablet kiosk mirror).
+   - Column 2: DJ & Event Banners, Session Schedule & Request Cutoff.
+   - Column 4: Lyrics Screen Audio Visualizer, New Performer Welcome Screen, Connect & Request Instructions.
+   - Column 6: Star Wars Crawl & Spaceship, Screen Rotation.
+
+4. Presentation & DJ:
+   - Column 0: Theme & Appearance (Dark/light mode, accent palette, UI font scaling).
+   - Column 2: DJ & Venue Management (KJ stage name, venue branding, custom interval announcements).
+   - Column 4: Auto-Advance Countdown (Grace period duration, lead-in timer, auto-start triggers).
+
+
+Section: Lyracist & LyracistDbEditor / Library Scanning & Metadata Management
+
+[Overview & Performance Optimization]
+Previously, scanning a library after adding a small batch of tracks (e.g. 5 new songs) could take significant time because the scanner repeatedly performed file-level existence checks (for companion .cdg files) and in-memory TagLib / FFprobe probing on all tracks stuck on "Unknown Artist". Furthermore, if the user cleared or rebuilt `lyracist.db`, all previously probed unresolved tracks were lost and had to be re-probed from scratch.
+
+To eliminate these bottlenecks, Lyracist Pro Suite now implements a three-fold optimization:
+1. Fast-Path In-Memory Rescans: During the initial directory scan, cataloged tracks whose metadata is already resolved or marked as needing repair skip companion .cdg disk checks, ZIP inspections, and regex evaluations. Only brand-new or modified files touch the disk.
+2. "Needs Repair" State Tracking: Songs whose artist cannot be resolved from either the filename or embedded ID3 tags are flagged as `NeedsRepair = true` and given a default tag marker (`Tags = "none"`). Subsequent library scans instantly filter out these tracks, preventing the scanner from re-probing the same unresolved files over and over.
+3. Standalone `noartist.db` Persistence: Songs with missing artist metadata are saved to an independent database (`Data/noartist.db`). Even if the main database (`lyracist.db`) is cleared or deleted, `noartist.db` retains the unresolvable list, track duration, and karaoke formatting. A new library scan reads from `noartist.db` and immediately registers them as needing repair without re-attempting TagLib or FFprobe disk extraction.
+
+[LyracistDbEditor Integration]
+- The top header and stats badge in LyracistDbEditor now clearly displays `Needs Repair: [count]`.
+- The checkbox filter in the Library view allows DJs to filter by `Only show songs needing repair ('Unknown Artist')`.
+- Saving manual edits to an artist automatically clears the `NeedsRepair` flag and purges the track from `noartist.db`.
+- Deleting a track from the library removes it from both `lyracist.db` and `noartist.db`.
+- The Slow Metadata Extractor (MusicBrainz / Spotify) automatically resolves or flags tracks requiring repair, updating both databases accordingly.
+
 
 
 Lyracist Pro Suite & KSRotation: Dedicated "New Performer Welcome Screen" GroupBox (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`) - (October 2026)

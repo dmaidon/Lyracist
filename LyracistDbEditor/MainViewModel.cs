@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:24:00 -> Guard dispatcher progress updates against TaskCanceledException during metadata probe
+// Edited on Oct 11, 2026 @ 13:32:00 -> Sync NoArtistStore when repairing or deleting songs and during slow metadata scan
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -207,7 +207,7 @@ public partial class MainViewModel : ObservableObject
                 IQueryable<Song> query = context.Songs;
                 if (OnlyShowMissingArtist)
                 {
-                    query = query.Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
+                    query = query.Where(s => s.NeedsRepair || s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
                 }
                 int total = query.Count();
                 songs = query.OrderBy(s => s.Artist).ThenBy(s => s.Title).Take(_resultLimit).ToList();
@@ -223,7 +223,7 @@ public partial class MainViewModel : ObservableObject
                 songs = searchService.SearchSync(SearchText);
                 if (OnlyShowMissingArtist)
                 {
-                    songs = songs.Where(s => s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
+                    songs = songs.Where(s => s.NeedsRepair || s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
                 }
 
                 // Text search comes from the FTS index, which caps its own result set, so it can't be paged.
@@ -301,6 +301,25 @@ public partial class MainViewModel : ObservableObject
                 dbSong.IsKaraoke = SelectedSong.IsKaraoke;
                 dbSong.KaraokeType = SelectedSong.KaraokeType;
 
+                if (!string.IsNullOrEmpty(dbSong.Artist) && dbSong.Artist != "Unknown Artist")
+                {
+                    dbSong.NeedsRepair = false;
+                    await NoArtistStore.RemoveAsync(dbSong.FilePath);
+                }
+                else
+                {
+                    dbSong.NeedsRepair = true;
+                    await NoArtistStore.UpsertAsync(new UnresolvedTrack
+                    {
+                        FilePath = dbSong.FilePath,
+                        Title = dbSong.Title,
+                        Duration = dbSong.Duration,
+                        KaraokeType = dbSong.KaraokeType,
+                        IsKaraoke = dbSong.IsKaraoke,
+                        DateFlagged = DateTime.UtcNow
+                    });
+                }
+
                 await context.SaveChangesAsync();
 
                 // Update the FTS search index
@@ -343,6 +362,7 @@ public partial class MainViewModel : ObservableObject
                 await context.SaveChangesAsync();
 
                 await searchService.RemoveSongFromIndex(dbSong.SongId);
+                await NoArtistStore.RemoveAsync(dbSong.FilePath);
 
                 SelectedSong = null;
                 RefreshStats();
@@ -539,7 +559,7 @@ public partial class MainViewModel : ObservableObject
             var searchService = new SearchService(context);
 
             var targetSongs = await context.Songs
-                .Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null)
+                .Where(s => s.NeedsRepair || s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null)
                 .ToListAsync(token);
 
             int total = targetSongs.Count;
@@ -650,6 +670,9 @@ public partial class MainViewModel : ObservableObject
                 // If tags or artist resolved successfully, update the DB record
                 if (!string.IsNullOrWhiteSpace(song.Artist) && song.Artist != "Unknown Artist")
                 {
+                    song.NeedsRepair = false;
+                    await NoArtistStore.RemoveAsync(song.FilePath, token);
+
                     // Save immediately in small transactions
                     await context.SaveChangesAsync(token);
 
@@ -667,6 +690,17 @@ public partial class MainViewModel : ObservableObject
                 }
                 else
                 {
+                    song.NeedsRepair = true;
+                    await NoArtistStore.UpsertAsync(new UnresolvedTrack
+                    {
+                        FilePath = song.FilePath,
+                        Title = song.Title,
+                        Duration = song.Duration,
+                        KaraokeType = song.KaraokeType,
+                        IsKaraoke = song.IsKaraoke,
+                        DateFlagged = DateTime.UtcNow
+                    }, token);
+
                     // Even if artist is not found, save the "none" tags update if set
                     await context.SaveChangesAsync(token);
                     failedFiles.Add(song.FilePath);
@@ -711,7 +745,7 @@ public partial class MainViewModel : ObservableObject
         {
             using var context = new LyracistDbContext();
             TotalSongCount = context.Songs.Count();
-            MissingArtistCount = context.Songs.Count(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
+            MissingArtistCount = context.Songs.Count(s => s.NeedsRepair || s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
         }
         catch (Exception ex)
         {

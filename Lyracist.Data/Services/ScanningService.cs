@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 12:13:00 -> Detect companion CDG files, expand audio format scanning, and isolate keyword matching
+// Edited on Oct 11, 2026 @ 13:30:00 -> Integrate standalone noartist.db store for persistence across database resets
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -287,6 +287,9 @@ namespace Lyracist.Data.Services
                 .AsNoTracking()
                 .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+            // Load standalone noartist.db cache: tracks missing artists survive even if lyracist.db was deleted
+            var noArtistMap = await NoArtistStore.GetAllAsync(cancellationToken);
+
             // Clean up dead records for files that no longer exist under the scanned directory paths.
             var songsToRemove = existingSongsMap.Values
                 .Where(s => scannedPaths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
@@ -296,6 +299,7 @@ namespace Lyracist.Data.Services
             {
                 _context.Songs.RemoveRange(songsToRemove);
                 await _context.SaveChangesAsync();
+                await NoArtistStore.RemoveBatchAsync(songsToRemove.Select(s => s.FilePath), cancellationToken);
                 foreach (var s in songsToRemove)
                 {
                     await searchService.RemoveSongFromIndex(s.SongId);
@@ -341,12 +345,18 @@ namespace Lyracist.Data.Services
 
                 foreach (var file in filesBatch)
                 {
-                    var parsed = ParseStoreDownload(file);
-
-                    string typeLabel = parsed.IsKaraoke ? parsed.KaraokeType : "Audio";
-
                     if (existingSongsMap.TryGetValue(file, out var existing))
                     {
+                        // FAST PATH: If the song is already cataloged with a resolved artist (or already flagged
+                        // as NeedsRepair), skip companion CDG disk lookups, ZIP inspection, and regex parsing.
+                        if (existing.NeedsRepair || (!string.IsNullOrEmpty(existing.Artist) && existing.Artist != UnknownArtist && !string.IsNullOrEmpty(existing.KaraokeType)))
+                        {
+                            continue;
+                        }
+
+                        var parsed = ParseStoreDownload(file);
+                        string typeLabel = parsed.IsKaraoke ? parsed.KaraokeType : "Audio";
+
                         bool changed = false;
 
                         // Title/artist come from the filename, which is only a guess. Once a song has a
@@ -358,6 +368,7 @@ namespace Lyracist.Data.Services
                             if (parsed.Artist != UnknownArtist && existing.Artist != parsed.Artist)
                             {
                                 existing.Artist = parsed.Artist;
+                                existing.NeedsRepair = false;
                                 changed = true;
                             }
                             if (existing.Title != parsed.Title)
@@ -380,8 +391,34 @@ namespace Lyracist.Data.Services
                             songsToReindex.Add(existing);
                         }
                     }
+                    else if (noArtistMap.TryGetValue(file, out var unresolved))
+                    {
+                        // COLD-SCAN PERSISTENCE: If lyracist.db was deleted or reset, noartist.db preserves
+                        // the record of tagless tracks and their measured duration/type so a full rebuild
+                        // does not waste time re-probing them from disk.
+                        var newSong = new Song
+                        {
+                            Title = unresolved.Title,
+                            Artist = UnknownArtist,
+                            FilePath = file,
+                            IsKaraoke = unresolved.IsKaraoke,
+                            KaraokeType = unresolved.KaraokeType,
+                            Duration = unresolved.Duration,
+                            Tags = "none",
+                            KeyDefault = 0,
+                            TempoDefault = 1.0,
+                            DateAdded = DateTime.UtcNow,
+                            NeedsRepair = true
+                        };
+                        songsToInsert.Add(newSong);
+                        songsToReindex.Add(newSong);
+                        existingSongsMap[file] = newSong;
+                    }
                     else
                     {
+                        var parsed = ParseStoreDownload(file);
+                        string typeLabel = parsed.IsKaraoke ? parsed.KaraokeType : "Audio";
+
                         var newSong = new Song
                         {
                             Title = parsed.Title,
@@ -392,7 +429,8 @@ namespace Lyracist.Data.Services
                             Duration = 0,
                             KeyDefault = 0,
                             TempoDefault = 1.0,
-                            DateAdded = DateTime.UtcNow
+                            DateAdded = DateTime.UtcNow,
+                            NeedsRepair = false
                         };
                         songsToInsert.Add(newSong);
                         songsToReindex.Add(newSong);
@@ -419,12 +457,22 @@ namespace Lyracist.Data.Services
                         entry.Property(s => s.Artist).IsModified = true;
                         entry.Property(s => s.IsKaraoke).IsModified = true;
                         entry.Property(s => s.KaraokeType).IsModified = true;
+                        entry.Property(s => s.NeedsRepair).IsModified = true;
                     }
 
                     await _context.SaveChangesAsync();
                     await searchService.IndexSongsBatch(songsToReindex);
 
                     await transaction.CommitAsync();
+
+                    var resolvedFilePaths = songsToUpdate
+                        .Where(s => !string.IsNullOrEmpty(s.Artist) && s.Artist != UnknownArtist)
+                        .Select(s => s.FilePath)
+                        .ToList();
+                    if (resolvedFilePaths.Count > 0)
+                    {
+                        await NoArtistStore.RemoveBatchAsync(resolvedFilePaths, cancellationToken);
+                    }
                 }
 
                 // Nothing later in the scan needs this batch's entities tracked, and leaving them
@@ -476,7 +524,7 @@ namespace Lyracist.Data.Services
         public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             var songsNeedingProbe = await _context.Songs
-                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null)
+                .Where(s => !s.NeedsRepair && (s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null))
                 .ToListAsync(cancellationToken);
 
             int totalFiles = songsNeedingProbe.Count;
@@ -518,6 +566,36 @@ namespace Lyracist.Data.Services
                 _context.Songs.UpdateRange(batch);
                 await _context.SaveChangesAsync();
 
+                // Synchronize probed batch with standalone noartist.db:
+                // Tracks that could not resolve an artist are saved to noartist.db so they persist across DB clears.
+                // Tracks that successfully resolved an artist are removed from noartist.db.
+                var unresolvables = batch
+                    .Where(s => s.NeedsRepair || s.Artist == UnknownArtist || string.IsNullOrEmpty(s.Artist))
+                    .Select(s => new UnresolvedTrack
+                    {
+                        FilePath = s.FilePath,
+                        Title = s.Title,
+                        Duration = s.Duration,
+                        KaraokeType = s.KaraokeType,
+                        IsKaraoke = s.IsKaraoke,
+                        DateFlagged = DateTime.UtcNow
+                    })
+                    .ToList();
+
+                var resolvedPaths = batch
+                    .Where(s => !s.NeedsRepair && s.Artist != UnknownArtist && !string.IsNullOrEmpty(s.Artist))
+                    .Select(s => s.FilePath)
+                    .ToList();
+
+                if (unresolvables.Count > 0)
+                {
+                    await NoArtistStore.UpsertBatchAsync(unresolvables, cancellationToken);
+                }
+                if (resolvedPaths.Count > 0)
+                {
+                    await NoArtistStore.RemoveBatchAsync(resolvedPaths, cancellationToken);
+                }
+
                 // Re-index FTS5 index to support tag and genre searching immediately
                 await searchService.IndexSongsBatch(batch);
 
@@ -530,10 +608,10 @@ namespace Lyracist.Data.Services
                 });
             }
 
-            int unknownArtistCount = await _context.Songs.CountAsync(s => s.Artist == "Unknown Artist" || s.Artist == null || s.Artist == "");
+            int unknownArtistCount = await _context.Songs.CountAsync(s => s.NeedsRepair || s.Artist == "Unknown Artist" || s.Artist == null || s.Artist == "");
             if (unknownArtistCount > 0)
             {
-                Lyracist.Shared.Globals.LogInfo("Lyracist", $"Metadata scan complete. {unknownArtistCount:N0} track(s) remain with 'Unknown Artist' (resolvable in LyracistDbEditor).");
+                Lyracist.Shared.Globals.LogInfo("Lyracist", $"Metadata scan complete. {unknownArtistCount:N0} track(s) remain with 'Unknown Artist' (flagged as Needs Repair in LyracistDbEditor).");
             }
         }
 
@@ -658,18 +736,22 @@ namespace Lyracist.Data.Services
                 }
             }
 
-            // 4. Mark Tags as completed with local genre or 'none' only if artist is resolved, 
-            // so unresolved Unknown Artists remain eligible for future metadata extraction.
+            // 4. Mark Tags as completed with local genre or 'none'.
+            // If the artist could still not be resolved (remains Unknown Artist or blank),
+            // flag NeedsRepair = true so subsequent scans skip re-probing this unresolvable file
+            // until repaired or re-probed from LyracistDbEditor.
             if (string.IsNullOrEmpty(song.Tags))
             {
-                if (song.Artist != UnknownArtist && !string.IsNullOrEmpty(song.Artist))
-                {
-                    song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
-                }
-                else if (!string.IsNullOrWhiteSpace(song.Genre))
-                {
-                    song.Tags = song.Genre;
-                }
+                song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
+            }
+
+            if (song.Artist == UnknownArtist || string.IsNullOrEmpty(song.Artist))
+            {
+                song.NeedsRepair = true;
+            }
+            else
+            {
+                song.NeedsRepair = false;
             }
         }
 

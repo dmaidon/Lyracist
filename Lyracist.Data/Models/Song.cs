@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:44:00 -> Add MixInMs and MixOutMs cue points
+// Edited on Oct 11, 2026 @ 10:05:00 -> Add NeedsRepair flag for unresolved metadata tracking
 using System;
 using System.Collections.Generic;
 
@@ -25,6 +25,7 @@ namespace Lyracist.Data.Models
         public string? Quality { get; set; }
         public int? MixInMs { get; set; }
         public int? MixOutMs { get; set; }
+        public bool NeedsRepair { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public DateTime? LastPlayed { get; set; }
         public int PlayCount { get; set; }

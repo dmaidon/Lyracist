@@ -1,9 +1,33 @@
-<!-- Edited on Oct 8, 2026 @ 13:30:00 -> Dynamic SongPathResolver across drives, user selection priority in Play, and missing file warnings -->
-Last Edit: Oct 8, 2026 - Dynamic SongPathResolver & Playback Selection Priority
+<!-- Edited on Oct 12, 2026 @ 12:00:00 -> Document time zone refresh, Special flag fixes -->
+Last Edit: Oct 12, 2026 - Time Zone Refresh & Special Singer Flag Fixes
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] - 2026-10-12
+
+### Fixed
+- **Time zone changes ignored until restart (`KSRotation/App.xaml.cs`, `Lyracist/App/App.xaml.cs`)**: .NET caches the local time zone on first use, so changing the Windows time zone mid-session left `DateTime.Now` (on-screen clock, timestamps, reports) on the old zone. Both apps now call `TimeZoneInfo.ClearCachedData()` on `SystemEvents.TimeChanged`.
+- **Sticky Special flag (`Shared/RotationHelpers.cs`)**: A Special (one-time) singer now has `IsSpecial` cleared when their performance ends, so reactivating or re-adding the same name no longer leaves them flagged Special. Regression assertion added to `RotationHelpersSingerTests`.
+- **Purple Velvet Curtain showed "Special" on every upcoming singer (`KSRotation/ViewModels/DisplayViewModel.cs`)**: The up-next items had no `IsSpecial` property, so the badge binding failed and WPF left it visible. `NextSingerDisplay` now carries each singer's real `IsSpecial` value.
+
+## [Unreleased] - 2026-10-11
+
+### Added
+- **Settings Page 4-Column Balanced Layout & Scroll Elimination (`Lyracist/Views/Pages/SettingsPage.xaml`)**:
+  - **Balanced 4-Column Distribution**: Rebalanced GroupBoxes across 4 columns in `Audio & Engine`, `Library & Ratings`, `Display`, and `Presentation & DJ` tabs so controls fit cleanly on screen without vertical scrolling on standard laptop and 1080p monitors.
+  - **Audio & Engine**: Distributed GroupBoxes into dedicated columns (Col 0: `Audio & Equalizers`, Col 2: `Performance Recording`, Col 4: `Decoders & Layout`, Col 6: `APIs & Logins`), eliminating the single-column vertical pileup in Column 0.
+  - **Library & Ratings**: Distributed GroupBoxes across columns (Col 0: `Music Library`, Col 2: `Tablet Server` & `KSRotation Sync`, Col 4: `Performer Ratings`, Col 6: `Test Mode`), ensuring music library maintenance and tablet server settings are immediately visible without scrolling.
+  - **Display**: Moved `Lyrics Screen Audio Visualizer` and `New Performer Welcome Screen` to Column 4, leaving `Monitors & Screen Assignments` dedicated in Column 0, and removed test background styling.
+  - **Presentation & DJ**: Moved `Auto-Advance Countdown` to Column 4, leaving `DJ & Venue Management` in Column 2 and `Theme & Appearance` in Column 0.
+- **Library Scan Performance, Standalone `noartist.db` & Unresolved Track Skipping (`Lyracist.Data/Services/NoArtistStore.cs`, `Lyracist.Data/Models/UnresolvedTrack.cs`, `Lyracist.Data/Services/ScanningService.cs`, `Lyracist.Data/Models/Song.cs`, `Lyracist.Data/Migrations/*`, `LyracistDbEditor/MainViewModel.cs`, `LyracistDbEditor/MainWindow.xaml`, `Lyracist.Tests/ScanningServiceTests.cs`)**:
+  - **Standalone `noartist.db` Persistent Database (`NoArtistStore.cs`, `UnresolvedTrack.cs`)**: Created an isolated SQLite database (`Data/noartist.db`) dedicated to retaining tracks identified as missing artist metadata. If the primary `lyracist.db` is ever cleared or deleted, `noartist.db` preserves the list of unresolvable tracks and their cached durations/types, allowing cold scans to instantly populate them into the new database without re-executing TagLib or FFprobe disk probing.
+  - **Fast-Path Rescan Optimization**: In `ScanningService.ProcessBatchAsync`, cataloged files with resolved metadata or flagged as `NeedsRepair` now skip expensive companion `.cdg` disk existence checks, regular expression evaluation, and ZIP archive inspection. When adding a handful of tracks to an existing library of tens of thousands of songs, the directory scan processes existing tracks in memory within seconds without redundant disk I/O.
+  - **`Song.NeedsRepair` Unresolved State Tracking**: Added `NeedsRepair` boolean column to the `Songs` database table. When background in-memory metadata probing (`ProbeSongMetadataAsync`) finishes checking local audio tags and FFprobe without finding a valid artist, it marks the track `NeedsRepair = true`, logs it to `noartist.db`, and records default tags (`Tags = "none"`).
+  - **Zero-Iteration Re-probe Skipping**: `ProbeMissingMetadataAsync` now filters out tracks with `!s.NeedsRepair`, preventing library rescans from repeatedly re-opening, reading, and failing on the same unresolvable or tagless files across every subsequent scan.
+  - **LyracistDbEditor Integration**: Updated `LyracistDbEditor` search filtering, stats, and manual editing to track `NeedsRepair`. Saving an updated artist clears the flag (`NeedsRepair = false`) and removes the track from `noartist.db`. The Slow Metadata Extractor automatically removes resolved tracks from `noartist.db` upon successful lookup.
+  - **Database Migration**: Added `20261011141500_AddNeedsRepairToSong` migration which automatically sets `NeedsRepair = true` on existing cataloged tracks with unknown artists and durations, delivering instant rescan speedups on existing libraries.
 
 ## [Unreleased] - 2026-10-08
 

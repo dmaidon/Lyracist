@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:51:00 -> Fix xUnit2029 warning using Assert.DoesNotContain
+// Edited on Oct 11, 2026 @ 13:35:00 -> Add tests for standalone noartist.db persistence across scans
 using System;
 using System.IO;
 using System.Linq;
@@ -26,6 +26,8 @@ public class ScanningServiceTests : IDisposable
         Directory.CreateDirectory(_tempDir);
         // A path that never exists, standing in for an unplugged external drive or share.
         _ghostDir = Path.Combine(Path.GetTempPath(), "ScanTestGhost_" + id);
+
+        NoArtistStore.OverrideDbPath = Path.Combine(_tempDir, "test_noartist.db");
     }
 
     public void Dispose()
@@ -45,6 +47,7 @@ public class ScanningServiceTests : IDisposable
             }
         }
         catch { }
+        NoArtistStore.OverrideDbPath = null;
         try { Directory.Delete(_tempDir, true); } catch { }
     }
 
@@ -222,4 +225,112 @@ public class ScanningServiceTests : IDisposable
 
         Assert.Equal("Toto", (await LoadAsync(path)).Artist);
     }
+
+    [Fact]
+    public async Task ProbeMissingMetadata_SetsNeedsRepair_WhenArtistCannotBeResolved()
+    {
+        string path = Path.Combine(_tempDir, "MysterySong.mp3");
+        File.WriteAllBytes(path, [0, 1, 2]);
+
+        await ScanAsync(_tempDir);
+
+        using (var context = new LyracistDbContext())
+        {
+            var scanner = new ScanningService(context);
+            await scanner.ProbeMissingMetadataAsync(null, TestContext.Current.CancellationToken);
+        }
+
+        var loaded = await LoadAsync(path);
+        Assert.True(loaded.NeedsRepair);
+        Assert.Equal("Unknown Artist", loaded.Artist);
+        Assert.Equal("none", loaded.Tags);
+    }
+
+    [Fact]
+    public async Task ProbeMissingMetadata_SkipsTracksFlaggedAsNeedsRepair()
+    {
+        string path = Path.Combine(_tempDir, "AlreadyFlagged.mp3");
+        File.WriteAllBytes(path, [0, 1, 2]);
+
+        using (var context = new LyracistDbContext())
+        {
+            context.Songs.Add(new Song
+            {
+                Title = "Already Flagged",
+                Artist = "Unknown Artist",
+                FilePath = path,
+                NeedsRepair = true,
+                Duration = 0,
+                Tags = ""
+            });
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var context = new LyracistDbContext())
+        {
+            var scanner = new ScanningService(context);
+            await scanner.ProbeMissingMetadataAsync(null, TestContext.Current.CancellationToken);
+        }
+
+        var loaded = await LoadAsync(path);
+        Assert.Equal(0, loaded.Duration);
+        Assert.True(loaded.NeedsRepair);
+    }
+
+    [Fact]
+    public async Task ProbeMissingMetadata_PersistsUnresolvedTracksToNoArtistStore()
+    {
+        string path = Path.Combine(_tempDir, "MysteryTrack.mp3");
+        File.WriteAllBytes(path, [0, 1, 2]);
+
+        await ScanAsync(_tempDir);
+
+        using (var context = new LyracistDbContext())
+        {
+            var scanner = new ScanningService(context);
+            await scanner.ProbeMissingMetadataAsync(null, TestContext.Current.CancellationToken);
+        }
+
+        Assert.True(await NoArtistStore.ContainsAsync(path, TestContext.Current.CancellationToken));
+        var all = await NoArtistStore.GetAllAsync(TestContext.Current.CancellationToken);
+        Assert.True(all.ContainsKey(path));
+        Assert.Equal("MysteryTrack", all[path].Title);
+    }
+
+    [Fact]
+    public async Task Scan_UsesNoArtistStore_DuringColdScan_WhenMainDbWasDeleted()
+    {
+        string path = Path.Combine(_tempDir, "MysteryTrackWithNoArtist.mp3");
+        File.WriteAllBytes(path, [0, 1, 2]);
+
+        // Pre-populate noartist.db (as if this track was probed in an earlier database that was cleared)
+        await NoArtistStore.UpsertAsync(new UnresolvedTrack
+        {
+            FilePath = path,
+            Title = "Mystery Track",
+            Duration = 215.5,
+            KaraokeType = "MP3G",
+            IsKaraoke = true,
+            DateFlagged = DateTime.UtcNow
+        }, TestContext.Current.CancellationToken);
+
+        // Verify lyracist.db does NOT have this song yet (cold scan after db cleared)
+        using (var check = new LyracistDbContext())
+        {
+            Assert.False(await check.Songs.AnyAsync(s => s.FilePath == path, TestContext.Current.CancellationToken));
+        }
+
+        // Perform scan
+        await ScanAsync(_tempDir);
+
+        // The song should be loaded straight into lyracist.db using cached info from noartist.db
+        var loaded = await LoadAsync(path);
+        Assert.Equal("Mystery Track", loaded.Title);
+        Assert.Equal("Unknown Artist", loaded.Artist);
+        Assert.Equal(215.5, loaded.Duration);
+        Assert.Equal("MP3G", loaded.KaraokeType);
+        Assert.True(loaded.IsKaraoke);
+        Assert.True(loaded.NeedsRepair);
+    }
 }
+
