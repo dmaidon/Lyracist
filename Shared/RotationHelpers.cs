@@ -635,6 +635,9 @@ namespace Lyracist.Shared
                 }
                 finishedEntry.IsInactive = true;
                 finishedEntry.IsCurrent = false;
+                // Special is a one-time status; clear it so the singer isn't still flagged Special
+                // if they are later reactivated or re-added as a regular singer.
+                finishedEntry.IsSpecial = false;
             }
 
             if (!floatCurrentToTop)

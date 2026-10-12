@@ -99,6 +99,7 @@ namespace KSRotation.ViewModels
         {
             public string Text { get; init; }
             public bool IsRotationStart { get; init; }
+            public bool IsSpecial { get; init; }
             public string SingerName { get; init; }
             public string Song { get; init; }
             public string SongTitle => Song;
@@ -106,10 +107,11 @@ namespace KSRotation.ViewModels
             public bool HasSong => !string.IsNullOrWhiteSpace(Song);
             public bool HasWaitTime => !string.IsNullOrWhiteSpace(WaitTime);
 
-            public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "")
+            public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "", bool isSpecial = false)
             {
                 Text = text;
                 IsRotationStart = isRotationStart;
+                IsSpecial = isSpecial;
                 SingerName = string.IsNullOrWhiteSpace(singerName) ? text : singerName;
                 Song = song;
                 WaitTime = waitTime;
@@ -425,14 +427,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
-                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime));
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial));
                     }
                 }
             }
@@ -448,14 +450,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
-                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime));
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial));
                     }
                 }
             }

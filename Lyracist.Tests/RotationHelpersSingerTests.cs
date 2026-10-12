@@ -809,6 +809,9 @@ public class RotationHelpersSingerTests
         Assert.True(dave.IsInactive);
         Assert.False(dave.IsCurrent);
 
+        // One-time Special status is cleared so a later reactivation isn't still Special
+        Assert.False(dave.IsSpecial);
+
         // Rotation resumes with the preserved Next singer (Bob)
         Assert.True(bob.IsCurrent);
         Assert.False(bob.IsNext);
