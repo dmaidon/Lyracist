@@ -627,6 +627,21 @@ namespace Lyracist.Shared
                 }
             }
 
+            // Finishing someone who is NOT the current performer (e.g. a displaced singer marked done after a
+            // Special was promoted over them) must not steal the spotlight: whoever is currently performing stays current.
+            if (!finishedEntry.IsCurrent)
+            {
+                for (int i = 0; i < singers.Count; i++)
+                {
+                    T s = singers[i];
+                    if (s != finishedEntry && s.IsCurrent && !s.IsInactive && !s.IsPaused)
+                    {
+                        designatedNext = s;
+                        break;
+                    }
+                }
+            }
+
             if (finishedEntry.IsSpecial)
             {
                 if (finishedEntry.IsRotationStart)

@@ -786,6 +786,29 @@ public class RotationHelpersSingerTests
         Assert.False(s3.IsSkipped);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AdvanceRotationAfterFinished_DisplacedSingerFinishedAfterSpecialPromoted_KeepsSpecialCurrent(bool floatToTop)
+    {
+        // #1 finished singing but wasn't marked done; a Special singer was added (taking over as current),
+        // then #1 is marked finished. The Special singer must stay current and #2 must stay Next.
+        var one = new Singer { Name = "One", IsCurrent = true, IsRotationStart = true };
+        var two = Active("Two");
+        var special = Special("Special");
+        var singers = new List<Singer> { one, two };
+
+        RotationHelpers.InsertNewSinger(singers, special);
+        Assert.True(special.IsCurrent);
+        Assert.True(one.IsNext);
+
+        RotationHelpers.AdvanceRotationAfterFinished(singers, one, floatCurrentToTop: floatToTop);
+
+        Assert.True(special.IsCurrent);
+        Assert.Same(special, singers[0]);
+        Assert.False(two.IsCurrent);
+    }
+
     [Fact]
     public void AdvanceRotationAfterFinished_SpecialSinger_BecomesInactiveAndResumesPreservedNext()
     {
