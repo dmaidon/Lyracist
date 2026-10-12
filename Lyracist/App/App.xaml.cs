@@ -240,6 +240,10 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        // .NET caches the local time zone at first use; without this a mid-session
+        // Windows time zone change is ignored until the app is restarted.
+        Microsoft.Win32.SystemEvents.TimeChanged += (_, _) => TimeZoneInfo.ClearCachedData();
+
         // Subscribe to theme changes to apply Lyracist custom brushes
         Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
         {

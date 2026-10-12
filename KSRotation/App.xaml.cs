@@ -20,6 +20,10 @@ namespace KSRotation
                 return;
             }
 
+            // .NET caches the local time zone at first use; without this a mid-session
+            // Windows time zone change is ignored until the app is restarted.
+            Microsoft.Win32.SystemEvents.TimeChanged += (_, _) => TimeZoneInfo.ClearCachedData();
+
             TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             LoggerService.LogAppStart();
