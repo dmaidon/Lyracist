@@ -3792,13 +3792,20 @@ namespace KSRotation.ViewModels
             _saveDebounceTimer.Stop();
             _dbDebounceTimer.Stop();
             _jsonCacheDebounceTimer.Stop();
+            // Persist the night's data first, and isolate each step: one failure on exit must not skip the saves.
+            RunShutdownStep(nameof(SaveDatabaseNow), SaveDatabaseNow);
+            RunShutdownStep(nameof(SaveSettingsNow), SaveSettingsNow);
             // Ensure the cache reflects any edits still pending in the debounce window before exit.
-            RebuildRotationJsonCacheNow();
-            _requestServer?.Stop();
-            SaveSettingsNow();
-            SaveDatabaseNow();
-            _displayWindowService.Shutdown();
-            _djBannerWindowService.Shutdown();
+            RunShutdownStep(nameof(RebuildRotationJsonCacheNow), RebuildRotationJsonCacheNow);
+            RunShutdownStep("RequestServer.Stop", () => _requestServer?.Stop());
+            RunShutdownStep("DisplayWindowService.Shutdown", _displayWindowService.Shutdown);
+            RunShutdownStep("DjBannerWindowService.Shutdown", _djBannerWindowService.Shutdown);
+        }
+
+        private static void RunShutdownStep(string name, Action step)
+        {
+            try { step(); }
+            catch (Exception ex) { LoggerService.LogError($"MainViewModel.Shutdown.{name}", ex); }
         }
 
         [RelayCommand]

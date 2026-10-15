@@ -188,6 +188,8 @@ namespace KSRotation.Services
                 {
                     if (token.IsCancellationRequested) break;
                     LoggerService.LogError("PatronRequestServer.AcceptConnectionsAsync", ex);
+                    // Back off so a persistent socket fault (e.g. Wi-Fi drop) can't spin the CPU and flood the log.
+                    try { await Task.Delay(250, token); } catch (OperationCanceledException) { break; }
                 }
             }
         }

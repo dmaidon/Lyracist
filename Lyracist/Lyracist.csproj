@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.11.584</AssemblyVersion>
-    <FileVersion>26.10.11.584</FileVersion>
+    <AssemblyVersion>26.10.12.585</AssemblyVersion>
+    <FileVersion>26.10.12.585</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->

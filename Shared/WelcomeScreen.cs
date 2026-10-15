@@ -792,6 +792,13 @@ public static class WelcomeScreenDesigns
                 Opacity = 0.32,
             };
             rays.Children.Add(wedge);
+
+            // Flash: alternating wedges strobe in anti-phase to catch the room's attention.
+            // ~1.4 flashes/sec per wedge, kept well under the 3 Hz photosensitivity guideline.
+            bool even = i % 2 == 0;
+            visual.Animate(wedge, UIElement.OpacityProperty,
+                new DoubleAnimation(even ? 0.12 : 0.7, even ? 0.7 : 0.12, TimeSpan.FromMilliseconds(350))
+                { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever });
         }
         canvas.Children.Add(rays);
         visual.Animate(spin, RotateTransform.AngleProperty,
