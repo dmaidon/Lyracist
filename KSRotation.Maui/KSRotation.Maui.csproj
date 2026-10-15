@@ -136,12 +136,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.13" />
+		<PackageReference Include="System.Formats.Nrbf" Version="10.0.13" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
+		<PackageReference Include="Microsoft.Maui.Controls.Build.Tasks" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Resizetizer" Version="10.0.110" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="QRCoder" Version="1.8.0" />
-		<PackageReference Include="System.Resources.Extensions" Version="10.0.11" />
-		<PackageReference Include="PDFsharp" Version="6.2.4" />
+		<PackageReference Include="QRCoder" Version="1.8.1" />
+		<PackageReference Include="System.Resources.Extensions" Version="10.0.13" />
+		<PackageReference Include="PDFsharp" Version="6.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>

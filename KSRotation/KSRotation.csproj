@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.12.751</AssemblyVersion>
-    <FileVersion>26.10.12.751</FileVersion>
+    <AssemblyVersion>26.10.15.754</AssemblyVersion>
+    <FileVersion>26.10.15.754</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -66,8 +66,8 @@
     <PackageReference Include="FlashCap" Version="1.12.0" />
     <PackageReference Include="NAudio.Wasapi" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
-    <PackageReference Include="PDFsharp" Version="6.2.4" />
-    <PackageReference Include="QRCoder" Version="1.8.0" />
+    <PackageReference Include="PDFsharp" Version="6.5.0" />
+    <PackageReference Include="QRCoder" Version="1.8.1" />
   </ItemGroup>
 
   <ItemGroup>
