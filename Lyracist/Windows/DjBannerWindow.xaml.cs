@@ -19,8 +19,32 @@ public partial class DjBannerWindow : Window
         _vm = vm;
         DataContext = vm;
         _vm.PropertyChanged += Vm_PropertyChanged;
+        IsVisibleChanged += OnVisibleChanged;
         UpdateBannerView();
     }
+
+    // A hidden window must not keep decoding and looping an MP4 banner in the background.
+    private void OnVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (IsVisible)
+        {
+            _shownPath = null;
+            _shownImage = null;
+            UpdateBannerView();
+        }
+        else
+        {
+            BannerVideo.Stop();
+            BannerVideo.Source = null;
+            _shownPath = null;
+            _shownImage = null;
+        }
+    }
+
+    // What is currently displayed, so the two PropertyChanged events per banner change (image + path)
+    // and repeated sets of the same path don't re-assign sources or restart a video.
+    private string? _shownPath;
+    private System.Windows.Media.ImageSource? _shownImage;
 
     private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -41,6 +65,10 @@ public partial class DjBannerWindow : Window
     private void UpdateBannerView()
     {
         string? path = _vm.BannerPath;
+        if (path == _shownPath && ReferenceEquals(_vm.BannerImage, _shownImage)) return;
+        _shownPath = path;
+        _shownImage = _vm.BannerImage;
+
         if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
         {
             BannerImage.Source = null;

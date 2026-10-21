@@ -28,7 +28,7 @@ public static class DjBannerFileManager
     {
         string folder = Path.Combine(eventBannersDir, GeneratedFolder);
         Directory.CreateDirectory(folder);
-        string path = Path.Combine(folder, $"Announcement-{DateTime.UtcNow:yyyyMMddHHmmssfff}.png");
+        string path = Path.Combine(folder, $"Announcement-{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid().ToString("N")[..6]}.png");
         CreateDynamicAnnouncementBannerPng(path, announcementText);
 
         foreach (string old in Directory.GetFiles(folder, "Announcement-*.png"))

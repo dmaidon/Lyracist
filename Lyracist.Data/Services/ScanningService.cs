@@ -20,6 +20,10 @@ namespace Lyracist.Data.Services
         private const string UnknownArtist = "Unknown Artist";
         private readonly LyracistDbContext _context = context;
 
+        // Built once: the filename parser runs per file, so constructing these per call was wasted work on big scans.
+        private static readonly Regex SunflyPattern = new(@"^(SF\s*\d+)\s*[-_]?\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex KvCodePattern = new(@"^KV\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         // ==========================================
         // FILENAME METADATA PARSER
         // ==========================================
@@ -74,7 +78,7 @@ namespace Lyracist.Data.Services
             }
 
             // 2. Sunfly Pattern Matching
-            var sfRegex = new Regex(@"^(SF\s*\d+)\s*[-_]?\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase);
+            var sfRegex = SunflyPattern;
             var sfMatch = sfRegex.Match(filename);
             if (sfMatch.Success)
             {
@@ -112,7 +116,7 @@ namespace Lyracist.Data.Services
                 cleaned = Regex.Replace(cleaned, @"\s*[-_(\[]\s*Karaoke Version\s*[\)\]]?", "", RegexOptions.IgnoreCase);
             }
 
-            var kvCodeRegex = new Regex(@"^KV\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase);
+            var kvCodeRegex = KvCodePattern;
             var kvMatch = kvCodeRegex.Match(cleaned);
             if (kvMatch.Success)
             {

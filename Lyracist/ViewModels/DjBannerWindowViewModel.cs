@@ -60,28 +60,46 @@ public partial class DjBannerWindowViewModel : ObservableObject
     // connected monitor is smaller than that, decoding at 4K would just waste memory for no visible
     // gain. Also never decodes larger than the source image's own native size (would upscale-decode
     // and waste memory on smaller user-uploaded banners).
-    private static int GetDecodeTargetWidth(string path)
-    {
-        const int DesignMaxWidth = 3840; // 4K UHD ceiling — matches the resolution DJ banners are generated at
+    // Monitor enumeration is a P/Invoke walk; monitors rarely change, so reuse the result briefly
+    // instead of repeating it on every banner switch.
+    private static int _cachedMonitorCap;
+    private static DateTime _cachedMonitorCapAt;
 
-        int monitorCap = DesignMaxWidth;
+    private static int GetMonitorCap(int designMaxWidth)
+    {
+        if (_cachedMonitorCap > 0 && DateTime.UtcNow - _cachedMonitorCapAt < TimeSpan.FromSeconds(30))
+        {
+            return _cachedMonitorCap;
+        }
+
+        int monitorCap = designMaxWidth;
         try
         {
-            var monitors = Lyracist.Shared.MonitorEnumerator.GetMonitors();
             int largestMonitorWidth = 0;
-            foreach (var m in monitors)
+            foreach (var m in Lyracist.Shared.MonitorEnumerator.GetMonitors())
             {
                 if (m.Width > largestMonitorWidth) largestMonitorWidth = m.Width;
             }
             if (largestMonitorWidth > 0)
             {
-                monitorCap = Math.Min(DesignMaxWidth, largestMonitorWidth);
+                monitorCap = Math.Min(designMaxWidth, largestMonitorWidth);
             }
         }
         catch
         {
             // Fall back to the 4K design ceiling if monitor enumeration fails
         }
+
+        _cachedMonitorCap = monitorCap;
+        _cachedMonitorCapAt = DateTime.UtcNow;
+        return monitorCap;
+    }
+
+    private static int GetDecodeTargetWidth(string path)
+    {
+        const int DesignMaxWidth = 3840; // 4K UHD ceiling — matches the resolution DJ banners are generated at
+
+        int monitorCap = GetMonitorCap(DesignMaxWidth);
 
         try
         {

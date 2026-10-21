@@ -1042,7 +1042,7 @@ namespace KSRotation.ViewModels
                 int localPort = _activeServerPort > 0 ? _activeServerPort : ServerPort;
                 string localPin = DjPin ?? string.Empty;
 
-                string url = $"http://{host.Trim()}:{port}/api/session/handoff?pin={Uri.EscapeDataString(pin ?? string.Empty)}";
+                string url = $"http://{host.Trim()}:{port}/api/session/handoff";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1079,7 +1079,7 @@ namespace KSRotation.ViewModels
                 // device never actually took over the session.
                 try
                 {
-                    string ackUrl = $"http://{host.Trim()}:{port}/api/session/handoff/ack?pin={Uri.EscapeDataString(pin ?? string.Empty)}&hostPort={localPort}&djPin={Uri.EscapeDataString(localPin)}";
+                    string ackUrl = $"http://{host.Trim()}:{port}/api/session/handoff/ack?hostPort={localPort}&djPin={Uri.EscapeDataString(localPin)}";
                     await client.GetAsync(ackUrl);
                 }
                 catch (Exception ackEx)

@@ -778,16 +778,22 @@ public partial class KaraokeViewModel : BaseViewModel
 
         try
         {
-            var results = (await _libraryService.SearchAsync(query, isMusic: false)).ToList();
-            var musicResults = (await _libraryService.SearchAsync(query, isMusic: true)).ToList();
+            // SQLite's "async" API runs synchronously on the calling thread, so push both queries to the
+            // pool and run them concurrently; each opens its own DbContext.
+            var karaokeTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: false)).ToList());
+            var musicTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: true)).ToList());
+            await Task.WhenAll(karaokeTask, musicTask);
 
             // Discard results if a newer search has since been issued.
             if (myToken != _searchRequestToken) return;
 
-            FilteredSongs = new ObservableCollection<KaraokeSong>(results);
-            FilteredMusic = new ObservableCollection<KaraokeSong>(musicResults);
+            FilteredSongs = new ObservableCollection<KaraokeSong>(karaokeTask.Result);
+            FilteredMusic = new ObservableCollection<KaraokeSong>(musicTask.Result);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Refreshing filtered song list failed", ex);
+        }
     }
 
     private void RefreshPendingRequestIndicators()
