@@ -1,9 +1,15 @@
-<!-- Edited on Oct 12, 2026 @ 12:00:00 -> Document time zone refresh, Special flag fixes -->
-Last Edit: Oct 12, 2026 - Time Zone Refresh & Special Singer Flag Fixes
+<!-- Edited on Oct 21, 2026 @ 06:45:00 -> Update System.Security.Cryptography.Pkcs to 10.0.13, bump assembly versions -->
+Last Edit: Oct 21, 2026 - System.Security.Cryptography.Pkcs Upgrade & Solution Assembly Version Bumps
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] - 2026-10-21
+
+### Changed
+- **System.Security.Cryptography.Pkcs Upgrade (`KSRotation.Maui/KSRotation.Maui.csproj`, `Lyracist.Data/Lyracist.Data.csproj`)**: Upgraded package reference from version `8.0.2` to `10.0.13` to align with the .NET 10 target framework and Microsoft Extensions package ecosystem.
+- **Solution Assembly Version Bumps**: Incremented build version numbers across all solution projects and test suites (`KSRotation`, `KSRotation.Maui`, `KSRotation.Tests`, `KnockoutTrivia`, `KnockoutTrivia.Tests`, `Lyracist`, `Lyracist.Data`, `Lyracist.Tests`, `Lyracist.Trivia`, `Lyracist.Trivia.Core`, `Lyracist.Trivia.Tests`, `LyracistDbEditor`, `LyracistKeyGen`, `ScaryokeWheel`, `TriviaDbCreator`).
 
 ## [Unreleased] - 2026-10-12
 

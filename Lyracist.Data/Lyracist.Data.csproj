@@ -7,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.10.15.322</AssemblyVersion>
-    <FileVersion>26.10.15.322</FileVersion>
+    <AssemblyVersion>26.10.15.323</AssemblyVersion>
+    <FileVersion>26.10.15.323</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
@@ -26,7 +26,7 @@
     </PackageReference>
     <PackageReference Include="PDFsharp" Version="6.5.0" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
