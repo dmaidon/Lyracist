@@ -172,6 +172,8 @@ namespace KSRotation.Services
                         continue;
                     }
 
+                    // No token on Task.Run: a cancelled token would stop the delegate from ever starting,
+                    // leaking the limiter slot and the client. HandleClientAsync has its own read timeout.
                     _ = Task.Run(async () =>
                     {
                         try
@@ -182,7 +184,7 @@ namespace KSRotation.Services
                         {
                             _connectionLimiter.Release();
                         }
-                    }, token);
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -233,7 +235,8 @@ namespace KSRotation.Services
                         string query = rawPath[(qIdx + 1)..];
                         foreach (string param in query.Split('&'))
                         {
-                            string[] kv = param.Split('=');
+                            // Split on the first '=' only so values containing '=' (e.g. base64 padding) survive.
+                            string[] kv = param.Split('=', 2);
                             if (kv.Length == 2)
                             {
                                 string decodedKey = WebUtility.UrlDecode(kv[0]);

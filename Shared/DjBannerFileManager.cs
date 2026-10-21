@@ -86,7 +86,8 @@ public static class DjBannerFileManager
             for (int i = 0; i < standardFiles.Length; i++)
             {
                 string fullPath = Path.Combine(directory, standardFiles[i]);
-                if (!File.Exists(fullPath))
+                // A 0-byte file is a leftover from an earlier failed render, not a real banner.
+                if (!File.Exists(fullPath) || new FileInfo(fullPath).Length == 0)
                 {
                     try
                     {
@@ -109,10 +110,14 @@ public static class DjBannerFileManager
                     }
                     catch
                     {
-                        // Fallback to empty file if rendering unavailable or contention occurs
+                        // Rendering failed: remove any partial/empty file so the next call retries instead of
+                        // treating a 0-byte PNG as an existing (blank) banner forever.
                         try
                         {
-                            File.WriteAllBytes(fullPath, []);
+                            if (File.Exists(fullPath) && new FileInfo(fullPath).Length == 0)
+                            {
+                                File.Delete(fullPath);
+                            }
                         }
                         catch
                         {

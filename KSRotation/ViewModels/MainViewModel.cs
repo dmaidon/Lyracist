@@ -3521,15 +3521,20 @@ namespace KSRotation.ViewModels
 
         private void RefreshAvailableDjBanners()
         {
+            // Clearing a collection bound to a ComboBox pushes an empty selection back into these
+            // properties, so remember the real choices first and restore them afterwards.
+            string previousDjBannerPath = SelectedDjBannerPath;
+            string previousJumbotronPath = SelectedJumbotronBannerPath;
+
             AvailableDjBanners.Clear();
             foreach (var item in DjBannerFileManager.ScanBanners(Globals.DjBannersDir))
             {
                 AvailableDjBanners.Add(item);
             }
 
-            if (!string.IsNullOrEmpty(SelectedDjBannerPath) && AvailableDjBanners.Any(b => b.FullPath == SelectedDjBannerPath))
+            if (!string.IsNullOrEmpty(previousDjBannerPath) && AvailableDjBanners.Any(b => b.FullPath == previousDjBannerPath))
             {
-                // Keep it
+                SelectedDjBannerPath = previousDjBannerPath;
             }
             else
             {
@@ -3545,10 +3550,9 @@ namespace KSRotation.ViewModels
 
             // Unlike SelectedDjBannerPath, an empty Jumbotron selection is a valid, deliberate
             // "None" choice - only clear it if it pointed at a banner that no longer exists.
-            if (!string.IsNullOrEmpty(SelectedJumbotronBannerPath) && !AvailableDjBanners.Any(b => b.FullPath == SelectedJumbotronBannerPath))
-            {
-                SelectedJumbotronBannerPath = string.Empty;
-            }
+            SelectedJumbotronBannerPath = !string.IsNullOrEmpty(previousJumbotronPath) && AvailableDjBanners.Any(b => b.FullPath == previousJumbotronPath)
+                ? previousJumbotronPath
+                : string.Empty;
         }
 
         [RelayCommand]

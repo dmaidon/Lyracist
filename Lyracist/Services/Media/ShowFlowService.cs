@@ -206,40 +206,43 @@ public class ShowFlowService : IShowFlowService
     public void StartEndRotationMusic(string? startTrackPath = null) => _endRotation.Play(startTrackPath);
     public void StopEndRotationMusic() => _endRotation.Stop();
 
-    public async void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
+    public void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
     {
         if (string.IsNullOrWhiteSpace(filePath)) return;
 
-        _occasion.Stop();
-        _fillIn.Pause();
-
-        _occasion.BassDb = bassDb;
-        _occasion.TrebleDb = trebleDb;
-        _occasion.PreampDb = preampDb;
-
-        string finalPath = filePath;
-
-        if (filePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
-            filePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            try
+            _occasion.Stop();
+            _fillIn.Pause();
+
+            _occasion.BassDb = bassDb;
+            _occasion.TrebleDb = trebleDb;
+            _occasion.PreampDb = preampDb;
+
+            if (filePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                filePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+                _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
+                return;
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+
+            _occasion.LoadPlaylist(new[] { filePath });
+            _occasion.Play();
+
             _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
-            return;
         }
-
-
-
-        _occasion.LoadPlaylist(new[] { finalPath });
-        _occasion.Play();
-
-        _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to play occasion '{occasionName}'", ex);
+        }
     }
 
     public void StopOccasion()

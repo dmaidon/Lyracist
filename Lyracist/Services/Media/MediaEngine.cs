@@ -314,7 +314,13 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             }
             finally
             {
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                if (dispatcher == null || dispatcher.HasShutdownStarted)
+                {
+                    // App is closing: nothing left to render to, and throwing here would crash the pool thread.
+                    _isRenderingFrame = false;
+                }
+                else dispatcher.BeginInvoke(new Action(() =>
                 {
                     try
                     {

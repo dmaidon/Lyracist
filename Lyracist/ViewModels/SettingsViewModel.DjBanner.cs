@@ -22,45 +22,57 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private DjBannerItem? _selectedJumbotronBanner;
 
+    // While true, selection changes come from rebuilding the lists (a bound ComboBox pushes null on
+    // Clear) and must not be written to the display preferences or change the live banner.
+    private bool _isRefreshingDjBanners;
+
     private void RefreshDjBanners()
     {
-        DjBanners.Clear();
-        foreach (var item in DjBannerFileManager.ScanBanners(Globals.DjBannersDir))
-        {
-            DjBanners.Add(item);
-        }
-
         var prefs = _display.GetPreferences();
-        if (!string.IsNullOrEmpty(prefs.SelectedDjBannerPath))
-        {
-            SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
-        }
-        else
-        {
-            SelectedDjBanner = DjBanners.FirstOrDefault();
-        }
+        string savedPath = prefs.SelectedDjBannerPath ?? string.Empty;
+        string savedJumbotronPath = prefs.SelectedJumbotronBannerPath ?? string.Empty;
 
-        JumbotronBanners.Clear();
-        JumbotronBanners.Add(new DjBannerItem { FileName = "(None - show tip message)", FullPath = string.Empty });
-        foreach (var item in DjBanners)
+        _isRefreshingDjBanners = true;
+        try
         {
-            JumbotronBanners.Add(item);
-        }
+            DjBanners.Clear();
+            foreach (var item in DjBannerFileManager.ScanBanners(Globals.DjBannersDir))
+            {
+                DjBanners.Add(item);
+            }
 
-        // Unlike SelectedDjBanner, an empty Jumbotron selection is a valid, deliberate "None"
-        // choice - only re-resolve it from saved preferences here, never default to the first banner.
-        SelectedJumbotronBanner = string.IsNullOrEmpty(prefs.SelectedJumbotronBannerPath)
-            ? JumbotronBanners[0]
-            : (JumbotronBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedJumbotronBannerPath) ?? JumbotronBanners[0]);
+            SelectedDjBanner = !string.IsNullOrEmpty(savedPath)
+                ? DjBanners.FirstOrDefault(b => b.FullPath == savedPath)
+                : DjBanners.FirstOrDefault();
+
+            JumbotronBanners.Clear();
+            JumbotronBanners.Add(new DjBannerItem { FileName = "(None - show tip message)", FullPath = string.Empty });
+            foreach (var item in DjBanners)
+            {
+                JumbotronBanners.Add(item);
+            }
+
+            // Unlike SelectedDjBanner, an empty Jumbotron selection is a valid, deliberate "None"
+            // choice - only re-resolve it from saved preferences here, never default to the first banner.
+            SelectedJumbotronBanner = string.IsNullOrEmpty(savedJumbotronPath)
+                ? JumbotronBanners[0]
+                : (JumbotronBanners.FirstOrDefault(b => b.FullPath == savedJumbotronPath) ?? JumbotronBanners[0]);
+        }
+        finally
+        {
+            _isRefreshingDjBanners = false;
+        }
     }
 
     partial void OnSelectedDjBannerChanged(DjBannerItem? value)
     {
+        if (_isRefreshingDjBanners) return;
         _display.UpdateDjBanner(value?.FullPath ?? string.Empty);
     }
 
     partial void OnSelectedJumbotronBannerChanged(DjBannerItem? value)
     {
+        if (_isRefreshingDjBanners) return;
         _display.SetJumbotronBanner(value?.FullPath ?? string.Empty);
     }
 

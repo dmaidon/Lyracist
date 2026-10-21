@@ -60,10 +60,18 @@ public partial class OccasionSearchWindow : Window
 
         // 1. Local Search
         LocalSongs.Clear();
-        var localResults = _library.Search(query).ToList();
-        foreach (var song in localResults)
+        try
         {
-            LocalSongs.Add(song);
+            // DB query off the UI thread so typing/clicking stays responsive.
+            var localResults = await Task.Run(() => _library.Search(query).ToList());
+            foreach (var song in localResults)
+            {
+                LocalSongs.Add(song);
+            }
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Local Occasion Search failed", ex);
         }
         NoLocalText.Visibility = LocalSongs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

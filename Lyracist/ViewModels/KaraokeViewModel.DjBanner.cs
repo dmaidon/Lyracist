@@ -16,27 +16,38 @@ public partial class KaraokeViewModel
     [ObservableProperty]
     private Lyracist.Shared.DjBannerItem? _selectedDjBanner;
 
+    // While true, selection changes come from rebuilding the list (a bound ComboBox pushes null on
+    // Clear) and must not be written to the display preferences or change the live banner.
+    private bool _isRefreshingDjBanners;
+
     private void RefreshDjBanners()
     {
-        DjBanners.Clear();
-        foreach (var item in Lyracist.Shared.DjBannerFileManager.ScanBanners(Lyracist.Shared.Globals.DjBannersDir))
-        {
-            DjBanners.Add(item);
-        }
-
         var prefs = _displayService.GetPreferences();
-        if (!string.IsNullOrEmpty(prefs.SelectedDjBannerPath))
+        string savedPath = prefs.SelectedDjBannerPath ?? string.Empty;
+
+        _isRefreshingDjBanners = true;
+        try
         {
-            SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
+            DjBanners.Clear();
+            foreach (var item in Lyracist.Shared.DjBannerFileManager.ScanBanners(Lyracist.Shared.Globals.DjBannersDir))
+            {
+                DjBanners.Add(item);
+            }
+
+            SelectedDjBanner = !string.IsNullOrEmpty(savedPath)
+                ? DjBanners.FirstOrDefault(b => b.FullPath == savedPath)
+                : DjBanners.FirstOrDefault();
         }
-        else
+        finally
         {
-            SelectedDjBanner = DjBanners.FirstOrDefault();
+            _isRefreshingDjBanners = false;
         }
     }
 
     partial void OnSelectedDjBannerChanged(Lyracist.Shared.DjBannerItem? value)
     {
+        if (_isRefreshingDjBanners) return;
+
         if (value != null && !string.IsNullOrEmpty(value.FullPath))
         {
             if (ActiveSpecialEvent != "None")
