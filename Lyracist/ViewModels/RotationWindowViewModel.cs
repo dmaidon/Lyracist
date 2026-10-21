@@ -104,7 +104,11 @@ public partial class RotationWindowViewModel : BaseViewModel
         _toggleTimer = new System.Timers.Timer(10000); // Toggle between queue and leaderboard every 10s
         _toggleTimer.Elapsed += (s, e) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            // BeginInvoke (not Invoke): a blocked UI thread must not pile up pool threads over a long night,
+            // and Application.Current is null while the app shuts down - an exception here would crash the process.
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted) return;
+            dispatcher.BeginInvoke(() =>
             {
                 ShowLeaderboard = !ShowLeaderboard;
                 if (ShowLeaderboard)
