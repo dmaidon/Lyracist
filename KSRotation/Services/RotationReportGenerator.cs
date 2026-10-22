@@ -1,8 +1,6 @@
 // Edited on Aug 25, 2026 @ 06:39:00 -> Fix RCS1118 const variable in DrawSummary
 using KSRotation.Models;
-using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,21 +16,6 @@ namespace KSRotation.Services
     /// </summary>
     public static class RotationReportGenerator
     {
-        static RotationReportGenerator()
-        {
-            try
-            {
-                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-                {
-                    PdfSharp.Fonts.GlobalFontSettings.UseWindowsFontsUnderWindows = true;
-                }
-            }
-            catch
-            {
-                // Guard against multiple initialization attempts or platform errors
-            }
-        }
-
         private static string ReportDirectoryPath => AppPaths.ReportsDirectoryPath;
 
         /// <summary>A single singer's report line: their display name, completed performances (round-ordered),
@@ -148,11 +131,19 @@ namespace KSRotation.Services
             List<SongPerformance> history,
             string venueName)
         {
-            PdfDocument document = new();
-            document.Info.Title = $"Karaoke Rotation Report - {venueName}";
-            document.Info.Author = "Karaoke Singer Rotation";
+            Directory.CreateDirectory(ReportDirectoryPath);
+            string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            string filePath = Path.Combine(ReportDirectoryPath, fileName);
 
-            var layout = new PdfLayoutManager(document);
+            var metadata = new SKDocumentPdfMetadata
+            {
+                Title = $"Karaoke Rotation Report - {venueName}",
+                Author = "Karaoke Singer Rotation"
+            };
+
+            using var stream = File.Create(filePath);
+            using var document = SKDocument.CreatePdf(stream, metadata);
+            using var layout = new PdfLayoutManager(document);
             string date = DateTime.Now.ToString("dddd, MMMM d, yyyy", CultureInfo.CurrentCulture);
             string time = DateTime.Now.ToString("h:mm tt", CultureInfo.CurrentCulture);
             layout.DrawHeader("Karaoke Rotation Report", venueName, date, time);
@@ -204,10 +195,8 @@ namespace KSRotation.Services
                 totalMusicRequesters, totalMusicTracks
             );
 
-            Directory.CreateDirectory(ReportDirectoryPath);
-            string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-            string filePath = Path.Combine(ReportDirectoryPath, fileName);
-            document.Save(filePath);
+            layout.Finish();
+            document.Close();
             return filePath;
         }
 
@@ -232,54 +221,108 @@ namespace KSRotation.Services
             return text.Length <= maxLength ? text : $"{text.AsSpan(0, maxLength - 3)}...";
         }
 
-        private class PdfLayoutManager
+        private sealed class PdfLayoutManager : IDisposable
         {
-            private readonly PdfDocument _document;
-            private PdfPage _currentPage = null!;
-            private XGraphics _gfx = null!;
-            private double _yPos;
-            private readonly double _margin = 40;
-            private readonly double _pageWidth;
-            private readonly double _pageHeight;
+            private const float PageWidth = 612f;  // US Letter in points
+            private const float PageHeight = 792f;
 
-            private readonly XStringFormat _leftAlign = new() { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
+            private readonly SKDocument _document;
+            private SKCanvas _canvas = null!;
+            private bool _pageOpen;
+            private float _yPos;
+            private readonly float _margin = 40;
+            private readonly float _pageWidth = PageWidth;
+            private readonly float _pageHeight = PageHeight;
 
-            // Fonts are immutable and reused across every page/row; build them once instead of per-row.
-            private static readonly XFont TitleFont = new("Arial", 18, XFontStyleEx.Bold);
-            private static readonly XFont SectionFont = new("Arial", 14, XFontStyleEx.Bold);
-            private static readonly XFont MetaFont = new("Arial", 10, XFontStyleEx.Regular);
-            private static readonly XFont SingerFont = new("Arial", 11, XFontStyleEx.Bold);
-            private static readonly XFont SongFont = new("Arial", 9, XFontStyleEx.Regular);
-            private static readonly XFont SummaryFont = new("Arial", 10, XFontStyleEx.Bold);
+            // Typefaces, fonts and paints are reused across every page/row; build them once per report.
+            private readonly SKTypeface _boldTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold);
+            private readonly SKTypeface _regularTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal);
+            private readonly SKFont _titleFont;
+            private readonly SKFont _sectionFont;
+            private readonly SKFont _metaFont;
+            private readonly SKFont _singerFont;
+            private readonly SKFont _songFont;
+            private readonly SKFont _summaryFont;
 
-            public PdfLayoutManager(PdfDocument document)
+            private readonly SKPaint _darkSlateGray = new() { Color = SKColors.DarkSlateGray, IsAntialias = true };
+            private readonly SKPaint _dimGray = new() { Color = SKColors.DimGray, IsAntialias = true };
+            private readonly SKPaint _gray = new() { Color = SKColors.Gray, IsAntialias = true };
+            private readonly SKPaint _black = new() { Color = SKColors.Black, IsAntialias = true };
+            private readonly SKPaint _ghostWhiteFill = new() { Color = SKColors.GhostWhite, Style = SKPaintStyle.Fill };
+            private readonly SKPaint _darkGrayStroke = new() { Color = SKColors.DarkGray, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
+            private readonly SKPaint _lightGrayStroke = new() { Color = SKColors.LightGray, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
+
+            public PdfLayoutManager(SKDocument document)
             {
                 _document = document;
+                _titleFont = new SKFont(_boldTypeface, 18);
+                _sectionFont = new SKFont(_boldTypeface, 14);
+                _metaFont = new SKFont(_regularTypeface, 10);
+                _singerFont = new SKFont(_boldTypeface, 11);
+                _songFont = new SKFont(_regularTypeface, 9);
+                _summaryFont = new SKFont(_boldTypeface, 10);
                 AddNewPage();
-                _pageWidth = _currentPage.Width.Point;
-                _pageHeight = _currentPage.Height.Point;
             }
 
             public void AddNewPage()
             {
-                _currentPage = _document.AddPage();
-                _currentPage.Size = PageSize.Letter;
-                _gfx = XGraphics.FromPdfPage(_currentPage);
+                if (_pageOpen)
+                {
+                    _document.EndPage();
+                }
+
+                _canvas = _document.BeginPage(_pageWidth, _pageHeight);
+                _pageOpen = true;
                 _yPos = _margin;
+            }
+
+            public void Finish()
+            {
+                if (_pageOpen)
+                {
+                    _document.EndPage();
+                    _pageOpen = false;
+                }
+            }
+
+            public void Dispose()
+            {
+                _titleFont.Dispose();
+                _sectionFont.Dispose();
+                _metaFont.Dispose();
+                _singerFont.Dispose();
+                _songFont.Dispose();
+                _summaryFont.Dispose();
+                _boldTypeface.Dispose();
+                _regularTypeface.Dispose();
+                _darkSlateGray.Dispose();
+                _dimGray.Dispose();
+                _gray.Dispose();
+                _black.Dispose();
+                _ghostWhiteFill.Dispose();
+                _darkGrayStroke.Dispose();
+                _lightGrayStroke.Dispose();
+            }
+
+            // Draws text with its top edge at y (matching a top-aligned text layout). For right alignment, x is the right edge.
+            private void DrawText(string text, SKFont font, SKPaint paint, float x, float y, SKTextAlign align = SKTextAlign.Left)
+            {
+                _canvas.DrawText(text, x, y - font.Metrics.Ascent, align, font, paint);
             }
 
             public void DrawHeader(string title, string venue, string date, string time)
             {
                 // Header Background block
-                XRect headerRect = new(_margin, _yPos, _pageWidth - (2 * _margin), 55);
-                _gfx.DrawRectangle(XPens.DarkGray, XBrushes.GhostWhite, headerRect);
+                var headerRect = new SKRect(_margin, _yPos, _pageWidth - _margin, _yPos + 55);
+                _canvas.DrawRect(headerRect, _ghostWhiteFill);
+                _canvas.DrawRect(headerRect, _darkGrayStroke);
 
                 // Draw title
-                _gfx.DrawString(title, TitleFont, XBrushes.DarkSlateGray, new XRect(_margin + 15, _yPos + 8, _pageWidth - (2 * _margin) - 30, 25), _leftAlign);
+                DrawText(title, _titleFont, _darkSlateGray, _margin + 15, _yPos + 8);
 
                 // Draw metadata
-                _gfx.DrawString($"Generated: {date} {time}", MetaFont, XBrushes.DimGray, new XRect(_margin + 15, _yPos + 33, _pageWidth - (2 * _margin) - 30, 15), _leftAlign);
-                _gfx.DrawString($"Venue: {venue}", MetaFont, XBrushes.DimGray, new XRect(_pageWidth - _margin - 215, _yPos + 33, 200, 15), new XStringFormat { Alignment = XStringAlignment.Far, LineAlignment = XLineAlignment.Near });
+                DrawText($"Generated: {date} {time}", _metaFont, _dimGray, _margin + 15, _yPos + 33);
+                DrawText($"Venue: {venue}", _metaFont, _dimGray, _pageWidth - _margin - 15, _yPos + 33, SKTextAlign.Right);
 
                 _yPos += 75;
             }
@@ -290,9 +333,9 @@ namespace KSRotation.Services
                 {
                     AddNewPage();
                 }
-                _gfx.DrawString(title, SectionFont, XBrushes.DarkSlateGray, _margin, _yPos, _leftAlign);
+                DrawText(title, _sectionFont, _darkSlateGray, _margin, _yPos);
                 _yPos += 18;
-                _gfx.DrawLine(XPens.LightGray, _margin, _yPos, _pageWidth - _margin, _yPos);
+                _canvas.DrawLine(_margin, _yPos, _pageWidth - _margin, _yPos, _lightGrayStroke);
                 _yPos += 10;
             }
 
@@ -302,7 +345,7 @@ namespace KSRotation.Services
                 {
                     AddNewPage();
                 }
-                _gfx.DrawString(message, SongFont, XBrushes.Gray, _margin + 15, _yPos, _leftAlign);
+                DrawText(message, _songFont, _gray, _margin + 15, _yPos);
                 _yPos += 22;
             }
 
@@ -315,7 +358,7 @@ namespace KSRotation.Services
                 }
 
                 // Draw singer name & count
-                _gfx.DrawString($"{singer} ({songCount} song{(songCount == 1 ? "" : "s")} completed)", SingerFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText($"{singer} ({songCount} song{(songCount == 1 ? "" : "s")} completed)", _singerFont, _black, _margin, _yPos);
                 _yPos += 16;
 
                 foreach (var song in songs)
@@ -324,7 +367,7 @@ namespace KSRotation.Services
                         ? $" (with {song.DuetPartnerName})"
                         : "";
                     string detail = $"Round {song.Round}: {Truncate(song.SongTitle, 40)} - {Truncate(song.ArtistName, 30)}{duetSuffix}";
-                    _gfx.DrawString($"  • {detail}", SongFont, XBrushes.DimGray, _margin + 15, _yPos, _leftAlign);
+                    DrawText($"  \u2022 {detail}", _songFont, _dimGray, _margin + 15, _yPos);
                     _yPos += 14;
                 }
 
@@ -342,15 +385,15 @@ namespace KSRotation.Services
                     AddNewPage();
                 }
 
-                _gfx.DrawLine(XPens.DarkGray, _margin, _yPos, _pageWidth - _margin, _yPos);
+                _canvas.DrawLine(_margin, _yPos, _pageWidth - _margin, _yPos, _darkGrayStroke);
                 _yPos += 10;
 
                 string karaokeSummary = $"Karaoke: {totalKaraokeSingers} Singers ({activeKaraokeSingers} Active, {inactiveKaraokeSingers} Inactive)  |  Total Songs Sung: {totalKaraokeSongs}";
-                _gfx.DrawString(karaokeSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText(karaokeSummary, _summaryFont, _black, _margin, _yPos);
                 _yPos += 16;
 
                 string musicSummary = $"Music Requests: {totalMusicRequesters} Requesters  |  Total Tracks Played: {totalMusicTracks}";
-                _gfx.DrawString(musicSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText(musicSummary, _summaryFont, _black, _margin, _yPos);
                 _yPos += 20;
             }
         }

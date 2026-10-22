@@ -46,7 +46,6 @@ MIT License
   Microsoft.EntityFrameworkCore.*  https://github.com/dotnet/efcore
   Microsoft.Extensions.Logging.*   https://github.com/dotnet/runtime
   Microsoft.IO.RecyclableMemoryStream  https://github.com/microsoft/Microsoft.IO.RecyclableMemoryStream
-  PDFsharp                         https://github.com/empira/PDFsharp
   QRCoder                          https://github.com/codebude/QRCoder
   SkiaSharp                        https://github.com/mono/SkiaSharp
   System.Resources.Extensions, System.Security.Cryptography.ProtectedData

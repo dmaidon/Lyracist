@@ -79,16 +79,6 @@ namespace Lyracist.Tests
                     _dbSeeded = true;
                 }
             }
-
-            // Register PDFsharp custom font resolver for test context
-            try
-            {
-                PdfSharp.Fonts.GlobalFontSettings.FontResolver = new CatalogBookGenerator.SimpleFontResolver();
-            }
-            catch
-            {
-                // Already registered
-            }
         }
 
         [Fact]
@@ -115,7 +105,6 @@ namespace Lyracist.Tests
         public void UpdateUserManuals()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -199,51 +188,12 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("CatalogBookExporter"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Database Manager / Catalog Book Exporter", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogBookExporter";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
         public void UpdateUserManualsForCastingSupport()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -321,44 +271,6 @@ Operators can now select different casting targets for the Singer Rotation Billb
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("CastingSupport"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Display Projection Window / Casting Support", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " CastingSupport";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
@@ -375,7 +287,6 @@ Operators can now select different casting targets for the Singer Rotation Billb
         public void UpdateUserManualsForCatalogTxtAndExtractorFailedList()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -449,51 +360,12 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("CatalogTxtAndFailedList"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Database Manager / Catalog Book Exporter & Failed Artist List", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogTxtAndFailedList";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
         public void UpdateUserManualsForPartyTymeRemoval()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -569,51 +441,12 @@ The Party Tyme karaoke streaming integration has been removed from the applicati
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PartyTymeRemoval"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Integration Settings / Party Tyme Removal", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " PartyTymeRemoval";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
         public void UpdateUserManualsForProfilesAndTagging()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -690,51 +523,12 @@ A comprehensive performer profile system and song tagging support have been inte
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ProfilesAndTagging"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Performer Profiles, Song Tagging & Singer Avatars", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " ProfilesAndTagging";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
         public void UpdateUserManualsForSearchScanAndCompactAutoAdvance()
         {
             string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
             string updateText = @"
@@ -809,44 +603,6 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SearchScanAndCompactToolbar"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Karaoke Song Search & Compact Auto-Advance Toolbar", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " SearchScanAndCompactToolbar";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                }
-            }
         }
 
         [Fact]
@@ -909,7 +665,6 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
             lock (_manualLock)
             {
                 string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-                string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
                 string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
                 string updateText = @"
@@ -988,44 +743,6 @@ Major updates have been added to improve projection screen customization and loc
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("QrCodeToggleAndMusicSeparation"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Audience Lyrics Screen QR Code & Library Format Separation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " QrCodeToggleAndMusicSeparation";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                    }
-                }
             }
         }
 
@@ -1035,7 +752,6 @@ Major updates have been added to improve projection screen customization and loc
             lock (_manualLock)
             {
                 string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-                string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
                 string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
                 string updateText = @"
@@ -1117,44 +833,6 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SearchPerfTabletButtonsAudioVolume"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SearchPerfTabletButtonsAudioVolume";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                    }
-                }
             }
         }
 
@@ -1166,7 +844,6 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1238,44 +915,6 @@ Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated S
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("UsbMixerOutputBoostLimiter"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " UsbMixerOutputBoostLimiter";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
-                    }
-                }
             }
         }
 
@@ -1287,7 +926,6 @@ Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated S
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1360,44 +998,6 @@ Section: Karaoke Screen 1080p Resolution Layout Optimization, Search Results Gri
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("Karaoke1080pLayoutOptimization"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Karaoke Screen 1080p Resolution Layout Optimization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " Karaoke1080pLayoutOptimization";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -1409,7 +1009,6 @@ Section: Karaoke Screen 1080p Resolution Layout Optimization, Search Results Gri
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1479,44 +1078,6 @@ Section: Special Event Banner Single Selection & 'None' Button Reset (Updated Se
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SpecialEventBannerMutualExclusion"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Special Event Banner Single Selection & 'None' Button Reset", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialEventBannerMutualExclusion";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -1528,7 +1089,6 @@ Section: Special Event Banner Single Selection & 'None' Button Reset (Updated Se
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1600,44 +1160,6 @@ Section: Hybrid GPS Venue Auto-Location & DashCast TV Streaming (Updated Sep 17,
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("HybridGpsVenueAutoLocation"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Hybrid GPS Venue Auto-Location & DashCast TV Streaming", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " HybridGpsVenueAutoLocation";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -1649,7 +1171,6 @@ Section: Hybrid GPS Venue Auto-Location & DashCast TV Streaming (Updated Sep 17,
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1721,44 +1242,6 @@ Section: Singer Skip Round-Scoped Rotation Bypass (Updated Sep 17, 2026)
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SingerSkipRoundScopedBypass"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Singer Skip Round-Scoped Rotation Bypass", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SingerSkipRoundScopedBypass";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -1770,7 +1253,6 @@ Section: Singer Skip Round-Scoped Rotation Bypass (Updated Sep 17, 2026)
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1851,44 +1333,6 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SpecialSingerCurrentTopPlacement"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Special Singer (One-Time Performance)", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialSingerCurrentTopPlacement";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -1900,7 +1344,6 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -1974,44 +1417,6 @@ Section: Seamless Bidirectional Device Switching & Session Handoff (Updated Sep 
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SeamlessDeviceSwitchingHandoff"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Seamless Bidirectional Device Switching & Session Handoff", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SeamlessDeviceSwitchingHandoff";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2023,7 +1428,6 @@ Section: Seamless Bidirectional Device Switching & Session Handoff (Updated Sep 
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2096,44 +1500,6 @@ Section: Automated Transition to In-App Remote DJ Controller on Handoff (Updated
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("AutoRemoteDjHandoff"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Automated Transition to In-App Remote DJ Controller on Handoff", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                    yPos += 15;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " AutoRemoteDjHandoff";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2145,7 +1511,6 @@ Section: Automated Transition to In-App Remote DJ Controller on Handoff (Updated
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2268,58 +1633,6 @@ Section: Device Switching, Live Session Handoff & Architecture Flow (Updated Sep
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("DeviceHandoffFlowArch"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont monoFont = new PdfSharp.Drawing.XFont("Arial", 7.5, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Device Switching, Live Session Handoff & Architecture Flow", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 58;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isDiagram = line.Contains("+--") || line.Contains("|") || line.Contains("===") || line.Contains("-->");
-                                    var font = isDiagram ? monoFont : bodyFont;
-                                    var brush = isDiagram ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isDiagram ? 9.5 : 12;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " DeviceHandoffFlowArch";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2331,7 +1644,6 @@ Section: Device Switching, Live Session Handoff & Architecture Flow (Updated Sep
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2431,58 +1743,6 @@ Section: Dynamic Round Completion Estimation & Full Round Duration Notice (Updat
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("RoundEstimateDocNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.5, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.5, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Dynamic Round Completion Estimation & Full Round Duration Notice", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.5;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " RoundEstimateDocNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2494,7 +1754,6 @@ Section: Dynamic Round Completion Estimation & Full Round Duration Notice (Updat
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2586,58 +1845,6 @@ Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banner
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ActiveSingersBannersNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.5, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.5, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banners", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.5;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " ActiveSingersBannersNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2649,7 +1856,6 @@ Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banner
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2750,58 +1956,6 @@ Lyracist Pro and KSRotation now feature eleven distinct, high-impact projection 
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("FourNewBillboardViewsNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Four New Dynamic Rotation Billboard Projection Views", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " FourNewBillboardViewsNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2813,7 +1967,6 @@ Lyracist Pro and KSRotation now feature eleven distinct, high-impact projection 
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -2903,58 +2056,6 @@ The Display configuration experience in KSRotation and Lyracist Pro has been str
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("UnifiedScreenRotationNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Screen Rotation and Display Tab Layout Reorganization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " UnifiedScreenRotationNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -2966,7 +2067,6 @@ The Display configuration experience in KSRotation and Lyracist Pro has been str
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -3051,58 +2151,6 @@ To ensure smooth hosting transitions during live shows, Lyracist Pro provides an
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SongEndReturnKaraokeNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Song End Return to Karaoke Screen & DJ Manual Start Workflow", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SongEndReturnKaraokeNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3114,7 +2162,6 @@ To ensure smooth hosting transitions during live shows, Lyracist Pro provides an
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -3213,58 +2260,6 @@ Lyracist Pro includes a configurable, real-time audio spectrum visualizer displa
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("LyricsVisualizerNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Lyrics Screen Audio Visualizer & Spectrum Customization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " LyricsVisualizerNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3278,7 +2273,6 @@ Lyracist Pro includes a configurable, real-time audio spectrum visualizer displa
             {
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
 
                 string updateText = @"Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog
 
@@ -3372,58 +2366,6 @@ To ensure a completely professional live performance experience without audience
                     }
                 }
 
-                // 3. Update pdf file if not already present
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("AdjustSynthDisplayNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " AdjustSynthDisplayNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3437,7 +2379,6 @@ To ensure a completely professional live performance experience without audience
             {
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
 
                 string updateText = @"Section: Audience Welcome & Pre-Show Screen / Dual QR Code Integration (Wi-Fi & Song Sign-Up)
 
@@ -3525,58 +2466,6 @@ To optimize patron onboarding before a show begins and between active performanc
                     }
                 }
 
-                // 3. Update pdf file if not already present
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PreShowScreenNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Audience Welcome & Pre-Show Screen / Dual QR Code Integration", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " PreShowScreenNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3590,7 +2479,6 @@ To optimize patron onboarding before a show begins and between active performanc
             {
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
 
                 string updateText = @"Section: Pre-Show Screen / Singer Welcome Screen Hold & Sequenced Release
 
@@ -3674,58 +2562,6 @@ To prevent audience projection distraction and keep Wi-Fi onboarding instruction
                     }
                 }
 
-                // 3. Update pdf file if not already present
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PreShowWelcomeHoldNotice"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Pre-Show Screen / Singer Welcome Screen Hold & Sequenced Release", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
-
-                                double yPos = 60;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.");
-                                    var font = isSection ? sectionFont : bodyFont;
-                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
-                                    double lineHeight = isSection ? 15 : 12.0;
-
-                                    if (yPos + lineHeight > 750)
-                                    {
-                                        page = doc.AddPage();
-                                        page.Size = PdfSharp.PageSize.Letter;
-                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                        yPos = 36;
-                                    }
-
-                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
-                                    yPos += lineHeight;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " PreShowWelcomeHoldNotice";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3737,7 +2573,6 @@ To prevent audience projection distraction and keep Wi-Fi onboarding instruction
                 string baseDir = AppContext.BaseDirectory;
                 string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
                 string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
                 string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
                 if (!Directory.Exists(docDir))
@@ -3808,44 +2643,6 @@ Section: Dynamic Special Event Announcement Banner Studio (Updated Oct 4, 2026)
                     }
                 }
 
-                // 3. Update pdf file by appending a page using PDFsharp
-                if (File.Exists(pdfPath))
-                {
-                    try
-                    {
-                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                        {
-                            string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("DynamicAnnouncementBannerStudio"))
-                            {
-                                var page = doc.AddPage();
-                                page.Size = PdfSharp.PageSize.Letter;
-                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                                gfx.DrawString("Section: Dynamic Special Event Announcement Banner Studio", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                                double yPos = 70;
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    if (line.StartsWith("Section:")) continue;
-                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                    yPos += 18;
-                                }
-
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " DynamicAnnouncementBannerStudio";
-                                doc.Save(pdfPath);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                    }
-                }
             }
         }
 
@@ -3856,7 +2653,6 @@ Section: Dynamic Special Event Announcement Banner Studio (Updated Oct 4, 2026)
             if (!Directory.Exists(docDir)) return;
 
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             string updateText = @"
@@ -3941,44 +2737,6 @@ During the final round of the evening (when 'Last Round' is engaged), performers
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ClearLastRoundDoneFlag"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Clear 'Last Round Done' Accidental Flag & Restore Performer", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " ClearLastRoundDoneFlag";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -3988,7 +2746,6 @@ During the final round of the evening (when 'Last Round' is engaged), performers
             if (!Directory.Exists(docDir)) return;
 
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             string updateText = @"
@@ -4083,44 +2840,6 @@ If the performer being moved to the top was previously skipped ('IsSkipped'), pa
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("MoveToTopOfRotation"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Move to Top of Rotation & Performer Priority", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " MoveToTopOfRotation";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -4130,7 +2849,6 @@ If the performer being moved to the top was previously skipped ('IsSkipped'), pa
             if (!Directory.Exists(docDir)) return;
 
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             string updateText = @"
@@ -4206,44 +2924,6 @@ Pressing Enter in the singer name input commits the name and advances focus to t
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("NewSingerPlaceholderCleanup"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: New Singer Placeholder Cleanup & Automatic Row Removal", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " NewSingerPlaceholderCleanup";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -4253,7 +2933,6 @@ Pressing Enter in the singer name input commits the name and advances focus to t
             if (!Directory.Exists(docDir)) return;
 
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             string updateText = @"
@@ -4335,44 +3014,6 @@ The test generator utilizes a curated pool of 18 realistic performer names (Bren
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("TestModeSingerCountOptions"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Test Mode Settings GroupBox & Performer Count Options", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " TestModeSingerCountOptions";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -4381,7 +3022,6 @@ The test generator utilizes a curated pool of 18 realistic performer names (Bren
             string baseDir = AppContext.BaseDirectory;
             string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             if (!Directory.Exists(docDir))
@@ -4461,44 +3101,6 @@ Hosts and KJs frequently need to manually adjust queue order during a live show 
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("MouseDragAndDropRotationReordering"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Mouse Drag-and-Drop Performer Reordering", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " MouseDragAndDropRotationReordering";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -4507,7 +3109,6 @@ Hosts and KJs frequently need to manually adjust queue order during a live show 
             string baseDir = AppContext.BaseDirectory;
             string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             if (!Directory.Exists(docDir))
@@ -4581,44 +3182,6 @@ When the 'Show Welcome to our new performer screen when a new singer joins' feat
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("NewSingerWelcomeFocusActivation"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: New Singer Welcome Screen / Focus-Based Activation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " NewSingerWelcomeFocusActivation";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
 
         [Fact]
@@ -4627,7 +3190,6 @@ When the 'Show Welcome to our new performer screen when a new singer joins' feat
             string baseDir = AppContext.BaseDirectory;
             string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
             string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
-            string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
             string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
 
             if (!Directory.Exists(docDir))
@@ -4717,44 +3279,6 @@ Lyracist v26.10.7 introduces comprehensive live performance tools:
                 }
             }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("FillerAutomixSamplePadRecording"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-
-                            gfx.DrawString("Section: Filler Automix, Sample Pad & Performance Recording", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
-                                yPos += 18;
-                            }
-
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " FillerAutomixSamplePadRecording";
-                            doc.Save(pdfPath);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
-                }
-            }
         }
     }
 }

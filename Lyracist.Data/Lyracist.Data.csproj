@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 08:20:00 -> Pin PDFsharp to MIT-licensed 6.2.4 to eliminate license exception -->
+<!-- Edited on Oct 22, 2026 @ 08:20:00 -> Replace PDFsharp with SkiaSharp for PDF generation -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -24,7 +24,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <PackageReference Include="Dapper" Version="2.1.89" />
