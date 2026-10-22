@@ -1,4 +1,4 @@
-<!-- Edited on Oct 4, 2026 @ 09:36:00 -> Exclude desktop-only LineInSpectrumService from KSRotation.Maui build -->
+<!-- Edited on Oct 22, 2026 @ 08:20:00 -> Pin PDFsharp to MIT-licensed 6.2.4 to eliminate license exception -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -146,7 +146,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="QRCoder" Version="1.8.1" />
 		<PackageReference Include="System.Resources.Extensions" Version="10.0.13" />
-		<PackageReference Include="PDFsharp" Version="6.5.0" />
+		<PackageReference Include="PDFsharp" Version="6.2.4" />
 	</ItemGroup>
 
 	<ItemGroup>

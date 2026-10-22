@@ -26,6 +26,11 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Subscribed `SettingsViewModel` in `KnockoutTrivia` to `MonitorEnumerator.MonitorsChanged` to automatically call `RefreshMonitors()`.
   - Linked `..\Shared\MonitorEnumerator.cs` into `Lyracist.Trivia.csproj` and wired `MonitorEnumerator.MonitorsChanged` to trigger `RefreshMonitors()` dynamically.
 
+### Fixed
+- **PDF Report Generation License Exception in KSRotation & Catalog Book Exporter (`KSRotation/KSRotation.csproj`, `Lyracist.Data/Lyracist.Data.csproj`, `KSRotation.Maui/KSRotation.Maui.csproj`)**:
+  - Reverted `PDFsharp` package reference from `6.5.0` back to `6.2.4`.
+  - Version `6.5.0` introduced a breaking license verification check (`The loaded license is not valid`) requiring an AGPL v3 or commercial license key. Pinning `PDFsharp` to `6.2.4` restores the permissive MIT licensing model, completely resolving the error when saving end-of-night rotation reports in KSRotation and exporting catalog books in Lyracist.
+
 ## [Unreleased] - 2026-10-21
 
 ### Changed
