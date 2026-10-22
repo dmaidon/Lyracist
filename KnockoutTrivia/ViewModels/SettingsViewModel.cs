@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 11:14:30 -> Added persistent DeviceName monitor selection and display event payload
+// Edited on Oct 22, 2026 @ 08:06:00 -> Subscribe to MonitorEnumerator.MonitorsChanged to auto-refresh available monitors
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -69,6 +69,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         RefreshMonitors();
+        MonitorEnumerator.MonitorsChanged += (s, e) => RefreshMonitors();
         _ = LoadSourcesAsync();
     }
 

@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 23:35:00 -> Add Announcement banner resolution in DisplayService
+// Edited on Oct 22, 2026 @ 08:06:00 -> Refresh screen assignments on MonitorEnumerator.MonitorsChanged native event
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -52,6 +52,13 @@ public class DisplayService : IDisplayService
 
         // Auto-subscribe to the MediaEngine's frame tick events to sync with the LyricsWindow VM
         _mediaEngine.FrameReady += OnMediaFrameReady;
+
+        MonitorEnumerator.MonitorsChanged += OnMonitorsChanged;
+    }
+
+    private void OnMonitorsChanged(object? sender, EventArgs e)
+    {
+        ScreenAssignmentsChanged?.Invoke();
     }
 
     private void OnMediaFrameReady(System.Windows.Media.ImageSource frame)

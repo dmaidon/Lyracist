@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:12:00 -> Add performance recording settings, device enumeration, live peak level, test recording, and retention configuration
+// Edited on Oct 22, 2026 @ 08:06:00 -> Populate Screens via RefreshScreens using dynamic MonitorEnumerator native event
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -309,9 +309,7 @@ public partial class SettingsViewModel : BaseViewModel
         _showFlow.SetEndRotationTone(EndRotationBass, EndRotationTreble, 0);
 
         // Load active screen list with a 'None' option first
-        List<ScreenInfo> screens = [new() { Index = -1, DeviceName = "None (Do not show)" }];
-        screens.AddRange(_display.GetScreens());
-        Screens = screens;
+        RefreshScreens();
 
         // Reflect the last saved monitor assignments/mirror state without
         // triggering the OnChanged side effects below (which would move the

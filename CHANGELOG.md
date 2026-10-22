@@ -1,9 +1,30 @@
-<!-- Edited on Oct 21, 2026 @ 06:45:00 -> Update System.Security.Cryptography.Pkcs to 10.0.13, bump assembly versions -->
-Last Edit: Oct 21, 2026 - System.Security.Cryptography.Pkcs Upgrade & Solution Assembly Version Bumps
+<!-- Edited on Oct 22, 2026 @ 08:12:00 -> Add event-driven native Windows display settings change detection across all apps -->
+Last Edit: Oct 22, 2026 - Windows Native Display Settings Change Detection
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] - 2026-10-22
+
+### Added
+- **Windows Native Display Change Detection & Dynamic Monitor Refresh (`Shared/MonitorEnumerator.cs`)**:
+  - Implemented static listening to `Microsoft.Win32.SystemEvents.DisplaySettingsChanged` with an automatic 250ms debounce and UI dispatcher marshaling in `MonitorEnumerator`.
+  - Replaced repetitive OS P/Invoke monitor enumeration calls with a synchronized in-memory cache (`_cachedMonitors`) that invalidates and refreshes only when Windows reports actual display topology, resolution, or cable connection/disconnection changes.
+  - Exposed `MonitorEnumerator.MonitorsChanged` event to notify all running apps and view models dynamically.
+
+### Changed
+- **Lyracist DJ Banner Monitor Cap Optimization (`Lyracist/ViewModels/DjBannerWindowViewModel.cs`)**:
+  - Replaced the 30-second polling interval check (`TimeSpan.FromSeconds(30)`) with event-driven invalidation hooked to `MonitorEnumerator.MonitorsChanged`. The maximum monitor width cap is now cached indefinitely until a monitor change actually occurs, eliminating repetitive enumeration calls during banner rendering.
+- **Dynamic Multi-Monitor Screen Dropdown Synchronization (`Lyracist/ViewModels/SettingsViewModel.Display.cs`, `Lyracist/ViewModels/SettingsViewModel.cs`, `Lyracist/ViewModels/KaraokeViewModel.Screens.cs`, `Lyracist/Services/Display/DisplayService.cs`)**:
+  - Converted `SettingsViewModel.Screens` to an `ObservableCollection<ScreenInfo>` with a new `RefreshScreens()` method that repopulates both `Screens` and `ConnectInstructionScreens` when displays change while preserving the host's selected monitors.
+  - Subscribed `DisplayService` to `MonitorEnumerator.MonitorsChanged` to automatically raise `ScreenAssignmentsChanged`.
+  - Updated `KaraokeViewModel.OnScreenAssignmentsChanged()` to repopulate `AvailableScreens` dynamically so monitor drop-downs immediately reflect hot-plugged HDMI displays or projectors without restarting the app.
+- **KSRotation Auto-Refresh on Display Changes (`KSRotation/ViewModels/MainViewModel.cs`)**:
+  - Subscribed `MainViewModel` to `MonitorEnumerator.MonitorsChanged`, automatically triggering `RefreshAvailableMonitors()` whenever an external screen or projector is connected or disconnected mid-show.
+- **Knockout Trivia & Lyracist Trivia Dynamic Monitor Detection (`KnockoutTrivia/ViewModels/SettingsViewModel.cs`, `Lyracist.Trivia/ViewModels/MainViewModel.cs`, `Lyracist.Trivia/Lyracist.Trivia.csproj`)**:
+  - Subscribed `SettingsViewModel` in `KnockoutTrivia` to `MonitorEnumerator.MonitorsChanged` to automatically call `RefreshMonitors()`.
+  - Linked `..\Shared\MonitorEnumerator.cs` into `Lyracist.Trivia.csproj` and wired `MonitorEnumerator.MonitorsChanged` to trigger `RefreshMonitors()` dynamically.
 
 ## [Unreleased] - 2026-10-21
 

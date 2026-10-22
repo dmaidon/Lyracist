@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:58:00 -> Remove OnPlaceholderSingerRenamed call from property changed
+// Edited on Oct 22, 2026 @ 08:06:00 -> Subscribe to MonitorEnumerator.MonitorsChanged to auto-refresh available monitors
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1527,6 +1527,9 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
             RefreshAvailableMonitors();
+#if !MAUI
+            MonitorEnumerator.MonitorsChanged += (s, e) => RefreshAvailableMonitors();
+#endif
 
             // Restores which target "Cast Rotation" will use next, but must NOT start casting
             // to it automatically on launch - casting only ever starts from an explicit

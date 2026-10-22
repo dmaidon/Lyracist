@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:55:00 -> Validate question set before stopping pregame timer / switching screens in StartGameWithSelectedPack
+// Edited on Oct 22, 2026 @ 08:06:00 -> Use MonitorEnumerator and subscribe to MonitorsChanged to auto-refresh available displays
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -532,6 +532,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _webServer.Start();
         DetermineConnectUrl();
         RefreshMonitors();
+        MonitorEnumerator.MonitorsChanged += (_, _) => RefreshMonitors();
         LoadQuestionPacks();
         LoadAnnouncements();
         InitializeHelpTopics();
@@ -554,12 +555,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public void RefreshMonitors()
     {
         AvailableMonitors.Clear();
-        var screens = Screen.AllScreens;
-        for (int i = 0; i < screens.Length; i++)
+        foreach (var info in MonitorEnumerator.GetMonitors())
         {
-            var s = screens[i];
-            var bounds = s.Bounds;
-            var info = new MonitorInfo(i, s.DeviceName, s.Primary, bounds.X, bounds.Y, bounds.Width, bounds.Height);
             AvailableMonitors.Add(info);
         }
 

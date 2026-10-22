@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 10:12:00 -> Refresh RotationWindowViewModel QR codes on WifiPassword change
+// Edited on Oct 22, 2026 @ 08:06:00 -> Make Screens an ObservableCollection and dynamically refresh screens and selections on screen change events
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -321,6 +321,8 @@ public partial class SettingsViewModel
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
+            RefreshScreens();
+
             var prefs = _display.GetPreferences();
 
             var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
@@ -364,7 +366,18 @@ public partial class SettingsViewModel
         });
     }
     // Display
-    public List<ScreenInfo> Screens { get; }
+    public ObservableCollection<ScreenInfo> Screens { get; } = [];
+
+    public void RefreshScreens()
+    {
+        Screens.Clear();
+        Screens.Add(new() { Index = -1, DeviceName = "None (Do not show)" });
+        foreach (var s in _display.GetScreens())
+        {
+            Screens.Add(s);
+        }
+        RefreshConnectInstructionScreens();
+    }
 
     public List<DisplayTarget> RotationTargets { get; } = System.Enum.GetValues<DisplayTarget>().ToList();
 

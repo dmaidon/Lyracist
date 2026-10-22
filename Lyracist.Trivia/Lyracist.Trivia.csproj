@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:19:00 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 22, 2026 @ 08:06:00 -> Link Shared\MonitorEnumerator.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -15,8 +15,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.10.15.170</AssemblyVersion>
-    <FileVersion>26.10.15.170</FileVersion>
+    <AssemblyVersion>26.10.22.171</AssemblyVersion>
+    <FileVersion>26.10.22.171</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>
@@ -41,6 +41,7 @@
     <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="Shared\SingleInstanceHelper.cs" />
+    <Compile Include="..\Shared\MonitorEnumerator.cs" Link="Shared\MonitorEnumerator.cs" />
   </ItemGroup>
 
   <ItemGroup>

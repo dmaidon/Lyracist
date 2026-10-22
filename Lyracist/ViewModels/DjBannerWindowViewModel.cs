@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 08:45:00 -> Set BannerImage before BannerPath so decoded image is ready when path changes
+// Edited on Oct 22, 2026 @ 08:06:00 -> Invalidate cached monitor cap on MonitorEnumerator.MonitorsChanged native event
 using System;
 using System.IO;
 using System.Windows.Media.Imaging;
@@ -8,6 +8,11 @@ namespace Lyracist.ViewModels;
 
 public partial class DjBannerWindowViewModel : ObservableObject
 {
+    static DjBannerWindowViewModel()
+    {
+        Lyracist.Shared.MonitorEnumerator.MonitorsChanged += (_, _) => _cachedMonitorCap = 0;
+    }
+
     [ObservableProperty]
     private BitmapImage? _bannerImage;
 
@@ -58,16 +63,13 @@ public partial class DjBannerWindowViewModel : ObservableObject
 
     // Caps the decoded bitmap to the display's real needs: design resolution is 4K UHD, but if every
     // connected monitor is smaller than that, decoding at 4K would just waste memory for no visible
-    // gain. Also never decodes larger than the source image's own native size (would upscale-decode
-    // and waste memory on smaller user-uploaded banners).
-    // Monitor enumeration is a P/Invoke walk; monitors rarely change, so reuse the result briefly
-    // instead of repeating it on every banner switch.
+    // gain. Also never decodes larger than the source image's own native size.
+    // Monitor cap is cached indefinitely and automatically invalidated when Windows reports a display settings change.
     private static int _cachedMonitorCap;
-    private static DateTime _cachedMonitorCapAt;
 
     private static int GetMonitorCap(int designMaxWidth)
     {
-        if (_cachedMonitorCap > 0 && DateTime.UtcNow - _cachedMonitorCapAt < TimeSpan.FromSeconds(30))
+        if (_cachedMonitorCap > 0)
         {
             return _cachedMonitorCap;
         }
@@ -91,7 +93,6 @@ public partial class DjBannerWindowViewModel : ObservableObject
         }
 
         _cachedMonitorCap = monitorCap;
-        _cachedMonitorCapAt = DateTime.UtcNow;
         return monitorCap;
     }
 

@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Add IsPreShowModeActive property delegating to IDisplayService
+// Edited on Oct 22, 2026 @ 08:06:00 -> Re-populate AvailableScreens on screen change events
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -142,6 +142,13 @@ public partial class KaraokeViewModel
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             var prefs = _displayService.GetPreferences();
+
+            AvailableScreens.Clear();
+            AvailableScreens.Add(new ScreenInfo { Index = -1, DeviceName = "None (Do not show)" });
+            foreach (var screen in _displayService.GetScreens())
+            {
+                AvailableScreens.Add(screen);
+            }
 
             var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
                 ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
