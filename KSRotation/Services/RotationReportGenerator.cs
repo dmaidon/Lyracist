@@ -1,8 +1,6 @@
-// Edited on Aug 25, 2026 @ 06:39:00 -> Fix RCS1118 const variable in DrawSummary
+// Edited on Oct 22, 2026 @ 08:42:00 -> Migrate PDF generation from PDFsharp to SkiaSharp
 using KSRotation.Models;
-using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,21 +16,6 @@ namespace KSRotation.Services
     /// </summary>
     public static class RotationReportGenerator
     {
-        static RotationReportGenerator()
-        {
-            try
-            {
-                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-                {
-                    PdfSharp.Fonts.GlobalFontSettings.UseWindowsFontsUnderWindows = true;
-                }
-            }
-            catch
-            {
-                // Guard against multiple initialization attempts or platform errors
-            }
-        }
-
         private static string ReportDirectoryPath => AppPaths.ReportsDirectoryPath;
 
         /// <summary>A single singer's report line: their display name, completed performances (round-ordered),
@@ -148,66 +131,75 @@ namespace KSRotation.Services
             List<SongPerformance> history,
             string venueName)
         {
-            PdfDocument document = new();
-            document.Info.Title = $"Karaoke Rotation Report - {venueName}";
-            document.Info.Author = "Karaoke Singer Rotation";
-
-            var layout = new PdfLayoutManager(document);
-            string date = DateTime.Now.ToString("dddd, MMMM d, yyyy", CultureInfo.CurrentCulture);
-            string time = DateTime.Now.ToString("h:mm tt", CultureInfo.CurrentCulture);
-            layout.DrawHeader("Karaoke Rotation Report", venueName, date, time);
-
-            List<ReportRow> rows = BuildReportRows(singers, history);
-
-            var karaokeRows = rows.Where(r => !r.IsMusic).ToList();
-            var musicRows = rows.Where(r => r.IsMusic).ToList();
-
-            // Draw Karaoke section
-            layout.DrawSectionHeader("Karaoke Rotation");
-            if (karaokeRows.Count > 0)
-            {
-                foreach (var row in karaokeRows)
-                {
-                    layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
-                }
-            }
-            else
-            {
-                layout.DrawEmptySectionMessage("No karaoke performances recorded.");
-            }
-
-            // Draw Music section
-            layout.DrawSectionHeader("Background Music Requests");
-            if (musicRows.Count > 0)
-            {
-                foreach (var row in musicRows)
-                {
-                    layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
-                }
-            }
-            else
-            {
-                layout.DrawEmptySectionMessage("No music requests played.");
-            }
-
-            // Calculate separate totals
-            int totalKaraokeSingers = karaokeRows.Count;
-            int inactiveKaraokeSingers = karaokeRows.Count(r => r.IsInactive);
-            int activeKaraokeSingers = totalKaraokeSingers - inactiveKaraokeSingers;
-            int totalKaraokeSongs = karaokeRows.Sum(r => r.Performances.Count);
-
-            int totalMusicRequesters = musicRows.Count;
-            int totalMusicTracks = musicRows.Sum(r => r.Performances.Count);
-
-            layout.DrawSummary(
-                totalKaraokeSingers, activeKaraokeSingers, inactiveKaraokeSingers, totalKaraokeSongs,
-                totalMusicRequesters, totalMusicTracks
-            );
-
             Directory.CreateDirectory(ReportDirectoryPath);
             string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             string filePath = Path.Combine(ReportDirectoryPath, fileName);
-            document.Save(filePath);
+
+            var metadata = new SKDocumentPdfMetadata
+            {
+                Title = $"Karaoke Rotation Report - {venueName}",
+                Author = "Karaoke Singer Rotation"
+            };
+
+            using (var stream = File.Create(filePath))
+            using (var document = SKDocument.CreatePdf(stream, metadata))
+            {
+                using (var layout = new PdfLayoutManager(document))
+                {
+                    string date = DateTime.Now.ToString("dddd, MMMM d, yyyy", CultureInfo.CurrentCulture);
+                    string time = DateTime.Now.ToString("h:mm tt", CultureInfo.CurrentCulture);
+                    layout.DrawHeader("Karaoke Rotation Report", venueName, date, time);
+
+                    List<ReportRow> rows = BuildReportRows(singers, history);
+
+                    var karaokeRows = rows.Where(r => !r.IsMusic).ToList();
+                    var musicRows = rows.Where(r => r.IsMusic).ToList();
+
+                    // Draw Karaoke section
+                    layout.DrawSectionHeader("Karaoke Rotation");
+                    if (karaokeRows.Count > 0)
+                    {
+                        foreach (var row in karaokeRows)
+                        {
+                            layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
+                        }
+                    }
+                    else
+                    {
+                        layout.DrawEmptySectionMessage("No karaoke performances recorded.");
+                    }
+
+                    // Draw Music section
+                    layout.DrawSectionHeader("Background Music Requests");
+                    if (musicRows.Count > 0)
+                    {
+                        foreach (var row in musicRows)
+                        {
+                            layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
+                        }
+                    }
+                    else
+                    {
+                        layout.DrawEmptySectionMessage("No music requests played.");
+                    }
+
+                    // Calculate separate totals
+                    int totalKaraokeSingers = karaokeRows.Count;
+                    int inactiveKaraokeSingers = karaokeRows.Count(r => r.IsInactive);
+                    int activeKaraokeSingers = totalKaraokeSingers - inactiveKaraokeSingers;
+                    int totalKaraokeSongs = karaokeRows.Sum(r => r.Performances.Count);
+
+                    int totalMusicRequesters = musicRows.Count;
+                    int totalMusicTracks = musicRows.Sum(r => r.Performances.Count);
+
+                    layout.DrawSummary(
+                        totalKaraokeSingers, activeKaraokeSingers, inactiveKaraokeSingers, totalKaraokeSongs,
+                        totalMusicRequesters, totalMusicTracks
+                    );
+                }
+                document.Close();
+            }
+
             return filePath;
         }
 
@@ -232,54 +224,78 @@ namespace KSRotation.Services
             return text.Length <= maxLength ? text : $"{text.AsSpan(0, maxLength - 3)}...";
         }
 
-        private class PdfLayoutManager
+        private sealed class PdfLayoutManager : IDisposable
         {
-            private readonly PdfDocument _document;
-            private PdfPage _currentPage = null!;
-            private XGraphics _gfx = null!;
-            private double _yPos;
-            private readonly double _margin = 40;
-            private readonly double _pageWidth;
-            private readonly double _pageHeight;
-
-            private readonly XStringFormat _leftAlign = new() { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
+            private readonly SKDocument _document;
+            private SKCanvas _canvas = null!;
+            private float _yPos;
+            private readonly float _margin = 40f;
+            private readonly float _pageWidth = 612f;
+            private readonly float _pageHeight = 792f;
+            private bool _hasOpenPage;
 
             // Fonts are immutable and reused across every page/row; build them once instead of per-row.
-            private static readonly XFont TitleFont = new("Arial", 18, XFontStyleEx.Bold);
-            private static readonly XFont SectionFont = new("Arial", 14, XFontStyleEx.Bold);
-            private static readonly XFont MetaFont = new("Arial", 10, XFontStyleEx.Regular);
-            private static readonly XFont SingerFont = new("Arial", 11, XFontStyleEx.Bold);
-            private static readonly XFont SongFont = new("Arial", 9, XFontStyleEx.Regular);
-            private static readonly XFont SummaryFont = new("Arial", 10, XFontStyleEx.Bold);
+            private static readonly SKTypeface ArialRegular = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) ?? SKTypeface.Default;
+            private static readonly SKTypeface ArialBold = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) ?? SKTypeface.Default;
 
-            public PdfLayoutManager(PdfDocument document)
+            private static readonly SKFont TitleFont = new(ArialBold, 18);
+            private static readonly SKFont SectionFont = new(ArialBold, 14);
+            private static readonly SKFont MetaFont = new(ArialRegular, 10);
+            private static readonly SKFont SingerFont = new(ArialBold, 11);
+            private static readonly SKFont SongFont = new(ArialRegular, 9);
+            private static readonly SKFont SummaryFont = new(ArialBold, 10);
+
+            private static readonly SKPaint DarkSlateGrayPaint = new() { Color = new SKColor(47, 79, 79), IsAntialias = true };
+            private static readonly SKPaint DimGrayPaint = new() { Color = new SKColor(105, 105, 105), IsAntialias = true };
+            private static readonly SKPaint GrayPaint = new() { Color = new SKColor(128, 128, 128), IsAntialias = true };
+            private static readonly SKPaint BlackPaint = new() { Color = SKColors.Black, IsAntialias = true };
+            private static readonly SKPaint GhostWhiteFillPaint = new() { Color = new SKColor(248, 248, 255), Style = SKPaintStyle.Fill };
+            private static readonly SKPaint DarkGrayStrokePaint = new() { Color = SKColors.DarkGray, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
+            private static readonly SKPaint LightGrayStrokePaint = new() { Color = SKColors.LightGray, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
+
+            public PdfLayoutManager(SKDocument document)
             {
                 _document = document;
                 AddNewPage();
-                _pageWidth = _currentPage.Width.Point;
-                _pageHeight = _currentPage.Height.Point;
             }
 
             public void AddNewPage()
             {
-                _currentPage = _document.AddPage();
-                _currentPage.Size = PageSize.Letter;
-                _gfx = XGraphics.FromPdfPage(_currentPage);
+                if (_hasOpenPage)
+                {
+                    _document.EndPage();
+                }
+                _canvas = _document.BeginPage(_pageWidth, _pageHeight);
+                _hasOpenPage = true;
                 _yPos = _margin;
+            }
+
+            private void DrawText(string text, float x, float topY, SKFont font, SKPaint paint)
+            {
+                font.GetFontMetrics(out var metrics);
+                float baseline = topY - metrics.Ascent;
+                _canvas.DrawText(text, x, baseline, SKTextAlign.Left, font, paint);
+            }
+
+            private void DrawTextRight(string text, float rightX, float topY, SKFont font, SKPaint paint)
+            {
+                font.GetFontMetrics(out var metrics);
+                float baseline = topY - metrics.Ascent;
+                _canvas.DrawText(text, rightX, baseline, SKTextAlign.Right, font, paint);
             }
 
             public void DrawHeader(string title, string venue, string date, string time)
             {
                 // Header Background block
-                XRect headerRect = new(_margin, _yPos, _pageWidth - (2 * _margin), 55);
-                _gfx.DrawRectangle(XPens.DarkGray, XBrushes.GhostWhite, headerRect);
+                _canvas.DrawRect(_margin, _yPos, _pageWidth - (2 * _margin), 55, GhostWhiteFillPaint);
+                _canvas.DrawRect(_margin, _yPos, _pageWidth - (2 * _margin), 55, DarkGrayStrokePaint);
 
                 // Draw title
-                _gfx.DrawString(title, TitleFont, XBrushes.DarkSlateGray, new XRect(_margin + 15, _yPos + 8, _pageWidth - (2 * _margin) - 30, 25), _leftAlign);
+                DrawText(title, _margin + 15, _yPos + 8, TitleFont, DarkSlateGrayPaint);
 
                 // Draw metadata
-                _gfx.DrawString($"Generated: {date} {time}", MetaFont, XBrushes.DimGray, new XRect(_margin + 15, _yPos + 33, _pageWidth - (2 * _margin) - 30, 15), _leftAlign);
-                _gfx.DrawString($"Venue: {venue}", MetaFont, XBrushes.DimGray, new XRect(_pageWidth - _margin - 215, _yPos + 33, 200, 15), new XStringFormat { Alignment = XStringAlignment.Far, LineAlignment = XLineAlignment.Near });
+                DrawText($"Generated: {date} {time}", _margin + 15, _yPos + 33, MetaFont, DimGrayPaint);
+                DrawTextRight($"Venue: {venue}", _pageWidth - _margin - 15, _yPos + 33, MetaFont, DimGrayPaint);
 
                 _yPos += 75;
             }
@@ -290,9 +306,9 @@ namespace KSRotation.Services
                 {
                     AddNewPage();
                 }
-                _gfx.DrawString(title, SectionFont, XBrushes.DarkSlateGray, _margin, _yPos, _leftAlign);
+                DrawText(title, _margin, _yPos, SectionFont, DarkSlateGrayPaint);
                 _yPos += 18;
-                _gfx.DrawLine(XPens.LightGray, _margin, _yPos, _pageWidth - _margin, _yPos);
+                _canvas.DrawLine(_margin, _yPos, _pageWidth - _margin, _yPos, LightGrayStrokePaint);
                 _yPos += 10;
             }
 
@@ -302,20 +318,20 @@ namespace KSRotation.Services
                 {
                     AddNewPage();
                 }
-                _gfx.DrawString(message, SongFont, XBrushes.Gray, _margin + 15, _yPos, _leftAlign);
+                DrawText(message, _margin + 15, _yPos, SongFont, GrayPaint);
                 _yPos += 22;
             }
 
             public void DrawRow(string singer, int songCount, List<SongPerformance> songs)
             {
-                double rowHeight = 20 + (songs.Count * 14);
+                float rowHeight = 20 + (songs.Count * 14);
                 if (_yPos + rowHeight > _pageHeight - _margin)
                 {
                     AddNewPage();
                 }
 
                 // Draw singer name & count
-                _gfx.DrawString($"{singer} ({songCount} song{(songCount == 1 ? "" : "s")} completed)", SingerFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText($"{singer} ({songCount} song{(songCount == 1 ? "" : "s")} completed)", _margin, _yPos, SingerFont, BlackPaint);
                 _yPos += 16;
 
                 foreach (var song in songs)
@@ -324,7 +340,7 @@ namespace KSRotation.Services
                         ? $" (with {song.DuetPartnerName})"
                         : "";
                     string detail = $"Round {song.Round}: {Truncate(song.SongTitle, 40)} - {Truncate(song.ArtistName, 30)}{duetSuffix}";
-                    _gfx.DrawString($"  • {detail}", SongFont, XBrushes.DimGray, _margin + 15, _yPos, _leftAlign);
+                    DrawText($"  • {detail}", _margin + 15, _yPos, SongFont, DimGrayPaint);
                     _yPos += 14;
                 }
 
@@ -336,22 +352,31 @@ namespace KSRotation.Services
                 int totalKaraokeSingers, int activeKaraokeSingers, int inactiveKaraokeSingers, int totalKaraokeSongs,
                 int totalMusicRequesters, int totalMusicTracks)
             {
-                const double height = 60;
+                const float height = 60f;
                 if (_yPos + height > _pageHeight - _margin)
                 {
                     AddNewPage();
                 }
 
-                _gfx.DrawLine(XPens.DarkGray, _margin, _yPos, _pageWidth - _margin, _yPos);
+                _canvas.DrawLine(_margin, _yPos, _pageWidth - _margin, _yPos, DarkGrayStrokePaint);
                 _yPos += 10;
 
                 string karaokeSummary = $"Karaoke: {totalKaraokeSingers} Singers ({activeKaraokeSingers} Active, {inactiveKaraokeSingers} Inactive)  |  Total Songs Sung: {totalKaraokeSongs}";
-                _gfx.DrawString(karaokeSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText(karaokeSummary, _margin, _yPos, SummaryFont, BlackPaint);
                 _yPos += 16;
 
                 string musicSummary = $"Music Requests: {totalMusicRequesters} Requesters  |  Total Tracks Played: {totalMusicTracks}";
-                _gfx.DrawString(musicSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                DrawText(musicSummary, _margin, _yPos, SummaryFont, BlackPaint);
                 _yPos += 20;
+            }
+
+            public void Dispose()
+            {
+                if (_hasOpenPage)
+                {
+                    _document.EndPage();
+                    _hasOpenPage = false;
+                }
             }
         }
     }

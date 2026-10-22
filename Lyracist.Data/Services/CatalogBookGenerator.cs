@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix S1192 duplicated string literals with private constants
+// Edited on Oct 22, 2026 @ 08:42:00 -> Migrate PDF generation from PDFsharp to SkiaSharp
 using System;
 using System.IO;
 using System.Linq;
@@ -6,9 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
+using SkiaSharp;
 using Lyracist.Data.Models;
 
 namespace Lyracist.Data.Services
@@ -20,18 +18,6 @@ namespace Lyracist.Data.Services
         private const string BorderColor = "D3D3D3";
         private const string InsideBorderColor = "E0E0E0";
         private const string ArialFontFamily = "Arial";
-
-        static CatalogBookGenerator()
-        {
-            try
-            {
-                PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
-            }
-            catch
-            {
-                // Guard against multiple initialization attempts
-            }
-        }
 
         private static string ReportsDirectory => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports");
 
@@ -144,16 +130,30 @@ namespace Lyracist.Data.Services
             string fileName = $"{catalogName}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             string filePath = Path.Combine(ReportsDirectory, fileName);
 
-            PdfDocument document = new();
-            document.Info.Title = isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle;
-            document.Info.Author = "Lyracist System";
+            var metadata = new SKDocumentPdfMetadata
+            {
+                Title = isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle,
+                Author = "Lyracist System"
+            };
 
-            XFont titleFont = new(ArialFontFamily, 14, XFontStyleEx.Bold);
-            XFont headerFont = new(ArialFontFamily, 10, XFontStyleEx.Bold);
-            XFont dataFont = new(ArialFontFamily, 9, XFontStyleEx.Regular);
-            XFont footerFont = new(ArialFontFamily, 8, XFontStyleEx.Regular);
+            const float pageWidth = 612f;
+            const float pageHeight = 792f;
 
-            XStringFormat leftAlign = new() { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Center };
+            using var arialBold = SKTypeface.FromFamilyName(ArialFontFamily, SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) ?? SKTypeface.Default;
+            using var arialRegular = SKTypeface.FromFamilyName(ArialFontFamily, SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) ?? SKTypeface.Default;
+
+            using var titleFont = new SKFont(arialBold, 14);
+            using var headerFont = new SKFont(arialBold, 10);
+            using var dataFont = new SKFont(arialRegular, 9);
+            using var footerFont = new SKFont(arialRegular, 8);
+
+            using var darkSlateGrayPaint = new SKPaint { Color = new SKColor(47, 79, 79), IsAntialias = true };
+            using var blackPaint = new SKPaint { Color = SKColors.Black, IsAntialias = true };
+            using var dimGrayPaint = new SKPaint { Color = new SKColor(105, 105, 105), IsAntialias = true };
+            using var grayPaint = new SKPaint { Color = new SKColor(128, 128, 128), IsAntialias = true };
+            using var ghostWhiteFillPaint = new SKPaint { Color = new SKColor(248, 248, 255), Style = SKPaintStyle.Fill };
+            using var lightGrayStrokePaint = new SKPaint { Color = SKColors.LightGray, Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
+            using var whiteSmokeStrokePaint = new SKPaint { Color = new SKColor(245, 245, 245), Style = SKPaintStyle.Stroke, StrokeWidth = 1 };
 
             using var context = new LyracistDbContext();
             context.Database.Migrate();
@@ -163,40 +163,46 @@ namespace Lyracist.Data.Services
                 .ThenBy(s => s.Title)
                 .ToList();
 
+            using var stream = File.Create(filePath);
+            using var document = SKDocument.CreatePdf(stream, metadata);
+
             int pageNumber = 0;
-            PdfPage page = null!;
-            XGraphics gfx = null!;
-            double yPos = 800; // Force new page at start
+            bool hasOpenPage = false;
+            SKCanvas canvas = null!;
+            float yPos = 75f;
 
             void AddNewPage()
             {
-                page = document.AddPage();
-                page.Size = PdfSharp.PageSize.Letter;
-                gfx = XGraphics.FromPdfPage(page);
+                if (hasOpenPage)
+                {
+                    document.EndPage();
+                }
+                canvas = document.BeginPage(pageWidth, pageHeight);
+                hasOpenPage = true;
                 pageNumber++;
 
                 // Draw title
-                gfx.DrawString(isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle, titleFont, XBrushes.DarkSlateGray, new XRect(40, 30, 532, 20), leftAlign);
+                DrawText(canvas, isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle, 40, 30, 20, titleFont, darkSlateGrayPaint);
 
                 // Draw table header
-                gfx.DrawRectangle(XBrushes.GhostWhite, new XRect(40, 55, 532, 20));
-                gfx.DrawRectangle(XPens.LightGray, new XRect(40, 55, 532, 20));
+                canvas.DrawRect(40, 55, 532, 20, ghostWhiteFillPaint);
+                canvas.DrawRect(40, 55, 532, 20, lightGrayStrokePaint);
 
-                gfx.DrawString("Artist", headerFont, XBrushes.Black, new XRect(45, 55, 145, 20), leftAlign);
-                gfx.DrawString("Title", headerFont, XBrushes.Black, new XRect(195, 55, 215, 20), leftAlign);
-                gfx.DrawString("Length", headerFont, XBrushes.Black, new XRect(415, 55, 45, 20), leftAlign);
-                gfx.DrawString("Genre", headerFont, XBrushes.Black, new XRect(465, 55, 107, 20), leftAlign);
+                DrawText(canvas, "Artist", 45, 55, 20, headerFont, blackPaint);
+                DrawText(canvas, "Title", 195, 55, 20, headerFont, blackPaint);
+                DrawText(canvas, "Length", 415, 55, 20, headerFont, blackPaint);
+                DrawText(canvas, "Genre", 465, 55, 20, headerFont, blackPaint);
 
                 // Draw page number footer
-                gfx.DrawLine(XPens.LightGray, 40, 750, 572, 750);
-                gfx.DrawString($"Page {pageNumber}", footerFont, XBrushes.DimGray, new XRect(40, 755, 532, 15), new XStringFormat { Alignment = XStringAlignment.Far });
+                canvas.DrawLine(40, 750, 572, 750, lightGrayStrokePaint);
+                DrawTextRight(canvas, $"Page {pageNumber}", 572, 755, 15, footerFont, dimGrayPaint);
 
-                yPos = 75;
+                yPos = 75f;
             }
 
             foreach (var song in songs)
             {
-                if (yPos + 18 > 740)
+                if (!hasOpenPage || yPos + 18 > 740)
                 {
                     AddNewPage();
                 }
@@ -206,23 +212,48 @@ namespace Lyracist.Data.Services
                 string durationStr = TimeSpan.FromSeconds(song.Duration).ToString(@"mm\:ss");
                 string genre = Truncate(song.Genre, 20);
 
-                gfx.DrawString(artist, dataFont, XBrushes.Black, new XRect(45, yPos, 145, 18), leftAlign);
-                gfx.DrawString(title, dataFont, XBrushes.Black, new XRect(195, yPos, 215, 18), leftAlign);
-                gfx.DrawString(durationStr, dataFont, XBrushes.Black, new XRect(415, yPos, 45, 18), leftAlign);
-                gfx.DrawString(genre, dataFont, XBrushes.Black, new XRect(465, yPos, 107, 18), leftAlign);
+                DrawText(canvas, artist, 45, yPos, 18, dataFont, blackPaint);
+                DrawText(canvas, title, 195, yPos, 18, dataFont, blackPaint);
+                DrawText(canvas, durationStr, 415, yPos, 18, dataFont, blackPaint);
+                DrawText(canvas, genre, 465, yPos, 18, dataFont, blackPaint);
 
-                gfx.DrawLine(XPens.WhiteSmoke, 40, yPos + 18, 572, yPos + 18);
+                canvas.DrawLine(40, yPos + 18, 572, yPos + 18, whiteSmokeStrokePaint);
                 yPos += 18;
             }
 
             if (pageNumber == 0)
             {
                 AddNewPage();
-                gfx.DrawString("No tracks found in the database matching this type.", dataFont, XBrushes.Gray, new XRect(45, yPos, 500, 18), leftAlign);
+                DrawText(canvas, "No tracks found in the database matching this type.", 45, yPos, 18, dataFont, grayPaint);
             }
 
-            document.Save(filePath);
+            if (hasOpenPage)
+            {
+                document.EndPage();
+            }
+            document.Close();
+
             return filePath;
+        }
+
+        private static void DrawText(SKCanvas canvas, string text, float x, float rowY, float rowHeight, SKFont font, SKPaint paint)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            font.GetFontMetrics(out var metrics);
+            float textHeight = Math.Abs(metrics.Ascent) + metrics.Descent;
+            float verticalOffset = (rowHeight - textHeight) / 2f;
+            float baseline = rowY + verticalOffset + Math.Abs(metrics.Ascent);
+            canvas.DrawText(text, x, baseline, SKTextAlign.Left, font, paint);
+        }
+
+        private static void DrawTextRight(SKCanvas canvas, string text, float rightX, float rowY, float rowHeight, SKFont font, SKPaint paint)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            font.GetFontMetrics(out var metrics);
+            float textHeight = Math.Abs(metrics.Ascent) + metrics.Descent;
+            float verticalOffset = (rowHeight - textHeight) / 2f;
+            float baseline = rowY + verticalOffset + Math.Abs(metrics.Ascent);
+            canvas.DrawText(text, rightX, baseline, SKTextAlign.Right, font, paint);
         }
 
         public static string GenerateTxt(bool isKaraoke)
@@ -295,50 +326,6 @@ namespace Lyracist.Data.Services
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
             return text.Length <= maxLength ? text : $"{text.Substring(0, maxLength - 3)}...";
-        }
-
-        public class SimpleFontResolver : PdfSharp.Fonts.IFontResolver
-        {
-            public byte[]? GetFont(string faceName)
-            {
-                string fontFile = faceName switch
-                {
-                    "Arial-Bold" => "arialbd.ttf",
-                    "Arial-Italic" => "ariali.ttf",
-                    "Arial-BoldItalic" => "arialbi.ttf",
-                    _ => "arial.ttf"
-                };
-
-                string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", fontFile);
-                if (File.Exists(fontPath))
-                {
-                    return File.ReadAllBytes(fontPath);
-                }
-                // Fallback to regular arial
-                fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "arial.ttf");
-                if (File.Exists(fontPath))
-                {
-                    return File.ReadAllBytes(fontPath);
-                }
-
-                return null;
-            }
-
-            public PdfSharp.Fonts.FontResolverInfo ResolveTypeface(string familyName, bool bold, bool italic)
-            {
-                if (familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (bold && italic)
-                        return new PdfSharp.Fonts.FontResolverInfo("Arial-BoldItalic");
-                    else if (bold)
-                        return new PdfSharp.Fonts.FontResolverInfo("Arial-Bold");
-                    else if (italic)
-                        return new PdfSharp.Fonts.FontResolverInfo("Arial-Italic");
-                    else
-                        return new PdfSharp.Fonts.FontResolverInfo("Arial");
-                }
-                return null!;
-            }
         }
     }
 }

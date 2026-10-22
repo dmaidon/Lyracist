@@ -1,4 +1,4 @@
-<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.207 across tests -->
+<!-- Edited on Oct 22, 2026 @ 08:41:00 -> Add PDFsharp and SkiaSharp dependencies for test suites -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.10.22.215</AssemblyVersion>
-    <FileVersion>26.10.22.215</FileVersion>
+    <AssemblyVersion>26.10.22.217</AssemblyVersion>
+    <FileVersion>26.10.22.217</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +24,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.153.1" />
   </ItemGroup>
 
   <ItemGroup>

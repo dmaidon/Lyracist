@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:39:00 -> Fix xUnit2033 return values of Assert.Single
+// Edited on Oct 22, 2026 @ 08:43:00 -> Add unit tests for GeneratePdf and GenerateCsv
 using KSRotation.Models;
 using KSRotation.Services;
 using System;
@@ -138,3 +138,38 @@ public class EscapeCsvTests
         Assert.Equal(string.Empty, RotationReportGenerator.EscapeCsv(null!));
     }
 }
+
+public class GenerateReportTests
+{
+    [Fact]
+    public void GeneratePdfCreatesValidPdfFile()
+    {
+        var singer = new SingerEntry { Name = "Alice" };
+        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Alice", SongTitle = "Song Title", ArtistName = "Artist Name", Round = 1, Timestamp = DateTime.Now };
+
+        string filePath = RotationReportGenerator.GeneratePdf([singer], [perf], "Test Venue");
+
+        Assert.True(File.Exists(filePath));
+        var fileInfo = new FileInfo(filePath);
+        Assert.True(fileInfo.Length > 0);
+
+        try { File.Delete(filePath); } catch { }
+    }
+
+    [Fact]
+    public void GenerateCsvCreatesValidCsvFile()
+    {
+        var singer = new SingerEntry { Name = "Bob" };
+        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Bob", SongTitle = "Test Song", ArtistName = "Test Artist", Round = 1, Timestamp = DateTime.Now };
+
+        string filePath = RotationReportGenerator.GenerateCsv([singer], [perf]);
+
+        Assert.True(File.Exists(filePath));
+        string content = File.ReadAllText(filePath);
+        Assert.Contains("Bob", content);
+        Assert.Contains("Test Song", content);
+
+        try { File.Delete(filePath); } catch { }
+    }
+}
+

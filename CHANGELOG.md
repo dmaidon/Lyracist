@@ -1,5 +1,5 @@
-<!-- Edited on Oct 22, 2026 @ 08:12:00 -> Add event-driven native Windows display settings change detection across all apps -->
-Last Edit: Oct 22, 2026 - Windows Native Display Settings Change Detection
+<!-- Edited on Oct 22, 2026 @ 08:49:00 -> Document SkiaSharp PDF generation migration in ChangeLog -->
+Last Edit: Oct 22, 2026 - Migration to SkiaSharp for PDF Generation & Native Display Change Detection
 
 # Changelog
 
@@ -12,8 +12,14 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Implemented static listening to `Microsoft.Win32.SystemEvents.DisplaySettingsChanged` with an automatic 250ms debounce and UI dispatcher marshaling in `MonitorEnumerator`.
   - Replaced repetitive OS P/Invoke monitor enumeration calls with a synchronized in-memory cache (`_cachedMonitors`) that invalidates and refreshes only when Windows reports actual display topology, resolution, or cable connection/disconnection changes.
   - Exposed `MonitorEnumerator.MonitorsChanged` event to notify all running apps and view models dynamically.
+- **Rotation Report PDF & CSV Unit Tests (`KSRotation.Tests/RotationReportServiceTests.cs`)**:
+  - Added unit tests for `RotationReportGenerator.GeneratePdf` and `RotationReportGenerator.GenerateCsv`, validating that PDF files and CSV rotation summaries generate cleanly to disk with non-zero byte size and correct row formatting.
 
 ### Changed
+- **Permanent Migration from PDFsharp to SkiaSharp for PDF Generation (`KSRotation/Services/RotationReportGenerator.cs`, `Lyracist.Data/Services/CatalogBookGenerator.cs`, `KSRotation/KSRotation.csproj`, `Lyracist.Data/Lyracist.Data.csproj`, `KSRotation.Maui/KSRotation.Maui.csproj`, `Lyracist.Tests/CatalogBookGeneratorTests.cs`)**:
+  - Permanently replaced `PDFsharp` across all production projects with `SkiaSharp`'s native vector PDF generation API (`SKDocument.CreatePdf`), resolving all risk of future commercial paywall/license traps (`The loaded license is not valid` introduced when PDFsharp bumped to 6.5.0+).
+  - Rewrote `KSRotation.Services.RotationReportGenerator` to render rotation reports (header boxes, venue metadata, section dividers, singer performance bullet rows, and summary tables) using `SKCanvas`, `SKFont`, `SKPaint`, and `SKTextAlign`, eliminating platform-specific font checks and custom font resolvers.
+  - Rewrote `Lyracist.Data.Services.CatalogBookGenerator` to render multi-page Karaoke and Music song catalog books using `SkiaSharp` with standard Letter pagination, custom table borders, alternating dividers, vertical cell text centering, and dynamic footer page numbering, removing `SimpleFontResolver` from production code.
 - **Lyracist DJ Banner Monitor Cap Optimization (`Lyracist/ViewModels/DjBannerWindowViewModel.cs`)**:
   - Replaced the 30-second polling interval check (`TimeSpan.FromSeconds(30)`) with event-driven invalidation hooked to `MonitorEnumerator.MonitorsChanged`. The maximum monitor width cap is now cached indefinitely until a monitor change actually occurs, eliminating repetitive enumeration calls during banner rendering.
 - **Dynamic Multi-Monitor Screen Dropdown Synchronization (`Lyracist/ViewModels/SettingsViewModel.Display.cs`, `Lyracist/ViewModels/SettingsViewModel.cs`, `Lyracist/ViewModels/KaraokeViewModel.Screens.cs`, `Lyracist/Services/Display/DisplayService.cs`)**:
@@ -28,8 +34,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ### Fixed
 - **PDF Report Generation License Exception in KSRotation & Catalog Book Exporter (`KSRotation/KSRotation.csproj`, `Lyracist.Data/Lyracist.Data.csproj`, `KSRotation.Maui/KSRotation.Maui.csproj`)**:
-  - Reverted `PDFsharp` package reference from `6.5.0` back to `6.2.4`.
-  - Version `6.5.0` introduced a breaking license verification check (`The loaded license is not valid`) requiring an AGPL v3 or commercial license key. Pinning `PDFsharp` to `6.2.4` restores the permissive MIT licensing model, completely resolving the error when saving end-of-night rotation reports in KSRotation and exporting catalog books in Lyracist.
+  - Completely eradicated the `The loaded license is not valid` runtime exception when saving end-of-night rotation reports in KSRotation and exporting catalog books in Lyracist by removing `PDFsharp` in favor of open-source `SkiaSharp`.
 
 ## [Unreleased] - 2026-10-21
 

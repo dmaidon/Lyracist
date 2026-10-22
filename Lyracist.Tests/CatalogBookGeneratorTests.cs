@@ -1,4 +1,4 @@
-// Edited on Oct 8, 2026 @ 13:28:00 -> Add graceful IOException handling for open manual docx in UpdateUserManuals
+// Edited on Oct 22, 2026 @ 08:42:00 -> Update test suite to use local SimpleFontResolver for manual PDF tests
 using System;
 using System.IO;
 using Xunit;
@@ -83,7 +83,7 @@ namespace Lyracist.Tests
             // Register PDFsharp custom font resolver for test context
             try
             {
-                PdfSharp.Fonts.GlobalFontSettings.FontResolver = new CatalogBookGenerator.SimpleFontResolver();
+                PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
             }
             catch
             {
@@ -4754,6 +4754,49 @@ Lyracist v26.10.7 introduces comprehensive live performance tools:
                 {
                     throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
                 }
+            }
+        }
+
+        private sealed class SimpleFontResolver : PdfSharp.Fonts.IFontResolver
+        {
+            public byte[]? GetFont(string faceName)
+            {
+                string fontFile = faceName switch
+                {
+                    "Arial-Bold" => "arialbd.ttf",
+                    "Arial-Italic" => "ariali.ttf",
+                    "Arial-BoldItalic" => "arialbi.ttf",
+                    _ => "arial.ttf"
+                };
+
+                string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", fontFile);
+                if (File.Exists(fontPath))
+                {
+                    return File.ReadAllBytes(fontPath);
+                }
+                fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "arial.ttf");
+                if (File.Exists(fontPath))
+                {
+                    return File.ReadAllBytes(fontPath);
+                }
+
+                return null;
+            }
+
+            public PdfSharp.Fonts.FontResolverInfo ResolveTypeface(string familyName, bool bold, bool italic)
+            {
+                if (familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (bold && italic)
+                        return new PdfSharp.Fonts.FontResolverInfo("Arial-BoldItalic");
+                    else if (bold)
+                        return new PdfSharp.Fonts.FontResolverInfo("Arial-Bold");
+                    else if (italic)
+                        return new PdfSharp.Fonts.FontResolverInfo("Arial-Italic");
+                    else
+                        return new PdfSharp.Fonts.FontResolverInfo("Arial");
+                }
+                return null!;
             }
         }
     }
