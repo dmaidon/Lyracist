@@ -20,6 +20,20 @@ public partial class ScaryokeViewModel : BaseViewModel
 
     public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
 
+    private const int RecentLimit = 8;
+    private readonly List<string> _recent = [];
+
+    /// <summary>
+    /// True when <paramref name="name"/> was landed on in the last two spins, so a local spin can
+    /// skip it. The window is kept smaller than the wheel so a valid segment always remains.
+    /// </summary>
+    public bool IsRecentRepeat(string name)
+    {
+        int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        int window = Math.Min(2, distinct - 1);
+        return _recent.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
+    }
+
     private readonly IDisplayService _display;
     private readonly RotationViewModel _rotation;
 
@@ -138,6 +152,15 @@ public partial class ScaryokeViewModel : BaseViewModel
     /// </summary>
     public bool ApplyResult(string category)
     {
+        if (category != "Spin Again")
+        {
+            _recent.Insert(0, category);
+            if (_recent.Count > RecentLimit)
+            {
+                _recent.RemoveAt(_recent.Count - 1);
+            }
+        }
+
         if (category == "Spin Again")
         {
             ResultText = "🔁 Spin Again!";

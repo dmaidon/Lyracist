@@ -230,6 +230,43 @@ public partial class ScaryokeWindow : Window
 
     private void OnSpinClick(object sender, RoutedEventArgs e) => Spin();
 
+    /// <summary>Segment covering the given angle, measured clockwise from the wheel's 12 o'clock start.</summary>
+    private Lyracist.ViewModels.WheelSegment SegmentAtPointerAngle(double angle)
+    {
+        double start = 0;
+        foreach (var segment in _vm.WheelSegments)
+        {
+            double end = start + segment.Sweep;
+            if (angle >= start && angle < end)
+            {
+                return segment;
+            }
+            start = end;
+        }
+
+        return _vm.WheelSegments[0];
+    }
+
+    /// <summary>Red flash across the window and a shake of the result text.</summary>
+    private void PlayDjsChoiceReveal()
+    {
+        var flash = new DoubleAnimationUsingKeyFrames();
+        flash.KeyFrames.Add(new LinearDoubleKeyFrame(0.6, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(80))));
+        flash.KeyFrames.Add(new LinearDoubleKeyFrame(0.05, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(260))));
+        flash.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(340))));
+        flash.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1000))));
+        FlashOverlay.BeginAnimation(OpacityProperty, flash);
+
+        var shake = new DoubleAnimationUsingKeyFrames();
+        double[] offsets = [-12, 12, -9, 9, -5, 5, 0];
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            shake.KeyFrames.Add(new LinearDoubleKeyFrame(offsets[i], KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds((i + 1) * 70))));
+        }
+
+        ResultShake.BeginAnimation(TranslateTransform.XProperty, shake);
+    }
+
     public double TargetAngle { get; private set; }
     public double SpinDuration { get; private set; }
 
@@ -246,8 +283,26 @@ public partial class ScaryokeWindow : Window
         // Rebuild segments on start spin to place "DJ's Choice" in a fresh random index
         RebuildWheel();
 
-        // 4-7 full turns plus a random landing offset, easing to a stop.
-        double target = forceTarget ?? (_currentAngle + 1440 + Random.Shared.NextDouble() * 1080);
+        // 4-7 full turns plus a random landing offset, easing to a stop. A forced target (remote
+        // spin) is used as-is; local spins re-roll the landing point while it hits a recent category.
+        double target;
+        if (forceTarget.HasValue)
+        {
+            target = forceTarget.Value;
+        }
+        else
+        {
+            double landing = 0;
+            for (int attempt = 0; attempt < 50; attempt++)
+            {
+                landing = Random.Shared.NextDouble() * 360;
+                if (!_vm.IsRecentRepeat(SegmentAtPointerAngle(landing).Name)) break;
+            }
+
+            double desired = (360 - landing) % 360;
+            double baseAngle = _currentAngle + 1440 + (Random.Shared.Next(0, 3) * 360);
+            target = baseAngle + (((desired - (baseAngle % 360)) + 360) % 360);
+        }
         TargetAngle = target;
 
         // Calculate dynamic duration based on rotation angle (harder spin = more rotations = longer duration)
@@ -276,24 +331,12 @@ public partial class ScaryokeWindow : Window
             SpinButton.IsEnabled = true;
 
             // Determine landed segment using non-uniform sweeps
-            double targetAngle = (360 - _currentAngle) % 360;
-            Lyracist.ViewModels.WheelSegment landedSegment = _vm.WheelSegments[0];
-            double currentStart = 0;
-            for (int i = 0; i < _vm.WheelSegments.Count; i++)
-            {
-                double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
-                if (targetAngle >= currentStart && targetAngle < currentEnd)
-                {
-                    landedSegment = _vm.WheelSegments[i];
-                    break;
-                }
-                currentStart = currentEnd;
-            }
-            string category = landedSegment.Name;
+            string category = SegmentAtPointerAngle((360 - _currentAngle) % 360).Name;
 
             // Play custom laughter if landing on DJ's Choice
             if (string.Equals(category, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
             {
+                PlayDjsChoiceReveal();
                 try
                 {
                     string[] laughFiles = ["evil-laugh-deep.mp3", "evil-laugh-reverb.mp3"];

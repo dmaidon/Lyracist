@@ -28,7 +28,21 @@ namespace KSRotation.Maui.ViewModels
         private const string SingersChoice = "Singer's Choice";
         private const string DjsChoice = "DJ's Choice";
 
+        private const int RecentLimit = 8;
+        private readonly List<string> _recent = [];
+
         private readonly MainViewModel _rotation;
+
+        /// <summary>
+        /// True when <paramref name="name"/> was landed on in the last two spins, so a spin can skip
+        /// it. The window is kept smaller than the wheel so a valid segment always remains.
+        /// </summary>
+        public bool IsRecentRepeat(string name)
+        {
+            int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            int window = Math.Min(2, distinct - 1);
+            return _recent.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
+        }
 
         public ObservableCollection<string> CustomCategories { get; } = [];
 
@@ -171,6 +185,12 @@ namespace KSRotation.Maui.ViewModels
         /// current yet).</summary>
         public void ApplyResult(string category)
         {
+            _recent.Insert(0, category);
+            if (_recent.Count > RecentLimit)
+            {
+                _recent.RemoveAt(_recent.Count - 1);
+            }
+
             var singer = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
                 ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
             string singerName = singer?.Name ?? "The singer";

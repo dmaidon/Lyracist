@@ -66,7 +66,12 @@
             <TextBlock Text="{Binding ResultText}"
                        FontSize="16" FontWeight="SemiBold"
                        Foreground="White"
-                       TextAlignment="Center" TextWrapping="Wrap"/>
+                       TextAlignment="Center" TextWrapping="Wrap"
+                       RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                    <TranslateTransform x:Name="ResultShake"/>
+                </TextBlock.RenderTransform>
+            </TextBlock>
         </Border>
 
         <!-- Spin -->
@@ -80,5 +85,9 @@
                 BorderThickness="0"
                 Cursor="Hand"
                 Click="OnSpinClick"/>
+
+        <!-- Full-window flash used for the DJ's Choice reveal -->
+        <Border x:Name="FlashOverlay" Grid.RowSpan="4" Margin="-20"
+                Background="#FF3D00" Opacity="0" IsHitTestVisible="False"/>
     </Grid>
 </Window>
