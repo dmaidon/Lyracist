@@ -1,9 +1,8 @@
-// Created on Jul 27, 2026 @ 10:00:00 -> Maui-specific report delivery: reuses the shared
-// RotationReportGenerator (PDF/CSV) but hands off the email step to the device's own mail app
-// instead of the desktop .eml-draft-and-launch trick KSRotation's own RotationReportService uses.
+// Edited on Oct 22, 2026 @ 10:25:00 -> Use MMMddyy date format in email compose subject
 using KSRotation.Models;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.Communication;
+using System.Globalization;
 using System.IO;
 
 namespace KSRotation.Services
@@ -35,10 +34,13 @@ namespace KSRotation.Services
             List<SingerEntry> singersList = [.. singers];
             List<SongPerformance> historyList = [.. history];
 
+            DateTime perfDate = RotationReportGenerator.GetPerformanceDate(historyList);
+            string baseFileName = RotationReportGenerator.BuildReportBaseFileName(venueName, perfDate);
+
             var (pdfPath, csvPath) = await Task.Run(() =>
             {
-                string pdf = RotationReportGenerator.GeneratePdf(singersList, historyList, venueName);
-                string csv = RotationReportGenerator.GenerateCsv(singersList, historyList);
+                string pdf = RotationReportGenerator.GeneratePdf(singersList, historyList, venueName, baseFileName);
+                string csv = RotationReportGenerator.GenerateCsv(singersList, historyList, venueName, baseFileName);
                 return (pdf, csv);
             });
 
@@ -50,7 +52,7 @@ namespace KSRotation.Services
             {
                 try
                 {
-                    await ComposeEmailAsync(emailRecipient.Trim(), venueName, pdfPath, csvPath);
+                    await ComposeEmailAsync(emailRecipient.Trim(), venueName, perfDate, pdfPath, csvPath);
                 }
                 catch (Exception ex)
                 {
@@ -61,7 +63,7 @@ namespace KSRotation.Services
             return (pdfPath, csvPath, emailError);
         }
 
-        private static async Task ComposeEmailAsync(string emailRecipient, string venueName, string pdfPath, string csvPath)
+        private static async Task ComposeEmailAsync(string emailRecipient, string venueName, DateTime perfDate, string pdfPath, string csvPath)
         {
             try
             {
@@ -70,10 +72,15 @@ namespace KSRotation.Services
                     .Select(e => e.Trim())
                     .ToList();
 
+                string dateStr = perfDate.ToString("MMMddyy", CultureInfo.InvariantCulture);
                 var message = new EmailMessage
                 {
-                    Subject = $"Karaoke Rotation Report - {venueName} - {DateTime.Now:yyyy-MM-dd}",
-                    Body = $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {venueName} on {DateTime.Now:dddd, MMMM d, yyyy}.",
+                    Subject = string.IsNullOrWhiteSpace(venueName)
+                        ? $"Karaoke Rotation Report - {dateStr}"
+                        : $"Karaoke Rotation Report - {venueName} - {dateStr}",
+                    Body = string.IsNullOrWhiteSpace(venueName)
+                        ? $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {perfDate:dddd, MMMM d, yyyy}."
+                        : $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {venueName} on {perfDate:dddd, MMMM d, yyyy}.",
                     To = recipients,
                     Attachments = []
                 };

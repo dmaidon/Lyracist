@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:42:00 -> Migrate PDF generation from PDFsharp to SkiaSharp
+// Edited on Oct 22, 2026 @ 10:25:00 -> Use MMMddyy date format for report filenames and metadata
 using KSRotation.Models;
 using SkiaSharp;
 using System;
@@ -17,6 +17,64 @@ namespace KSRotation.Services
     public static class RotationReportGenerator
     {
         private static string ReportDirectoryPath => AppPaths.ReportsDirectoryPath;
+
+        /// <summary>
+        /// Determines the performance date from the earliest performance in history, falling back to today if history is empty.
+        /// </summary>
+        internal static DateTime GetPerformanceDate(List<SongPerformance>? history)
+        {
+            if (history != null && history.Count > 0)
+            {
+                return history.Min(h => h.Timestamp).Date;
+            }
+            return DateTime.Today;
+        }
+
+        /// <summary>
+        /// Strips invalid file name characters from a string so it can be safely used in a file name.
+        /// </summary>
+        internal static string SanitizeFileNamePart(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return string.Empty;
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sb = new StringBuilder(name.Length);
+            foreach (char c in name.Trim())
+            {
+                if (invalidChars.Contains(c) || c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)
+                {
+                    continue;
+                }
+                sb.Append(c);
+            }
+            return sb.ToString().Trim();
+        }
+
+        /// <summary>
+        /// Builds the report base filename without extension, in the format "[Venue] - MMMddyy" (or "MMMddyy" if no venue),
+        /// incrementing a numeric suffix (" (2)", " (3)") if a file with the candidate name already exists.
+        /// </summary>
+        internal static string BuildReportBaseFileName(string? venueName, DateTime perfDate)
+        {
+            string dateStr = perfDate.ToString("MMMddyy", CultureInfo.InvariantCulture);
+            string sanitizedVenue = SanitizeFileNamePart(venueName);
+            string baseName = string.IsNullOrWhiteSpace(sanitizedVenue)
+                ? dateStr
+                : $"{sanitizedVenue} - {dateStr}";
+
+            string candidate = baseName;
+            int counter = 2;
+            while (File.Exists(Path.Combine(ReportDirectoryPath, $"{candidate}.pdf")) ||
+                   File.Exists(Path.Combine(ReportDirectoryPath, $"{candidate}.csv")))
+            {
+                candidate = $"{baseName} ({counter++})";
+            }
+
+            return candidate;
+        }
 
         /// <summary>A single singer's report line: their display name, completed performances (round-ordered),
         /// and whether they are marked inactive in the queue. Built once and shared by both the CSV and PDF writers.</summary>
@@ -80,7 +138,9 @@ namespace KSRotation.Services
 
         internal static string GenerateCsv(
             List<SingerEntry> singers,
-            List<SongPerformance> history)
+            List<SongPerformance> history,
+            string? venueName = null,
+            string? baseFileName = null)
         {
             StringBuilder sb = new();
             sb.AppendLine("Singer,Duet Partner,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp");
@@ -120,7 +180,9 @@ namespace KSRotation.Services
             }
 
             Directory.CreateDirectory(ReportDirectoryPath);
-            string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            DateTime perfDate = GetPerformanceDate(history);
+            string baseName = baseFileName ?? BuildReportBaseFileName(venueName, perfDate);
+            string fileName = $"{baseName}.csv";
             string filePath = Path.Combine(ReportDirectoryPath, fileName);
             File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
             return filePath;
@@ -129,15 +191,20 @@ namespace KSRotation.Services
         internal static string GeneratePdf(
             List<SingerEntry> singers,
             List<SongPerformance> history,
-            string venueName)
+            string venueName,
+            string? baseFileName = null)
         {
             Directory.CreateDirectory(ReportDirectoryPath);
-            string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            DateTime perfDate = GetPerformanceDate(history);
+            string baseName = baseFileName ?? BuildReportBaseFileName(venueName, perfDate);
+            string fileName = $"{baseName}.pdf";
             string filePath = Path.Combine(ReportDirectoryPath, fileName);
 
             var metadata = new SKDocumentPdfMetadata
             {
-                Title = $"Karaoke Rotation Report - {venueName}",
+                Title = string.IsNullOrWhiteSpace(venueName)
+                    ? $"Karaoke Rotation Report - {perfDate.ToString("MMMddyy", CultureInfo.InvariantCulture)}"
+                    : $"Karaoke Rotation Report - {venueName} - {perfDate.ToString("MMMddyy", CultureInfo.InvariantCulture)}",
                 Author = "Karaoke Singer Rotation"
             };
 
@@ -146,7 +213,7 @@ namespace KSRotation.Services
             {
                 using (var layout = new PdfLayoutManager(document))
                 {
-                    string date = DateTime.Now.ToString("dddd, MMMM d, yyyy", CultureInfo.CurrentCulture);
+                    string date = perfDate.ToString("dddd, MMMM d, yyyy", CultureInfo.CurrentCulture);
                     string time = DateTime.Now.ToString("h:mm tt", CultureInfo.CurrentCulture);
                     layout.DrawHeader("Karaoke Rotation Report", venueName, date, time);
 

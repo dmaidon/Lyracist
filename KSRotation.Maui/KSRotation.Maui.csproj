@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 08:41:00 -> Replace PDFsharp with SkiaSharp for PDF generation -->
+<!-- Edited on Oct 22, 2026 @ 09:57:00 -> Update AssemblyVersion, FileVersion, and ApplicationDisplayVersion to 26.10.22.* -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -20,11 +20,11 @@
 		<ApplicationTitle>KSRotation.Maui</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>psft.ksrotation.maui</ApplicationId>
+		<ApplicationId>com.parole.ksrotation</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0.1</ApplicationDisplayVersion>
-		<ApplicationVersion>2</ApplicationVersion>
+		<ApplicationDisplayVersion>26.10.22</ApplicationDisplayVersion>
+		<ApplicationVersion>3</ApplicationVersion>
 
 		<!-- To develop on Windows with unpackaged, change to None -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -34,21 +34,13 @@
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-	</PropertyGroup>
-
-	<!-- Fast Deployment stays on for Debug so F5 only pushes changed assemblies instead of a full
-	     ~100MB reinstall each time; Release keeps the full embed for launch stability. -->
-	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Debug'">
-		<AndroidEnableFastDeployment>true</AndroidEnableFastDeployment>
-	</PropertyGroup>
-	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' != 'Debug'">
 		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.10.5.728</AssemblyVersion>
+		<AssemblyVersion>26.10.22.758</AssemblyVersion>
 
-		<FileVersion>26.10.5.728</FileVersion>
+		<FileVersion>26.10.22.758</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -136,13 +128,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.120" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.13" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.13" />
 		<PackageReference Include="System.Formats.Nrbf" Version="10.0.13" />
 		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Maui.Controls.Build.Tasks" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Resizetizer" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Controls.Build.Tasks" Version="10.0.120" />
+		<PackageReference Include="Microsoft.Maui.Resizetizer" Version="10.0.120" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="QRCoder" Version="1.8.1" />
 		<PackageReference Include="System.Resources.Extensions" Version="10.0.13" />

@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Remove dead suppression targets (IDE0076)
+// Edited on Oct 22, 2026 @ 10:15:00 -> Update suppression target for CreateEmlDraft signature
 // This file is used by Code Analysis to maintain SuppressMessage
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given
@@ -21,7 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.HandleClientAsync(System.Net.Sockets.TcpClient)~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.Start")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.Stop")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.RotationReportService.CreateEmlDraft(System.String,System.String,System.String,System.String)")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.RotationReportService.CreateEmlDraft(System.String,System.String,System.DateTime,System.String,System.String,System.String)")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.ThemeService.Apply(System.String)")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.ThemeService.IsSystemDarkMode~System.Boolean")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.#ctor")]

@@ -1,6 +1,8 @@
-// Last Edit: Jul 27, 2026 10:00 - Split PDF/CSV generation out into RotationReportGenerator (shared with
-// KSRotation.Maui); this file now only holds the desktop-specific email-draft delivery mechanism.
+// Edited on Oct 22, 2026 @ 10:25:00 -> Use MMMddyy date format in EML draft subject
 using KSRotation.Models;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Mail;
@@ -41,8 +43,10 @@ namespace KSRotation.Services
 
             return Task.Run(() =>
             {
-                string pdfPath = RotationReportGenerator.GeneratePdf(singersList, historyList, venueName);
-                string csvPath = RotationReportGenerator.GenerateCsv(singersList, historyList);
+                DateTime perfDate = RotationReportGenerator.GetPerformanceDate(historyList);
+                string baseFileName = RotationReportGenerator.BuildReportBaseFileName(venueName, perfDate);
+                string pdfPath = RotationReportGenerator.GeneratePdf(singersList, historyList, venueName, baseFileName);
+                string csvPath = RotationReportGenerator.GenerateCsv(singersList, historyList, venueName, baseFileName);
 
                 // The PDF/CSV are already safely on disk at this point. Emailing them is a best-effort
                 // extra step — a mail-client/SMTP-pickup failure here must not make the caller think the
@@ -52,7 +56,7 @@ namespace KSRotation.Services
                 {
                     try
                     {
-                        CreateEmlDraft(emailRecipient.Trim(), venueName, pdfPath, csvPath);
+                        CreateEmlDraft(emailRecipient.Trim(), venueName, perfDate, baseFileName, pdfPath, csvPath);
                     }
                     catch (Exception ex)
                     {
@@ -68,6 +72,8 @@ namespace KSRotation.Services
         private static void CreateEmlDraft(
             string emailRecipient,
             string venueName,
+            DateTime perfDate,
+            string baseFileName,
             string pdfPath,
             string csvPath)
         {
@@ -87,8 +93,13 @@ namespace KSRotation.Services
                     mail.To.Add("recipient@example.com");
                 }
 
-                mail.Subject = $"Karaoke Rotation Report - {venueName} - {DateTime.Now:yyyy-MM-dd}";
-                mail.Body = $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {venueName} on {DateTime.Now:dddd, MMMM d, yyyy}.";
+                string dateStr = perfDate.ToString("MMMddyy", CultureInfo.InvariantCulture);
+                mail.Subject = string.IsNullOrWhiteSpace(venueName)
+                    ? $"Karaoke Rotation Report - {dateStr}"
+                    : $"Karaoke Rotation Report - {venueName} - {dateStr}";
+                mail.Body = string.IsNullOrWhiteSpace(venueName)
+                    ? $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {perfDate:dddd, MMMM d, yyyy}."
+                    : $"Attached are the Karaoke Rotation Reports (PDF and CSV formats) for {venueName} on {perfDate:dddd, MMMM d, yyyy}.";
                 mail.Headers.Add("X-Unsent", "1");
 
                 if (File.Exists(pdfPath))
@@ -119,7 +130,7 @@ namespace KSRotation.Services
                     if (files.Length > 0)
                     {
                         string sourceEml = files[0];
-                        string destEmlName = $"Rotation_Report_{DateTime.Now:yyyyMMdd_HHmmss}.eml";
+                        string destEmlName = $"{baseFileName}.eml";
                         string destEmlPath = Path.Combine(ReportDirectoryPath, destEmlName);
 
                         Directory.CreateDirectory(ReportDirectoryPath);

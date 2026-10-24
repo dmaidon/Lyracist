@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Edited on Sep 17, 2026 @ 11:58:00 -> Add ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION permissions for GPS venue auto-location -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- Edited on Oct 22, 2026 @ 09:48:00 -> Suppress AndroidX dynamic receiver signature permission to avoid Android 16 PackageManager NPE -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 	<application android:allowBackup="true" android:supportsRtl="true" android:usesCleartextTraffic="true" android:label="KSRotation.MAUI"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
@@ -8,4 +8,6 @@
 	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
+	<uses-permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
 </manifest>

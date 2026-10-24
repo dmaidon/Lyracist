@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:43:00 -> Add unit tests for GeneratePdf and GenerateCsv
+// Edited on Oct 22, 2026 @ 10:25:00 -> Update unit tests for MMMddyy date format in filenames
 using KSRotation.Models;
 using KSRotation.Services;
 using System;
@@ -142,14 +142,71 @@ public class EscapeCsvTests
 public class GenerateReportTests
 {
     [Fact]
-    public void GeneratePdfCreatesValidPdfFile()
+    public void GetPerformanceDate_ReturnsEarliestDate_WhenHistoryExists()
+    {
+        var day1 = new DateTime(2026, 10, 20, 21, 30, 0);
+        var day2 = new DateTime(2026, 10, 21, 1, 15, 0);
+        List<SongPerformance> history =
+        [
+            new() { Timestamp = day2, SingerName = "Bob" },
+            new() { Timestamp = day1, SingerName = "Alice" }
+        ];
+
+        DateTime result = RotationReportGenerator.GetPerformanceDate(history);
+        Assert.Equal(new DateTime(2026, 10, 20), result);
+    }
+
+    [Fact]
+    public void GetPerformanceDate_ReturnsToday_WhenHistoryIsEmpty()
+    {
+        DateTime result = RotationReportGenerator.GetPerformanceDate([]);
+        Assert.Equal(DateTime.Today, result);
+    }
+
+    [Fact]
+    public void SanitizeFileNamePart_RemovesIllegalCharacters()
+    {
+        string sanitized = RotationReportGenerator.SanitizeFileNamePart("Rusty/Anchor: Bar & Grill?");
+        Assert.DoesNotContain("/", sanitized);
+        Assert.DoesNotContain(":", sanitized);
+        Assert.DoesNotContain("?", sanitized);
+        Assert.Contains("Rusty", sanitized);
+        Assert.Contains("Anchor", sanitized);
+    }
+
+    [Fact]
+    public void BuildReportBaseFileName_FormatsVenueAndDateWithoutRotation()
+    {
+        var date = new DateTime(2026, 10, 21);
+        string baseName = RotationReportGenerator.BuildReportBaseFileName("The Rusty Anchor", date);
+        Assert.StartsWith("The Rusty Anchor - Oct2126", baseName);
+        Assert.DoesNotContain("Rotation", baseName);
+    }
+
+    [Fact]
+    public void BuildReportBaseFileName_UsesDateOnly_WhenVenueIsEmpty()
+    {
+        var date = new DateTime(2026, 10, 21);
+        string baseName = RotationReportGenerator.BuildReportBaseFileName("", date);
+        Assert.StartsWith("Oct2126", baseName);
+        Assert.DoesNotContain("Rotation", baseName);
+    }
+
+    [Fact]
+    public void GeneratePdfCreatesValidPdfFileWithVenueAndDateName()
     {
         var singer = new SingerEntry { Name = "Alice" };
-        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Alice", SongTitle = "Song Title", ArtistName = "Artist Name", Round = 1, Timestamp = DateTime.Now };
+        var perfDate = new DateTime(2026, 10, 21, 22, 0, 0);
+        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Alice", SongTitle = "Song Title", ArtistName = "Artist Name", Round = 1, Timestamp = perfDate };
 
         string filePath = RotationReportGenerator.GeneratePdf([singer], [perf], "Test Venue");
 
         Assert.True(File.Exists(filePath));
+        string fileName = Path.GetFileName(filePath);
+        Assert.StartsWith("Test Venue - Oct2126", fileName);
+        Assert.EndsWith(".pdf", fileName);
+        Assert.DoesNotContain("Rotation", fileName);
+
         var fileInfo = new FileInfo(filePath);
         Assert.True(fileInfo.Length > 0);
 
@@ -157,14 +214,20 @@ public class GenerateReportTests
     }
 
     [Fact]
-    public void GenerateCsvCreatesValidCsvFile()
+    public void GenerateCsvCreatesValidCsvFileWithVenueAndDateName()
     {
         var singer = new SingerEntry { Name = "Bob" };
-        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Bob", SongTitle = "Test Song", ArtistName = "Test Artist", Round = 1, Timestamp = DateTime.Now };
+        var perfDate = new DateTime(2026, 10, 21, 23, 0, 0);
+        var perf = new SongPerformance { SingerId = singer.Id, SingerName = "Bob", SongTitle = "Test Song", ArtistName = "Test Artist", Round = 1, Timestamp = perfDate };
 
-        string filePath = RotationReportGenerator.GenerateCsv([singer], [perf]);
+        string filePath = RotationReportGenerator.GenerateCsv([singer], [perf], "Test Venue");
 
         Assert.True(File.Exists(filePath));
+        string fileName = Path.GetFileName(filePath);
+        Assert.StartsWith("Test Venue - Oct2126", fileName);
+        Assert.EndsWith(".csv", fileName);
+        Assert.DoesNotContain("Rotation", fileName);
+
         string content = File.ReadAllText(filePath);
         Assert.Contains("Bob", content);
         Assert.Contains("Test Song", content);
