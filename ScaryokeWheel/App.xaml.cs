@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:22:30 -> Enforce single-instance application execution using SingleInstanceHelper
+// Edited on Oct 24, 2026 @ 15:05:00 -> Qualify System.Windows.Application to avoid ambiguity with Windows Forms
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -9,7 +9,7 @@ namespace ScaryokeWheel
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {

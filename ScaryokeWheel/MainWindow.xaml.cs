@@ -1,8 +1,9 @@
-// Edited on Oct 24, 2026 @ 14:00:00 -> Spin feel, pitched ticks, themed sounds, volume, winner pulse, true fullscreen, label fitting, saved window bounds
+// Edited on Oct 24, 2026 @ 15:53:00 -> Keep main window on laptop display during dual-monitor audience projection
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -12,6 +13,13 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Brush = System.Windows.Media.Brush;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Point = System.Windows.Point;
+using Size = System.Windows.Size;
 
 namespace ScaryokeWheel;
 
@@ -23,6 +31,7 @@ public partial class MainWindow : Window
     private const double MinWindowHeight = 520;
 
     private readonly ScaryokeWheelViewModel _vm;
+    private ScaryokeProjectionWindow? _projectionWindow;
     private double _currentAngle;
     private bool _isSpinning;
 
@@ -61,6 +70,60 @@ public partial class MainWindow : Window
         // Redraw the wheel whenever the view model has repopulated its segments
         _vm.WheelSegmentsRebuilt += OnWheelSegmentsRebuilt;
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        _vm.TargetMonitorChanged += OnTargetMonitorChanged;
+    }
+
+    private void OnTargetMonitorChanged(object? sender, string deviceName)
+    {
+        // When the user changes the audience monitor selection, update the projection window if open.
+        // MainWindow (the host console with the Spin button) always remains on the laptop.
+        if (_projectionWindow != null)
+        {
+            var targetScreen = Lyracist.Shared.WindowPositioner.ResolveByDeviceName(System.Windows.Forms.Screen.AllScreens, deviceName)
+                               ?? (System.Windows.Forms.Screen.AllScreens.Length > 1
+                                   ? System.Windows.Forms.Screen.AllScreens.FirstOrDefault(s => !s.Primary) ?? System.Windows.Forms.Screen.AllScreens[1]
+                                   : System.Windows.Forms.Screen.PrimaryScreen)
+                               ?? System.Windows.Forms.Screen.AllScreens[0];
+            Lyracist.Shared.WindowPositioner.FillArea(_projectionWindow, targetScreen.Bounds);
+        }
+    }
+
+    private void ToggleAudienceProjection()
+    {
+        if (_projectionWindow != null)
+        {
+            _projectionWindow.Close();
+            _projectionWindow = null;
+            _vm.IsProjectionActive = false;
+        }
+        else
+        {
+            var targetScreen = Lyracist.Shared.WindowPositioner.ResolveByDeviceName(System.Windows.Forms.Screen.AllScreens, _vm.SelectedMonitor?.DeviceName)
+                               ?? (System.Windows.Forms.Screen.AllScreens.Length > 1
+                                   ? System.Windows.Forms.Screen.AllScreens.FirstOrDefault(s => !s.Primary) ?? System.Windows.Forms.Screen.AllScreens[1]
+                                   : System.Windows.Forms.Screen.PrimaryScreen)
+                               ?? System.Windows.Forms.Screen.AllScreens[0];
+
+            _projectionWindow = new ScaryokeProjectionWindow(_vm);
+            _projectionWindow.Closed += (_, _) =>
+            {
+                _projectionWindow = null;
+                _vm.IsProjectionActive = false;
+            };
+
+            _projectionWindow.Show();
+            Lyracist.Shared.WindowPositioner.FillArea(_projectionWindow, targetScreen.Bounds);
+            _vm.IsProjectionActive = true;
+
+            // Ensure the main window with the Spin Button stays on the laptop, active and focused
+            Activate();
+            SpinButton?.Focus();
+        }
+    }
+
+    private void OnToggleAudienceScreenClick(object sender, RoutedEventArgs e)
+    {
+        ToggleAudienceProjection();
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -390,6 +453,7 @@ public partial class MainWindow : Window
         };
 
         WheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
+        _projectionWindow?.SpinTo(target, seconds);
     }
 
     private void PlayLaugh()
@@ -555,14 +619,17 @@ public partial class MainWindow : Window
             _restoreResizeMode = ResizeMode;
             _restoreBounds = WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds;
 
-            // Cover the whole monitor, taskbar included, rather than just its work area
+            // Cover the whole selected monitor, taskbar included, rather than just its work area
             WindowState = WindowState.Normal;
             ResizeMode = ResizeMode.NoResize;
-            var bounds = CurrentMonitorBounds();
-            Left = bounds.Left;
-            Top = bounds.Top;
-            Width = bounds.Width;
-            Height = bounds.Height;
+
+            // Cover the current screen where MainWindow is located rather than jumping to audience monitor
+            var centerPoint = new System.Drawing.Point((int)(Left + (Width / 2)), (int)(Top + (Height / 2)));
+            var currentScreen = System.Windows.Forms.Screen.FromPoint(centerPoint)
+                                ?? System.Windows.Forms.Screen.PrimaryScreen
+                                ?? System.Windows.Forms.Screen.AllScreens[0];
+
+            Lyracist.Shared.WindowPositioner.FillArea(this, currentScreen.Bounds);
             Topmost = true;
         }
         else
@@ -577,6 +644,11 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnTogglePresentationClick(object sender, RoutedEventArgs e)
+    {
+        TogglePresentationMode();
+    }
+
     // ─── Window placement ────────────────────────────────────────────────
 
     private void RestoreWindowBounds()
@@ -588,6 +660,8 @@ public partial class MainWindow : Window
         if (s.WindowLeft is not double left || s.WindowTop is not double top ||
             s.WindowWidth is not double width || s.WindowHeight is not double height)
         {
+            var primary = System.Windows.Forms.Screen.PrimaryScreen ?? System.Windows.Forms.Screen.AllScreens[0];
+            Lyracist.Shared.WindowPositioner.CenterInArea(this, primary.WorkingArea, Width, Height);
             return;
         }
 
@@ -601,6 +675,8 @@ public partial class MainWindow : Window
         var visible = Rect.Intersect(saved, screens);
         if (visible.IsEmpty || visible.Width < 120 || visible.Height < 60)
         {
+            var primary = System.Windows.Forms.Screen.PrimaryScreen ?? System.Windows.Forms.Screen.AllScreens[0];
+            Lyracist.Shared.WindowPositioner.CenterInArea(this, primary.WorkingArea, width, height);
             return;
         }
 
@@ -614,6 +690,13 @@ public partial class MainWindow : Window
     protected override void OnClosing(CancelEventArgs e)
     {
         base.OnClosing(e);
+
+        try
+        {
+            _projectionWindow?.Close();
+            _projectionWindow = null;
+        }
+        catch { }
 
         CompositionTarget.Rendering -= OnRendering;
 

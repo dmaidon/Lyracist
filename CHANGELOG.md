@@ -1,9 +1,19 @@
-<!-- Edited on Oct 22, 2026 @ 08:49:00 -> Document SkiaSharp PDF generation migration in ChangeLog -->
-Last Edit: Oct 22, 2026 - Migration to SkiaSharp for PDF Generation & Native Display Change Detection
+<!-- Edited on Oct 24, 2026 @ 15:33:00 -> Document Scaryoke Wheel dual-monitor projection and DJ's Choice toggle -->
+Last Edit: Oct 24, 2026 - Scaryoke Wheel DJ's Choice Toggle, Dual-Monitor Audience Projection & Fullscreen Presentation
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] - 2026-10-24
+
+### Added
+- **Scaryoke Standalone Wheel DJ's Choice Toggle, Dual-Monitor Audience Projection & Display Selection (`ScaryokeWheel/ScaryokeSettings.cs`, `ScaryokeWheel/ScaryokeWheelViewModel.cs`, `ScaryokeWheel/ScaryokeProjectionWindow.xaml`, `ScaryokeWheel/ScaryokeProjectionWindow.xaml.cs`, `ScaryokeWheel/MainWindow.xaml`, `ScaryokeWheel/MainWindow.xaml.cs`, `ScaryokeWheel/ScaryokeWheel.csproj`)**:
+  - **DJ's Choice Sliver Toggle**: Added `ShowDjsChoice` toggle (default true) in `ScaryokeSettings` and the `Settings & About` UI, allowing operators to include or omit the two thin black "DJ's Choice" slivers independently from Singer's Choice. When disabled, sliver width selectors are disabled and only custom categories (and optional Singer's Choice) populate the wheel.
+  - **Secondary Monitor Audience Projection Window (`ScaryokeProjectionWindow`)**: Added a dedicated borderless audience projection window designed to display on a 2nd monitor, stage TV, or projector. KJs can launch or dismiss the audience screen using the title bar button `[📺 Audience Screen]`, tab button `[📺 Project Wheel to 2nd Monitor]`, or Settings. The primary window stays on the host's laptop so the KJ can operate the Spin button and manage categories seamlessly.
+  - **Synchronized Wheel Spinning & Animations**: When the KJ clicks the Spin button on their laptop, the audience projection window executes the exact same physics-based deceleration curve, flashing tick lights, segment highlights, and DJ's Choice reveal animations in frame-accurate real-time lockstep.
+  - **Target Display Monitor Selection**: Linked shared multi-monitor infrastructure (`MonitorEnumerator`, `MonitorInfo`, `MonitorDpiHelper`, `WindowPositioner`) and added dynamic monitor selection dropdowns in both the custom Title Bar and the Settings & About tab. Automatically listens for Windows display setting changes, defaults to the secondary (external/audience) monitor when multiple displays are connected, and moves the audience projection window without moving the primary DJ console window (which remains anchored to the host's laptop display).
+  - **User Manual Documentation Updates**: Added `UpdateUserManualsForScaryokeWheelDjsChoiceAndMonitor` in `CatalogBookGeneratorTests.cs`, automatically updating `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, and `Lyracist_User_Manual_Updates.txt`.
 
 ## [Unreleased] - 2026-10-22
 

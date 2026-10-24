@@ -2551,3 +2551,40 @@ Lyracist v26.10.7 introduces comprehensive live performance tools:
    - Automated Start/Stop: Automatically arms and records during active singer performances and stops on completion. Discards takes under 10 seconds.
    - Background Processing: Converts WAV recordings to high-quality MP3 via FFmpeg in the background and indexes them in the database.
    - Settings & Playback: Configure recording input device with live VU level meter, 5-second test clip recorder, and retention days in Settings. Singer profiles include a 'Recorded Performances' tab to play back, delete, or open the folder for saved takes. A visual 'REC' indicator illuminates in the main window while recording.
+
+
+Section: Scaryoke Standalone Wheel / DJ's Choice & Monitor Selection
+
+[Update Details]
+Scaryoke Wheel now includes configurable DJ's Choice sliver inclusion and target monitor display selection.
+
+1. DJ's Choice Sliver Toggle:
+   - Operators can now toggle the inclusion of the two black "DJ's Choice" slivers on and off from the Settings & About tab.
+   - When disabled, only Singer's Choice and custom categories populate the wheel.
+   - When enabled, operators can customize the sliver width (Small, Medium, Large) independently.
+
+2. Target Display Monitor Selection:
+   - Operators can select any connected monitor to display the Scaryoke Wheel directly from the Title Bar dropdown or the Settings tab.
+   - Supports native dynamic monitor topology refresh when projectors or secondary displays are connected or disconnected.
+   - Automatically positions or centers the wheel on the selected screen, and covers the chosen monitor when entering Fullscreen Presentation Mode (F11).
+
+
+Section: Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection
+
+[Update Details]
+Scaryoke Wheel now includes configurable DJ's Choice sliver inclusion, target monitor selection, and dedicated dual-monitor audience projection.
+
+1. DJ's Choice Sliver Toggle:
+   - Operators can now toggle the inclusion of the two black "DJ's Choice" slivers on and off from the Settings & About tab.
+   - When disabled, only Singer's Choice and custom categories populate the wheel.
+   - When enabled, operators can customize the sliver width (Small, Medium, Large) independently.
+
+2. Target Display Monitor Selection:
+   - Operators can select any connected monitor to display the Scaryoke Wheel directly from the Title Bar dropdown or the Settings tab.
+   - Supports native dynamic monitor topology refresh when projectors or secondary displays are connected or disconnected.
+   - Automatically positions or centers the wheel on the selected screen, and covers the chosen monitor when entering Fullscreen Presentation Mode (F11).
+
+3. Dual-Monitor Audience Projection Window:
+   - Operators can launch a borderless audience projection window on a secondary display or projector via the [📺 Audience Screen] title bar button or [📺 Project Wheel to 2nd Monitor] button.
+   - The primary window stays on the DJ laptop with the Spin button and control tabs, while the audience window displays a full-screen high-visibility wheel.
+   - Spins, decelerations, and winner/DJ's Choice reveals are synchronized frame-for-frame in real time across both displays.

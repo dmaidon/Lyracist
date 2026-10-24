@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:19:15 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 24, 2026 @ 15:02:00 -> Add UseWindowsForms and link shared monitor positioning files -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -9,9 +9,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.10.24.236</AssemblyVersion>
-    <FileVersion>26.10.24.236</FileVersion>
+    <AssemblyVersion>26.10.24.254</AssemblyVersion>
+    <FileVersion>26.10.24.254</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
@@ -29,6 +30,10 @@
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+    <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
+    <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="Shared\MonitorDpiHelper.cs" />
+    <Compile Include="..\Shared\WindowPositioner.cs" Link="Shared\WindowPositioner.cs" />
+    <Compile Include="..\Shared\MonitorEnumerator.cs" Link="Shared\MonitorEnumerator.cs" />
   </ItemGroup>
 
   <ItemGroup>

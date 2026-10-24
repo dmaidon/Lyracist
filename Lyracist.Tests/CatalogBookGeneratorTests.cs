@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:42:00 -> Update test suite to use local SimpleFontResolver for manual PDF tests
+// Edited on Oct 24, 2026 @ 15:34:00 -> Update Scaryoke Wheel manual documentation for dual-monitor audience projection
 using System;
 using System.IO;
 using Xunit;
@@ -4746,6 +4746,130 @@ Lyracist v26.10.7 introduces comprehensive live performance tools:
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " FillerAutomixSamplePadRecording";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeWheelDjsChoiceAndMonitor()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection
+
+[Update Details]
+Scaryoke Wheel now includes configurable DJ's Choice sliver inclusion, target monitor selection, and dedicated dual-monitor audience projection.
+
+1. DJ's Choice Sliver Toggle:
+   - Operators can now toggle the inclusion of the two black ""DJ's Choice"" slivers on and off from the Settings & About tab.
+   - When disabled, only Singer's Choice and custom categories populate the wheel.
+   - When enabled, operators can customize the sliver width (Small, Medium, Large) independently.
+
+2. Target Display Monitor Selection:
+   - Operators can select any connected monitor to display the Scaryoke Wheel directly from the Title Bar dropdown or the Settings tab.
+   - Supports native dynamic monitor topology refresh when projectors or secondary displays are connected or disconnected.
+   - Automatically positions or centers the wheel on the selected screen, and covers the chosen monitor when entering Fullscreen Presentation Mode (F11).
+
+3. Dual-Monitor Audience Projection Window:
+   - Operators can launch a borderless audience projection window on a secondary display or projector via the [📺 Audience Screen] title bar button or [📺 Project Wheel to 2nd Monitor] button.
+   - The primary window stays on the DJ laptop with the Spin button and control tabs, while the audience window displays a full-screen high-visibility wheel.
+   - Spins, decelerations, and winner/DJ's Choice reveals are synchronized frame-for-frame in real time across both displays.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ScaryokeWheelAudienceProjectionAndMonitor"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Scaryoke Standalone Wheel / DJ's Choice, Audience Projection & Monitor Selection", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeWheelAudienceProjectionAndMonitor";
                             doc.Save(pdfPath);
                         }
                     }

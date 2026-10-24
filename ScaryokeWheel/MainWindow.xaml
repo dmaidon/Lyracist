@@ -1,3 +1,4 @@
+<!-- Edited on Oct 24, 2026 @ 16:05:00 -> Adjust button and combo box dimensions and preserve laptop host window positioning -->
 <Window x:Class="ScaryokeWheel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -42,6 +43,65 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
                     <TextBlock Text="🎃" FontSize="18" Margin="0,0,8,0" />
                     <TextBlock Text="Scaryoke Standalone Wheel" FontWeight="SemiBold" FontSize="14" Foreground="#FF6D00" />
+                </StackPanel>
+
+                <!-- Monitor Selection & Fullscreen in TitleBar -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <TextBlock Text="🖥️" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <ComboBox ItemsSource="{Binding AvailableMonitors}"
+                              SelectedItem="{Binding SelectedMonitor}"
+                              Width="160" Height="35"
+                              FontSize="12"
+                              Background="#1E1A26" Foreground="#E0DDEC"
+                              BorderBrush="#332B45"
+                              VerticalContentAlignment="Center"
+                              ToolTip="Display monitor for the wheel">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Index, StringFormat='{}Monitor {0}: '}" FontWeight="Bold" Foreground="#FF6D00" />
+                                    <TextBlock Text="{Binding Width, StringFormat='{}{0}x'}" Foreground="#E0DDEC" />
+                                    <TextBlock Text="{Binding Height}" Foreground="#E0DDEC" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Click="OnToggleAudienceScreenClick"
+                            Height="35"
+                            Padding="10,0"
+                            Margin="8,0,0,0"
+                            Background="#2A103D"
+                            Foreground="#E0DDEC"
+                            BorderBrush="#FF6D00"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            ToolTip="Open/close audience projection window on selected monitor"
+                            Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Content" Value="📺 Audience Screen" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsProjectionActive}" Value="True">
+                                        <Setter Property="Content" Value="📺 Close Audience" />
+                                        <Setter Property="Background" Value="#6A0DAD" />
+                                        <Setter Property="Foreground" Value="#00E676" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="⛶ Fullscreen"
+                            Click="OnTogglePresentationClick"
+                            Height="28"
+                            Padding="10,0"
+                            Margin="8,0,0,0"
+                            Background="#291F26"
+                            Foreground="#FF6D00"
+                            BorderBrush="#332B45"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            ToolTip="Toggle fullscreen presentation mode on selected monitor (F11)"
+                            Cursor="Hand" />
                 </StackPanel>
 
                 <!-- Window Control Buttons (Minimize, Close) -->
@@ -202,6 +262,30 @@
 
                         <!-- Actions -->
                         <StackPanel Grid.Row="3" Margin="0,0,0,25">
+                            <Button Click="OnToggleAudienceScreenClick"
+                                    Height="40"
+                                    Margin="0,0,0,10"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#231730"
+                                    Foreground="#E0DDEC"
+                                    BorderBrush="#6A0DAD"
+                                    BorderThickness="1"
+                                    FontWeight="SemiBold"
+                                    Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Content" Value="📺 Project Wheel to 2nd Monitor (Audience Display)" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsProjectionActive}" Value="True">
+                                                <Setter Property="Content" Value="📺 Disconnect 2nd Monitor Audience Display" />
+                                                <Setter Property="Foreground" Value="#00E676" />
+                                                <Setter Property="BorderBrush" Value="#00E676" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
                             <ui:Button x:Name="SpinButton"
                                        Content="SPIN THE WHEEL"
                                        FontSize="18"
@@ -452,7 +536,7 @@
                                         </Grid.ColumnDefinitions>
                                         <ComboBox ItemsSource="{Binding Presets}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPreset}" Height="32" Margin="0,0,8,0" />
                                         <Button Grid.Column="1" Content="Load" Width="56" Margin="0,0,6,0" Command="{Binding LoadPresetCommand}" Cursor="Hand" />
-                                        <Button Grid.Column="2" Content="Delete" Width="56" Command="{Binding DeletePresetCommand}" Cursor="Hand" />
+                                        <Button Grid.Column="2" Content="Delete" Width="65" Command="{Binding DeletePresetCommand}" Cursor="Hand" />
                                     </Grid>
                                     <Grid Margin="0,0,0,18">
                                         <Grid.ColumnDefinitions>
@@ -473,16 +557,76 @@
                                         <Button Grid.Column="1" Content="Save Preset" Width="100" Command="{Binding SavePresetCommand}" Cursor="Hand" />
                                     </Grid>
 
-                                    <!-- Wheel options -->
-                                    <TextBlock Text="WHEEL OPTIONS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,0,0,8" FontSize="13" />
+                                    <!-- Wheel and Display options -->
+                                    <TextBlock Text="DISPLAY &amp; WHEEL OPTIONS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,0,0,8" FontSize="13" />
+
+                                    <!-- Monitor Selection -->
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Display Monitor" Foreground="#E0DDEC" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                        <ComboBox Grid.Column="1"
+                                                  ItemsSource="{Binding AvailableMonitors}"
+                                                  SelectedItem="{Binding SelectedMonitor}"
+                                                  Height="35"
+                                                  Margin="0,0,8,0">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Index, StringFormat='{}Monitor {0}: '}" FontWeight="Bold" Foreground="#FF6D00" />
+                                                        <TextBlock Text="{Binding Width, StringFormat='{}{0}x'}" Foreground="#E0DDEC" />
+                                                        <TextBlock Text="{Binding Height}" Foreground="#E0DDEC" />
+                                                        <TextBlock Text=" (Primary)" Foreground="#8F8B9B">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsPrimary}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button Grid.Column="2"
+                                                Click="OnToggleAudienceScreenClick"
+                                                Height="30"
+                                                Padding="12,0"
+                                                Background="#2A103D"
+                                                BorderBrush="#FF6D00"
+                                                FontWeight="SemiBold"
+                                                Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Content" Value="📺 Project Wheel" />
+                                                    <Setter Property="Foreground" Value="#E0DDEC" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsProjectionActive}" Value="True">
+                                                            <Setter Property="Content" Value="✕ Close Projection" />
+                                                            <Setter Property="Foreground" Value="#FF5252" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+
                                     <CheckBox Content="Include Singer's Choice segment" IsChecked="{Binding ShowSingersChoice}" Foreground="#E0DDEC" Margin="0,0,0,8" />
-                                    <Grid Margin="0,0,0,18">
+                                    <CheckBox Content="Include DJ's Choice slivers" IsChecked="{Binding ShowDjsChoice}" Foreground="#E0DDEC" Margin="0,0,0,8" />
+                                    <Grid Margin="0,0,0,18" IsEnabled="{Binding ShowDjsChoice}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="DJ's Choice slivers" Foreground="#E0DDEC" VerticalAlignment="Center" Margin="0,0,10,0" />
-                                        <ComboBox Grid.Column="1" ItemsSource="{Binding SliverSizeLabels}" SelectedIndex="{Binding SliverSizeIndex}" Height="30" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding SliverSizeLabels}" SelectedIndex="{Binding SliverSizeIndex}" Height="35" />
                                     </Grid>
 
                                     <TextBlock Text="Scaryoke is the ultimate singing challenge! Performers are forced to step outside their comfort zones and sing a song randomly picked by the wheel."
@@ -505,7 +649,7 @@
                                         <BulletDecorator.Bullet>
                                             <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="The wheel always includes Singer's Choice, flanked by two thin black DJ's Choice slivers." TextWrapping="Wrap" Foreground="#E0DDEC" />
+                                        <TextBlock Text="The wheel can include Singer's Choice and thin black DJ's Choice slivers (configurable in Settings)." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
                                     <BulletDecorator Margin="0,0,0,8">

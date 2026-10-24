@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 14:00:00 -> Sanitized loading, corrupt-file quarantine, sliver size, Singer's Choice toggle, volume, window bounds
+// Edited on Oct 24, 2026 @ 15:05:00 -> Add ShowDjsChoice toggle and SelectedMonitorDevice setting
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -65,6 +65,11 @@ public class ScaryokeSettings
     public double SliverWeight { get; set; } = 0.15;
 
     public bool ShowSingersChoice { get; set; } = true;
+
+    public bool ShowDjsChoice { get; set; } = true;
+
+    /// <summary>Target monitor device name to display the wheel on (e.g. \\.\DISPLAY2).</summary>
+    public string SelectedMonitorDevice { get; set; } = string.Empty;
 
     // Last window placement (null until the window has been closed once)
     public double? WindowLeft { get; set; }

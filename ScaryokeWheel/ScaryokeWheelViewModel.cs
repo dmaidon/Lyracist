@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 14:00:00 -> Rename, reorder, enable/disable, undo remove, sliver size, Singer's Choice toggle, volume, result detail
+// Edited on Oct 24, 2026 @ 15:53:00 -> Default audience monitor to secondary display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,7 +118,22 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     private bool _showSingersChoice = true;
 
     [ObservableProperty]
+    private bool _showDjsChoice = true;
+
+    [ObservableProperty]
     private int _sliverSizeIndex;
+
+    [ObservableProperty]
+    private ObservableCollection<Lyracist.Shared.MonitorInfo> _availableMonitors = [];
+
+    [ObservableProperty]
+    private Lyracist.Shared.MonitorInfo? _selectedMonitor;
+
+    [ObservableProperty]
+    private bool _isProjectionActive;
+
+    /// <summary>Raised when the target display monitor selection changes.</summary>
+    public event EventHandler<string>? TargetMonitorChanged;
 
     [ObservableProperty]
     private ObservableCollection<CategoryPreset> _presets = [];
@@ -157,6 +172,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         _avoidRepeats = _settings.AvoidRepeats;
         _volume = _settings.Volume;
         _showSingersChoice = _settings.ShowSingersChoice;
+        _showDjsChoice = _settings.ShowDjsChoice;
         _sliverSizeIndex = NearestSliverIndex(_settings.SliverWeight);
 
         foreach (var preset in _settings.Presets)
@@ -171,6 +187,44 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         }
 
         RebuildWheelSegments();
+
+        RefreshMonitors();
+        Lyracist.Shared.MonitorEnumerator.MonitorsChanged += (_, _) =>
+        {
+            System.Windows.Application.Current?.Dispatcher.InvokeAsync(RefreshMonitors);
+        };
+    }
+
+    public void RefreshMonitors()
+    {
+        AvailableMonitors.Clear();
+        foreach (var info in Lyracist.Shared.MonitorEnumerator.GetMonitors())
+        {
+            AvailableMonitors.Add(info);
+        }
+
+        if (AvailableMonitors.Count > 0)
+        {
+            var match = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, _settings.SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
+            // Default to secondary (external/audience) monitor if multiple displays exist, otherwise primary
+            SelectedMonitor = match ?? (AvailableMonitors.Count > 1
+                ? AvailableMonitors.FirstOrDefault(m => !m.IsPrimary) ?? AvailableMonitors[1]
+                : AvailableMonitors[0]);
+        }
+        else
+        {
+            SelectedMonitor = null;
+        }
+    }
+
+    partial void OnSelectedMonitorChanged(Lyracist.Shared.MonitorInfo? value)
+    {
+        if (value != null)
+        {
+            _settings.SelectedMonitorDevice = value.DeviceName;
+            _settings.Save();
+            TargetMonitorChanged?.Invoke(this, value.DeviceName);
+        }
     }
 
     private static int NearestSliverIndex(double weight)
@@ -222,6 +276,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     partial void OnShowSingersChoiceChanged(bool value)
     {
         _settings.ShowSingersChoice = value;
+        _settings.Save();
+        if (!IsSpinning)
+        {
+            RebuildWheelSegments();
+        }
+    }
+
+    partial void OnShowDjsChoiceChanged(bool value)
+    {
+        _settings.ShowDjsChoice = value;
         _settings.Save();
         if (!IsSpinning)
         {
@@ -562,7 +626,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
             Weight = sliverWeight
         };
 
-        if (ShowSingersChoice)
+        if (ShowSingersChoice && ShowDjsChoice)
         {
             var singersChoice = new WheelSegment
             {
@@ -577,7 +641,19 @@ public partial class ScaryokeWheelViewModel : ObservableObject
             list.Insert(insertIndex + 1, singersChoice);
             list.Insert(insertIndex + 2, NewSliver());
         }
-        else
+        else if (ShowSingersChoice && !ShowDjsChoice)
+        {
+            var singersChoice = new WheelSegment
+            {
+                Name = SingersChoiceName,
+                Color = "#228B22",
+                TextColor = GetContrastingTextColor("#228B22")
+            };
+
+            int insertIndex = Rng.Next(0, list.Count + 1);
+            list.Insert(insertIndex, singersChoice);
+        }
+        else if (!ShowSingersChoice && ShowDjsChoice)
         {
             // Without Singer's Choice the slivers are scattered independently
             list.Insert(Rng.Next(0, list.Count + 1), NewSliver());
@@ -585,9 +661,12 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         }
 
         double totalWeight = list.Sum(s => s.Weight);
-        foreach (var segment in list)
+        if (totalWeight > 0)
         {
-            segment.Sweep = 360.0 * segment.Weight / totalWeight;
+            foreach (var segment in list)
+            {
+                segment.Sweep = 360.0 * segment.Weight / totalWeight;
+            }
         }
 
         WheelSegments.Clear();
