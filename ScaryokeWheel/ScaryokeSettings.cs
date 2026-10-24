@@ -6,8 +6,23 @@ using System.Text.Json;
 
 namespace ScaryokeWheel;
 
+public class CategoryStyle
+{
+    public double Weight { get; set; } = 1;
+    public string? Color { get; set; }
+}
+
+public class CategoryPreset
+{
+    public string Name { get; set; } = string.Empty;
+    public List<string> Categories { get; set; } = [];
+    public Dictionary<string, CategoryStyle> Styles { get; set; } = [];
+}
+
 public class ScaryokeSettings
 {
+    public const int MaxCategories = 11;
+
     private static readonly string SettingsFolder = Lyracist.Shared.Globals.SettingsDir;
 
     private static readonly string SettingsPath = Path.Combine(SettingsFolder, "scaryoke_settings.json");
@@ -26,6 +41,15 @@ public class ScaryokeSettings
         "Disney Songs",
         "90s Pop"
     ];
+
+    /// <summary>Per-category weight and colour overrides, keyed by category name.</summary>
+    public Dictionary<string, CategoryStyle> Styles { get; set; } = [];
+
+    public List<CategoryPreset> Presets { get; set; } = [];
+
+    public bool IsMuted { get; set; }
+
+    public bool AvoidRepeats { get; set; } = true;
 
     public static ScaryokeSettings Load()
     {
@@ -57,10 +81,12 @@ public class ScaryokeSettings
                 var settings = JsonSerializer.Deserialize<ScaryokeSettings>(json);
                 if (settings?.Categories != null)
                 {
-                    if (settings.Categories.Count > 11)
+                    if (settings.Categories.Count > MaxCategories)
                     {
-                        settings.Categories = settings.Categories.GetRange(0, 11);
+                        settings.Categories = settings.Categories.GetRange(0, MaxCategories);
                     }
+                    settings.Styles ??= [];
+                    settings.Presets ??= [];
                     return settings;
                 }
             }
@@ -78,9 +104,9 @@ public class ScaryokeSettings
         try
         {
             Directory.CreateDirectory(SettingsFolder);
-            if (Categories.Count > 11)
+            if (Categories.Count > MaxCategories)
             {
-                Categories = Categories.GetRange(0, 11);
+                Categories = Categories.GetRange(0, MaxCategories);
             }
             string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(SettingsPath, json);

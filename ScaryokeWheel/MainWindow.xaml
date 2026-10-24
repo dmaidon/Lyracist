@@ -15,7 +15,8 @@
         WindowStyle="None"
         AllowsTransparency="True"
         BorderBrush="#332B45"
-        BorderThickness="1">
+        BorderThickness="1"
+        PreviewKeyDown="OnWindowPreviewKeyDown">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="40" ResizeBorderThickness="5" GlassFrameThickness="0" />
@@ -30,7 +31,7 @@
         </Grid.RowDefinitions>
 
         <!-- Custom Title Bar for Dark Spooky Theme -->
-        <Border Grid.Row="0" Background="#16141C" Height="40" MouseDown="OnTitleBarMouseDown">
+        <Border x:Name="TitleBar" Grid.Row="0" Background="#16141C" Height="40" MouseDown="OnTitleBarMouseDown">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -139,6 +140,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!-- Spooky Header -->
@@ -158,12 +160,36 @@
                                            FontSize="26"
                                            FontWeight="Bold"
                                            Foreground="#00E676"
-                                           HorizontalAlignment="Center" />
+                                           HorizontalAlignment="Center"
+                                           RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <TranslateTransform x:Name="ResultShake" />
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
                             </StackPanel>
                         </Border>
 
+                        <!-- Options and recent spins -->
+                        <StackPanel x:Name="OptionsPanel" Grid.Row="2" Margin="0,0,0,15">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <CheckBox Content="Mute sounds" IsChecked="{Binding IsMuted}" Foreground="#E0DDEC" Margin="0,0,20,0" />
+                                <CheckBox Content="Avoid repeats" IsChecked="{Binding AvoidRepeats}" Foreground="#E0DDEC" />
+                            </StackPanel>
+                            <Grid>
+                                <TextBlock Text="RECENT SPINS" FontSize="11" FontWeight="Bold" Foreground="#8F8B9B" VerticalAlignment="Center" />
+                                <Button Content="Clear" HorizontalAlignment="Right" Command="{Binding ClearHistoryCommand}" Background="Transparent" BorderThickness="0" Foreground="#8F8B9B" Cursor="Hand" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding History}" MaxHeight="110" Margin="0,4,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" FontSize="13" Foreground="#E0DDEC" Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
                         <!-- Actions -->
-                        <StackPanel Grid.Row="2" Margin="0,0,0,25">
+                        <StackPanel Grid.Row="3" Margin="0,0,0,25">
                             <ui:Button x:Name="SpinButton"
                                        Content="SPIN THE WHEEL"
                                        FontSize="18"
@@ -185,7 +211,7 @@
             </TabItem>
 
             <!-- TAB 2: SETTINGS & ABOUT -->
-            <TabItem Header="Settings &amp; About">
+            <TabItem x:Name="SettingsTab" Header="Settings &amp; About">
                 <Grid Margin="15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.1*" />
@@ -203,7 +229,7 @@
                         <!-- Setup Header -->
                         <StackPanel Grid.Row="0" Margin="0,0,0,15">
                             <TextBlock Text="Configure Scaryoke Categories" FontSize="18" FontWeight="SemiBold" Foreground="#FF6D00" />
-                            <TextBlock Text="Categories will be randomized along with a black 'DJ's Choice' segment" FontSize="13" Foreground="#8F8B9B" Margin="0,4,0,0" />
+                            <TextBlock Text="Categories are placed on the wheel with Singer's Choice and black 'DJ's Choice' slivers" FontSize="13" Foreground="#8F8B9B" Margin="0,4,0,0" />
                         </StackPanel>
 
                         <!-- Scrollable Category List -->
@@ -235,9 +261,33 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E0DDEC" />
+                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E0DDEC" />
                                             <Button Grid.Column="1"
+                                                    Width="34"
+                                                    Height="34"
+                                                    Margin="0,0,6,0"
+                                                    Background="{Binding DisplayColor}"
+                                                    BorderBrush="#332B45"
+                                                    ToolTip="Change colour"
+                                                    Command="{Binding DataContext.CycleColorCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand" />
+                                            <Button Grid.Column="2"
+                                                    Width="44"
+                                                    Height="34"
+                                                    Margin="0,0,6,0"
+                                                    Background="#1E1A26"
+                                                    BorderBrush="#332B45"
+                                                    ToolTip="Wheel size (click to change)"
+                                                    Command="{Binding DataContext.CycleWeightCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand">
+                                                <TextBlock Text="{Binding Weight, StringFormat={}{0:0}×}" Foreground="#E0DDEC" FontWeight="SemiBold" />
+                                            </Button>
+                                            <Button Grid.Column="3"
                                                     Width="34"
                                                     Height="34"
                                                     Background="#291F26"
@@ -262,6 +312,32 @@
                                     <TextBlock Text="{Binding CustomCategories.Count}" FontWeight="Bold" Foreground="#FF6D00" />
                                     <TextBlock Text="/11" Foreground="#8F8B9B" />
                                 </StackPanel>
+                            </Grid>
+
+                            <!-- Presets -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding Presets}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPreset}" Height="32" Margin="0,0,8,0" />
+                                <Button Grid.Column="1" Content="Load" Width="60" Margin="0,0,6,0" Command="{Binding LoadPresetCommand}" Cursor="Hand" />
+                                <Button Grid.Column="2" Content="Delete" Width="60" Command="{Binding DeletePresetCommand}" Cursor="Hand" />
+                            </Grid>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBox Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                            PlaceholderText="Preset name (e.g. 80s Night)..."
+                                            Height="32"
+                                            Margin="0,0,8,0"
+                                            MaxLength="30"
+                                            BorderBrush="#332B45"
+                                            Background="#1C1A24" />
+                                <Button Grid.Column="1" Content="Save Preset" Width="126" Command="{Binding SavePresetCommand}" Cursor="Hand" />
                             </Grid>
 
                             <!-- TextBox and Add Button -->
@@ -328,7 +404,7 @@
                                         <BulletDecorator.Bullet>
                                             <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="The 12th segment is always DJ's Choice (colored Black)." TextWrapping="Wrap" Foreground="#E0DDEC" />
+                                        <TextBlock Text="The wheel always includes Singer's Choice, flanked by two thin black DJ's Choice slivers." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
                                     <BulletDecorator Margin="0,0,0,8">
@@ -365,5 +441,8 @@
                 </Grid>
             </TabItem>
         </TabControl>
+
+        <!-- Full-window flash used for the DJ's Choice reveal -->
+        <Border x:Name="FlashOverlay" Grid.Row="0" Grid.RowSpan="2" Background="#FF3D00" Opacity="0" IsHitTestVisible="False" />
     </Grid>
 </Window>
