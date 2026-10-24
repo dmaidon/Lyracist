@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.Maui.ViewModels"
+             xmlns:services="clr-namespace:KSRotation.Maui.Services"
              x:Class="KSRotation.Maui.Views.ScaryokeWheelPage"
              x:DataType="viewmodels:ScaryokeWheelViewModel"
              Title="Scaryoke Wheel"
@@ -27,10 +28,22 @@
 
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding CustomCategories}" Spacing="2">
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
-                                <Grid ColumnDefinitions="*,Auto" Padding="0,2">
-                                    <Label Text="{Binding .}" VerticalOptions="Center" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" />
+                            <DataTemplate x:DataType="viewmodels:CategoryItem">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4" Padding="0,2">
+                                    <Label Text="{Binding Name}" VerticalOptions="Center" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" />
                                     <Button Grid.Column="1"
+                                            BackgroundColor="{Binding DisplayColor}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ScaryokeWheelViewModel}, Mode=FindAncestorBindingContext}, Path=CycleColorCommand}"
+                                            CommandParameter="{Binding .}"
+                                            WidthRequest="32" HeightRequest="32" Padding="0" CornerRadius="16" />
+                                    <Button Grid.Column="2"
+                                            Text="{Binding Weight, StringFormat='{0:0}×'}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ScaryokeWheelViewModel}, Mode=FindAncestorBindingContext}, Path=CycleWeightCommand}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="{AppThemeBinding Light=#E2E8F0, Dark=#2A2F42}"
+                                            TextColor="{AppThemeBinding Light=#1E293B, Dark=White}"
+                                            WidthRequest="44" HeightRequest="32" Padding="0" FontSize="12" />
+                                    <Button Grid.Column="3"
                                             Text="✕"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ScaryokeWheelViewModel}, Mode=FindAncestorBindingContext}, Path=RemoveCategoryCommand}"
                                             CommandParameter="{Binding .}"
@@ -54,6 +67,17 @@
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
+
+                    <Label Text="Presets" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" Margin="0,8,0,0" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" />
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                        <Picker Grid.Column="0" Title="Saved presets" ItemsSource="{Binding Presets}" ItemDisplayBinding="{Binding Name, x:DataType=services:CategoryPreset}" SelectedItem="{Binding SelectedPreset}" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Button Grid.Column="1" Text="Load" Command="{Binding LoadPresetCommand}" BackgroundColor="#6D28D9" TextColor="White" />
+                        <Button Grid.Column="2" Text="Delete" Command="{Binding DeletePresetCommand}" BackgroundColor="#EF4444" TextColor="White" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                        <Entry Grid.Column="0" Text="{Binding NewPresetName}" Placeholder="Preset name..." TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Button Grid.Column="1" Text="Save Preset" Command="{Binding SavePresetCommand}" BackgroundColor="#6D28D9" TextColor="White" />
+                    </Grid>
 
                     <Label Text="Up to 11 categories. The wheel also always includes a Singer's Choice segment and two small DJ's Choice slivers." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,4,0,0" />
                 </VerticalStackLayout>

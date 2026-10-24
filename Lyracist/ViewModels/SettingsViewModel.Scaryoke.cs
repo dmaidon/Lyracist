@@ -18,6 +18,103 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private string _newScaryokeCategoryName = string.Empty;
 
+    // Weight/colour of the selected category, shown next to the list
+    [ObservableProperty]
+    private double _selectedScaryokeWeight = 1;
+
+    [ObservableProperty]
+    private string _selectedScaryokeColor = "Transparent";
+
+    public ObservableCollection<string> ScaryokePresetNames { get; } = [];
+
+    [ObservableProperty]
+    private string? _selectedScaryokePreset;
+
+    [ObservableProperty]
+    private string _newScaryokePresetName = string.Empty;
+
+    partial void OnSelectedScaryokeCategoryChanged(string? value) => UpdateSelectedScaryokeStyle();
+
+    private void UpdateSelectedScaryokeStyle()
+    {
+        if (SelectedScaryokeCategory == null)
+        {
+            SelectedScaryokeWeight = 1;
+            SelectedScaryokeColor = "Transparent";
+            return;
+        }
+
+        var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
+        SelectedScaryokeWeight = style.Weight;
+        SelectedScaryokeColor = style.Color ?? ScaryokeViewModel.PaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
+    }
+
+    [RelayCommand]
+    private void CycleScaryokeWeight()
+    {
+        if (SelectedScaryokeCategory == null) return;
+
+        var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
+        double weight = style.Weight >= 3 ? 1 : style.Weight + 1;
+        AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, weight, style.Color);
+        UpdateSelectedScaryokeStyle();
+    }
+
+    [RelayCommand]
+    private void CycleScaryokeColor()
+    {
+        if (SelectedScaryokeCategory == null) return;
+
+        var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
+        int index = Array.FindIndex(ScaryokeViewModel.Palette, c => string.Equals(c, SelectedScaryokeColor, StringComparison.OrdinalIgnoreCase));
+        string next = ScaryokeViewModel.Palette[(index + 1) % ScaryokeViewModel.Palette.Length];
+        AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, style.Weight, next);
+        UpdateSelectedScaryokeStyle();
+    }
+
+    private void RefreshScaryokePresets()
+    {
+        ScaryokePresetNames.Clear();
+        foreach (string name in AppSettings.ScaryokePresetNames)
+        {
+            ScaryokePresetNames.Add(name);
+        }
+    }
+
+    [RelayCommand]
+    private void SaveScaryokePreset()
+    {
+        string name = NewScaryokePresetName?.Trim() ?? "";
+        if (string.IsNullOrEmpty(name)) return;
+
+        AppSettings.SaveScaryokePreset(name);
+        NewScaryokePresetName = string.Empty;
+        RefreshScaryokePresets();
+        SelectedScaryokePreset = name;
+    }
+
+    [RelayCommand]
+    private void LoadScaryokePreset()
+    {
+        if (SelectedScaryokePreset == null) return;
+
+        if (AppSettings.LoadScaryokePreset(SelectedScaryokePreset))
+        {
+            SelectedScaryokeCategory = null;
+            RefreshScaryokeCategories();
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteScaryokePreset()
+    {
+        if (SelectedScaryokePreset == null) return;
+
+        AppSettings.DeleteScaryokePreset(SelectedScaryokePreset);
+        SelectedScaryokePreset = null;
+        RefreshScaryokePresets();
+    }
+
     private void RefreshScaryokeCategories()
     {
         ScaryokeCategories.Clear();

@@ -907,7 +907,7 @@
                             <!-- Scaryoke Settings -->
                             <GroupBox Header="Scaryoke Categories" Style="{StaticResource OrangeSettingsGroupBoxStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="Wheel Categories (Max 12)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBlock Text="Wheel Categories (Max 8)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <ListBox ItemsSource="{Binding ScaryokeCategories}" SelectedItem="{Binding SelectedScaryokeCategory}" MaxHeight="140" Height="140" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
@@ -915,6 +915,23 @@
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
+                                    <TextBlock Text="Selected Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="26" Height="26" CornerRadius="4" BorderBrush="Gray" BorderThickness="1" Background="{Binding SelectedScaryokeColor}" />
+                                        <ui:Button Grid.Column="2" Content="Change Colour" Command="{Binding CycleScaryokeColorCommand}" Height="26" FontSize="11" HorizontalAlignment="Stretch" />
+                                        <ui:Button Grid.Column="4" Command="{Binding CycleScaryokeWeightCommand}" Height="26" FontSize="11" HorizontalAlignment="Stretch">
+                                            <TextBlock FontSize="11">
+                                                <Run Text="Size: " /><Run Text="{Binding SelectedScaryokeWeight, Mode=OneWay}" /><Run Text="×" />
+                                            </TextBlock>
+                                        </ui:Button>
+                                    </Grid>
                                     <TextBlock Text="Add Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
                                     <Grid Margin="0,0,0,8">
                                         <Grid.ColumnDefinitions>
@@ -925,7 +942,30 @@
                                         <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokeCategoryName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Category Name..." Height="26" FontSize="11" />
                                         <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddScaryokeCategoryCommand}" Appearance="Primary" Height="26" FontSize="11" />
                                     </Grid>
-                                    <ui:Button Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveScaryokeCategoryCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
+                                    <ui:Button Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveScaryokeCategoryCommand}" Appearance="Danger" HorizontalAlignment="Stretch" Margin="0,0,0,12" />
+
+                                    <TextBlock Text="Presets" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" ItemsSource="{Binding ScaryokePresetNames}" SelectedItem="{Binding SelectedScaryokePreset}" Height="26" FontSize="11" />
+                                        <ui:Button Grid.Column="2" Content="Load" Command="{Binding LoadScaryokePresetCommand}" Height="26" FontSize="11" />
+                                        <ui:Button Grid.Column="4" Content="Delete" Command="{Binding DeleteScaryokePresetCommand}" Height="26" FontSize="11" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokePresetName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Preset name..." Height="26" FontSize="11" />
+                                        <ui:Button Grid.Column="2" Content="Save Preset" Command="{Binding SaveScaryokePresetCommand}" Appearance="Primary" Height="26" FontSize="11" />
+                                    </Grid>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>

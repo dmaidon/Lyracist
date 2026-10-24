@@ -1,11 +1,13 @@
 // Created on Jul 27, 2026 @ 11:00:00 -> Weighted category wheel, tied to the live rotation queue for
 // current-singer messaging. Segment math mirrors the WPF ScaryokeWheel/Lyracist ScaryokeViewModel
 // implementations so the mechanic (categories + Singer's Choice + DJ's Choice) stays the same.
+// Edited on Oct 24, 2026 -> Per-category weight and colour, named presets, edits locked while spinning
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Maui.Services;
 using KSRotation.ViewModels;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace KSRotation.Maui.ViewModels
 {
@@ -14,7 +16,31 @@ namespace KSRotation.Maui.ViewModels
         public string Name { get; set; } = string.Empty;
         public string Color { get; set; } = "#8A2BE2";
         public string TextColor { get; set; } = "#FFFFFF";
+        public double Weight { get; set; } = 1.0;
         public double Sweep { get; set; }
+    }
+
+    /// <summary>A user category with its optional weight and colour override.</summary>
+    public partial class CategoryItem : ObservableObject
+    {
+        public CategoryItem(string name)
+        {
+            Name = name;
+        }
+
+        public string Name { get; }
+
+        /// <summary>Relative slice size (1-3).</summary>
+        [ObservableProperty]
+        public partial double Weight { get; set; } = 1;
+
+        /// <summary>Explicit colour override; null means "use the palette colour for this position".</summary>
+        [ObservableProperty]
+        public partial string? Color { get; set; }
+
+        /// <summary>The colour actually used on the wheel (set by the view model on rebuild).</summary>
+        [ObservableProperty]
+        public partial string DisplayColor { get; set; } = "#8A2BE2";
     }
 
     public partial class ScaryokeWheelViewModel : ObservableObject
@@ -27,11 +53,14 @@ namespace KSRotation.Maui.ViewModels
 
         private const string SingersChoice = "Singer's Choice";
         private const string DjsChoice = "DJ's Choice";
+        private const double SliverWeight = 0.15;
+        private const double MaxWeight = 3;
 
         private const int RecentLimit = 8;
         private readonly List<string> _recent = [];
 
         private readonly MainViewModel _rotation;
+        private readonly ScaryokeSettings _settings;
 
         /// <summary>
         /// True when <paramref name="name"/> was landed on in the last two spins, so a spin can skip
@@ -44,9 +73,17 @@ namespace KSRotation.Maui.ViewModels
             return _recent.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
         }
 
-        public ObservableCollection<string> CustomCategories { get; } = [];
+        public ObservableCollection<CategoryItem> CustomCategories { get; } = [];
+
+        public ObservableCollection<CategoryPreset> Presets { get; } = [];
 
         public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
+
+        [ObservableProperty]
+        public partial CategoryPreset? SelectedPreset { get; set; }
+
+        [ObservableProperty]
+        public partial string NewPresetName { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial string NewCategoryName { get; set; } = string.Empty;
@@ -66,16 +103,69 @@ namespace KSRotation.Maui.ViewModels
         {
             _rotation = rotation;
 
-            var settings = ScaryokeSettingsService.Load();
-            foreach (var category in settings.Categories)
+            _settings = ScaryokeSettingsService.Load();
+            foreach (var preset in _settings.Presets)
             {
-                CustomCategories.Add(category);
+                Presets.Add(preset);
+            }
+
+            foreach (string category in _settings.Categories)
+            {
+                _settings.Styles.TryGetValue(category, out var style);
+                AddItem(category, style);
             }
 
             RebuildWheelSegments();
         }
 
-        [RelayCommand]
+        private bool CanEdit() => !IsSpinning;
+
+        partial void OnIsSpinningChanged(bool value)
+        {
+            // Editing the wheel mid-spin would redraw it under the animation
+            AddCategoryCommand.NotifyCanExecuteChanged();
+            RemoveCategoryCommand.NotifyCanExecuteChanged();
+            CycleColorCommand.NotifyCanExecuteChanged();
+            CycleWeightCommand.NotifyCanExecuteChanged();
+            LoadPresetCommand.NotifyCanExecuteChanged();
+        }
+
+        private CategoryItem AddItem(string name, CategoryStyle? style)
+        {
+            var item = new CategoryItem(name)
+            {
+                Weight = Math.Clamp(style?.Weight ?? 1, 1, MaxWeight),
+                Color = style?.Color
+            };
+            item.PropertyChanged += OnItemPropertyChanged;
+            CustomCategories.Add(item);
+            return item;
+        }
+
+        private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // DisplayColor is an output of the rebuild, not an edit
+            if (e.PropertyName is nameof(CategoryItem.Weight) or nameof(CategoryItem.Color))
+            {
+                SaveAndRebuild();
+            }
+        }
+
+        private Dictionary<string, CategoryStyle> CurrentStyles() =>
+            CustomCategories
+                .Where(c => c.Weight != 1 || c.Color != null)
+                .ToDictionary(c => c.Name, c => new CategoryStyle { Weight = c.Weight, Color = c.Color });
+
+        private void SaveAndRebuild()
+        {
+            _settings.Categories = [.. CustomCategories.Select(c => c.Name)];
+            _settings.Styles = CurrentStyles();
+            ScaryokeSettingsService.Save(_settings);
+
+            RebuildWheelSegments();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
         private void AddCategory()
         {
             ValidationError = string.Empty;
@@ -91,34 +181,125 @@ namespace KSRotation.Maui.ViewModels
                 return;
             }
 
-            if (CustomCategories.Contains(name, StringComparer.OrdinalIgnoreCase))
+            if (CustomCategories.Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)))
             {
                 ValidationError = "This category already exists.";
                 return;
             }
 
-            CustomCategories.Add(name);
+            AddItem(name, null);
             NewCategoryName = string.Empty;
-            SaveCategories();
-            RebuildWheelSegments();
+            SaveAndRebuild();
         }
 
-        [RelayCommand]
-        private void RemoveCategory(string? category)
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void RemoveCategory(CategoryItem? category)
         {
             if (category == null)
             {
                 return;
             }
 
+            category.PropertyChanged -= OnItemPropertyChanged;
             CustomCategories.Remove(category);
-            SaveCategories();
-            RebuildWheelSegments();
+            SaveAndRebuild();
         }
 
-        private void SaveCategories()
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void CycleColor(CategoryItem? category)
         {
-            ScaryokeSettingsService.Save(new ScaryokeSettings { Categories = [.. CustomCategories] });
+            if (category == null)
+            {
+                return;
+            }
+
+            int index = Array.FindIndex(SegmentColors, c => string.Equals(c, category.DisplayColor, StringComparison.OrdinalIgnoreCase));
+            category.Color = SegmentColors[(index + 1) % SegmentColors.Length];
+        }
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void CycleWeight(CategoryItem? category)
+        {
+            if (category == null)
+            {
+                return;
+            }
+
+            category.Weight = category.Weight >= MaxWeight ? 1 : category.Weight + 1;
+        }
+
+        [RelayCommand]
+        private void SavePreset()
+        {
+            string name = NewPresetName?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(name) || CustomCategories.Count == 0)
+            {
+                return;
+            }
+
+            var preset = new CategoryPreset
+            {
+                Name = name,
+                Categories = [.. CustomCategories.Select(c => c.Name)],
+                Styles = CurrentStyles()
+            };
+
+            // Saving under an existing name replaces that preset
+            var existing = Presets.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                Presets[Presets.IndexOf(existing)] = preset;
+            }
+            else
+            {
+                Presets.Add(preset);
+            }
+
+            SelectedPreset = preset;
+            NewPresetName = string.Empty;
+            SavePresets();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void LoadPreset()
+        {
+            if (SelectedPreset == null)
+            {
+                return;
+            }
+
+            foreach (var item in CustomCategories)
+            {
+                item.PropertyChanged -= OnItemPropertyChanged;
+            }
+            CustomCategories.Clear();
+
+            foreach (string name in SelectedPreset.Categories.Take(MaxCategories))
+            {
+                SelectedPreset.Styles.TryGetValue(name, out var style);
+                AddItem(name, style);
+            }
+
+            SaveAndRebuild();
+        }
+
+        [RelayCommand]
+        private void DeletePreset()
+        {
+            if (SelectedPreset == null)
+            {
+                return;
+            }
+
+            Presets.Remove(SelectedPreset);
+            SelectedPreset = null;
+            SavePresets();
+        }
+
+        private void SavePresets()
+        {
+            _settings.Presets = [.. Presets];
+            ScaryokeSettingsService.Save(_settings);
         }
 
         /// <summary>
@@ -131,12 +312,15 @@ namespace KSRotation.Maui.ViewModels
 
             for (int i = 0; i < CustomCategories.Count; i++)
             {
-                string color = SegmentColors[i % SegmentColors.Length];
+                var item = CustomCategories[i];
+                string color = item.Color ?? SegmentColors[i % SegmentColors.Length];
+                item.DisplayColor = color;
                 list.Add(new WheelSegment
                 {
-                    Name = CustomCategories[i],
+                    Name = item.Name,
                     Color = color,
-                    TextColor = GetContrastingTextColor(color)
+                    TextColor = GetContrastingTextColor(color),
+                    Weight = item.Weight
                 });
             }
 
@@ -147,8 +331,8 @@ namespace KSRotation.Maui.ViewModels
                 TextColor = GetContrastingTextColor("#228B22")
             };
 
-            var leftSliver = new WheelSegment { Name = DjsChoice, Color = "#000000", TextColor = "#FF5722" };
-            var rightSliver = new WheelSegment { Name = DjsChoice, Color = "#000000", TextColor = "#FF5722" };
+            var leftSliver = new WheelSegment { Name = DjsChoice, Color = "#000000", TextColor = "#FF5722", Weight = SliverWeight };
+            var rightSliver = new WheelSegment { Name = DjsChoice, Color = "#000000", TextColor = "#FF5722", Weight = SliverWeight };
 
             if (list.Count == 0)
             {
@@ -164,13 +348,10 @@ namespace KSRotation.Maui.ViewModels
                 list.Insert(insertIndex + 2, rightSliver);
             }
 
-            // Regular categories and Singer's Choice get weight 1.0; the two DJ's Choice slivers get 0.15.
-            double totalWeight = (list.Count - 2) + (2 * 0.15);
-            double baseSweep = 360.0 / totalWeight;
-
+            double totalWeight = list.Sum(s => s.Weight);
             foreach (var segment in list)
             {
-                segment.Sweep = segment.Name == DjsChoice ? baseSweep * 0.15 : baseSweep;
+                segment.Sweep = 360.0 * segment.Weight / totalWeight;
             }
 
             WheelSegments.Clear();

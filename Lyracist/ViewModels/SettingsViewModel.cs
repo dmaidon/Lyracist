@@ -408,6 +408,7 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshLibraryDirectories();
         RefreshLibraryStatus();
         RefreshScaryokeCategories();
+        RefreshScaryokePresets();
         RefreshVenues();
         RefreshAvailableRatingIcons();
         RefreshDjBanners();

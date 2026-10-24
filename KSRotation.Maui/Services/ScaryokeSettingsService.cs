@@ -4,8 +4,26 @@ using System.Text.Json;
 
 namespace KSRotation.Maui.Services
 {
+    public class CategoryStyle
+    {
+        public double Weight { get; set; } = 1;
+        public string? Color { get; set; }
+    }
+
+    public class CategoryPreset
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<string> Categories { get; set; } = [];
+        public Dictionary<string, CategoryStyle> Styles { get; set; } = [];
+    }
+
     public class ScaryokeSettings
     {
+        /// <summary>Per-category weight and colour overrides, keyed by category name.</summary>
+        public Dictionary<string, CategoryStyle> Styles { get; set; } = [];
+
+        public List<CategoryPreset> Presets { get; set; } = [];
+
         public List<string> Categories { get; set; } =
         [
             "Elvis",
@@ -44,6 +62,8 @@ namespace KSRotation.Maui.Services
                         {
                             settings.Categories = settings.Categories.GetRange(0, MaxCategories);
                         }
+                        settings.Styles ??= [];
+                        settings.Presets ??= [];
                         return settings;
                     }
                 }

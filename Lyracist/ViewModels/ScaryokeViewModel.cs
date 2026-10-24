@@ -10,6 +10,7 @@ public class WheelSegment
     public string Name { get; set; } = string.Empty;
     public string Color { get; set; } = "#8A2BE2";
     public string TextColor { get; set; } = "#FFFFFF";
+    public double Weight { get; set; } = 1.0;
     public double Sweep { get; set; }
 }
 
@@ -19,6 +20,17 @@ public partial class ScaryokeViewModel : BaseViewModel
     public static string[] WheelCategories => [.. Core.Helpers.AppSettings.ScaryokeCategories];
 
     public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
+
+    private const double SliverWeight = 0.15;
+
+    /// <summary>Wheel palette, also used by Settings to cycle a category's colour.</summary>
+    public static readonly string[] Palette =
+    [
+        "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
+        "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
+    ];
+
+    public static string PaletteColor(int index) => Palette[index % Palette.Length];
 
     private const int RecentLimit = 8;
     private readonly List<string> _recent = [];
@@ -51,20 +63,17 @@ public partial class ScaryokeViewModel : BaseViewModel
     {
         var list = new List<WheelSegment>();
         var customCategories = Core.Helpers.AppSettings.ScaryokeCategories;
-        var segmentColors = new[]
-        {
-            "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
-            "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
-        };
 
         for (int i = 0; i < customCategories.Count; i++)
         {
-            string color = segmentColors[i % segmentColors.Length];
+            var style = Core.Helpers.AppSettings.GetScaryokeStyle(customCategories[i]);
+            string color = style.Color ?? PaletteColor(i);
             list.Add(new WheelSegment
             {
                 Name = customCategories[i],
                 Color = color,
-                TextColor = GetContrastingTextColor(color)
+                TextColor = GetContrastingTextColor(color),
+                Weight = Math.Clamp(style.Weight, 1, 3)
             });
         }
 
@@ -79,14 +88,16 @@ public partial class ScaryokeViewModel : BaseViewModel
         {
             Name = "DJ's Choice",
             Color = "#000000",
-            TextColor = "#FF5722"
+            TextColor = "#FF5722",
+            Weight = SliverWeight
         };
 
         var rightSliver = new WheelSegment
         {
             Name = "DJ's Choice",
             Color = "#000000",
-            TextColor = "#FF5722"
+            TextColor = "#FF5722",
+            Weight = SliverWeight
         };
 
         if (list.Count == 0)
@@ -103,19 +114,10 @@ public partial class ScaryokeViewModel : BaseViewModel
             list.Insert(insertIndex + 2, rightSliver);
         }
 
-        double totalWeight = (list.Count - 2) + (2 * 0.15);
-        double baseSweep = 360.0 / totalWeight;
-
+        double totalWeight = list.Sum(s => s.Weight);
         foreach (var segment in list)
         {
-            if (segment.Name == "DJ's Choice")
-            {
-                segment.Sweep = baseSweep * 0.15;
-            }
-            else
-            {
-                segment.Sweep = baseSweep;
-            }
+            segment.Sweep = 360.0 * segment.Weight / totalWeight;
         }
 
         WheelSegments.Clear();

@@ -84,6 +84,9 @@ public static class AppSettings
                         .Take(8)];
                 }
 
+                data.ScaryokeStyles ??= [];
+                data.ScaryokePresets ??= [];
+
                 return data;
             }
         }
@@ -380,6 +383,85 @@ public static class AppSettings
         lock (_lock)
         {
             _data.ScaryokeCategories.Remove(category);
+            _data.ScaryokeStyles.Remove(category);
+            Save();
+        }
+    }
+
+    public static ScaryokeCategoryStyle GetScaryokeStyle(string category)
+    {
+        lock (_lock)
+        {
+            return _data.ScaryokeStyles.TryGetValue(category, out var style)
+                ? new ScaryokeCategoryStyle { Weight = style.Weight, Color = style.Color }
+                : new ScaryokeCategoryStyle();
+        }
+    }
+
+    public static void SetScaryokeStyle(string category, double weight, string? color)
+    {
+        lock (_lock)
+        {
+            if (weight == 1 && color == null)
+            {
+                _data.ScaryokeStyles.Remove(category);
+            }
+            else
+            {
+                _data.ScaryokeStyles[category] = new ScaryokeCategoryStyle { Weight = weight, Color = color };
+            }
+            Save();
+        }
+    }
+
+    public static System.Collections.Generic.IReadOnlyList<string> ScaryokePresetNames
+    {
+        get { lock (_lock) { return _data.ScaryokePresets.Select(p => p.Name).ToList(); } }
+    }
+
+    /// <summary>Snapshots the current categories and styles under <paramref name="name"/>, replacing any preset of that name.</summary>
+    public static void SaveScaryokePreset(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        lock (_lock)
+        {
+            var preset = new ScaryokePreset
+            {
+                Name = name.Trim(),
+                Categories = [.. _data.ScaryokeCategories],
+                Styles = _data.ScaryokeStyles
+                    .Where(kv => _data.ScaryokeCategories.Contains(kv.Key))
+                    .ToDictionary(kv => kv.Key, kv => new ScaryokeCategoryStyle { Weight = kv.Value.Weight, Color = kv.Value.Color })
+            };
+
+            _data.ScaryokePresets.RemoveAll(p => string.Equals(p.Name, preset.Name, StringComparison.OrdinalIgnoreCase));
+            _data.ScaryokePresets.Add(preset);
+            Save();
+        }
+    }
+
+    public static bool LoadScaryokePreset(string name)
+    {
+        lock (_lock)
+        {
+            var preset = _data.ScaryokePresets.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (preset == null) return false;
+
+            _data.ScaryokeCategories = [.. preset.Categories.Take(8)];
+            _data.ScaryokeStyles = preset.Styles
+                .Where(kv => _data.ScaryokeCategories.Contains(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => new ScaryokeCategoryStyle { Weight = kv.Value.Weight, Color = kv.Value.Color });
+            Save();
+            return true;
+        }
+    }
+
+    public static void DeleteScaryokePreset(string name)
+    {
+        lock (_lock)
+        {
+            _data.ScaryokePresets.RemoveAll(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             Save();
         }
     }
@@ -1309,6 +1391,10 @@ public static class AppSettings
             "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
             "60s Oldies", "Motown"
         ];
+
+        // Per-category weight/colour overrides (keyed by category name) and named presets
+        public Dictionary<string, ScaryokeCategoryStyle> ScaryokeStyles { get; set; } = [];
+        public List<ScaryokePreset> ScaryokePresets { get; set; } = [];
 
         // Venues & DJ name
         public string DjName { get; set; } = "DJ Karaoke";
