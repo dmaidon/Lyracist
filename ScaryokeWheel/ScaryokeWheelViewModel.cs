@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 12:00:00 -> Category weights, colours and presets; edits locked while spinning
+// Edited on Oct 24, 2026 @ 14:00:00 -> Rename, reorder, enable/disable, undo remove, sliver size, Singer's Choice toggle, volume, result detail
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,15 +18,21 @@ public class WheelSegment
     public double Sweep { get; set; }
 }
 
-/// <summary>A user category with its optional weight and colour override.</summary>
+/// <summary>A user category with its optional weight, colour and enabled state.</summary>
 public partial class CategoryItem : ObservableObject
 {
     public CategoryItem(string name)
     {
-        Name = name;
+        _name = name;
+        CommittedName = name;
     }
 
-    public string Name { get; }
+    /// <summary>Editable in the list; the view model validates and reverts bad edits.</summary>
+    [ObservableProperty]
+    private string _name;
+
+    /// <summary>The last name that passed validation.</summary>
+    public string CommittedName { get; set; }
 
     /// <summary>Relative size on the wheel (1-3).</summary>
     [ObservableProperty]
@@ -39,13 +45,26 @@ public partial class CategoryItem : ObservableObject
     /// <summary>The colour actually used on the wheel (set by the view model on rebuild).</summary>
     [ObservableProperty]
     private string _displayColor = "#FF6D00";
+
+    /// <summary>Disabled categories stay in the list but are left off the wheel.</summary>
+    [ObservableProperty]
+    private bool _isEnabled = true;
 }
 
 public partial class ScaryokeWheelViewModel : ObservableObject
 {
-    private const double SliverWeight = 0.15;
     private const double MaxWeight = 3;
     private const int HistoryLimit = 8;
+    private const string SingersChoiceName = "Singer's Choice";
+    private const string DjsChoiceName = "DJ's Choice";
+
+    /// <summary>Selectable DJ's Choice sliver sizes, smallest first.</summary>
+    public static readonly (string Label, double Weight)[] SliverSizes =
+    [
+        ("Small", 0.15),
+        ("Medium", 0.30),
+        ("Large", 0.50)
+    ];
 
     private readonly ScaryokeSettings _settings;
     private static readonly Random Rng = new();
@@ -72,10 +91,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     private string _newCategoryName = string.Empty;
 
     [ObservableProperty]
+    private string _validationError = string.Empty;
+
+    [ObservableProperty]
     private ObservableCollection<WheelSegment> _wheelSegments = [];
 
     [ObservableProperty]
     private string _resultText = "Spin the wheel for a challenge!";
+
+    [ObservableProperty]
+    private string _resultDetail = string.Empty;
 
     [ObservableProperty]
     private bool _isSpinning;
@@ -87,6 +112,15 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     private bool _avoidRepeats;
 
     [ObservableProperty]
+    private double _volume = 1.0;
+
+    [ObservableProperty]
+    private bool _showSingersChoice = true;
+
+    [ObservableProperty]
+    private int _sliverSizeIndex;
+
+    [ObservableProperty]
     private ObservableCollection<CategoryPreset> _presets = [];
 
     [ObservableProperty]
@@ -95,7 +129,15 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     [ObservableProperty]
     private string _newPresetName = string.Empty;
 
+    [ObservableProperty]
+    private string _undoLabel = string.Empty;
+
+    private CategoryItem? _lastRemoved;
+    private int _lastRemovedIndex;
+
     public ObservableCollection<string> History { get; } = [];
+
+    public IReadOnlyList<string> SliverSizeLabels { get; } = [.. SliverSizes.Select(s => s.Label)];
 
     /// <summary>Raised after <see cref="WheelSegments"/> has been fully repopulated.</summary>
     public event EventHandler? WheelSegmentsRebuilt;
@@ -106,11 +148,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
     public int MaxCategories => ScaryokeSettings.MaxCategories;
 
+    public ScaryokeSettings Settings => _settings;
+
     public ScaryokeWheelViewModel()
     {
         _settings = ScaryokeSettings.Load();
         _isMuted = _settings.IsMuted;
         _avoidRepeats = _settings.AvoidRepeats;
+        _volume = _settings.Volume;
+        _showSingersChoice = _settings.ShowSingersChoice;
+        _sliverSizeIndex = NearestSliverIndex(_settings.SliverWeight);
 
         foreach (var preset in _settings.Presets)
         {
@@ -126,6 +173,19 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         RebuildWheelSegments();
     }
 
+    private static int NearestSliverIndex(double weight)
+    {
+        int best = 0;
+        for (int i = 1; i < SliverSizes.Length; i++)
+        {
+            if (Math.Abs(SliverSizes[i].Weight - weight) < Math.Abs(SliverSizes[best].Weight - weight))
+            {
+                best = i;
+            }
+        }
+        return best;
+    }
+
     private bool CanEdit() => !IsSpinning;
 
     partial void OnIsSpinningChanged(bool value)
@@ -135,6 +195,9 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         RemoveCategoryCommand.NotifyCanExecuteChanged();
         CycleColorCommand.NotifyCanExecuteChanged();
         CycleWeightCommand.NotifyCanExecuteChanged();
+        MoveUpCommand.NotifyCanExecuteChanged();
+        MoveDownCommand.NotifyCanExecuteChanged();
+        UndoRemoveCommand.NotifyCanExecuteChanged();
         LoadPresetCommand.NotifyCanExecuteChanged();
     }
 
@@ -148,6 +211,32 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     {
         _settings.AvoidRepeats = value;
         _settings.Save();
+    }
+
+    partial void OnVolumeChanged(double value)
+    {
+        _settings.Volume = Math.Clamp(value, 0, 1);
+        _settings.Save();
+    }
+
+    partial void OnShowSingersChoiceChanged(bool value)
+    {
+        _settings.ShowSingersChoice = value;
+        _settings.Save();
+        if (!IsSpinning)
+        {
+            RebuildWheelSegments();
+        }
+    }
+
+    partial void OnSliverSizeIndexChanged(int value)
+    {
+        _settings.SliverWeight = SliverSizes[Math.Clamp(value, 0, SliverSizes.Length - 1)].Weight;
+        _settings.Save();
+        if (!IsSpinning)
+        {
+            RebuildWheelSegments();
+        }
     }
 
     public void AddHistory(string name)
@@ -175,35 +264,100 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         return History.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
     }
 
-    private CategoryItem AddItem(string name, CategoryStyle? style)
+    /// <summary>Sets the result headline and a short instruction for the landed segment.</summary>
+    public void ShowResult(string segmentName)
+    {
+        ResultText = segmentName.ToUpper();
+        ResultDetail = segmentName switch
+        {
+            SingersChoiceName => "Singer picks any song they like!",
+            DjsChoiceName => "The DJ picks your song... be afraid.",
+            _ => $"Pick a song from: {segmentName}"
+        };
+    }
+
+    private CategoryItem AddItem(string name, CategoryStyle? style, int? index = null)
     {
         var item = new CategoryItem(name)
         {
             Weight = Math.Clamp(style?.Weight ?? 1, 1, MaxWeight),
-            Color = style?.Color
+            Color = style?.Color,
+            IsEnabled = style?.Enabled ?? true
         };
         item.PropertyChanged += OnItemPropertyChanged;
-        CustomCategories.Add(item);
+        if (index.HasValue)
+        {
+            CustomCategories.Insert(index.Value, item);
+        }
+        else
+        {
+            CustomCategories.Add(item);
+        }
         return item;
     }
 
     private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (sender is not CategoryItem item) return;
+
+        if (e.PropertyName == nameof(CategoryItem.Name))
+        {
+            ApplyRename(item);
+            return;
+        }
+
         // DisplayColor is an output of the rebuild, not an edit
-        if (e.PropertyName is nameof(CategoryItem.Weight) or nameof(CategoryItem.Color))
+        if (e.PropertyName is nameof(CategoryItem.Weight) or nameof(CategoryItem.Color) or nameof(CategoryItem.IsEnabled))
         {
             SaveAndRebuild();
         }
     }
 
+    private void ApplyRename(CategoryItem item)
+    {
+        string name = item.Name?.Trim() ?? string.Empty;
+        if (name == item.CommittedName && item.Name == name) return;
+
+        string? error = null;
+        if (name.Length == 0)
+        {
+            error = "A category needs a name.";
+        }
+        else if (ScaryokeSettings.ReservedNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+        {
+            error = $"\"{name}\" is added to the wheel automatically.";
+        }
+        else if (CustomCategories.Any(c => !ReferenceEquals(c, item) && string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)))
+        {
+            error = "This category already exists.";
+        }
+
+        if (error != null)
+        {
+            ValidationError = error;
+            item.Name = item.CommittedName;
+            return;
+        }
+
+        ValidationError = string.Empty;
+        item.CommittedName = name;
+        if (item.Name != name)
+        {
+            item.Name = name;
+        }
+
+        if (IsSpinning) return;
+        SaveAndRebuild();
+    }
+
     private Dictionary<string, CategoryStyle> CurrentStyles() =>
         CustomCategories
-            .Where(c => c.Weight != 1 || c.Color != null)
-            .ToDictionary(c => c.Name, c => new CategoryStyle { Weight = c.Weight, Color = c.Color });
+            .Where(c => c.Weight != 1 || c.Color != null || !c.IsEnabled)
+            .ToDictionary(c => c.CommittedName, c => new CategoryStyle { Weight = c.Weight, Color = c.Color, Enabled = c.IsEnabled });
 
     private void SaveAndRebuild()
     {
-        _settings.Categories = [.. CustomCategories.Select(c => c.Name)];
+        _settings.Categories = [.. CustomCategories.Select(c => c.CommittedName)];
         _settings.Styles = CurrentStyles();
         _settings.Save();
 
@@ -218,26 +372,23 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
         if (CustomCategories.Count >= MaxCategories)
         {
-            System.Windows.MessageBox.Show(
-                $"A maximum of {MaxCategories} custom categories is allowed.",
-                "Category Limit",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning
-            );
+            ValidationError = $"A maximum of {MaxCategories} custom categories is allowed.";
             return;
         }
 
-        if (CustomCategories.Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)))
+        if (ScaryokeSettings.ReservedNames.Contains(name, StringComparer.OrdinalIgnoreCase))
         {
-            System.Windows.MessageBox.Show(
-                "This category already exists.",
-                "Duplicate Category",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning
-            );
+            ValidationError = $"\"{name}\" is added to the wheel automatically.";
             return;
         }
 
+        if (CustomCategories.Any(c => string.Equals(c.CommittedName, name, StringComparison.OrdinalIgnoreCase)))
+        {
+            ValidationError = "This category already exists.";
+            return;
+        }
+
+        ValidationError = string.Empty;
         AddItem(name, null);
         NewCategoryName = string.Empty;
 
@@ -249,9 +400,50 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     {
         if (category == null) return;
 
+        // Remembered so one click can bring it back
+        _lastRemovedIndex = CustomCategories.IndexOf(category);
+        _lastRemoved = category;
+        UndoLabel = $"Undo remove \"{category.CommittedName}\"";
+
         category.PropertyChanged -= OnItemPropertyChanged;
         CustomCategories.Remove(category);
 
+        SaveAndRebuild();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void UndoRemove()
+    {
+        if (_lastRemoved == null) return;
+
+        var item = _lastRemoved;
+        bool duplicate = CustomCategories.Any(c => string.Equals(c.CommittedName, item.CommittedName, StringComparison.OrdinalIgnoreCase));
+        if (CustomCategories.Count < MaxCategories && !duplicate)
+        {
+            item.PropertyChanged += OnItemPropertyChanged;
+            CustomCategories.Insert(Math.Clamp(_lastRemovedIndex, 0, CustomCategories.Count), item);
+            SaveAndRebuild();
+        }
+
+        _lastRemoved = null;
+        UndoLabel = string.Empty;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void MoveUp(CategoryItem? category) => Move(category, -1);
+
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void MoveDown(CategoryItem? category) => Move(category, 1);
+
+    private void Move(CategoryItem? category, int offset)
+    {
+        if (category == null) return;
+
+        int from = CustomCategories.IndexOf(category);
+        int to = from + offset;
+        if (from < 0 || to < 0 || to >= CustomCategories.Count) return;
+
+        CustomCategories.Move(from, to);
         SaveAndRebuild();
     }
 
@@ -281,7 +473,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         var preset = new CategoryPreset
         {
             Name = name,
-            Categories = [.. CustomCategories.Select(c => c.Name)],
+            Categories = [.. CustomCategories.Select(c => c.CommittedName)],
             Styles = CurrentStyles()
         };
 
@@ -311,6 +503,8 @@ public partial class ScaryokeWheelViewModel : ObservableObject
             item.PropertyChanged -= OnItemPropertyChanged;
         }
         CustomCategories.Clear();
+        _lastRemoved = null;
+        UndoLabel = string.Empty;
 
         foreach (string name in SelectedPreset.Categories.Take(MaxCategories))
         {
@@ -341,59 +535,53 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     {
         var list = new List<WheelSegment>();
 
-        // Map custom categories to wheel segments with colors
+        // Map enabled categories to wheel segments; colour falls back by list position so it stays
+        // stable when another category is toggled off
         for (int i = 0; i < CustomCategories.Count; i++)
         {
             var item = CustomCategories[i];
             string color = item.Color ?? SegmentColors[i % SegmentColors.Length];
             item.DisplayColor = color;
+            if (!item.IsEnabled) continue;
+
             list.Add(new WheelSegment
             {
-                Name = item.Name,
+                Name = item.CommittedName,
                 Color = color,
                 TextColor = GetContrastingTextColor(color),
                 Weight = item.Weight
             });
         }
 
-        // Singer's Choice is a regular-sized segment
-        var singersChoice = new WheelSegment
+        double sliverWeight = SliverSizes[Math.Clamp(SliverSizeIndex, 0, SliverSizes.Length - 1)].Weight;
+        WheelSegment NewSliver() => new()
         {
-            Name = "Singer's Choice",
-            Color = "#228B22",
-            TextColor = GetContrastingTextColor("#228B22")
-        };
-
-        // DJ's Choice slivers are the thin black segments with spooky orange text
-        var leftSliver = new WheelSegment
-        {
-            Name = "DJ's Choice",
+            Name = DjsChoiceName,
             Color = "#000000",
             TextColor = "#FF5722", // Vibrant Spooky Orange-Red
-            Weight = SliverWeight
+            Weight = sliverWeight
         };
 
-        var rightSliver = new WheelSegment
+        if (ShowSingersChoice)
         {
-            Name = "DJ's Choice",
-            Color = "#000000",
-            TextColor = "#FF5722",
-            Weight = SliverWeight
-        };
+            var singersChoice = new WheelSegment
+            {
+                Name = SingersChoiceName,
+                Color = "#228B22",
+                TextColor = GetContrastingTextColor("#228B22")
+            };
 
-        if (list.Count == 0)
-        {
-            list.Add(leftSliver);
-            list.Add(singersChoice);
-            list.Add(rightSliver);
+            // Singer's Choice sits between the two slivers at a fresh random position each rebuild
+            int insertIndex = Rng.Next(0, list.Count + 1);
+            list.Insert(insertIndex, NewSliver());
+            list.Insert(insertIndex + 1, singersChoice);
+            list.Insert(insertIndex + 2, NewSliver());
         }
         else
         {
-            // Singer's Choice sits between the slivers at a fresh random position each rebuild
-            int insertIndex = Rng.Next(0, list.Count + 1);
-            list.Insert(insertIndex, leftSliver);
-            list.Insert(insertIndex + 1, singersChoice);
-            list.Insert(insertIndex + 2, rightSliver);
+            // Without Singer's Choice the slivers are scattered independently
+            list.Insert(Rng.Next(0, list.Count + 1), NewSliver());
+            list.Insert(Rng.Next(0, list.Count + 1), NewSliver());
         }
 
         double totalWeight = list.Sum(s => s.Weight);

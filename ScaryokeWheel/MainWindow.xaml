@@ -122,7 +122,7 @@
                             </Canvas>
 
                             <!-- Indicator Pointer pointing at 12 o'clock (Adjust first Margin value to shift pointer left/right) -->
-                            <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="9,-4,0,0">
+                            <Polygon Points="0,0 28,0 14,24" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-4,0,0">
                                 <Polygon.Effect>
                                     <DropShadowEffect Color="#FF3D00" BlurRadius="10" ShadowDepth="0" />
                                 </Polygon.Effect>
@@ -163,9 +163,13 @@
                                            HorizontalAlignment="Center"
                                            RenderTransformOrigin="0.5,0.5">
                                     <TextBlock.RenderTransform>
-                                        <TranslateTransform x:Name="ResultShake" />
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="ResultScale" />
+                                            <TranslateTransform x:Name="ResultShake" />
+                                        </TransformGroup>
                                     </TextBlock.RenderTransform>
                                 </TextBlock>
+                                <TextBlock Text="{Binding ResultDetail}" TextWrapping="Wrap" TextAlignment="Center" FontSize="14" Foreground="#C9C5D6" HorizontalAlignment="Center" Margin="0,12,0,0" />
                             </StackPanel>
                         </Border>
 
@@ -175,6 +179,14 @@
                                 <CheckBox Content="Mute sounds" IsChecked="{Binding IsMuted}" Foreground="#E0DDEC" Margin="0,0,20,0" />
                                 <CheckBox Content="Avoid repeats" IsChecked="{Binding AvoidRepeats}" Foreground="#E0DDEC" />
                             </StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Volume" FontSize="12" Foreground="#8F8B9B" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" LargeChange="0.1" SmallChange="0.05" Value="{Binding Volume, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
                             <Grid>
                                 <TextBlock Text="RECENT SPINS" FontSize="11" FontWeight="Bold" Foreground="#8F8B9B" VerticalAlignment="Center" />
                                 <Button Content="Clear" HorizontalAlignment="Right" Command="{Binding ClearHistoryCommand}" Background="Transparent" BorderThickness="0" Foreground="#8F8B9B" Cursor="Hand" />
@@ -259,13 +271,52 @@
                                     <DataTemplate>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E0DDEC" />
-                                            <Button Grid.Column="1"
+                                            <CheckBox IsChecked="{Binding IsEnabled}" ToolTip="Include on the wheel" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            <!-- Editable name: committed when the box loses focus; the view model reverts invalid names -->
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                                     MaxLength="30"
+                                                     FontSize="14"
+                                                     FontWeight="SemiBold"
+                                                     VerticalAlignment="Center"
+                                                     Background="Transparent"
+                                                     BorderThickness="0"
+                                                     Foreground="#E0DDEC"
+                                                     CaretBrush="#FF6D00"
+                                                     Margin="0,0,6,0" />
+                                            <Button Grid.Column="2"
+                                                    Content="▲"
+                                                    Width="26"
+                                                    Height="34"
+                                                    Margin="0,0,2,0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="#8F8B9B"
+                                                    ToolTip="Move up"
+                                                    Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand" />
+                                            <Button Grid.Column="3"
+                                                    Content="▼"
+                                                    Width="26"
+                                                    Height="34"
+                                                    Margin="0,0,6,0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="#8F8B9B"
+                                                    ToolTip="Move down"
+                                                    Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand" />
+                                            <Button Grid.Column="4"
                                                     Width="34"
                                                     Height="34"
                                                     Margin="0,0,6,0"
@@ -275,7 +326,7 @@
                                                     Command="{Binding DataContext.CycleColorCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
                                                     Cursor="Hand" />
-                                            <Button Grid.Column="2"
+                                            <Button Grid.Column="5"
                                                     Width="44"
                                                     Height="34"
                                                     Margin="0,0,6,0"
@@ -287,7 +338,7 @@
                                                     Cursor="Hand">
                                                 <TextBlock Text="{Binding Weight, StringFormat={}{0:0}×}" Foreground="#E0DDEC" FontWeight="SemiBold" />
                                             </Button>
-                                            <Button Grid.Column="3"
+                                            <Button Grid.Column="6"
                                                     Width="34"
                                                     Height="34"
                                                     Background="#291F26"
@@ -303,42 +354,45 @@
                             </ListBox>
                         </Border>
 
-                        <!-- Add Category Controls (Max 11 warning) -->
+                        <!-- Add Category Controls -->
                         <StackPanel Grid.Row="2" Margin="0,15,0,0">
                             <!-- Helper Count -->
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Limit: Max 11 categories" FontSize="12" Foreground="#8F8B9B" VerticalAlignment="Center" />
+                                <TextBlock FontSize="12" Foreground="#8F8B9B" VerticalAlignment="Center">
+                                    <Run Text="Limit: Max " /><Run Text="{Binding MaxCategories, Mode=OneWay}" /><Run Text=" categories" />
+                                </TextBlock>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Text="{Binding CustomCategories.Count}" FontWeight="Bold" Foreground="#FF6D00" />
-                                    <TextBlock Text="/11" Foreground="#8F8B9B" />
+                                    <TextBlock Text="{Binding MaxCategories, StringFormat=/{0}}" Foreground="#8F8B9B" />
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Presets -->
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ComboBox ItemsSource="{Binding Presets}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPreset}" Height="32" Margin="0,0,8,0" />
-                                <Button Grid.Column="1" Content="Load" Width="60" Margin="0,0,6,0" Command="{Binding LoadPresetCommand}" Cursor="Hand" />
-                                <Button Grid.Column="2" Content="Delete" Width="60" Command="{Binding DeletePresetCommand}" Cursor="Hand" />
-                            </Grid>
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                            PlaceholderText="Preset name (e.g. 80s Night)..."
-                                            Height="32"
-                                            Margin="0,0,8,0"
-                                            MaxLength="30"
-                                            BorderBrush="#332B45"
-                                            Background="#1C1A24" />
-                                <Button Grid.Column="1" Content="Save Preset" Width="126" Command="{Binding SavePresetCommand}" Cursor="Hand" />
-                            </Grid>
+                            <!-- Undo the last removal (shown only while there is one) -->
+                            <Button Content="{Binding UndoLabel}" Command="{Binding UndoRemoveCommand}" HorizontalAlignment="Left" Margin="0,0,0,8" Padding="10,4" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding UndoLabel}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <!-- Validation message -->
+                            <TextBlock Text="{Binding ValidationError}" Foreground="#FF5252" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ValidationError}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
                             <!-- TextBox and Add Button -->
                             <Grid>
@@ -353,7 +407,11 @@
                                             VerticalContentAlignment="Center"
                                             MaxLength="30"
                                             BorderBrush="#332B45"
-                                            Background="#1C1A24" />
+                                            Background="#1C1A24">
+                                    <ui:TextBox.InputBindings>
+                                        <KeyBinding Key="Return" Command="{Binding AddCategoryCommand}" />
+                                    </ui:TextBox.InputBindings>
+                                </ui:TextBox>
                                 <ui:Button Grid.Column="1"
                                            Content="Add Category"
                                            Height="40"
@@ -384,6 +442,49 @@
                             <!-- Descriptions & Rules -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,15">
                                 <StackPanel>
+                                    <!-- Presets -->
+                                    <TextBlock Text="PRESETS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,0,0,8" FontSize="13" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox ItemsSource="{Binding Presets}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPreset}" Height="32" Margin="0,0,8,0" />
+                                        <Button Grid.Column="1" Content="Load" Width="56" Margin="0,0,6,0" Command="{Binding LoadPresetCommand}" Cursor="Hand" />
+                                        <Button Grid.Column="2" Content="Delete" Width="56" Command="{Binding DeletePresetCommand}" Cursor="Hand" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,18">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBox Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                    PlaceholderText="Preset name (e.g. 80s Night)..."
+                                                    Height="32"
+                                                    Margin="0,0,8,0"
+                                                    MaxLength="30"
+                                                    BorderBrush="#332B45"
+                                                    Background="#1C1A24">
+                                            <ui:TextBox.InputBindings>
+                                                <KeyBinding Key="Return" Command="{Binding SavePresetCommand}" />
+                                            </ui:TextBox.InputBindings>
+                                        </ui:TextBox>
+                                        <Button Grid.Column="1" Content="Save Preset" Width="100" Command="{Binding SavePresetCommand}" Cursor="Hand" />
+                                    </Grid>
+
+                                    <!-- Wheel options -->
+                                    <TextBlock Text="WHEEL OPTIONS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,0,0,8" FontSize="13" />
+                                    <CheckBox Content="Include Singer's Choice segment" IsChecked="{Binding ShowSingersChoice}" Foreground="#E0DDEC" Margin="0,0,0,8" />
+                                    <Grid Margin="0,0,0,18">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="DJ's Choice slivers" Foreground="#E0DDEC" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding SliverSizeLabels}" SelectedIndex="{Binding SliverSizeIndex}" Height="30" />
+                                    </Grid>
+
                                     <TextBlock Text="Scaryoke is the ultimate singing challenge! Performers are forced to step outside their comfort zones and sing a song randomly picked by the wheel."
                                                TextWrapping="Wrap"
                                                FontSize="13"
@@ -397,7 +498,7 @@
                                         <BulletDecorator.Bullet>
                                             <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="Enter up to 11 custom genre or artist categories in Settings." TextWrapping="Wrap" Foreground="#E0DDEC" />
+                                        <TextBlock Text="Add custom genre or artist categories in Settings. Rename, reorder, resize, recolour or switch them off there." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
                                     <BulletDecorator Margin="0,0,0,8">

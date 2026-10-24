@@ -1,10 +1,14 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1123 arithmetic parentheses
+// Edited on Oct 24, 2026 @ 14:00:00 -> Spin feel, pitched ticks, themed sounds, volume, winner pulse, true fullscreen, label fitting, saved window bounds
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -15,19 +19,34 @@ public partial class MainWindow : Window
 {
     private const double WheelSize = 420;
     private const double Radius = WheelSize / 2;
+    private const double MinWindowWidth = 700;
+    private const double MinWindowHeight = 520;
 
     private readonly ScaryokeWheelViewModel _vm;
     private double _currentAngle;
     private bool _isSpinning;
 
-    // Pre-loaded synthesized WAV streams and players
-    private static readonly MemoryStream TickStream = ScaryokeAudio.CreateTickStream();
-
-    private static readonly SoundPlayer TickPlayer = new(TickStream);
+    // Synthesized sounds are rebuilt whenever the volume changes. Ticks come in three pitches so
+    // the click drops in tone as the wheel slows down.
+    private readonly SoundPlayer?[] _tickPlayers = new SoundPlayer?[3];
+    private SoundPlayer? _spinPlayer;
+    private SoundPlayer? _resultPlayer;
+    private readonly List<MemoryStream> _soundStreams = [];
 
     private int _lastTickIndex = -1;
     private long _lastTickTimestamp;
+    private double _lastRawAngle;
+    private long _lastRenderTimestamp;
     private System.Windows.Media.MediaPlayer? _laughMediaPlayer;
+
+    // Slice + label elements per segment, so the winner can be highlighted after a spin
+    private readonly List<UIElement[]> _segmentVisuals = [];
+
+    private bool _isPresentationMode;
+    private Rect _restoreBounds;
+    private WindowState _restoreState;
+    private bool _restoreTopmost;
+    private ResizeMode _restoreResizeMode;
 
     public MainWindow()
     {
@@ -35,16 +54,25 @@ public partial class MainWindow : Window
         _vm = new ScaryokeWheelViewModel();
         DataContext = _vm;
 
+        RestoreWindowBounds();
+        BuildSounds();
         BuildWheel();
 
         // Redraw the wheel whenever the view model has repopulated its segments
         _vm.WheelSegmentsRebuilt += OnWheelSegmentsRebuilt;
+        _vm.PropertyChanged += OnViewModelPropertyChanged;
+    }
 
-        try
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ScaryokeWheelViewModel.Volume))
         {
-            TickPlayer.Load();
+            BuildSounds();
+            if (_laughMediaPlayer != null)
+            {
+                _laughMediaPlayer.Volume = _vm.Volume;
+            }
         }
-        catch { }
     }
 
     private void OnWheelSegmentsRebuilt(object? sender, EventArgs e)
@@ -58,14 +86,82 @@ public partial class MainWindow : Window
         BuildWheel();
     }
 
+    // ─── Sounds ──────────────────────────────────────────────────────────
+
+    private SoundPlayer? NewPlayer(MemoryStream stream)
+    {
+        _soundStreams.Add(stream);
+        try
+        {
+            var player = new SoundPlayer(stream);
+            player.Load();
+            return player;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Sound load failed: {ex.Message}");
+            return null;
+        }
+    }
+
+    private void BuildSounds()
+    {
+        foreach (var player in _tickPlayers)
+        {
+            player?.Dispose();
+        }
+        _spinPlayer?.Dispose();
+        _resultPlayer?.Dispose();
+        foreach (var stream in _soundStreams)
+        {
+            stream.Dispose();
+        }
+        _soundStreams.Clear();
+
+        double volume = _vm.Volume;
+        double[] pitches = [1.0, 0.75, 0.55];
+        for (int i = 0; i < pitches.Length; i++)
+        {
+            _tickPlayers[i] = NewPlayer(ScaryokeAudio.CreateTickStream(pitches[i], volume));
+        }
+        _spinPlayer = NewPlayer(ScaryokeAudio.CreateSpinStartStream(volume));
+        _resultPlayer = NewPlayer(ScaryokeAudio.CreateResultStream(volume));
+    }
+
+    private void PlaySound(SoundPlayer? player)
+    {
+        if (_vm.IsMuted || player == null) return;
+
+        try
+        {
+            player.Play();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Sound play failed: {ex.Message}");
+        }
+    }
+
+    // ─── Wheel drawing ───────────────────────────────────────────────────
+
     private static Point Polar(double angleDegrees, double radius)
     {
         double rad = angleDegrees * Math.PI / 180.0;
         return new Point(Radius + (radius * Math.Sin(rad)), Radius - (radius * Math.Cos(rad)));
     }
 
+    /// <summary>Font size that keeps a category name inside its 140px label box.</summary>
+    private static double LabelFontSize(string text) => text.Length switch
+    {
+        <= 14 => 13,
+        <= 20 => 11,
+        _ => 9.5
+    };
+
     private void BuildWheel()
     {
+        _segmentVisuals.Clear();
+
         var segments = _vm.WheelSegments;
         if (segments == null || segments.Count == 0) return;
 
@@ -101,19 +197,23 @@ public partial class MainWindow : Window
             var label = new Grid
             {
                 Width = 140,
-                Height = 26,
+                Height = 30,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new RotateTransform(textAngle)
             };
 
             var textColor = (Color)ColorConverter.ConvertFromString(segments[i].TextColor);
             bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
+            string labelText = isDjsChoice ? "💀" : segments[i].Name;
             label.Children.Add(new TextBlock
             {
-                Text = isDjsChoice ? "💀" : segments[i].Name,
+                Text = labelText,
                 Foreground = new SolidColorBrush(textColor),
-                FontSize = isDjsChoice ? 14 : 13,
+                FontSize = isDjsChoice ? 14 : LabelFontSize(labelText),
                 FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                TextTrimming = TextTrimming.CharacterEllipsis,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             });
@@ -122,26 +222,73 @@ public partial class MainWindow : Window
             Canvas.SetTop(label, labelPos.Y - (label.Height / 2));
             WheelCanvas.Children.Add(label);
 
+            _segmentVisuals.Add([slice, label]);
             start = end;
         }
     }
 
-    private void OnRendering(object? sender, EventArgs e)
+    /// <summary>Index of the segment covering the given angle, measured clockwise from the wheel's 12 o'clock start.</summary>
+    private int SegmentIndexAtPointerAngle(double angle)
     {
-        double angle = (360 - (WheelRotate.Angle % 360)) % 360;
-
-        int currentTickIndex = 0;
-        double currentStart = 0;
+        double start = 0;
         for (int i = 0; i < _vm.WheelSegments.Count; i++)
         {
-            double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
-            if (angle >= currentStart && angle < currentEnd)
+            double end = start + _vm.WheelSegments[i].Sweep;
+            if (angle >= start && angle < end)
             {
-                currentTickIndex = i;
-                break;
+                return i;
             }
-            currentStart = currentEnd;
+            start = end;
         }
+
+        return 0;
+    }
+
+    private WheelSegment SegmentAtPointerAngle(double angle) => _vm.WheelSegments[SegmentIndexAtPointerAngle(angle)];
+
+    /// <summary>Dims every segment except the winner and pulses the winner a few times.</summary>
+    private void HighlightWinner(int winnerIndex)
+    {
+        for (int i = 0; i < _segmentVisuals.Count; i++)
+        {
+            foreach (var visual in _segmentVisuals[i])
+            {
+                if (i == winnerIndex)
+                {
+                    visual.BeginAnimation(OpacityProperty, new DoubleAnimation(1.0, 0.6, TimeSpan.FromMilliseconds(260))
+                    {
+                        AutoReverse = true,
+                        RepeatBehavior = new RepeatBehavior(3)
+                    });
+                }
+                else
+                {
+                    visual.BeginAnimation(OpacityProperty, new DoubleAnimation(1.0, 0.35, TimeSpan.FromMilliseconds(400))
+                    {
+                        FillBehavior = FillBehavior.HoldEnd
+                    });
+                }
+            }
+        }
+    }
+
+    // ─── Spinning ────────────────────────────────────────────────────────
+
+    private void OnRendering(object? sender, EventArgs e)
+    {
+        double raw = WheelRotate.Angle;
+        long now = Environment.TickCount64;
+        double angle = (360 - (raw % 360)) % 360;
+        int currentTickIndex = SegmentIndexAtPointerAngle(angle);
+
+        // Wheel speed in degrees per second, to choose the tick pitch
+        double speed = 0;
+        if (_lastRenderTimestamp != 0 && now > _lastRenderTimestamp)
+        {
+            speed = Math.Abs(raw - _lastRawAngle) * 1000.0 / (now - _lastRenderTimestamp);
+        }
+        _lastRawAngle = raw;
+        _lastRenderTimestamp = now;
 
         if (_lastTickIndex == -1)
         {
@@ -149,15 +296,11 @@ public partial class MainWindow : Window
         }
         else if (currentTickIndex != _lastTickIndex)
         {
-            long now = Environment.TickCount64;
-            if (!_vm.IsMuted && now - _lastTickTimestamp >= 50)
+            if (now - _lastTickTimestamp >= 50)
             {
-                try
-                {
-                    TickPlayer.Play();
-                    _lastTickTimestamp = now;
-                }
-                catch { /* Best-effort */ }
+                int pitchIndex = speed > 900 ? 0 : speed > 300 ? 1 : 2;
+                PlaySound(_tickPlayers[pitchIndex]);
+                _lastTickTimestamp = now;
             }
             _lastTickIndex = currentTickIndex;
         }
@@ -171,19 +314,14 @@ public partial class MainWindow : Window
         _vm.IsSpinning = true;
         SpinButton.IsEnabled = false;
         _vm.ResultText = "Spinning...";
+        _vm.ResultDetail = string.Empty;
         ResultTextBlock.Foreground = ResultNormalBrush;
 
-        if (!_vm.IsMuted)
-        {
-            try
-            {
-                SystemSounds.Asterisk.Play();
-            }
-            catch { }
-        }
+        PlaySound(_spinPlayer);
 
         _lastTickIndex = -1;
         _lastTickTimestamp = 0;
+        _lastRenderTimestamp = 0;
         CompositionTarget.Rendering += OnRendering;
 
         // Rebuild segments on start spin to place "DJ's Choice" in a fresh random index
@@ -202,9 +340,12 @@ public partial class MainWindow : Window
         double desired = (360 - landing) % 360;
         double baseAngle = _currentAngle + 1440 + (Random.Shared.Next(0, 2) * 360);
         double target = baseAngle + (((desired - (baseAngle % 360)) + 360) % 360);
-        var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(4.2))
+
+        // Varied length, with a long creeping tail so the last few ticks land one at a time
+        double seconds = 4.0 + (Random.Shared.NextDouble() * 1.5);
+        var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(seconds))
         {
-            DecelerationRatio = 0.9,
+            EasingFunction = new PowerEase { Power = 3.5, EasingMode = EasingMode.EaseOut },
             FillBehavior = FillBehavior.HoldEnd
         };
 
@@ -220,10 +361,12 @@ public partial class MainWindow : Window
             _vm.IsSpinning = false;
             SpinButton.IsEnabled = true;
 
-            WheelSegment landedSegment = SegmentAtPointerAngle((360 - _currentAngle) % 360);
+            int landedIndex = SegmentIndexAtPointerAngle((360 - _currentAngle) % 360);
+            WheelSegment landedSegment = _vm.WheelSegments[landedIndex];
 
-            _vm.ResultText = landedSegment.Name.ToUpper();
+            _vm.ShowResult(landedSegment.Name);
             _vm.AddHistory(landedSegment.Name);
+            HighlightWinner(landedIndex);
 
             bool isDjsChoiceResult = string.Equals(landedSegment.Name?.Trim(), "DJ's Choice", StringComparison.OrdinalIgnoreCase);
             if (isDjsChoiceResult)
@@ -238,93 +381,89 @@ public partial class MainWindow : Window
 
             if (isDjsChoiceResult)
             {
-                try
-                {
-                    TickPlayer.Stop();
-
-                    // Randomly select one of the 2 MP3 files in Assets folder
-                    string[] laughFiles = ["evil-laugh-deep.mp3", "evil-laugh-reverb.mp3"];
-                    string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
-                    string appDir = AppDomain.CurrentDomain.BaseDirectory;
-                    string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
-
-                    if (File.Exists(filePath))
-                    {
-                        try
-                        {
-                            _laughMediaPlayer?.Close();
-                            var laughPlayer = new System.Windows.Media.MediaPlayer();
-                            _laughMediaPlayer = laughPlayer;
-                            bool laughFailed = false;
-
-                            // Unplayable file: Open() doesn't throw, it raises MediaFailed
-                            laughPlayer.MediaFailed += (_, _) =>
-                            {
-                                if (laughFailed) return;
-                                laughFailed = true;
-                                if (ReferenceEquals(_laughMediaPlayer, laughPlayer))
-                                {
-                                    PlaySynthesizedLaughFallback();
-                                }
-                            };
-
-                            laughPlayer.Open(new Uri(filePath));
-
-                            // Chain play "be_afraid.mp3" immediately after the evil laugh completes
-                            void endedHandler(object? s, EventArgs ev)
-                            {
-                                laughPlayer.MediaEnded -= endedHandler;
-                                try
-                                {
-                                    string nextFile = System.IO.Path.Combine(appDir, "Assets", "be_afraid.mp3");
-                                    if (File.Exists(nextFile) && ReferenceEquals(_laughMediaPlayer, laughPlayer))
-                                    {
-                                        laughPlayer.Open(new Uri(nextFile));
-                                        laughPlayer.Play();
-                                    }
-                                }
-                                catch { }
-                            }
-
-                            laughPlayer.MediaEnded += endedHandler;
-
-                            _laughMediaPlayer.Play();
-                        }
-                        catch
-                        {
-                            PlaySynthesizedLaughFallback();
-                        }
-                    }
-                    else
-                    {
-                        PlaySynthesizedLaughFallback();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Evil laugh failed: {ex}");
-                    PlaySynthesizedLaughFallback();
-                }
+                PlayLaugh();
             }
             else
             {
-                try
-                {
-                    SystemSounds.Exclamation.Play();
-                }
-                catch { }
+                PlaySound(_resultPlayer);
             }
         };
 
         WheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
     }
 
+    private void PlayLaugh()
+    {
+        try
+        {
+            foreach (var player in _tickPlayers)
+            {
+                player?.Stop();
+            }
+
+            // Randomly select one of the 2 MP3 files in Assets folder
+            string[] laughFiles = ["evil-laugh-deep.mp3", "evil-laugh-reverb.mp3"];
+            string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
+
+            if (!File.Exists(filePath))
+            {
+                PlaySynthesizedLaughFallback();
+                return;
+            }
+
+            _laughMediaPlayer?.Close();
+            var laughPlayer = new System.Windows.Media.MediaPlayer { Volume = _vm.Volume };
+            _laughMediaPlayer = laughPlayer;
+            bool laughFailed = false;
+
+            // Unplayable file: Open() doesn't throw, it raises MediaFailed
+            laughPlayer.MediaFailed += (_, _) =>
+            {
+                if (laughFailed) return;
+                laughFailed = true;
+                if (ReferenceEquals(_laughMediaPlayer, laughPlayer))
+                {
+                    PlaySynthesizedLaughFallback();
+                }
+            };
+
+            laughPlayer.Open(new Uri(filePath));
+
+            // Chain play "be_afraid.mp3" immediately after the evil laugh completes
+            void endedHandler(object? s, EventArgs ev)
+            {
+                laughPlayer.MediaEnded -= endedHandler;
+                try
+                {
+                    string nextFile = System.IO.Path.Combine(appDir, "Assets", "be_afraid.mp3");
+                    if (File.Exists(nextFile) && ReferenceEquals(_laughMediaPlayer, laughPlayer))
+                    {
+                        laughPlayer.Open(new Uri(nextFile));
+                        laughPlayer.Play();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"be_afraid failed: {ex.Message}");
+                }
+            }
+
+            laughPlayer.MediaEnded += endedHandler;
+            laughPlayer.Play();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Evil laugh failed: {ex}");
+            PlaySynthesizedLaughFallback();
+        }
+    }
+
     private static readonly Brush ResultNormalBrush = new SolidColorBrush(Color.FromRgb(0x00, 0xE6, 0x76));
     private static readonly Brush ResultDjsChoiceBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x3D, 0x00));
 
-    private bool _isPresentationMode;
-
-    /// <summary>Red flash across the window, a shake of the result text and an orange-red result.</summary>
+    /// <summary>Red flash across the window, a shake and pop of the result text, and an orange-red result.</summary>
     private void PlayDjsChoiceReveal()
     {
         ResultTextBlock.Foreground = ResultDjsChoiceBrush;
@@ -344,6 +483,60 @@ public partial class MainWindow : Window
         }
 
         ResultShake.BeginAnimation(TranslateTransform.XProperty, shake);
+
+        // Pop: the result text swells to 1.4x and settles back
+        var pop = new DoubleAnimationUsingKeyFrames();
+        pop.KeyFrames.Add(new LinearDoubleKeyFrame(1.4, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(180))));
+        pop.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(700))));
+        ResultScale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
+        ResultScale.BeginAnimation(ScaleTransform.ScaleYProperty, pop);
+    }
+
+    // ─── Presentation mode ───────────────────────────────────────────────
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorInfo
+    {
+        public int Size;
+        public NativeRect Monitor;
+        public NativeRect Work;
+        public uint Flags;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+
+    private const uint MonitorDefaultToNearest = 2;
+
+    /// <summary>Full bounds (including the taskbar) of the monitor the window is on, in WPF units.</summary>
+    private Rect CurrentMonitorBounds()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
+        if (handle != IntPtr.Zero && GetMonitorInfo(MonitorFromWindow(handle, MonitorDefaultToNearest), ref info))
+        {
+            var dpi = VisualTreeHelper.GetDpi(this);
+            return new Rect(
+                info.Monitor.Left / dpi.DpiScaleX,
+                info.Monitor.Top / dpi.DpiScaleY,
+                (info.Monitor.Right - info.Monitor.Left) / dpi.DpiScaleX,
+                (info.Monitor.Bottom - info.Monitor.Top) / dpi.DpiScaleY);
+        }
+
+        return new Rect(0, 0, SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
     }
 
     private void TogglePresentationMode()
@@ -354,25 +547,104 @@ public partial class MainWindow : Window
         SettingsTab.Visibility = _isPresentationMode ? Visibility.Collapsed : Visibility.Visible;
         OptionsPanel.Visibility = _isPresentationMode ? Visibility.Collapsed : Visibility.Visible;
         ResultTextBlock.FontSize = _isPresentationMode ? 56 : 26;
-        WindowState = _isPresentationMode ? WindowState.Maximized : WindowState.Normal;
+
+        if (_isPresentationMode)
+        {
+            _restoreState = WindowState;
+            _restoreTopmost = Topmost;
+            _restoreResizeMode = ResizeMode;
+            _restoreBounds = WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds;
+
+            // Cover the whole monitor, taskbar included, rather than just its work area
+            WindowState = WindowState.Normal;
+            ResizeMode = ResizeMode.NoResize;
+            var bounds = CurrentMonitorBounds();
+            Left = bounds.Left;
+            Top = bounds.Top;
+            Width = bounds.Width;
+            Height = bounds.Height;
+            Topmost = true;
+        }
+        else
+        {
+            Topmost = _restoreTopmost;
+            ResizeMode = _restoreResizeMode;
+            Left = _restoreBounds.Left;
+            Top = _restoreBounds.Top;
+            Width = _restoreBounds.Width;
+            Height = _restoreBounds.Height;
+            WindowState = _restoreState;
+        }
     }
 
-    /// <summary>Segment covering the given angle, measured clockwise from the wheel's 12 o'clock start.</summary>
-    private WheelSegment SegmentAtPointerAngle(double angle)
+    // ─── Window placement ────────────────────────────────────────────────
+
+    private void RestoreWindowBounds()
     {
-        double start = 0;
-        foreach (var segment in _vm.WheelSegments)
+        MinWidth = MinWindowWidth;
+        MinHeight = MinWindowHeight;
+
+        var s = _vm.Settings;
+        if (s.WindowLeft is not double left || s.WindowTop is not double top ||
+            s.WindowWidth is not double width || s.WindowHeight is not double height)
         {
-            double end = start + segment.Sweep;
-            if (angle >= start && angle < end)
-            {
-                return segment;
-            }
-            start = end;
+            return;
         }
 
-        return _vm.WheelSegments[0];
+        width = Math.Max(width, MinWindowWidth);
+        height = Math.Max(height, MinWindowHeight);
+
+        // Ignore a saved position that is no longer on any screen (e.g. a disconnected monitor)
+        var saved = new Rect(left, top, width, height);
+        var screens = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+        var visible = Rect.Intersect(saved, screens);
+        if (visible.IsEmpty || visible.Width < 120 || visible.Height < 60)
+        {
+            return;
+        }
+
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Left = left;
+        Top = top;
+        Width = width;
+        Height = height;
     }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+
+        CompositionTarget.Rendering -= OnRendering;
+
+        // Leave presentation mode and maximized states out of the saved placement
+        var bounds = _isPresentationMode ? _restoreBounds : (WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds);
+        if (!bounds.IsEmpty)
+        {
+            var s = _vm.Settings;
+            s.WindowLeft = bounds.Left;
+            s.WindowTop = bounds.Top;
+            s.WindowWidth = bounds.Width;
+            s.WindowHeight = bounds.Height;
+            s.Save();
+        }
+
+        _laughMediaPlayer?.Close();
+        _laughMediaPlayer = null;
+        foreach (var player in _tickPlayers)
+        {
+            player?.Dispose();
+        }
+        _spinPlayer?.Dispose();
+        _resultPlayer?.Dispose();
+        foreach (var stream in _soundStreams)
+        {
+            stream.Dispose();
+        }
+        _soundStreams.Clear();
+    }
+
+    // ─── Input ───────────────────────────────────────────────────────────
 
     private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
@@ -394,11 +666,12 @@ public partial class MainWindow : Window
 
     private void PlaySynthesizedLaughFallback()
     {
+        double volume = _vm.Volume;
         System.Threading.Tasks.Task.Run(() =>
         {
             try
             {
-                using var laughStream = ScaryokeAudio.CreateEvilLaughStream();
+                using var laughStream = ScaryokeAudio.CreateEvilLaughStream(volume);
                 using var player = new SoundPlayer(laughStream);
                 player.PlaySync();
             }
