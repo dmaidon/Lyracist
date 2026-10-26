@@ -1,4 +1,4 @@
-﻿// Edited on Oct 8, 2026 @ 13:26:00 -> Prioritize selected song in Play and integrate SongPathResolver in playback flows
+// Edited on Oct 26, 2026 @ 08:05:00 -> Ensure ShowRotationWindow is invoked on OpenScaryokeWheel
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1576,6 +1576,7 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         var wheel = App.AppHost.Services.GetRequiredService<Windows.ScaryokeWindow>();
         wheel.RebuildWheel();
+        _displayService.ShowRotationWindow();
         wheel.Show();
         wheel.Activate();
     }

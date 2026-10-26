@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:43:00 -> Add filler automix, sample pad, and performance recording settings
+// Edited on Oct 26, 2026 @ 08:05:00 -> Add ScaryokeOverlayMonitor setting to select monitor where Scaryoke wheel is overlaid
 using System;
 using System.IO;
 using System.Text.Json;
@@ -74,18 +74,19 @@ public static class AppSettings
                     return new SettingsData();
                 }
 
-                // Clean up loaded categories to enforce the new 8-category limit
+                // Clean up loaded categories to enforce the 11-category limit
                 if (data.ScaryokeCategories != null)
                 {
                     data.ScaryokeCategories = [.. data.ScaryokeCategories
                         .Where(c => !string.Equals(c, "Singer's Choice", StringComparison.OrdinalIgnoreCase) &&
                                     !string.Equals(c, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
                         .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Take(8)];
+                        .Take(11)];
                 }
 
                 data.ScaryokeStyles ??= [];
                 data.ScaryokePresets ??= [];
+                data.ScaryokeSpinHistory = [.. (data.ScaryokeSpinHistory ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).Take(11)];
 
                 return data;
             }
@@ -369,7 +370,7 @@ public static class AppSettings
 
         lock (_lock)
         {
-            if (_data.ScaryokeCategories.Count >= 8) return;
+            if (_data.ScaryokeCategories.Count >= 11) return;
             if (!_data.ScaryokeCategories.Contains(category, StringComparer.OrdinalIgnoreCase))
             {
                 _data.ScaryokeCategories.Add(category);
@@ -448,7 +449,7 @@ public static class AppSettings
             var preset = _data.ScaryokePresets.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             if (preset == null) return false;
 
-            _data.ScaryokeCategories = [.. preset.Categories.Take(8)];
+            _data.ScaryokeCategories = [.. preset.Categories.Take(11)];
             _data.ScaryokeStyles = preset.Styles
                 .Where(kv => _data.ScaryokeCategories.Contains(kv.Key))
                 .ToDictionary(kv => kv.Key, kv => new ScaryokeCategoryStyle { Weight = kv.Value.Weight, Color = kv.Value.Color });
@@ -464,6 +465,68 @@ public static class AppSettings
             _data.ScaryokePresets.RemoveAll(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             Save();
         }
+    }
+
+    public static IReadOnlyList<string> ScaryokeSpinHistory
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _data.ScaryokeSpinHistory.ToList();
+            }
+        }
+    }
+
+    public static void RecordScaryokeSpin(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category) || string.Equals(category, "Spin Again", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        lock (_lock)
+        {
+            _data.ScaryokeSpinHistory ??= [];
+            _data.ScaryokeSpinHistory.Insert(0, category.Trim());
+            while (_data.ScaryokeSpinHistory.Count > 11)
+            {
+                _data.ScaryokeSpinHistory.RemoveAt(_data.ScaryokeSpinHistory.Count - 1);
+            }
+            Save();
+        }
+    }
+
+    public static void ClearScaryokeSpinHistory()
+    {
+        lock (_lock)
+        {
+            _data.ScaryokeSpinHistory ??= [];
+            _data.ScaryokeSpinHistory.Clear();
+            Save();
+        }
+    }
+
+    public static bool ScaryokeShowSingersChoice
+    {
+        get => _data.ScaryokeShowSingersChoice;
+        set { _data.ScaryokeShowSingersChoice = value; Save(); }
+    }
+
+    public static bool ScaryokeShowDjsChoice
+    {
+        get => _data.ScaryokeShowDjsChoice;
+        set { _data.ScaryokeShowDjsChoice = value; Save(); }
+    }
+
+    public static bool ScaryokeAvoidRepeats
+    {
+        get => _data.ScaryokeAvoidRepeats;
+        set { _data.ScaryokeAvoidRepeats = value; Save(); }
+    }
+
+    public static string ScaryokeOverlayMonitor
+    {
+        get { lock (_lock) { return _data.ScaryokeOverlayMonitor ?? string.Empty; } }
+        set { lock (_lock) { _data.ScaryokeOverlayMonitor = value ?? string.Empty; } Save(); }
     }
 
     // ─── Venues & DJ ─────────────────────────────────────────────────────────
@@ -1385,16 +1448,21 @@ public static class AppSettings
         // Library scan roots — persisted so the app can rescan on demand
         public List<string> LibraryDirectories { get; set; } = [];
 
-        // Scaryoke categories - dynamic configuration up to 8 sectors
+        // Scaryoke categories - dynamic configuration up to 11 sectors
         public List<string> ScaryokeCategories { get; set; } =
         [
             "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
-            "60s Oldies", "Motown"
+            "60s Oldies", "Motown", "Hard Rock", "90s Pop", "Disco"
         ];
 
         // Per-category weight/colour overrides (keyed by category name) and named presets
         public Dictionary<string, ScaryokeCategoryStyle> ScaryokeStyles { get; set; } = [];
         public List<ScaryokePreset> ScaryokePresets { get; set; } = [];
+        public List<string> ScaryokeSpinHistory { get; set; } = [];
+        public bool ScaryokeShowSingersChoice { get; set; } = true;
+        public bool ScaryokeShowDjsChoice { get; set; } = true;
+        public bool ScaryokeAvoidRepeats { get; set; } = true;
+        public string ScaryokeOverlayMonitor { get; set; } = string.Empty;
 
         // Venues & DJ name
         public string DjName { get; set; } = "DJ Karaoke";

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:37:00 -> Update user manuals for skipped anchor singer restoration on round completion
+// Edited on Oct 26, 2026 @ 08:05:00 -> Update user manuals for Scaryoke Settings tab, duplicate groupboxes removal, and overlay monitor selection
 using System;
 using System.IO;
 using Xunit;
@@ -5112,6 +5112,402 @@ Resolved an issue where a rotation anchor singer who was skipped at the beginnin
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " SkippedAnchorSingerRestoration";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeSpinHistoryPersistence()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns
+
+[Update Details]
+Added persistent spin history tracking across all applications incorporating the Scaryoke Wheel (Scaryoke standalone wheel, KSRotation, Lyracist, and KSRotation.Maui).
+
+1. Spin History Persistence Across Shutdowns:
+   - Landed categories are automatically preserved in JSON settings when the wheel window is closed, dismissed, or shut down between performers, and across application restarts.
+   - When the next performer is called up and the wheel is reopened, the prevent duplicate spins mechanism (AvoidRepeats) inspects the past spin history and prevents immediate back-to-back duplicate challenge outcomes.
+
+2. Automatic Spin History Reset on Rotation Save or Clear:
+   - When the rotation queue is cleared (ClearRotation or ClearRotationQueue) or when end-of-night performance reports are saved (SaveRotation or ResetEverything), the spin past history is automatically purged from memory and disk.
+   - This ensures each new rotation or show starts with a completely fresh, unbiased wheel history.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ScaryokeSpinHistoryPersistence"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeSpinHistoryPersistence";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForKaraokeSettingsTabAndDisplayScrolling()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Settings Page / Dedicated Karaoke Settings Tab & Display Tab Independent Column Scrolling
+
+[Update Details]
+Added a dedicated 'Karaoke Settings' tab in the main Settings page, enhanced wheel category configuration up to 11 categories with custom and automatic color selection, integrated wheel rule toggles, and converted the Display page into 4 independently scrollable columns to resolve laptop display truncation.
+
+1. Dedicated Karaoke Settings Tab:
+   - Added a new top-level tab 'Karaoke Settings' in the Settings page to centralize all karaoke and Scaryoke wheel options.
+   - Wheel Categories: Supports configuring up to 11 custom wheel categories (expanded from 8).
+   - Category Styling & Colors: Allows DJs to set custom slice colors from the palette or reset to automatic app-assigned palette colors ('Auto by App'). Slice sizes/probability weights (1x, 2x, 3x) can also be customized.
+   - Wheel Rules & Toggles:
+     * DJ's Choice Toggle: Include or exclude high-stakes black DJ's Choice slivers.
+     * Singer's Choice Toggle: Include or exclude the green Singer's Choice segment.
+     * Prevent Duplicate Spins: Avoid consecutive spins landing on the same category; remembers past spins across sessions and resets on rotation clear/save.
+   - Wheel Category Presets: Save, load, and delete named category presets.
+   - Rotation & Queue Management: Convenient access to rotation rules (Float Current Singer to Top, Block Duplicate Songs in Session, Mirror Lyrics Display, Wait Time display and Default Song Length slider).
+
+2. Display Page Independent Column Scrolling:
+   - Refactored the Display tab in Settings so that all 4 columns (Monitors & Screen Assignments, DJ & Event Banners, Audio Visualizer & Welcome Screen, Star Wars Crawl & Screen Rotation) now feature independent vertical scrolling.
+   - Prevents truncated content on laptop screens and standard 1920x1080 displays with Windows display scaling (125%/150%).
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Dedicated Karaoke Settings Tab & Display Tab Independent Column Scrolling"))
+                {
+                    File.AppendAllText(txtPath, "\r\n" + updateText);
+                }
+            }
+
+            // 2. Update DOCX manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true);
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    if (body != null)
+                    {
+                        bool alreadyUpdated = false;
+                        foreach (var p in body.Elements<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                        {
+                            if (p.InnerText != null && p.InnerText.Contains("Dedicated Karaoke Settings Tab & Display Tab Independent Column Scrolling"))
+                            {
+                                alreadyUpdated = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyUpdated)
+                        {
+                            var titlePara = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                    new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" }),
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Settings Page / Dedicated Karaoke Settings Tab & Display Tab Independent Column Scrolling")));
+                            body.AppendChild(titlePara);
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                var para = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)));
+                                body.AppendChild(para);
+                            }
+                            doc.MainDocumentPart?.Document?.Save();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("KaraokeSettingsTabAndDisplayScrolling"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: Settings Page / Dedicated Karaoke Settings Tab & Display Scrolling", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " KaraokeSettingsTabAndDisplayScrolling";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeSettingsTabAndOverlayMonitorSelection()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Settings Page / Scaryoke Settings Tab & Audience Overlay Monitor Selection
+
+[Update Details]
+Renamed the tab from 'Karaoke Settings' to 'Scaryoke Settings' to clarify its dedicated purpose, eliminated redundant Rotation and Queue / Wait Time groupboxes that were duplicated from the Presentation and Display tabs, and introduced dedicated Audience Display & Overlay Monitor selection to allow DJs to choose exactly which screen or monitor displays the Scaryoke roulette wheel overlay.
+
+1. Renamed to 'Scaryoke Settings':
+   - Clearly isolates all Scaryoke roulette configuration (wheel categories, colors, probabilities, rules, toggles, presets, and overlay display).
+   - Eliminates redundant 'Rotation & Queue Rules' and 'Wait Times & Durations' sections to prevent confusion and conflicting settings.
+
+2. Audience Display & Target Overlay Monitor Selection:
+   - Added Target Overlay Monitor selector under Audience Display & Overlay.
+   - Allows DJs to project the Scaryoke wheel onto:
+     * Rotation Billboard Screen (Default): Overlays over the primary singer rotation display.
+     * Lyrics Projection Screen: Overlays onto the dedicated audience lyrics screen.
+     * DJ & Special Event Banner Screen: Overlays onto the secondary banner screen.
+     * Any connected display monitor (Monitor 1, Monitor 2, etc.) discovered by the system.
+   - Automatically positions the audience overlay onto the selected monitor upon wheel launch and restores default placement when the wheel is closed.
+   - Includes a live '🎃 Open Scaryoke Wheel' test button to verify placement, physics, and projection.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Settings Tab & Audience Overlay Monitor Selection"))
+                {
+                    File.AppendAllText(txtPath, "\r\n" + updateText);
+                }
+            }
+
+            // 2. Update docx manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            string docText = body.InnerText;
+                            if (!docText.Contains("Scaryoke Settings Tab & Audience Overlay Monitor Selection"))
+                            {
+                                var headingPara = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" }
+                                    ),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "FF6D00" },
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "28" }
+                                        ),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Scaryoke Settings Tab & Audience Overlay Monitor Selection")
+                                    )
+                                );
+                                body.AppendChild(headingPara);
+
+                                foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                {
+                                    if (string.IsNullOrWhiteSpace(line)) continue;
+                                    var para = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    );
+                                    body.AppendChild(para);
+                                }
+                                doc.MainDocumentPart?.Document?.Save();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string? keywords = doc.Info.Keywords;
+                        if (keywords == null || !keywords.Contains("ScaryokeSettingsTabAndOverlayMonitor"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.A4;
+
+                            using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                            {
+                                var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(230, 90, 0));
+
+                                double y = 40;
+                                gfx.DrawString("Scaryoke Settings Tab & Audience Overlay Monitor Selection", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                y += 24;
+
+                                var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                foreach (var line in lines)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line))
+                                    {
+                                        y += 8;
+                                        continue;
+                                    }
+                                    gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 14;
+
+                                    if (y > page.Height.Point - 40)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.A4;
+                                        gfx.Dispose();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeSettingsTabAndOverlayMonitor";
                             doc.Save(pdfPath);
                         }
                     }

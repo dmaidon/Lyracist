@@ -1,4 +1,4 @@
-// Edited on Oct 8, 2026 @ 11:47:00 -> Default empty music track performer names to Music Request and propagate IsMusic
+// Edited on Oct 26, 2026 @ 06:55:00 -> Add RotationCleared event and clear Scaryoke spin history on rotation clear
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -127,6 +127,7 @@ public partial class RotationViewModel : BaseViewModel
     }
 
     public event Action? RotationStateChanged;
+    public event Action? RotationCleared;
 
     public ObservableCollection<Singer> Rotation { get; } = [];
 
@@ -422,6 +423,8 @@ public partial class RotationViewModel : BaseViewModel
     {
         Rotation.Clear();
         WelcomeScreenService.Instance.ResetTonight();
+        Core.Helpers.AppSettings.ClearScaryokeSpinHistory();
+        RotationCleared?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }
 
@@ -950,6 +953,8 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Clear();
         WelcomeScreenService.Instance.ResetTonight();
         SelectedSinger = null;
+        Core.Helpers.AppSettings.ClearScaryokeSpinHistory();
+        RotationCleared?.Invoke();
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);

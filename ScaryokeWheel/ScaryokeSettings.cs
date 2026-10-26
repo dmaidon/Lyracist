@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 15:05:00 -> Add ShowDjsChoice toggle and SelectedMonitorDevice setting
+// Edited on Oct 26, 2026 @ 06:55:00 -> Add SpinHistory persistence, RecordSpin, and ClearSpinHistory to prevent duplicate spins across sessions
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,6 +77,39 @@ public class ScaryokeSettings
     public double? WindowWidth { get; set; }
     public double? WindowHeight { get; set; }
 
+    /// <summary>Recent landed challenges preserved across wheel closures and application restarts to prevent consecutive duplicates.</summary>
+    public List<string> SpinHistory { get; set; } = [];
+
+    /// <summary>Appends a landed category to the spin history and persists settings.</summary>
+    public void RecordSpin(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category) || string.Equals(category, "Spin Again", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        SpinHistory ??= [];
+        SpinHistory.Insert(0, category.Trim());
+        while (SpinHistory.Count > 8)
+        {
+            SpinHistory.RemoveAt(SpinHistory.Count - 1);
+        }
+        Save();
+    }
+
+    /// <summary>Clears the landed category history and persists settings.</summary>
+    public void ClearSpinHistory()
+    {
+        SpinHistory ??= [];
+        SpinHistory.Clear();
+        Save();
+    }
+
+    /// <summary>True for #RRGGBB or #AARRGGBB.</summary>
+    public static bool IsValidHexColor(string? color) =>
+        !string.IsNullOrWhiteSpace(color) && System.Text.RegularExpressions.Regex.IsMatch(color.Trim(), "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$");
+
+    /// <summary>Returns the trimmed colour if valid, otherwise null so the category falls back to the automatic palette.</summary>
+    public static string? SanitizeColor(string? color) => IsValidHexColor(color) ? color!.Trim() : null;
+
     /// <summary>Trims, drops blank/reserved/duplicate names and clamps to the category limit.</summary>
     public static List<string> CleanCategories(IEnumerable<string?> names) =>
     [
@@ -96,7 +129,7 @@ public class ScaryokeSettings
             .ToDictionary(kv => kv.Key, kv => new CategoryStyle
             {
                 Weight = Math.Clamp(kv.Value.Weight, 1, 3),
-                Color = kv.Value.Color,
+                Color = SanitizeColor(kv.Value.Color),
                 Enabled = kv.Value.Enabled
             });
         Presets = [.. (Presets ?? []).Where(p => p != null && !string.IsNullOrWhiteSpace(p.Name))];
@@ -104,9 +137,11 @@ public class ScaryokeSettings
         {
             preset.Categories = CleanCategories(preset.Categories ?? []);
             preset.Styles ??= [];
+            foreach (var style in preset.Styles.Values.Where(v => v != null)) style.Color = SanitizeColor(style.Color);
         }
         Volume = Math.Clamp(Volume, 0, 1);
         SliverWeight = Math.Clamp(SliverWeight, 0.05, 0.6);
+        SpinHistory = [.. (SpinHistory ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).Take(8)];
     }
 
     public static ScaryokeSettings Load()
@@ -178,7 +213,9 @@ public class ScaryokeSettings
             Directory.CreateDirectory(SettingsFolder);
             Categories = CleanCategories(Categories);
             string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(SettingsPath, json);
+            string tmp = SettingsPath + ".tmp";
+            File.WriteAllText(tmp, json);
+            File.Move(tmp, SettingsPath, true);
         }
         catch (Exception ex)
         {

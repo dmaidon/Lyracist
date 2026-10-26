@@ -1,4 +1,4 @@
-<!-- Edited on Oct 11, 2026 @ 14:45:00 -> Organize settings into balanced 4-column layout across tabs to eliminate scrolling -->
+<!-- Edited on Oct 26, 2026 @ 08:05:00 -> Rename tab to Scaryoke Settings, remove duplicate rotation/queue groupboxes, and add overlay monitor selection -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -497,22 +497,22 @@
                 </Grid>
             </TabItem>
 
-            <!-- ── TAB 2: Display (4 Equal Columns) ── -->
+            <!-- ── TAB 2: Display (4 Scrollable Columns) ── -->
             <TabItem Header="Display" FontSize="12">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Column 0: Monitors & Screen Assignments -->
-                        <StackPanel Grid.Column="0" Margin="0,0,0,16">
+                    <!-- Column 0: Monitors & Screen Assignments -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
                             <GroupBox Header="Monitors &amp; Screen Assignments" Style="{StaticResource BlueSettingsGroupBoxStyle}">
                                 <StackPanel>
                                     <CheckBox Content="Enable Lyrics Projection Screen" IsChecked="{Binding IsLyricsActive, Mode=TwoWay}" Margin="0,0,0,4" />
@@ -572,9 +572,11 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
+                    </ScrollViewer>
 
-                        <!-- Column 1: DJ & Special Event Banners, Session Schedule -->
-                        <StackPanel Grid.Column="2" Margin="0,0,0,16">
+                    <!-- Column 1: DJ & Special Event Banners, Session Schedule -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
                             <GroupBox Header="DJ &amp; Event Banners" Style="{StaticResource BlueSettingsGroupBoxStyle}">
                                 <StackPanel>
                                     <TextBlock Text="DJ Banner Image" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
@@ -696,9 +698,11 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
+                    </ScrollViewer>
 
-                        <!-- Column 2: Lyrics Screen Audio Visualizer, New Performer Welcome Screen, Connect Instructions -->
-                        <StackPanel Grid.Column="4" Margin="0,0,0,16">
+                    <!-- Column 2: Lyrics Screen Audio Visualizer, New Performer Welcome Screen, Connect Instructions -->
+                    <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
                             <!-- Lyrics Screen Audio Visualizer -->
                             <GroupBox Header="Lyrics Screen Audio Visualizer" Style="{StaticResource BlueSettingsGroupBoxStyle}">
                                 <StackPanel>
@@ -772,9 +776,11 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
+                    </ScrollViewer>
 
-                        <!-- Column 3: Star Wars Crawl & Screen Rotation -->
-                        <StackPanel Grid.Column="6" Margin="0,0,0,16">
+                    <!-- Column 3: Star Wars Crawl & Screen Rotation -->
+                    <ScrollViewer Grid.Column="6" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
                             <GroupBox Header="Star Wars Crawl &amp; Spaceship" Style="{StaticResource BlueSettingsGroupBoxStyle}">
                                 <StackPanel>
                                     <TextBlock Text="Crawl Intro Text Template" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
@@ -884,11 +890,167 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
-                    </Grid>
-                </ScrollViewer>
+                    </ScrollViewer>
+                </Grid>
             </TabItem>
 
-            <!-- ── TAB 3: Special Events ── -->
+            <!-- ── TAB 3: Scaryoke Settings (3 Balanced Scrollable Columns) ── -->
+            <TabItem Header="Scaryoke Settings" FontSize="12">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Column 0: Scaryoke Wheel Categories (Max 11) & Color Customization -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
+                            <GroupBox Header="Scaryoke Categories" Style="{StaticResource OrangeSettingsGroupBoxStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Wheel Categories (Max 11)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ListBox ItemsSource="{Binding ScaryokeCategories}" SelectedItem="{Binding SelectedScaryokeCategory}" MaxHeight="160" Height="160" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                             <DataTemplate>
+                                                <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <!-- Category Styling & Color -->
+                                    <TextBlock Text="Selected Category Styling" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" BorderBrush="Gray" BorderThickness="1" Background="{Binding SelectedScaryokeColor}" ToolTip="Category color" />
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SelectedCategoryColorModeText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" />
+                                            <TextBlock Text="Auto colors assigned by app palette if custom color is not set" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:Button Grid.Column="0" Content="Set Color" Command="{Binding CycleScaryokeColorCommand}" Height="28" FontSize="11" HorizontalAlignment="Stretch" ToolTip="Cycle custom category color" />
+                                        <ui:Button Grid.Column="2" Content="Auto Color" Command="{Binding ResetScaryokeColorCommand}" Height="28" FontSize="11" HorizontalAlignment="Stretch" ToolTip="Reset category to automatic app-assigned color" />
+                                        <ui:Button Grid.Column="4" Command="{Binding CycleScaryokeWeightCommand}" Height="28" FontSize="11" HorizontalAlignment="Stretch" ToolTip="Wheel slice size / weight multiplier">
+                                            <TextBlock FontSize="11">
+                                                <Run Text="Size: " /><Run Text="{Binding SelectedScaryokeWeight, Mode=OneWay}" /><Run Text="×" />
+                                            </TextBlock>
+                                        </ui:Button>
+                                    </Grid>
+
+                                    <!-- Add New Category -->
+                                    <TextBlock Text="Add Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,4,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokeCategoryName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New Category Name..." Height="28" FontSize="11" MaxLength="30" />
+                                        <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddScaryokeCategoryCommand}" Appearance="Primary" Height="28" FontSize="11" />
+                                    </Grid>
+                                    <ui:Button Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveScaryokeCategoryCommand}" Appearance="Danger" HorizontalAlignment="Stretch" Margin="0,0,0,12" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Column 2: Wheel Mode Toggles & Category Presets -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
+                            <GroupBox Header="Wheel Rules &amp; Toggles" Style="{StaticResource OrangeSettingsGroupBoxStyle}">
+                                <StackPanel>
+                                    <!-- DJ's Choice Toggle -->
+                                    <CheckBox Content="Include DJ's Choice slivers" IsChecked="{Binding ScaryokeShowDjsChoice, Mode=TwoWay}" Margin="0,0,0,4" FontWeight="SemiBold" />
+                                    <TextBlock Text="Inserts high-stakes black DJ's Choice slivers into the wheel. If landed, the DJ picks the singer's song with an evil laugh!" Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="24,0,0,12" />
+
+                                    <!-- Singer's Choice Toggle -->
+                                    <CheckBox Content="Include Singer's Choice segment" IsChecked="{Binding ScaryokeShowSingersChoice, Mode=TwoWay}" Margin="0,0,0,4" FontWeight="SemiBold" />
+                                    <TextBlock Text="Inserts a Singer's Choice segment onto the wheel, letting the lucky singer choose any track they want." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="24,0,0,12" />
+
+                                    <!-- Prevent Dupes Toggle -->
+                                    <CheckBox Content="Prevent duplicate spins (Avoid repeats)" IsChecked="{Binding ScaryokeAvoidRepeats, Mode=TwoWay}" Margin="0,0,0,4" FontWeight="SemiBold" />
+                                    <TextBlock Text="Prevents consecutive performers from getting the same category. Preserves past spins across app shutdowns and automatically clears when rotation is cleared or saved." Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="24,0,0,12" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Wheel Category Presets -->
+                            <GroupBox Header="Category Presets" Style="{StaticResource SlateSettingsGroupBoxStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Load or Save Preset" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" ItemsSource="{Binding ScaryokePresetNames}" SelectedItem="{Binding SelectedScaryokePreset}" Height="28" FontSize="11" />
+                                        <ui:Button Grid.Column="2" Content="Load" Command="{Binding LoadScaryokePresetCommand}" Height="28" FontSize="11" />
+                                        <ui:Button Grid.Column="4" Content="Delete" Command="{Binding DeleteScaryokePresetCommand}" Height="28" FontSize="11" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokePresetName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New preset name..." Height="28" FontSize="11" />
+                                        <ui:Button Grid.Column="2" Content="Save Preset" Command="{Binding SaveScaryokePresetCommand}" Appearance="Primary" Height="28" FontSize="11" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Column 4: Audience Display & Target Overlay Monitor -->
+                    <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,16">
+                            <GroupBox Header="Audience Display &amp; Overlay" Style="{StaticResource OrangeSettingsGroupBoxStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Target Overlay Monitor" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding ScaryokeOverlayChoices}"
+                                              SelectedValue="{Binding SelectedScaryokeOverlayMonitor, Mode=TwoWay}"
+                                              SelectedValuePath="DeviceName"
+                                              DisplayMemberPath="DisplayName"
+                                              Margin="0,0,0,8" />
+                                    <TextBlock Text="Select the display monitor where the Scaryoke roulette wheel is projected for the audience. By default, it overlays onto the active Singer Rotation Billboard screen."
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12" />
+
+                                    <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+                                    <TextBlock Text="Preview &amp; Testing" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBlock Text="Open the live Scaryoke wheel to test wheel physics, spinning sounds, and audience projection on the selected monitor."
+                                               Foreground="{DynamicResource AppTextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                    <ui:Button Content="🎃 Open Scaryoke Wheel"
+                                               Command="{Binding OpenScaryokeWheelCommand}"
+                                               Appearance="Primary"
+                                               HorizontalAlignment="Stretch"
+                                               Height="32"
+                                               FontSize="11"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 4: Special Events ── -->
             <TabItem Header="Special Events" FontSize="12">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
@@ -901,78 +1063,8 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Column 0 -->
+                    <!-- Column 0: System Simulator -->
                     <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="0,0,4,16">
-                            <!-- Scaryoke Settings -->
-                            <GroupBox Header="Scaryoke Categories" Style="{StaticResource OrangeSettingsGroupBoxStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Wheel Categories (Max 8)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <ListBox ItemsSource="{Binding ScaryokeCategories}" SelectedItem="{Binding SelectedScaryokeCategory}" MaxHeight="140" Height="140" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                    <TextBlock Text="Selected Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="26" Height="26" CornerRadius="4" BorderBrush="Gray" BorderThickness="1" Background="{Binding SelectedScaryokeColor}" />
-                                        <ui:Button Grid.Column="2" Content="Change Colour" Command="{Binding CycleScaryokeColorCommand}" Height="26" FontSize="11" HorizontalAlignment="Stretch" />
-                                        <ui:Button Grid.Column="4" Command="{Binding CycleScaryokeWeightCommand}" Height="26" FontSize="11" HorizontalAlignment="Stretch">
-                                            <TextBlock FontSize="11">
-                                                <Run Text="Size: " /><Run Text="{Binding SelectedScaryokeWeight, Mode=OneWay}" /><Run Text="×" />
-                                            </TextBlock>
-                                        </ui:Button>
-                                    </Grid>
-                                    <TextBlock Text="Add Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokeCategoryName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Category Name..." Height="26" FontSize="11" />
-                                        <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddScaryokeCategoryCommand}" Appearance="Primary" Height="26" FontSize="11" />
-                                    </Grid>
-                                    <ui:Button Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveScaryokeCategoryCommand}" Appearance="Danger" HorizontalAlignment="Stretch" Margin="0,0,0,12" />
-
-                                    <TextBlock Text="Presets" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" ItemsSource="{Binding ScaryokePresetNames}" SelectedItem="{Binding SelectedScaryokePreset}" Height="26" FontSize="11" />
-                                        <ui:Button Grid.Column="2" Content="Load" Command="{Binding LoadScaryokePresetCommand}" Height="26" FontSize="11" />
-                                        <ui:Button Grid.Column="4" Content="Delete" Command="{Binding DeleteScaryokePresetCommand}" Height="26" FontSize="11" />
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokePresetName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Preset name..." Height="26" FontSize="11" />
-                                        <ui:Button Grid.Column="2" Content="Save Preset" Command="{Binding SaveScaryokePresetCommand}" Appearance="Primary" Height="26" FontSize="11" />
-                                    </Grid>
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Column 2 -->
-                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,0,4,16">
                             <!-- System Simulator -->
                             <GroupBox Header="System Simulator Auto-Pilot" Style="{StaticResource OrangeSettingsGroupBoxStyle}">

@@ -117,6 +117,16 @@ namespace Lyracist.Shared
             list.Insert(newIndex, item);
         }
 
+        /// <summary>Index of the first rotation-start singer (the round anchor), or 0 when none is flagged; -1 for an empty list.</summary>
+        private static int FindAnchorIndex<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            for (int i = 0; i < singers.Count; i++)
+            {
+                if (singers[i].IsRotationStart) return i;
+            }
+            return singers.Count > 0 ? 0 : -1;
+        }
+
         /// <summary>
         /// Helper to check if any singer in <paramref name="singers"/> is active, non-paused, and not a special singer.
         /// </summary>
@@ -507,16 +517,7 @@ namespace Lyracist.Shared
             int startIndex = singers.IndexOf(currentEntry);
             if (startIndex == -1) return;
 
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (singers[i].IsRotationStart)
-                {
-                    anchorIndex = i;
-                    break;
-                }
-            }
-            if (anchorIndex == -1 && count > 0) anchorIndex = 0;
+            int anchorIndex = FindAnchorIndex(singers);
 
             bool reachedAnchor = false;
             for (int i = 1; i < count; i++)
@@ -634,16 +635,7 @@ namespace Lyracist.Shared
             ArgumentNullException.ThrowIfNull(finishedEntry);
 
             int count = singers.Count;
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (singers[i].IsRotationStart)
-                {
-                    anchorIndex = i;
-                    break;
-                }
-            }
-            if (anchorIndex == -1 && count > 0) anchorIndex = 0;
+            int anchorIndex = FindAnchorIndex(singers);
 
             // If someone was designated as Next (e.g. displaced when a special singer or manual override sang),
             // preserve them so the rotation resumes with them seamlessly.
@@ -915,16 +907,7 @@ namespace Lyracist.Shared
             current.EstimatedWaitMinutes = 0;
             double cumulativeSeconds = ResolveEstimatedSeconds(current, defaultEstimatedPerformanceSeconds);
 
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (singers[i].IsRotationStart)
-                {
-                    anchorIndex = i;
-                    break;
-                }
-            }
-            if (anchorIndex == -1 && count > 0) anchorIndex = 0;
+            int anchorIndex = FindAnchorIndex(singers);
 
             bool reachedAnchor = false;
             int startIndex = singers.IndexOf(current);
@@ -971,16 +954,7 @@ namespace Lyracist.Shared
             int startIndex = singers.IndexOf(currentEntry);
             if (startIndex == -1) return list;
 
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (singers[i].IsRotationStart)
-                {
-                    anchorIndex = i;
-                    break;
-                }
-            }
-            if (anchorIndex == -1 && count > 0) anchorIndex = 0;
+            int anchorIndex = FindAnchorIndex(singers);
 
             bool reachedAnchor = false;
             for (int i = 1; i <= count && list.Count < maxCount; i++)
@@ -1028,16 +1002,7 @@ namespace Lyracist.Shared
             int count = singers.Count;
             if (currentIndex < 0 || count == 0) return null;
 
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (singers[i].IsRotationStart)
-                {
-                    anchorIndex = i;
-                    break;
-                }
-            }
-            if (anchorIndex == -1 && count > 0) anchorIndex = 0;
+            int anchorIndex = FindAnchorIndex(singers);
 
             bool reachedAnchor = false;
             for (int i = 1; i < count; i++)

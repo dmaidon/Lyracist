@@ -1,4 +1,4 @@
-<!-- Edited on Oct 25, 2026 @ 23:49:00 -> Clarify toggle label and tooltip to prevent 2 singers in a row getting same result -->
+<!-- Edited on Oct 26, 2026 @ 07:35:00 -> Add ContextMenu with Reset to Auto option on category color button -->
 <Window x:Class="ScaryokeWheel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -406,10 +406,17 @@
                                                     Margin="0,0,6,0"
                                                     Background="{Binding DisplayColor}"
                                                     BorderBrush="#332B45"
-                                                    ToolTip="Change colour"
+                                                    ToolTip="Change colour (Right-click for options)"
                                                     Command="{Binding DataContext.CycleColorCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
-                                                    Cursor="Hand" />
+                                                    Cursor="Hand">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Cycle Colour" Command="{Binding DataContext.CycleColorCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                        <MenuItem Header="Reset to Auto (by app)" Command="{Binding DataContext.ResetColorCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                            </Button>
                                             <Button Grid.Column="5"
                                                     Width="44"
                                                     Height="34"

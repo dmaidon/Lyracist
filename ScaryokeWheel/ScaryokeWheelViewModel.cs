@@ -1,4 +1,4 @@
-// Edited on Oct 25, 2026 @ 23:48:00 -> Enforce strict consecutive duplicate prevention when AvoidRepeats is enabled
+// Edited on Oct 26, 2026 @ 07:35:00 -> Add ResetColor command to reset category color to auto (by app)
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -186,6 +186,11 @@ public partial class ScaryokeWheelViewModel : ObservableObject
             AddItem(name, style);
         }
 
+        foreach (var item in _settings.SpinHistory)
+        {
+            History.Add(item);
+        }
+
         RebuildWheelSegments();
 
         RefreshMonitors();
@@ -248,6 +253,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         AddCategoryCommand.NotifyCanExecuteChanged();
         RemoveCategoryCommand.NotifyCanExecuteChanged();
         CycleColorCommand.NotifyCanExecuteChanged();
+        ResetColorCommand.NotifyCanExecuteChanged();
         CycleWeightCommand.NotifyCanExecuteChanged();
         MoveUpCommand.NotifyCanExecuteChanged();
         MoveDownCommand.NotifyCanExecuteChanged();
@@ -270,6 +276,18 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     partial void OnVolumeChanged(double value)
     {
         _settings.Volume = Math.Clamp(value, 0, 1);
+        _volumeSaveTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+        _volumeSaveTimer.Tick -= OnVolumeSaveTick;
+        _volumeSaveTimer.Tick += OnVolumeSaveTick;
+        _volumeSaveTimer.Stop();
+        _volumeSaveTimer.Start();
+    }
+
+    private System.Windows.Threading.DispatcherTimer? _volumeSaveTimer;
+
+    private void OnVolumeSaveTick(object? sender, EventArgs e)
+    {
+        _volumeSaveTimer?.Stop();
         _settings.Save();
     }
 
@@ -310,10 +328,15 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         {
             History.RemoveAt(History.Count - 1);
         }
+        _settings.RecordSpin(name);
     }
 
     [RelayCommand]
-    private void ClearHistory() => History.Clear();
+    public void ClearHistory()
+    {
+        History.Clear();
+        _settings.ClearSpinHistory();
+    }
 
     /// <summary>
     /// True when <paramref name="name"/> was landed on recently enough to be skipped.
@@ -324,11 +347,13 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     {
         if (!AvoidRepeats) return false;
 
+        int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        if (distinct < 2) return false;
+
         // Strictly prevent 2 singers in a row getting the same result
         if (History.Count > 0 && string.Equals(History[0], name, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
         int window = Math.Min(2, distinct - 1);
         return History.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
     }
@@ -523,6 +548,15 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
         int index = Array.FindIndex(SegmentColors, c => string.Equals(c, category.DisplayColor, StringComparison.OrdinalIgnoreCase));
         category.Color = SegmentColors[(index + 1) % SegmentColors.Length];
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void ResetColor(CategoryItem? category)
+    {
+        if (category == null) return;
+
+        category.Color = null;
+        SaveAndRebuild();
     }
 
     [RelayCommand(CanExecute = nameof(CanEdit))]

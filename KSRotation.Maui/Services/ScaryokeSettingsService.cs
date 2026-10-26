@@ -1,5 +1,6 @@
-// Created on Jul 27, 2026 @ 11:00:00 -> Persisted category list for the Scaryoke Wheel (Maui-only feature).
+// Edited on Oct 26, 2026 @ 06:55:00 -> Add SpinHistory persistence to ScaryokeSettings in Maui
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace KSRotation.Maui.Services
@@ -38,6 +39,8 @@ namespace KSRotation.Maui.Services
             "Disney Songs",
             "90s Pop"
         ];
+
+        public List<string> SpinHistory { get; set; } = [];
     }
 
     public static class ScaryokeSettingsService
@@ -64,6 +67,7 @@ namespace KSRotation.Maui.Services
                         }
                         settings.Styles ??= [];
                         settings.Presets ??= [];
+                        settings.SpinHistory = [.. (settings.SpinHistory ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).Take(8)];
                         return settings;
                     }
                 }
@@ -86,7 +90,9 @@ namespace KSRotation.Maui.Services
                     settings.Categories = settings.Categories.GetRange(0, MaxCategories);
                 }
                 string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(SettingsPath, json);
+                string tmp = SettingsPath + ".tmp";
+                File.WriteAllText(tmp, json);
+                File.Move(tmp, SettingsPath, true);
             }
             catch
             {

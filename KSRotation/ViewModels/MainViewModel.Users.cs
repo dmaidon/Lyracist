@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 14:10:00 -> Rotate and clean up raw_ avatar copies
+// Edited on Oct 26, 2026 @ 07:45:00 -> Update UsersMainTabIndex for dedicated Karaoke Settings tab
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -743,7 +743,7 @@ namespace KSRotation.ViewModels
                 SelectedUser = existing;
             }
 
-            SelectedMainTabIndex = 3;
+            SelectedMainTabIndex = UsersMainTabIndex;
         }
 
         [RelayCommand]

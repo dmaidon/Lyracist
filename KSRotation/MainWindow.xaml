@@ -1,4 +1,4 @@
-<!-- Edited on Oct 26, 2026 @ 00:55:00 -> Add Scaryoke Spin button to rotation toolbar -->
+<!-- Edited on Oct 26, 2026 @ 08:35:00 -> Rename tab to Scaryoke Settings and remove duplicate rotation rules -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2159,19 +2159,265 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Display" Width="65" Height="45">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid Margin="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+            <!-- Dedicated Scaryoke Settings Tab -->
+            <TabItem Header="Scaryoke Settings" Width="145" Height="45">
+                <Grid Margin="12" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Column 0: Target Monitor, Connect & Request Instructions, Casting Controls -->
-                        <StackPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,0,12">
+                    <!-- Column 0: Wheel Categories (Max 11) -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,8,0">
+                        <StackPanel Margin="0,0,0,12">
+                            <GroupBox Header="Wheel Categories (Max 11)" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Categories appearing as segments on the roulette wheel. Max 11 categories."
+                                               TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+
+                                    <ListBox ItemsSource="{Binding ScaryokeCategories}"
+                                             SelectedItem="{Binding SelectedScaryokeCategory, Mode=TwoWay}"
+                                             Height="230"
+                                             BorderThickness="1"
+                                             BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                             Background="{DynamicResource MaterialDesignCardBackground}"
+                                             Padding="4"
+                                             Margin="0,0,0,10">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="4,2">
+                                                    <TextBlock Text="• " FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                                    <TextBlock Text="{Binding}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding NewScaryokeCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                 Height="32"
+                                                 Padding="6,4"
+                                                 ToolTip="Enter a new category name (max 11 total)" />
+                                        <Button Grid.Column="1"
+                                                Content="Add Category"
+                                                Command="{Binding AddScaryokeCategoryCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="6,0,0,0"
+                                                Height="32"
+                                                Padding="10,4" />
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0"
+                                                Content="Delete Category"
+                                                Command="{Binding DeleteScaryokeCategoryCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="0,0,4,0"
+                                                Height="32" />
+                                        <Button Grid.Column="1"
+                                                Content="Reset to Defaults"
+                                                Command="{Binding ResetScaryokeCategoriesCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="4,0,0,0"
+                                                Height="32"
+                                                ToolTip="Reset to the 11 default curated categories" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Column 1: Category Styling & Colors -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,8,0">
+                        <StackPanel Margin="0,0,0,12">
+                            <GroupBox Header="Category Styling &amp; Colors" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Selected Category:" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="{Binding SelectedScaryokeCategory, FallbackValue='(Select a category)'}"
+                                               FontSize="15" FontWeight="Bold" Margin="0,0,0,10" Foreground="{DynamicResource AppContrastTextBrush}" />
+
+                                    <TextBlock Text="Slice Color Assignment:" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <Border Background="{Binding SelectedScaryokeColor}"
+                                            BorderThickness="2"
+                                            BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                            CornerRadius="6"
+                                            Height="40"
+                                            Margin="0,0,0,6"
+                                            ToolTip="Current color preview for the selected category" />
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding SelectedCategoryColorModeText, StringFormat='Mode: {0}'}"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <Button Grid.Column="1"
+                                                Content="Auto Color (by App)"
+                                                Command="{Binding ResetScaryokeColorCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="28"
+                                                Padding="8,2"
+                                                ToolTip="Clear custom color so the app automatically assigns a distinct color from its palette" />
+                                    </Grid>
+
+                                    <TextBlock Text="Choose Palette Color:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,4,0,4" />
+                                    <ItemsControl ItemsSource="{Binding AvailableScaryokePaletteColors}" Margin="0,0,0,10">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Width="26"
+                                                        Height="26"
+                                                        Margin="3"
+                                                        Padding="0"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                        Background="{Binding}"
+                                                        Command="{Binding DataContext.SetScaryokeColorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip="{Binding}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <Button Content="Cycle Color"
+                                            Command="{Binding CycleScaryokeColorCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="30"
+                                            Margin="0,0,0,14"
+                                            ToolTip="Cycle through available vibrant colors" />
+
+                                    <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,4,0,12" />
+
+                                    <TextBlock Text="{Binding SelectedScaryokeWeight, StringFormat='Slice Size / Weight Multiplier: {0:0}x'}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AppHeaderBrush}"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock Text="Larger weights give the category a wider slice and higher landing probability."
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               Margin="0,0,0,8" />
+                                    <Button Content="Cycle Weight (1x / 2x / 3x)"
+                                            Command="{Binding CycleScaryokeWeightCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="32" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Column 2: Wheel Rules & Toggles -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,0,0">
+                        <StackPanel Margin="0,0,0,12">
+                            <GroupBox Header="Wheel Rules &amp; Toggles" Style="{StaticResource GreenSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <CheckBox Content="Include DJ's Choice Slivers"
+                                              IsChecked="{Binding ScaryokeShowDjsChoice, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="When checked, two thin black DJ's Choice slivers are added to the wheel. When landed, the DJ picks the song." />
+
+                                    <CheckBox Content="Include Singer's Choice Segment"
+                                              IsChecked="{Binding ScaryokeShowSingersChoice, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="When checked, a green Singer's Choice segment is included on the wheel." />
+
+                                    <CheckBox Content="Prevent Duplicate Spins (Consecutive)"
+                                              IsChecked="{Binding ScaryokeAvoidConsecutiveRepeats, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="When checked, ensures two consecutive singers never receive the same challenge. Persists across wheel dismissals and restarts." />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Wheel Category Presets" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Save and restore custom category collections for themed karaoke nights."
+                                               FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+
+                                    <TextBlock Text="Saved Presets" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding ScaryokePresetNames}"
+                                              SelectedItem="{Binding SelectedScaryokePreset, Mode=TwoWay}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              Margin="0,0,0,8" />
+
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0"
+                                                Content="Load Preset"
+                                                Command="{Binding LoadScaryokePresetCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="0,0,4,0"
+                                                Height="32" />
+                                        <Button Grid.Column="1"
+                                                Content="Delete Preset"
+                                                Command="{Binding DeleteScaryokePresetCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="4,0,0,0"
+                                                Height="32" />
+                                    </Grid>
+
+                                    <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,4,0,10" />
+
+                                    <TextBlock Text="Preset Name to Save" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding NewScaryokePresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                 Height="32"
+                                                 Padding="6,4" />
+                                        <Button Grid.Column="1"
+                                                Content="Save Preset"
+                                                Command="{Binding SaveScaryokePresetCommand}"
+                                                Style="{StaticResource ModernButtonStyle}"
+                                                Margin="6,0,0,0"
+                                                Height="32"
+                                                Padding="10,4" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Display" Width="65" Height="45">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Column 0: Target Monitor, Connect & Request Instructions, Casting Controls -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,8,0">
+                        <StackPanel VerticalAlignment="Top" Margin="0,0,0,12">
                             <!-- Display & Projection (Target Monitor) -->
                             <GroupBox Header="Display &amp; Projection" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                 <StackPanel Margin="0,4,0,0">
@@ -2303,9 +2549,108 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
+                    </ScrollViewer>
 
-                        <!-- Column 2: Synth Bars and New Performer Welcome Screen -->
-                        <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="15,0,0,12">
+                    <!-- Column 1: Screen Rotation -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,8,0">
+                        <StackPanel VerticalAlignment="Top" Margin="0,0,0,12">
+                            <!-- Screen Rotation GroupBox -->
+                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}">
+                                <StackPanel Margin="0,4,0,0">
+                                    <CheckBox
+                                        Content="Automatically rotate through screens"
+                                        IsChecked="{Binding AutoRotateProjectionViews, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,10"
+                                        ToolTip="When enabled, the projection display automatically randomly changes through the selected screens below every configured interval, instead of staying on one fixed screen." />
+
+                                    <CheckBox
+                                        Content="Reduced projection effects (slower PCs)"
+                                        IsChecked="{Binding ReducedProjectionEffects, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,10"
+                                        ToolTip="Use fewer particles and skip glow/blur effects on the themed projection screens. Turn this on if the projection display stutters on an older laptop or a busy venue PC." />
+
+                                    <!-- Single Duration Setting -->
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Change screen every:"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding AutoRotateDurationSeconds, UpdateSourceTrigger=LostFocus}"
+                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                 Width="60"
+                                                 Height="28"
+                                                 Padding="4,2"
+                                                 TextAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Margin="8,0,4,0" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="sec"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </Grid>
+
+                                    <!-- Select All / Clear All Buttons -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Button Content="✓ Select All"
+                                                Command="{Binding SelectAllProjectionScreensCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="26"
+                                                Padding="10,2"
+                                                Margin="0,0,8,0"
+                                                ToolTip="Select all projection screens with a single click" />
+                                        <Button Content="✗ Clear All"
+                                                Command="{Binding ClearAllProjectionScreensCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="26"
+                                                Padding="10,2"
+                                                ToolTip="Deselect all projection screens" />
+                                    </StackPanel>
+
+                                    <TextBlock Text="Check which screens to randomly rotate through:"
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               Margin="0,0,0,8"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding ViewName}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource MaterialDesignBody}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Column 2: Synth Bars and New Performer Welcome Screen -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,8,0">
+                        <StackPanel VerticalAlignment="Top" Margin="0,0,0,12">
                             <!-- Synth Bars GroupBox: live frequency bars driven by a line-in / mic -->
                             <GroupBox Header="🎚 Synth Bars (Live Audio Input)" Style="{StaticResource NavySettingsGroupBoxStyle}">
                                 <StackPanel Margin="0,4,0,0">
@@ -2440,108 +2785,13 @@
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
+                    </ScrollViewer>
 
-                        <!-- Column 1: Screen Rotation -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="15,0,0,12">
-                            <!-- Screen Rotation GroupBox -->
-                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}">
-                                <StackPanel Margin="0,4,0,0">
-                                    <CheckBox
-                                        Content="Automatically rotate through screens"
-                                        IsChecked="{Binding AutoRotateProjectionViews, UpdateSourceTrigger=PropertyChanged}"
-                                        Style="{StaticResource ModernCheckBoxStyle}"
-                                        Margin="0,0,0,10"
-                                        ToolTip="When enabled, the projection display automatically randomly changes through the selected screens below every configured interval, instead of staying on one fixed screen." />
-
-                                    <CheckBox
-                                        Content="Reduced projection effects (slower PCs)"
-                                        IsChecked="{Binding ReducedProjectionEffects, UpdateSourceTrigger=PropertyChanged}"
-                                        Style="{StaticResource ModernCheckBoxStyle}"
-                                        Margin="0,0,0,10"
-                                        ToolTip="Use fewer particles and skip glow/blur effects on the themed projection screens. Turn this on if the projection display stutters on an older laptop or a busy venue PC." />
-
-                                    <!-- Single Duration Setting -->
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Change screen every:"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBox Grid.Column="1"
-                                                 Text="{Binding AutoRotateDurationSeconds, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource ModernTextBoxStyle}"
-                                                 Width="60"
-                                                 Height="28"
-                                                 Padding="4,2"
-                                                 TextAlignment="Center"
-                                                 VerticalAlignment="Center"
-                                                 Margin="8,0,4,0" />
-                                        <TextBlock Grid.Column="2"
-                                                   Text="sec"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="12"
-                                                   Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                    </Grid>
-
-                                    <!-- Select All / Clear All Buttons -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <Button Content="✓ Select All"
-                                                Command="{Binding SelectAllProjectionScreensCommand}"
-                                                Style="{StaticResource ModernSecondaryButtonStyle}"
-                                                Height="26"
-                                                Padding="10,2"
-                                                Margin="0,0,8,0"
-                                                ToolTip="Select all projection screens with a single click" />
-                                        <Button Content="✗ Clear All"
-                                                Command="{Binding ClearAllProjectionScreensCommand}"
-                                                Style="{StaticResource ModernSecondaryButtonStyle}"
-                                                Height="26"
-                                                Padding="10,2"
-                                                ToolTip="Deselect all projection screens" />
-                                    </StackPanel>
-
-                                    <TextBlock Text="Check which screens to randomly rotate through:"
-                                               TextWrapping="Wrap"
-                                               FontSize="12"
-                                               Margin="0,0,0,8"
-                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
-
-                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,3">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <CheckBox Grid.Column="0"
-                                                              IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                                                              Style="{StaticResource ModernCheckBoxStyle}"
-                                                              VerticalAlignment="Center"
-                                                              Margin="0,0,8,0" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding ViewName}"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource MaterialDesignBody}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-
+                    <ScrollViewer Grid.Column="3" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,0,0">
                         <GroupBox Header="DJ &amp; Special Event Banners"
                                   Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                  Grid.Column="3"
-                                  Grid.ColumnSpan="2"
                                   VerticalAlignment="Top"
-                                  Margin="15,0,0,0">
+                                  Margin="0,0,0,12">
                             <Grid Margin="0,4,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -2687,8 +2937,8 @@
                                 </StackPanel>
                             </Grid>
                         </GroupBox>
-                    </Grid>
-                </ScrollViewer>
+                    </ScrollViewer>
+                </Grid>
             </TabItem>
 
             <!-- Users & Singers Management Tab -->

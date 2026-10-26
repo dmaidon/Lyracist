@@ -1,5 +1,5 @@
-<!-- Edited on Oct 26, 2026 @ 06:35:00 -> Document skipped anchor singer restoration upon round completion and queue bottom prevention -->
-Last Edit: Oct 26, 2026 - Skipped Rotation Anchor Performer Rollover Restoration and Queue Bottom Prevention
+<!-- Edited on Oct 26, 2026 @ 08:58:00 -> Update changelog with Scaryoke Settings tab, duplicate removal, spin history persistence, and display column scrolling -->
+Last Edit: Oct 26, 2026 - Dedicated Scaryoke Settings Tab, Overlay Monitor Selection, Category Colors & Rules, and Scrollable Display Columns
 
 # Changelog
 
@@ -8,6 +8,18 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-26
 
 ### Added
+- **Dedicated Scaryoke Settings Tab, 11 Wheel Categories, Color Customization, Overlay Monitor Routing & Display Tab Column Scrolling (`Lyracist/Views/Pages/SettingsPage.xaml`, `Lyracist/Core/Helpers/AppSettings.cs`, `Lyracist/ViewModels/SettingsViewModel.Scaryoke.cs`, `Lyracist/ViewModels/ScaryokeViewModel.cs`)**:
+  - **Dedicated Scaryoke Settings Tab**: Added a new top-level tab 'Scaryoke Settings' in the main Settings page, centralizing all Scaryoke roulette wheel configuration, color customization, probability rules, presets, and audience overlay monitor routing into a balanced, clean 3-column view.
+  - **Removed Redundant Duplicate Boxes**: Removed duplicate 'Rotation & Queue Rules' and 'Wait Times & Durations' sections from the Scaryoke tab that previously duplicated settings on the Presentation and Display tabs, avoiding operator confusion.
+  - **Target Audience Overlay Monitor**: Added target overlay monitor selector under Audience Display & Overlay. Allows KJs to choose which monitor displays the live Scaryoke roulette wheel overlay (Rotation Billboard screen, Lyrics screen, DJ Banner screen, or any specific connected display device) with live test launch button.
+  - **Max 11 Categories**: Expanded the Scaryoke Wheel category capacity from 8 to 11 categories across settings persistence, category management, presets, and validation.
+  - **Category Custom & Automatic Color Selection**: Added option to assign custom slice colors from the color palette or leave unassigned to use automatic app-assigned palette colors ("Auto by App") with a dedicated 'Auto Color' reset command and status indicator. Slice weight multipliers (1x, 2x, 3x) can also be customized.
+  - **Wheel Rule Toggles**: Integrated configurable toggles for including DJ's Choice slivers (`ScaryokeShowDjsChoice`), Singer's Choice segment (`ScaryokeShowSingersChoice`), and duplicate spin prevention (`ScaryokeAvoidRepeats`).
+  - **Independent Display Page Column Scrolling**: Converted all 4 columns on the `Display` settings tab into independently scrollable panels (`ScrollViewer` on columns 0, 2, 4, 6), resolving content truncation issues on laptop displays and standard 1920x1080 screens with Windows display scaling (125%/150%).
+- **Scaryoke Wheel Spin History Persistence Across Shutdowns & Auto-Clearing on Rotation Reset (`ScaryokeWheel`, `KSRotation`, `Lyracist`, `KSRotation.Maui`)**:
+  - **Cross-Session Spin History Persistence**: Persisted recent spin results (`SpinHistory`) into JSON configuration (`scaryoke_settings.json` in `ScaryokeWheel` and `KSRotation`, `lyracist_settings.json` in `Lyracist`, and MAUI `settings.json` in `KSRotation.Maui`). When the Scaryoke Wheel window is closed, dismissed, or shut down between performers, or when the application is restarted, the previous landed challenges are remembered.
+  - **Consecutive Duplicate Prevention on Reopen**: When the next singer steps up and Scaryoke is activated, the duplicate prevention mechanism (`AvoidRepeats` / `ScaryokeAvoidConsecutiveRepeats`) inspects the stored history and prevents back-to-back duplicates, ensuring two consecutive singers never receive the same singing challenge.
+  - **Automatic Spin History Clearing on Rotation Save or Clear**: When the operator clears the rotation queue (`ClearRotation`, `ClearRotationQueue`) or saves the nightly performance reports (`SaveRotation`, `ResetEverything`), the Scaryoke past spin history is automatically cleared from both memory and persistent storage across all integrated apps.
 - **Skipped Rotation Anchor Performer Rollover Restoration & Queue Bottom Prevention (`Shared/RotationHelpers.cs`, `Lyracist.Tests/RotationHelpersSingerTests.cs`, `KSRotation.Tests/RotationTests.cs`)**:
   - **Round Completion Skip Clearing**: Resolved an issue where an anchor singer who was skipped at the beginning of a show had their `IsSkipped` flag persist across round completion. When the last singer in the rotation finished, the anchor was erroneously bypassed for the start of the new round and flushed to the bottom of the active queue in floating mode without being given a chance to sing.
   - **Round Rollover Detection Before Reordering**: Updated `AdvanceRotationAfterFinished`, `MarkNextSinger`, `RecalculateEstimatedWaits`, `GetNextActiveSingers`, and `FindNextEligibleSinger` to recognize that reaching or crossing the rotation start anchor (`IsRotationStart`) concludes the current round and clears all round-scoped `IsSkipped` flags on active performers BEFORE selecting the next current performer and before evaluating floating queue reordering.

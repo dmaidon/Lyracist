@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 00:20:00 -> Initialize and shutdown Scaryoke wheel in MainViewModel
+// Edited on Oct 26, 2026 @ 07:45:00 -> Update UsersMainTabIndex for dedicated Karaoke Settings tab
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -78,12 +78,14 @@ namespace KSRotation.ViewModels
             ("I'll Leave This World Loving You","Ricky Van Shelton")
         ];
 
+        public const int UsersMainTabIndex = 4;
+
         [ObservableProperty]
         public partial int SelectedMainTabIndex { get; set; }
 
         partial void OnSelectedMainTabIndexChanged(int value)
         {
-            if (value == 3)
+            if (value == UsersMainTabIndex)
             {
                 _ = LoadAllUsersAsync();
             }
@@ -2002,6 +2004,7 @@ namespace KSRotation.ViewModels
 #if !MAUI
                 WelcomeScreenService.Instance.ResetTonight();
 #endif
+                ClearScaryokeHistory();
                 if (IsDisplayEnabled)
                 {
                     _displayWindowService.Update(Singers);
@@ -2755,6 +2758,7 @@ namespace KSRotation.ViewModels
                     _performanceHistory.Clear();
                 }
                 Singers.Clear();
+                ClearScaryokeHistory();
 
                 string emailMsg;
                 if (emailError != null)
@@ -3243,6 +3247,7 @@ namespace KSRotation.ViewModels
         public void ResetEverything()
         {
             Singers.Clear();
+            ClearScaryokeHistory();
             lock (_performanceHistoryLock)
             {
                 _performanceHistory.Clear();
@@ -3254,6 +3259,19 @@ namespace KSRotation.ViewModels
             SaveSettingsNow();
             RebuildRotationJsonCacheNow();
         }
+
+#if MAUI
+        public void ClearScaryokeHistory()
+        {
+            try
+            {
+                var settings = Services.ScaryokeSettingsService.Load();
+                settings.SpinHistory.Clear();
+                Services.ScaryokeSettingsService.Save(settings);
+            }
+            catch { }
+        }
+#endif
 
         private List<SongPerformance> GetPerformanceHistorySnapshot()
         {

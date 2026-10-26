@@ -1652,6 +1652,49 @@ public class MainViewModelTests
         Assert.True(bob.IsNext);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AdvanceRotationAfterFinished_SingleSkippedSinger_DoesNotThrowAndKeepsOneCurrent(bool floatMode)
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, IsRotationStart = true, IsSkipped = true };
+        var list = new ObservableCollection<SingerEntry> { alice };
+
+        RotationHelpers.AdvanceRotationAfterFinished(list, alice, floatCurrentToTop: floatMode);
+
+        Assert.True(list.Count(s => s.IsCurrent) <= 1);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AdvanceRotationAfterFinished_AllSkipped_DoesNotThrowAndKeepsOneCurrent(bool floatMode)
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, IsRotationStart = true, IsSkipped = true };
+        var bob = new SingerEntry { Name = "Bob", IsSkipped = true };
+        var carol = new SingerEntry { Name = "Carol", IsSkipped = true };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.AdvanceRotationAfterFinished(list, alice, floatCurrentToTop: floatMode);
+
+        Assert.True(list.Count(s => s.IsCurrent) <= 1);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AdvanceRotationAfterFinished_MultipleRotationStartFlags_DoesNotThrowAndKeepsOneCurrent(bool floatMode)
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob", IsRotationStart = true };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.AdvanceRotationAfterFinished(list, alice, floatCurrentToTop: floatMode);
+
+        Assert.Equal(1, list.Count(s => s.IsCurrent));
+    }
+
     [Fact]
     public void HandleSingerRetiredOrRemoved_Moves1stFlagToNextActiveSinger()
     {

@@ -1,4 +1,4 @@
-// Edited on Oct 25, 2026 @ 23:56:00 -> Add toggle and strict duplicate check to prevent two singers in a row from getting the same result
+// Edited on Oct 26, 2026 @ 07:20:00 -> Support dynamic toggles for DJ's Choice and Singer's Choice, and AvoidRepeats
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Services.Display;
 using System.Collections.ObjectModel;
@@ -32,11 +32,11 @@ public partial class ScaryokeViewModel : BaseViewModel
 
     public static string PaletteColor(int index) => Palette[index % Palette.Length];
 
-    private const int RecentLimit = 8;
+    private const int RecentLimit = 11;
     private readonly List<string> _recent = [];
 
     [ObservableProperty]
-    private bool _avoidRepeats = true;
+    private bool _avoidRepeats = Core.Helpers.AppSettings.ScaryokeAvoidRepeats;
 
     /// <summary>
     /// True when <paramref name="name"/> was landed on in the last spin and <see cref="AvoidRepeats"/>
@@ -44,7 +44,7 @@ public partial class ScaryokeViewModel : BaseViewModel
     /// </summary>
     public bool IsRecentRepeat(string name)
     {
-        if (!AvoidRepeats) return false;
+        if (!AvoidRepeats || !Core.Helpers.AppSettings.ScaryokeAvoidRepeats) return false;
         if (_recent.Count == 0) return false;
         return string.Equals(_recent[0], name, StringComparison.OrdinalIgnoreCase);
     }
@@ -59,6 +59,8 @@ public partial class ScaryokeViewModel : BaseViewModel
     {
         _display = display;
         _rotation = rotation;
+        _recent.AddRange(Core.Helpers.AppSettings.ScaryokeSpinHistory);
+        _rotation.RotationCleared += ClearHistory;
         RebuildWheelSegments(); // Initial segments setup
     }
 
@@ -80,41 +82,54 @@ public partial class ScaryokeViewModel : BaseViewModel
             });
         }
 
-        var singersChoice = new WheelSegment
-        {
-            Name = "Singer's Choice",
-            Color = "#228B22",
-            TextColor = GetContrastingTextColor("#228B22")
-        };
+        bool showSingersChoice = Core.Helpers.AppSettings.ScaryokeShowSingersChoice;
+        bool showDjsChoice = Core.Helpers.AppSettings.ScaryokeShowDjsChoice;
 
-        var leftSliver = new WheelSegment
-        {
-            Name = "DJ's Choice",
-            Color = "#000000",
-            TextColor = "#FF5722",
-            Weight = SliverWeight
-        };
+        var specialSegments = new List<WheelSegment>();
 
-        var rightSliver = new WheelSegment
+        if (showDjsChoice)
         {
-            Name = "DJ's Choice",
-            Color = "#000000",
-            TextColor = "#FF5722",
-            Weight = SliverWeight
-        };
-
-        if (list.Count == 0)
-        {
-            list.Add(leftSliver);
-            list.Add(singersChoice);
-            list.Add(rightSliver);
+            specialSegments.Add(new WheelSegment
+            {
+                Name = "DJ's Choice",
+                Color = "#000000",
+                TextColor = "#FF5722",
+                Weight = SliverWeight
+            });
         }
-        else
+
+        if (showSingersChoice)
         {
-            int insertIndex = Random.Shared.Next(0, list.Count + 1);
-            list.Insert(insertIndex, leftSliver);
-            list.Insert(insertIndex + 1, singersChoice);
-            list.Insert(insertIndex + 2, rightSliver);
+            specialSegments.Add(new WheelSegment
+            {
+                Name = "Singer's Choice",
+                Color = "#228B22",
+                TextColor = GetContrastingTextColor("#228B22")
+            });
+        }
+
+        if (showDjsChoice)
+        {
+            specialSegments.Add(new WheelSegment
+            {
+                Name = "DJ's Choice",
+                Color = "#000000",
+                TextColor = "#FF5722",
+                Weight = SliverWeight
+            });
+        }
+
+        if (specialSegments.Count > 0)
+        {
+            if (list.Count == 0)
+            {
+                list.AddRange(specialSegments);
+            }
+            else
+            {
+                int insertIndex = Random.Shared.Next(0, list.Count + 1);
+                list.InsertRange(insertIndex, specialSegments);
+            }
         }
 
         double totalWeight = list.Sum(s => s.Weight);
@@ -164,6 +179,7 @@ public partial class ScaryokeViewModel : BaseViewModel
             {
                 _recent.RemoveAt(_recent.Count - 1);
             }
+            Core.Helpers.AppSettings.RecordScaryokeSpin(category);
         }
 
         if (category == "Spin Again")
@@ -185,5 +201,12 @@ public partial class ScaryokeViewModel : BaseViewModel
         };
         _display.ShowLyricsOverlay($"🎃 SCARYOKE: {category}!\n{ResultText}", 10);
         return false;
+    }
+
+    /// <summary>Clears the landed category history from memory and settings.</summary>
+    public void ClearHistory()
+    {
+        _recent.Clear();
+        Core.Helpers.AppSettings.ClearScaryokeSpinHistory();
     }
 }

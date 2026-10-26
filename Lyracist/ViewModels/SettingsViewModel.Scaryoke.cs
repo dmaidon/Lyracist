@@ -1,8 +1,11 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split Scaryoke wheel category settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Oct 26, 2026 @ 08:05:00 -> Add Scaryoke overlay monitor selection and choices
+using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Helpers;
+using Lyracist.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lyracist.ViewModels;
 
@@ -25,6 +28,43 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private string _selectedScaryokeColor = "Transparent";
 
+    [ObservableProperty]
+    private bool _isSelectedCategoryCustomColor;
+
+    [ObservableProperty]
+    private string _selectedCategoryColorModeText = "Auto (by app)";
+
+    [ObservableProperty]
+    private bool _scaryokeShowSingersChoice = AppSettings.ScaryokeShowSingersChoice;
+
+    partial void OnScaryokeShowSingersChoiceChanged(bool value) => AppSettings.ScaryokeShowSingersChoice = value;
+
+    [ObservableProperty]
+    private bool _scaryokeShowDjsChoice = AppSettings.ScaryokeShowDjsChoice;
+
+    partial void OnScaryokeShowDjsChoiceChanged(bool value) => AppSettings.ScaryokeShowDjsChoice = value;
+
+    [ObservableProperty]
+    private bool _scaryokeAvoidRepeats = AppSettings.ScaryokeAvoidRepeats;
+
+    partial void OnScaryokeAvoidRepeatsChanged(bool value) => AppSettings.ScaryokeAvoidRepeats = value;
+
+    public ObservableCollection<WelcomeScreenChoice> ScaryokeOverlayChoices { get; } = [];
+
+    public string SelectedScaryokeOverlayMonitor
+    {
+        get => AppSettings.ScaryokeOverlayMonitor;
+        set
+        {
+            string monitor = value ?? string.Empty;
+            if (AppSettings.ScaryokeOverlayMonitor != monitor)
+            {
+                AppSettings.ScaryokeOverlayMonitor = monitor;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public ObservableCollection<string> ScaryokePresetNames { get; } = [];
 
     [ObservableProperty]
@@ -41,12 +81,17 @@ public partial class SettingsViewModel
         {
             SelectedScaryokeWeight = 1;
             SelectedScaryokeColor = "Transparent";
+            IsSelectedCategoryCustomColor = false;
+            SelectedCategoryColorModeText = "None";
             return;
         }
 
         var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
         SelectedScaryokeWeight = style.Weight;
-        SelectedScaryokeColor = style.Color ?? ScaryokeViewModel.PaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
+        bool hasCustom = !string.IsNullOrWhiteSpace(style.Color);
+        IsSelectedCategoryCustomColor = hasCustom;
+        SelectedCategoryColorModeText = hasCustom ? "Custom Color" : "Auto (by app)";
+        SelectedScaryokeColor = hasCustom ? style.Color! : ScaryokeViewModel.PaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
     }
 
     [RelayCommand]
@@ -69,6 +114,16 @@ public partial class SettingsViewModel
         int index = Array.FindIndex(ScaryokeViewModel.Palette, c => string.Equals(c, SelectedScaryokeColor, StringComparison.OrdinalIgnoreCase));
         string next = ScaryokeViewModel.Palette[(index + 1) % ScaryokeViewModel.Palette.Length];
         AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, style.Weight, next);
+        UpdateSelectedScaryokeStyle();
+    }
+
+    [RelayCommand]
+    private void ResetScaryokeColor()
+    {
+        if (SelectedScaryokeCategory == null) return;
+
+        var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
+        AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, style.Weight, null);
         UpdateSelectedScaryokeStyle();
     }
 
@@ -130,10 +185,10 @@ public partial class SettingsViewModel
         string cat = NewScaryokeCategoryName?.Trim() ?? "";
         if (string.IsNullOrWhiteSpace(cat)) return;
 
-        if (AppSettings.ScaryokeCategories.Count >= 8)
+        if (AppSettings.ScaryokeCategories.Count >= 11)
         {
             System.Windows.MessageBox.Show(
-                "A maximum of 8 categories is allowed for the Scaryoke wheel.",
+                "A maximum of 11 categories is allowed for the Scaryoke wheel.",
                 "Max Categories Reached",
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Warning);
@@ -163,5 +218,34 @@ public partial class SettingsViewModel
         AppSettings.RemoveScaryokeCategory(SelectedScaryokeCategory);
         SelectedScaryokeCategory = null;
         RefreshScaryokeCategories();
+    }
+
+    public void RefreshScaryokeOverlayChoices()
+    {
+        ScaryokeOverlayChoices.Clear();
+        ScaryokeOverlayChoices.Add(new WelcomeScreenChoice(string.Empty, "Rotation Billboard Screen (Default)"));
+        ScaryokeOverlayChoices.Add(new WelcomeScreenChoice("LYRICS", "Lyrics Projection Screen"));
+        ScaryokeOverlayChoices.Add(new WelcomeScreenChoice("DJBANNER", "DJ & Special Event Banner Screen"));
+
+        try
+        {
+            foreach (var m in MonitorEnumerator.GetMonitors())
+            {
+                ScaryokeOverlayChoices.Add(new WelcomeScreenChoice(
+                    m.DeviceName,
+                    $"Monitor {m.Index + 1} ({m.Width}x{m.Height}){(m.IsPrimary ? " [Primary]" : "")}"));
+            }
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private void OpenScaryokeWheel()
+    {
+        var wheel = App.AppHost.Services.GetRequiredService<Windows.ScaryokeWindow>();
+        wheel.RebuildWheel();
+        _display.ShowRotationWindow();
+        wheel.Show();
+        wheel.Activate();
     }
 }

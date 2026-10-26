@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Populate Screens via RefreshScreens using dynamic MonitorEnumerator native event
+// Edited on Oct 26, 2026 @ 08:05:00 -> Initialize RefreshScaryokeOverlayChoices in constructor
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -409,6 +409,7 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshLibraryStatus();
         RefreshScaryokeCategories();
         RefreshScaryokePresets();
+        RefreshScaryokeOverlayChoices();
         RefreshVenues();
         RefreshAvailableRatingIcons();
         RefreshDjBanners();

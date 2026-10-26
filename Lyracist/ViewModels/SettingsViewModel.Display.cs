@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Make Screens an ObservableCollection and dynamically refresh screens and selections on screen change events
+// Edited on Oct 26, 2026 @ 08:05:00 -> Refresh Scaryoke overlay screen choices when displays change
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -377,6 +377,7 @@ public partial class SettingsViewModel
             Screens.Add(s);
         }
         RefreshConnectInstructionScreens();
+        RefreshScaryokeOverlayChoices();
     }
 
     public List<DisplayTarget> RotationTargets { get; } = System.Enum.GetValues<DisplayTarget>().ToList();

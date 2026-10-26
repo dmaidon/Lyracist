@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Support Pre-Show mode and pass Wi-Fi QR credentials in RefreshSignUpInvite
+// Edited on Oct 26, 2026 @ 08:05:00 -> Position ScaryokeWheelOverlay on ScaryokeOverlayMonitor and restore default on close
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -1218,11 +1218,70 @@ public partial class RotationWindow : Window, ICaptureSource
             BuildScaryokeWheel(scaryokeWindow.ViewModel);
             BillboardResultText.Text = scaryokeWindow.ViewModel.ResultText;
             ScaryokeWheelOverlay.Visibility = Visibility.Visible;
+            ApplyScaryokeMonitorPlacement();
         }
         else
         {
             ScaryokeWheelOverlay.Visibility = Visibility.Collapsed;
+            RestoreDefaultRotationPlacement();
         }
+    }
+
+    private void ApplyScaryokeMonitorPlacement()
+    {
+        string target = Core.Helpers.AppSettings.ScaryokeOverlayMonitor;
+        if (string.IsNullOrWhiteSpace(target)) return;
+
+        try
+        {
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            System.Windows.Forms.Screen? targetScreen = null;
+
+            if (target.Equals("LYRICS", StringComparison.OrdinalIgnoreCase))
+            {
+                var display = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+                int? lyricsIdx = display?.GetPreferences().LyricsScreenIndex;
+                if (lyricsIdx.HasValue && lyricsIdx.Value >= 0 && lyricsIdx.Value < screens.Length)
+                {
+                    targetScreen = screens[lyricsIdx.Value];
+                }
+            }
+            else if (target.Equals("DJBANNER", StringComparison.OrdinalIgnoreCase))
+            {
+                var display = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+                int? bannerIdx = display?.GetPreferences().DjBannerScreenIndex;
+                if (bannerIdx.HasValue && bannerIdx.Value >= 0 && bannerIdx.Value < screens.Length)
+                {
+                    targetScreen = screens[bannerIdx.Value];
+                }
+            }
+            else
+            {
+                targetScreen = screens.FirstOrDefault(s => string.Equals(s.DeviceName, target, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (targetScreen != null)
+            {
+                Lyracist.Shared.WindowPositioner.FillArea(this, targetScreen.Bounds);
+                Topmost = true;
+                WindowState = WindowState.Normal;
+                WindowState = WindowState.Maximized;
+            }
+        }
+        catch { }
+    }
+
+    private void RestoreDefaultRotationPlacement()
+    {
+        string target = Core.Helpers.AppSettings.ScaryokeOverlayMonitor;
+        if (string.IsNullOrWhiteSpace(target)) return;
+
+        try
+        {
+            var display = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+            display?.RestoreAssignments();
+        }
+        catch { }
     }
 
     private static System.Windows.Point PolarPoint(double angleDegrees, double radius)

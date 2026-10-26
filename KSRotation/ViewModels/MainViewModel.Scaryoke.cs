@@ -1,4 +1,4 @@
-// Created on Oct 26, 2026 @ 00:05:00 -> Scaryoke Wheel host viewmodel logic, commands, sound synthesis, and tablet synchronization
+// Edited on Oct 26, 2026 @ 07:45:00 -> Add max 11 categories, custom/auto color management, presets, and wheel toggles
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -22,7 +22,7 @@ namespace KSRotation.ViewModels
         private double _scaryokeCurrentAngle;
         private static readonly Random _scaryokeRng = new();
 
-        private static readonly string[] ScaryokeSegmentColors =
+        public static readonly string[] ScaryokeSegmentColors =
         [
             "#6A0DAD", // Purple
             "#FF6D00", // Orange
@@ -37,6 +37,11 @@ namespace KSRotation.ViewModels
             "#00796B"  // Teal Blue
         ];
 
+        public static string ScaryokePaletteColor(int index) =>
+            ScaryokeSegmentColors[((index % ScaryokeSegmentColors.Length) + ScaryokeSegmentColors.Length) % ScaryokeSegmentColors.Length];
+
+        public IReadOnlyList<string> AvailableScaryokePaletteColors => ScaryokeSegmentColors;
+
         [ObservableProperty]
         public partial bool IsScaryokeActive { get; set; }
 
@@ -45,6 +50,12 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool ScaryokeAvoidConsecutiveRepeats { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool ScaryokeShowSingersChoice { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool ScaryokeShowDjsChoice { get; set; } = true;
 
         [ObservableProperty]
         public partial string ScaryokeResultText { get; set; } = "Spin the wheel for a challenge!";
@@ -62,6 +73,34 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<string> ScaryokeHistory { get; } = [];
 
+        public ObservableCollection<string> ScaryokeCategories { get; } = [];
+
+        [ObservableProperty]
+        public partial string? SelectedScaryokeCategory { get; set; }
+
+        [ObservableProperty]
+        public partial string NewScaryokeCategoryName { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial double SelectedScaryokeWeight { get; set; } = 1;
+
+        [ObservableProperty]
+        public partial string SelectedScaryokeColor { get; set; } = "Transparent";
+
+        [ObservableProperty]
+        public partial bool IsSelectedCategoryCustomColor { get; set; }
+
+        [ObservableProperty]
+        public partial string SelectedCategoryColorModeText { get; set; } = "Auto (by app)";
+
+        public ObservableCollection<string> ScaryokePresetNames { get; } = [];
+
+        [ObservableProperty]
+        public partial string? SelectedScaryokePreset { get; set; }
+
+        [ObservableProperty]
+        public partial string NewScaryokePresetName { get; set; } = string.Empty;
+
         public event EventHandler<ScaryokeSpinEventArgs>? ScaryokeSpinStarted;
         public event EventHandler<ScaryokeSpinCompletedEventArgs>? ScaryokeSpinFinished;
 
@@ -71,8 +110,22 @@ namespace KSRotation.ViewModels
             {
                 _scaryokeSettings = ScaryokeSettings.Load();
                 ScaryokeAvoidConsecutiveRepeats = _scaryokeSettings.AvoidRepeats;
+                ScaryokeShowSingersChoice = _scaryokeSettings.ShowSingersChoice;
+                ScaryokeShowDjsChoice = _scaryokeSettings.ShowDjsChoice;
                 ScaryokeIsMuted = _scaryokeSettings.IsMuted;
                 ScaryokeVolume = _scaryokeSettings.Volume;
+                ScaryokeHistory.Clear();
+                foreach (var spin in _scaryokeSettings.SpinHistory)
+                {
+                    ScaryokeHistory.Add(spin);
+                }
+                ScaryokeCategories.Clear();
+                foreach (var cat in _scaryokeSettings.Categories)
+                {
+                    ScaryokeCategories.Add(cat);
+                }
+                RefreshScaryokePresets();
+                SelectedScaryokeCategory = ScaryokeCategories.FirstOrDefault();
             }
             catch
             {
@@ -81,10 +134,28 @@ namespace KSRotation.ViewModels
             RebuildScaryokeWheelSegments();
         }
 
+        partial void OnSelectedScaryokeCategoryChanged(string? value) => UpdateSelectedScaryokeStyle();
+
         partial void OnScaryokeAvoidConsecutiveRepeatsChanged(bool value)
         {
             _scaryokeSettings.AvoidRepeats = value;
             _scaryokeSettings.Save();
+        }
+
+        partial void OnScaryokeShowSingersChoiceChanged(bool value)
+        {
+            _scaryokeSettings.ShowSingersChoice = value;
+            _scaryokeSettings.Save();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        partial void OnScaryokeShowDjsChoiceChanged(bool value)
+        {
+            _scaryokeSettings.ShowDjsChoice = value;
+            _scaryokeSettings.Save();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
         }
 
         partial void OnScaryokeIsMutedChanged(bool value)
@@ -96,7 +167,267 @@ namespace KSRotation.ViewModels
         partial void OnScaryokeVolumeChanged(double value)
         {
             _scaryokeSettings.Volume = value;
+            _scaryokeVolumeSaveTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            _scaryokeVolumeSaveTimer.Tick -= OnScaryokeVolumeSaveTick;
+            _scaryokeVolumeSaveTimer.Tick += OnScaryokeVolumeSaveTick;
+            _scaryokeVolumeSaveTimer.Stop();
+            _scaryokeVolumeSaveTimer.Start();
+        }
+
+        private System.Windows.Threading.DispatcherTimer? _scaryokeVolumeSaveTimer;
+
+        private void OnScaryokeVolumeSaveTick(object? sender, EventArgs e)
+        {
+            _scaryokeVolumeSaveTimer?.Stop();
             _scaryokeSettings.Save();
+        }
+
+        private void UpdateSelectedScaryokeStyle()
+        {
+            if (SelectedScaryokeCategory == null)
+            {
+                SelectedScaryokeWeight = 1;
+                SelectedScaryokeColor = "Transparent";
+                IsSelectedCategoryCustomColor = false;
+                SelectedCategoryColorModeText = "None";
+                return;
+            }
+
+            if (_scaryokeSettings.Styles.TryGetValue(SelectedScaryokeCategory, out var style))
+            {
+                SelectedScaryokeWeight = Math.Clamp(style.Weight, 1, 3);
+                bool hasCustom = !string.IsNullOrWhiteSpace(style.Color);
+                IsSelectedCategoryCustomColor = hasCustom;
+                SelectedCategoryColorModeText = hasCustom ? "Custom Color" : "Auto (by app)";
+                SelectedScaryokeColor = hasCustom ? style.Color! : ScaryokePaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
+            }
+            else
+            {
+                SelectedScaryokeWeight = 1;
+                IsSelectedCategoryCustomColor = false;
+                SelectedCategoryColorModeText = "Auto (by app)";
+                SelectedScaryokeColor = ScaryokePaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
+            }
+        }
+
+        [RelayCommand]
+        public void AddScaryokeCategory()
+        {
+            if (IsScaryokeSpinning) return;
+            string cat = NewScaryokeCategoryName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(cat)) return;
+
+            if (ScaryokeCategories.Count >= ScaryokeSettings.MaxCategories)
+            {
+                System.Windows.MessageBox.Show($"Maximum of {ScaryokeSettings.MaxCategories} categories allowed.", "Category Limit", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (ScaryokeSettings.ReservedNames.Contains(cat, StringComparer.OrdinalIgnoreCase))
+            {
+                System.Windows.MessageBox.Show($"'{cat}' is a reserved category name.", "Reserved Name", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (ScaryokeCategories.Any(c => string.Equals(c, cat, StringComparison.OrdinalIgnoreCase)))
+            {
+                System.Windows.MessageBox.Show($"'{cat}' is already in the categories list.", "Duplicate Category", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            _scaryokeSettings.Categories.Add(cat);
+            _scaryokeSettings.Save();
+            ScaryokeCategories.Add(cat);
+            SelectedScaryokeCategory = cat;
+            NewScaryokeCategoryName = string.Empty;
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void DeleteScaryokeCategory()
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokeCategory == null) return;
+            string cat = SelectedScaryokeCategory;
+            _scaryokeSettings.Categories.RemoveAll(c => string.Equals(c, cat, StringComparison.OrdinalIgnoreCase));
+            _scaryokeSettings.Styles.Remove(cat);
+            _scaryokeSettings.Save();
+            ScaryokeCategories.Remove(cat);
+            SelectedScaryokeCategory = ScaryokeCategories.FirstOrDefault();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void ResetScaryokeCategories()
+        {
+            if (IsScaryokeSpinning) return;
+            string[] defaults = ["Elvis", "Rock", "Country", "Pop", "Gender Bender", "Oldies", "80s Hits", "Disco", "Hard Rock", "Disney Songs", "90s Pop"];
+            _scaryokeSettings.Categories = [.. defaults];
+            _scaryokeSettings.Styles.Clear();
+            _scaryokeSettings.Save();
+
+            ScaryokeCategories.Clear();
+            foreach (var cat in _scaryokeSettings.Categories)
+            {
+                ScaryokeCategories.Add(cat);
+            }
+            SelectedScaryokeCategory = ScaryokeCategories.FirstOrDefault();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void CycleScaryokeWeight()
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokeCategory == null) return;
+            string cat = SelectedScaryokeCategory;
+            if (!_scaryokeSettings.Styles.TryGetValue(cat, out var style))
+            {
+                style = new CategoryStyle { Weight = 1 };
+                _scaryokeSettings.Styles[cat] = style;
+            }
+            double w = style.Weight >= 3 ? 1 : style.Weight + 1;
+            style.Weight = w;
+            _scaryokeSettings.Save();
+            UpdateSelectedScaryokeStyle();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void CycleScaryokeColor()
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokeCategory == null) return;
+            string cat = SelectedScaryokeCategory;
+            if (!_scaryokeSettings.Styles.TryGetValue(cat, out var style))
+            {
+                style = new CategoryStyle();
+                _scaryokeSettings.Styles[cat] = style;
+            }
+            int index = Array.FindIndex(ScaryokeSegmentColors, c => string.Equals(c, SelectedScaryokeColor, StringComparison.OrdinalIgnoreCase));
+            string next = ScaryokeSegmentColors[(index + 1 + ScaryokeSegmentColors.Length) % ScaryokeSegmentColors.Length];
+            style.Color = next;
+            _scaryokeSettings.Save();
+            UpdateSelectedScaryokeStyle();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void SetScaryokeColor(string color)
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokeCategory == null || !ScaryokeSettings.IsValidHexColor(color)) return;
+            string cat = SelectedScaryokeCategory;
+            if (!_scaryokeSettings.Styles.TryGetValue(cat, out var style))
+            {
+                style = new CategoryStyle();
+                _scaryokeSettings.Styles[cat] = style;
+            }
+            style.Color = color;
+            _scaryokeSettings.Save();
+            UpdateSelectedScaryokeStyle();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void ResetScaryokeColor()
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokeCategory == null) return;
+            string cat = SelectedScaryokeCategory;
+            if (_scaryokeSettings.Styles.TryGetValue(cat, out var style))
+            {
+                style.Color = null;
+                _scaryokeSettings.Save();
+            }
+            UpdateSelectedScaryokeStyle();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        private void RefreshScaryokePresets()
+        {
+            ScaryokePresetNames.Clear();
+            foreach (var preset in _scaryokeSettings.Presets)
+            {
+                if (!string.IsNullOrWhiteSpace(preset.Name))
+                {
+                    ScaryokePresetNames.Add(preset.Name);
+                }
+            }
+        }
+
+        [RelayCommand]
+        public void SaveScaryokePreset()
+        {
+            string name = NewScaryokePresetName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(name)) return;
+
+            var existing = _scaryokeSettings.Presets.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                existing.Categories = [.. _scaryokeSettings.Categories];
+                existing.Styles = _scaryokeSettings.Styles.ToDictionary(k => k.Key, v => new CategoryStyle { Weight = v.Value.Weight, Color = v.Value.Color, Enabled = v.Value.Enabled });
+            }
+            else
+            {
+                _scaryokeSettings.Presets.Add(new CategoryPreset
+                {
+                    Name = name,
+                    Categories = [.. _scaryokeSettings.Categories],
+                    Styles = _scaryokeSettings.Styles.ToDictionary(k => k.Key, v => new CategoryStyle { Weight = v.Value.Weight, Color = v.Value.Color, Enabled = v.Value.Enabled })
+                });
+            }
+            _scaryokeSettings.Save();
+            NewScaryokePresetName = string.Empty;
+            RefreshScaryokePresets();
+            SelectedScaryokePreset = name;
+        }
+
+        [RelayCommand]
+        public void LoadScaryokePreset()
+        {
+            if (IsScaryokeSpinning) return;
+            if (SelectedScaryokePreset == null) return;
+            var preset = _scaryokeSettings.Presets.FirstOrDefault(p => string.Equals(p.Name, SelectedScaryokePreset, StringComparison.OrdinalIgnoreCase));
+            if (preset == null) return;
+
+            _scaryokeSettings.Categories = ScaryokeSettings.CleanCategories(preset.Categories);
+            _scaryokeSettings.Styles = (preset.Styles ?? [])
+                .Where(kv => kv.Value != null && _scaryokeSettings.Categories.Contains(kv.Key, StringComparer.OrdinalIgnoreCase))
+                .ToDictionary(kv => kv.Key, kv => new CategoryStyle
+                {
+                    Weight = Math.Clamp(kv.Value.Weight, 1, 3),
+                    Color = kv.Value.Color,
+                    Enabled = kv.Value.Enabled
+                });
+            _scaryokeSettings.Save();
+
+            ScaryokeCategories.Clear();
+            foreach (var cat in _scaryokeSettings.Categories)
+            {
+                ScaryokeCategories.Add(cat);
+            }
+            SelectedScaryokeCategory = ScaryokeCategories.FirstOrDefault();
+            RebuildScaryokeWheelSegments();
+            _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        [RelayCommand]
+        public void DeleteScaryokePreset()
+        {
+            if (SelectedScaryokePreset == null) return;
+            string name = SelectedScaryokePreset;
+            _scaryokeSettings.Presets.RemoveAll(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            _scaryokeSettings.Save();
+            RefreshScaryokePresets();
+            SelectedScaryokePreset = ScaryokePresetNames.FirstOrDefault();
         }
 
         [RelayCommand]
@@ -117,6 +448,14 @@ namespace KSRotation.ViewModels
             if (IsScaryokeActive) return;
 
             IsScaryokeActive = true;
+            _scaryokeSettings = ScaryokeSettings.Load();
+            if (ScaryokeHistory.Count == 0 && _scaryokeSettings.SpinHistory.Count > 0)
+            {
+                foreach (var spin in _scaryokeSettings.SpinHistory)
+                {
+                    ScaryokeHistory.Add(spin);
+                }
+            }
             RebuildScaryokeWheelSegments();
 
             _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
@@ -190,22 +529,28 @@ namespace KSRotation.ViewModels
                 {
                     if (!style.Enabled) continue;
                     weight = Math.Clamp(style.Weight, 1, 3);
-                    if (!string.IsNullOrWhiteSpace(style.Color)) color = style.Color;
+                    if (ScaryokeSettings.IsValidHexColor(style.Color)) color = style.Color!;
                 }
 
                 workingList.Add((cat, weight, color, "#FFFFFF"));
             }
 
             // Add Singer's Choice
-            workingList.Add(("Singer's Choice", 1.0, "#22C55E", "#000000"));
+            if (ScaryokeShowSingersChoice)
+            {
+                workingList.Add(("Singer's Choice", 1.0, "#22C55E", "#000000"));
+            }
 
             // Insert 2 small DJ's Choice slivers at separated random positions
-            int count = workingList.Count;
-            int idx1 = _scaryokeRng.Next(0, count);
-            int idx2 = (idx1 + Math.Max(2, count / 2)) % (count + 1);
+            if (ScaryokeShowDjsChoice)
+            {
+                int count = workingList.Count;
+                int idx1 = _scaryokeRng.Next(0, count);
+                int idx2 = (idx1 + Math.Max(2, (count + 1) / 2)) % (count + 2);
 
-            workingList.Insert(idx1, ("DJ's Choice", _scaryokeSettings.SliverWeight, "#0B0914", "#FF3D00"));
-            workingList.Insert(idx2, ("DJ's Choice", _scaryokeSettings.SliverWeight, "#0B0914", "#FF3D00"));
+                workingList.Insert(idx1, ("DJ's Choice", _scaryokeSettings.SliverWeight, "#0B0914", "#FF3D00"));
+                workingList.Insert(idx2, ("DJ's Choice", _scaryokeSettings.SliverWeight, "#0B0914", "#FF3D00"));
+            }
 
             double totalWeight = workingList.Sum(s => s.Weight);
             if (totalWeight <= 0) totalWeight = 1;
@@ -270,6 +615,7 @@ namespace KSRotation.ViewModels
                 break;
             }
 
+            var landedSegment = SegmentAtPointerAngle(landing);
             double desired = (360 - landing) % 360;
             double baseAngle = _scaryokeCurrentAngle + 1440 + (_scaryokeRng.Next(0, 2) * 360);
             double targetAngle = baseAngle + (((desired - (baseAngle % 360)) + 360) % 360);
@@ -300,7 +646,7 @@ namespace KSRotation.ViewModels
             _scaryokeCurrentAngle = targetAngle % 360;
             IsScaryokeSpinning = false;
 
-            var landed = SegmentAtPointerAngle(landing);
+            var landed = landedSegment;
             ScaryokeResultText = landed.Name.ToUpper();
             ScaryokeResultDetail = landed.Name switch
             {
@@ -315,6 +661,7 @@ namespace KSRotation.ViewModels
             {
                 ScaryokeHistory.RemoveAt(ScaryokeHistory.Count - 1);
             }
+            _scaryokeSettings.RecordSpin(landed.Name);
 
             bool isDjsChoice = string.Equals(landed.Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
 
@@ -362,6 +709,13 @@ namespace KSRotation.ViewModels
                 CurrentSingerName = cur?.Name ?? "Stage Open",
                 Segments = [.. ScaryokeWheelSegments]
             };
+        }
+
+        /// <summary>Clears Scaryoke past spin history from memory and disk.</summary>
+        public void ClearScaryokeHistory()
+        {
+            ScaryokeHistory.Clear();
+            _scaryokeSettings.ClearSpinHistory();
         }
     }
 

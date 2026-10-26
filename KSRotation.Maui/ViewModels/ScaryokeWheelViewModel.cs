@@ -1,7 +1,4 @@
-// Created on Jul 27, 2026 @ 11:00:00 -> Weighted category wheel, tied to the live rotation queue for
-// current-singer messaging. Segment math mirrors the WPF ScaryokeWheel/Lyracist ScaryokeViewModel
-// implementations so the mechanic (categories + Singer's Choice + DJ's Choice) stays the same.
-// Edited on Oct 24, 2026 -> Per-category weight and colour, named presets, edits locked while spinning
+// Edited on Oct 26, 2026 @ 06:55:00 -> Persist and restore SpinHistory across shutdowns and enforce consecutive duplicate prevention
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Maui.Services;
@@ -69,6 +66,11 @@ namespace KSRotation.Maui.ViewModels
         public bool IsRecentRepeat(string name)
         {
             int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            if (distinct < 2) return false;
+
+            if (_recent.Count > 0 && string.Equals(_recent[0], name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
             int window = Math.Min(2, distinct - 1);
             return _recent.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
         }
@@ -113,6 +115,11 @@ namespace KSRotation.Maui.ViewModels
             {
                 _settings.Styles.TryGetValue(category, out var style);
                 AddItem(category, style);
+            }
+
+            foreach (var item in _settings.SpinHistory)
+            {
+                _recent.Add(item);
             }
 
             RebuildWheelSegments();
@@ -371,6 +378,8 @@ namespace KSRotation.Maui.ViewModels
             {
                 _recent.RemoveAt(_recent.Count - 1);
             }
+            _settings.SpinHistory = [.. _recent];
+            ScaryokeSettingsService.Save(_settings);
 
             var singer = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
                 ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
@@ -383,6 +392,13 @@ namespace KSRotation.Maui.ViewModels
                 "Gender Bender" => $"{singerName} must sing a song made famous by the opposite gender!",
                 _ => $"{singerName} picks any song from: {category}!",
             };
+        }
+
+        public void ClearHistory()
+        {
+            _recent.Clear();
+            _settings.SpinHistory.Clear();
+            ScaryokeSettingsService.Save(_settings);
         }
 
         private static string GetContrastingTextColor(string hexColor)

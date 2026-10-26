@@ -1,6 +1,30 @@
-// Edited on Oct 26, 2026 @ 06:34:00 -> Document skipped anchor singer restoration upon round completion and queue bottom prevention
+// Edited on Oct 26, 2026 @ 08:37:00 -> Document Dedicated Scaryoke Settings Tab, 11 categories, custom/auto color, DJ/singer/dupe toggles, and Display scrollable columns
 
-KSRotation & Lyracist: Skipped Rotation Anchor Performer Rollover Restoration & Queue Bottom Prevention - (October 2026)
+KSRotation & Lyracist: Dedicated Scaryoke Settings Tab, 11 Categories, Custom & Auto Color Selection, Wheel Rule Toggles, and Display Tab Independent Column Scrolling - (October 2026)
+
+Section: Application Settings / Scaryoke Settings & Display Configuration
+
+[Overview & Features]
+Centralized all Scaryoke roulette wheel configuration, color customization, probability rules, presets, and audience overlay monitor routing into a dedicated "Scaryoke Settings" tab, removing duplicate rotation settings and adding independent per-column scrolling on the Display tab.
+
+1. Dedicated Scaryoke Settings Tab:
+   - Added a dedicated "Scaryoke Settings" tab in Settings across both KSRotation and Lyracist.
+   - Clean, balanced layout containing:
+     * Wheel Categories (Max 11): List of active wheel slices with Add Category, Delete Category, and Reset to Defaults.
+     * Category Styling & Colors: Live slice color swatch, color mode indication ("Custom Color" vs "Auto (by app)"), Auto Color reset button, curated 11-color palette picker, color cycler, and slice size / weight multiplier cycler (1x, 2x, 3x).
+     * Wheel Rules & Toggles: Checkboxes for "Include DJ's Choice Slivers", "Include Singer's Choice Segment", and "Prevent Duplicate Spins (Consecutive)".
+     * Wheel Category Presets: Load, save, and delete custom category collections for themed karaoke nights.
+   - Removed redundant "Rotation & Queue Rules" from the Scaryoke tab in KSRotation, ensuring all general rotation settings remain consolidated within their primary settings page.
+
+2. Max 11 Categories & Auto vs. Custom Styling:
+   - Expanded category capacity to 11 categories (up from 8).
+   - "Auto Color (by App)" fallback: When custom color is cleared or unassigned, the app automatically assigns an automatic distinct, high-contrast palette color to each slice.
+
+3. Independent Scrollable Columns on Display Tab:
+   - Replaced single outer ScrollViewer with independent per-column ScrollViewers across all columns on the Display settings tab.
+   - Completely eliminates vertical content truncation on 1920x1080 laptop screens and high-DPI scaling displays (125% / 150%).
+
+
 
 Section: Rotation Management / Performer Skipping & Round Rollover / Anchor Singer
 
@@ -2673,3 +2697,58 @@ Resolved an issue where a rotation anchor singer who was skipped at the beginnin
    - Because the anchor singer's skip flag is cleared at round completion, they are restored to full active eligibility immediately when the final performer finishes.
    - In floating mode (FloatCurrentSingerToTop), the anchor singer remains at index 0 and becomes the active current singer instead of being flushed to the bottom of the active queue.
    - The on-deck indicator (IsNext) and wait-time projections accurately highlight the anchor singer as Up Next as the final performer of the round sings.
+
+
+Section: Scaryoke Wheel / Spin History Persistence & Duplicate Prevention Across Shutdowns
+
+[Update Details]
+Added persistent spin history tracking across all applications incorporating the Scaryoke Wheel (Scaryoke standalone wheel, KSRotation, Lyracist, and KSRotation.Maui).
+
+1. Spin History Persistence Across Shutdowns:
+   - Landed categories are automatically preserved in JSON settings when the wheel window is closed, dismissed, or shut down between performers, and across application restarts.
+   - When the next performer is called up and the wheel is reopened, the prevent duplicate spins mechanism (AvoidRepeats) inspects the past spin history and prevents immediate back-to-back duplicate challenge outcomes.
+
+2. Automatic Spin History Reset on Rotation Save or Clear:
+   - When the rotation queue is cleared (ClearRotation or ClearRotationQueue) or when end-of-night performance reports are saved (SaveRotation or ResetEverything), the spin past history is automatically purged from memory and disk.
+   - This ensures each new rotation or show starts with a completely fresh, unbiased wheel history.
+
+
+Section: Settings Page / Dedicated Karaoke Settings Tab & Display Tab Independent Column Scrolling
+
+[Update Details]
+Added a dedicated 'Karaoke Settings' tab in the main Settings page, enhanced wheel category configuration up to 11 categories with custom and automatic color selection, integrated wheel rule toggles, and converted the Display page into 4 independently scrollable columns to resolve laptop display truncation.
+
+1. Dedicated Karaoke Settings Tab:
+   - Added a new top-level tab 'Karaoke Settings' in the Settings page to centralize all karaoke and Scaryoke wheel options.
+   - Wheel Categories: Supports configuring up to 11 custom wheel categories (expanded from 8).
+   - Category Styling & Colors: Allows DJs to set custom slice colors from the palette or reset to automatic app-assigned palette colors ('Auto by App'). Slice sizes/probability weights (1x, 2x, 3x) can also be customized.
+   - Wheel Rules & Toggles:
+     * DJ's Choice Toggle: Include or exclude high-stakes black DJ's Choice slivers.
+     * Singer's Choice Toggle: Include or exclude the green Singer's Choice segment.
+     * Prevent Duplicate Spins: Avoid consecutive spins landing on the same category; remembers past spins across sessions and resets on rotation clear/save.
+   - Wheel Category Presets: Save, load, and delete named category presets.
+   - Rotation & Queue Management: Convenient access to rotation rules (Float Current Singer to Top, Block Duplicate Songs in Session, Mirror Lyrics Display, Wait Time display and Default Song Length slider).
+
+2. Display Page Independent Column Scrolling:
+   - Refactored the Display tab in Settings so that all 4 columns (Monitors & Screen Assignments, DJ & Event Banners, Audio Visualizer & Welcome Screen, Star Wars Crawl & Screen Rotation) now feature independent vertical scrolling.
+   - Prevents truncated content on laptop screens and standard 1920x1080 displays with Windows display scaling (125%/150%).
+
+
+Section: Settings Page / Scaryoke Settings Tab & Audience Overlay Monitor Selection
+
+[Update Details]
+Renamed the tab from 'Karaoke Settings' to 'Scaryoke Settings' to clarify its dedicated purpose, eliminated redundant Rotation and Queue / Wait Time groupboxes that were duplicated from the Presentation and Display tabs, and introduced dedicated Audience Display & Overlay Monitor selection to allow DJs to choose exactly which screen or monitor displays the Scaryoke roulette wheel overlay.
+
+1. Renamed to 'Scaryoke Settings':
+   - Clearly isolates all Scaryoke roulette configuration (wheel categories, colors, probabilities, rules, toggles, presets, and overlay display).
+   - Eliminates redundant 'Rotation & Queue Rules' and 'Wait Times & Durations' sections to prevent confusion and conflicting settings.
+
+2. Audience Display & Target Overlay Monitor Selection:
+   - Added Target Overlay Monitor selector under Audience Display & Overlay.
+   - Allows DJs to project the Scaryoke wheel onto:
+     * Rotation Billboard Screen (Default): Overlays over the primary singer rotation display.
+     * Lyrics Projection Screen: Overlays onto the dedicated audience lyrics screen.
+     * DJ & Special Event Banner Screen: Overlays onto the secondary banner screen.
+     * Any connected display monitor (Monitor 1, Monitor 2, etc.) discovered by the system.
+   - Automatically positions the audience overlay onto the selected monitor upon wheel launch and restores default placement when the wheel is closed.
+   - Includes a live '🎃 Open Scaryoke Wheel' test button to verify placement, physics, and projection.
