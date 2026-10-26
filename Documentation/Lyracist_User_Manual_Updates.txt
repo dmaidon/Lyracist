@@ -1,4 +1,21 @@
-// Edited on Oct 26, 2026 @ 00:40:00 -> Document Scaryoke Wheel integration into KSRotation, tablet sync, and consecutive duplicate prevention toggle
+// Edited on Oct 26, 2026 @ 06:34:00 -> Document skipped anchor singer restoration upon round completion and queue bottom prevention
+
+KSRotation & Lyracist: Skipped Rotation Anchor Performer Rollover Restoration & Queue Bottom Prevention - (October 2026)
+
+Section: Rotation Management / Performer Skipping & Round Rollover / Anchor Singer
+
+[Overview & Behavior Correction]
+Resolved an issue where an anchor singer (`IsRotationStart`) who was skipped at the beginning of a show had their skipped status improperly persist into subsequent rounds, causing them to be passed over upon round completion and automatically moved to the bottom of the active queue in floating mode without being given a chance to sing.
+
+1. Round-Scoped Skip Lifecycle:
+   - When a performer steps away temporarily and the DJ toggles "Skip", the skip status is strictly scoped to the current round.
+   - Advancing the rotation now evaluates whether the rotation sequence reaches or crosses the rotation anchor (`IsRotationStart`).
+   - The moment the round completes (when the last performer in rotation finishes their song or advancing wraps past the rotation anchor), all round-scoped `IsSkipped` flags on active performers are immediately reset to `false`.
+
+2. Immediate Turn Restoration & Queue Position Preservation:
+   - Because the anchor singer's skip flag is cleared at round completion before selecting the next performer and before performing list reordering, the anchor singer is recognized as eligible to lead off the new round.
+   - In floating mode (`FloatCurrentSingerToTop`), the anchor singer remains at index 0 and becomes the active current singer instead of being erroneously detected as a skipped performer and flushed to the bottom of the active queue.
+   - The on-deck indicator (`IsNext`), audience billboards, and wait-time projections accurately show the anchor singer as Up Next as the final performer of the round sings.
 
 
 KSRotation & ScaryokeWheel: Scaryoke Wheel Integration into KSRotation, Audience Projection Precedence, Tablet Remote DJ Board & Consecutive Duplicate Prevention Toggle - (October 2026)
@@ -2640,3 +2657,19 @@ Scaryoke Wheel is now integrated into KSRotation with display screen precedence,
 3. Consecutive Duplicate Prevention Toggle:
    - Added a 'Prevent 2 singers in a row getting the same result' toggle across ScaryokeWheel, KSRotation, and Lyracist.
    - Prevents back-to-back duplicate challenge outcomes between consecutive performers.
+
+
+Section: Rotation Management / Skipped Anchor Singer Rollover Restoration & Queue Position
+
+[Update Details]
+Resolved an issue where a rotation anchor singer who was skipped at the beginning of a show was erroneously bypassed upon round completion and moved to the bottom of the active queue without a turn to sing.
+
+1. Round-Scoped Skip Lifecycle:
+   - When a performer is skipped (including the rotation anchor), the skipped status is strictly scoped to the active round.
+   - Advancing the rotation evaluates whether the sequence reaches or crosses the rotation anchor (IsRotationStart).
+   - When the round completes (final singer in rotation finishes their song), all round-scoped IsSkipped flags are automatically cleared before selecting the next singer or evaluating queue reordering.
+
+2. Immediate Turn Restoration & Queue Position Preservation:
+   - Because the anchor singer's skip flag is cleared at round completion, they are restored to full active eligibility immediately when the final performer finishes.
+   - In floating mode (FloatCurrentSingerToTop), the anchor singer remains at index 0 and becomes the active current singer instead of being flushed to the bottom of the active queue.
+   - The on-deck indicator (IsNext) and wait-time projections accurately highlight the anchor singer as Up Next as the final performer of the round sings.

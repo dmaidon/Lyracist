@@ -1,5 +1,5 @@
-<!-- Edited on Oct 26, 2026 @ 00:42:00 -> Document Scaryoke Wheel integration into KSRotation, tablet sync, and consecutive duplicate prevention toggle -->
-Last Edit: Oct 26, 2026 - Scaryoke Wheel Integration into KSRotation, Display Precedence, Tablet Sync, and Consecutive Duplicate Prevention
+<!-- Edited on Oct 26, 2026 @ 06:35:00 -> Document skipped anchor singer restoration upon round completion and queue bottom prevention -->
+Last Edit: Oct 26, 2026 - Skipped Rotation Anchor Performer Rollover Restoration and Queue Bottom Prevention
 
 # Changelog
 
@@ -8,6 +8,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [Unreleased] - 2026-10-26
 
 ### Added
+- **Skipped Rotation Anchor Performer Rollover Restoration & Queue Bottom Prevention (`Shared/RotationHelpers.cs`, `Lyracist.Tests/RotationHelpersSingerTests.cs`, `KSRotation.Tests/RotationTests.cs`)**:
+  - **Round Completion Skip Clearing**: Resolved an issue where an anchor singer who was skipped at the beginning of a show had their `IsSkipped` flag persist across round completion. When the last singer in the rotation finished, the anchor was erroneously bypassed for the start of the new round and flushed to the bottom of the active queue in floating mode without being given a chance to sing.
+  - **Round Rollover Detection Before Reordering**: Updated `AdvanceRotationAfterFinished`, `MarkNextSinger`, `RecalculateEstimatedWaits`, `GetNextActiveSingers`, and `FindNextEligibleSinger` to recognize that reaching or crossing the rotation start anchor (`IsRotationStart`) concludes the current round and clears all round-scoped `IsSkipped` flags on active performers BEFORE selecting the next current performer and before evaluating floating queue reordering.
+  - **Immediate Turn Restoration**: When the last performer finishes, the anchor singer's skip flag is cleared immediately, their turn as the rotation anchor is recognized, and they are floated to index 0 and marked current as intended.
 - **Scaryoke Wheel KSRotation Host Integration & Display Screen Precedence (`KSRotation/MainWindow.xaml`, `KSRotation/ViewModels/MainViewModel.Scaryoke.cs`, `KSRotation/Windows/ScaryokeControlWindow.xaml`, `KSRotation/Windows/SingerDisplayWindow.xaml`, `KSRotation/Services/DisplayWindowService.cs`)**:
   - **Rotation Toolbar & Master Activation**: Added a dedicated `🎃 Scaryoke` toggle button to the primary Rotation toolbar (next to `Last Round`). Clicking it launches the host control window and immediately displays the live wheel on the singer display window (`SingerDisplayWindow`).
   - **Screen Precedence Over Other Displays**: When Scaryoke is activated, the audience wheel overlay is assigned top Z-index (Z-Index 135/136) on `SingerDisplayWindow` and automatically brings the window forward (`Topmost = true`), taking absolute precedence over standard rotation lists, welcome screens, DJ announcements, and trivia. When unclicked, the wheel shuts down cleanly across all screens and tablets.

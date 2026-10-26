@@ -1,4 +1,4 @@
-// Edited on Oct 5, 2026 @ 22:53:30 -> Add unit tests for MoveSingerToTop preserving anchor and unskipping performer
+// Edited on Oct 26, 2026 @ 06:32:00 -> Add unit tests for skipped anchor singer restored on round completion
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -755,6 +755,89 @@ public class RotationHelpersSingerTests
         Assert.True(alice.IsCurrent);
         // Bob's IsSkipped should automatically be cleared on round rollover!
         Assert.False(bob.IsSkipped);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_AnchorSingerSkippedAtBeginningOfShow_RestoredAndSingsWhenRoundCompletes_FloatMode()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = Active("Bob");
+        var carol = Active("Carol");
+        var dave = Active("Dave");
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        // 1. Anchor singer (Alice) is skipped at the beginning of the show
+        alice.IsSkipped = true;
+        RotationHelpers.AdvanceRotationAfterFinished(singers, alice, floatCurrentToTop: true);
+
+        // Bob becomes current, Alice moves to bottom of active queue and remains skipped for Round 1
+        Assert.True(bob.IsCurrent);
+        Assert.Same(bob, singers[0]);
+        Assert.True(alice.IsSkipped);
+        Assert.Same(alice, singers[3]);
+
+        // 2. Bob finishes -> Carol becomes current
+        RotationHelpers.AdvanceRotationAfterFinished(singers, bob, floatCurrentToTop: true);
+        Assert.True(carol.IsCurrent);
+        Assert.Same(carol, singers[0]);
+        Assert.True(alice.IsSkipped);
+
+        // 3. Carol finishes -> Dave becomes current
+        RotationHelpers.AdvanceRotationAfterFinished(singers, carol, floatCurrentToTop: true);
+        Assert.True(dave.IsCurrent);
+        Assert.Same(dave, singers[0]);
+        Assert.True(alice.IsSkipped);
+
+        // While Dave is singing, Alice (the anchor) is next on deck because the round will complete
+        Assert.True(alice.IsNext);
+
+        // 4. Dave (last singer in rotation) finishes: the rotation completed!
+        // The anchor must NOT be moved to the bottom; Alice's IsSkipped must be cleared and Alice must be allowed to sing!
+        RotationHelpers.AdvanceRotationAfterFinished(singers, dave, floatCurrentToTop: true);
+
+        Assert.True(alice.IsCurrent);
+        Assert.Same(alice, singers[0]);
+        Assert.False(alice.IsSkipped);
+        Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_AnchorSingerSkippedAtBeginningOfShow_RestoredAndSingsWhenRoundCompletes_NonFloatMode()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = Active("Bob");
+        var carol = Active("Carol");
+        var dave = Active("Dave");
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        // 1. Anchor singer (Alice) is skipped at the beginning of the show
+        alice.IsSkipped = true;
+        RotationHelpers.AdvanceRotationAfterFinished(singers, alice, floatCurrentToTop: false);
+
+        // Bob becomes current, Alice remains skipped for Round 1
+        Assert.True(bob.IsCurrent);
+        Assert.True(alice.IsSkipped);
+
+        // 2. Bob finishes -> Carol becomes current
+        RotationHelpers.AdvanceRotationAfterFinished(singers, bob, floatCurrentToTop: false);
+        Assert.True(carol.IsCurrent);
+        Assert.True(alice.IsSkipped);
+
+        // 3. Carol finishes -> Dave becomes current
+        RotationHelpers.AdvanceRotationAfterFinished(singers, carol, floatCurrentToTop: false);
+        Assert.True(dave.IsCurrent);
+        Assert.True(alice.IsSkipped);
+
+        // While Dave is singing, Alice (the anchor) is next on deck because the round will complete
+        Assert.True(alice.IsNext);
+
+        // 4. Dave (last singer in rotation) finishes: the rotation completed!
+        // Alice's IsSkipped must be cleared and Alice must become current and allowed to sing!
+        RotationHelpers.AdvanceRotationAfterFinished(singers, dave, floatCurrentToTop: false);
+
+        Assert.True(alice.IsCurrent);
+        Assert.False(alice.IsSkipped);
+        Assert.True(bob.IsNext);
     }
 
     [Fact]
