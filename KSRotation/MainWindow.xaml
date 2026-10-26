@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 12:13:00 -> Add mouse drag-and-drop reordering with drag grip handle to rotation queue -->
+<!-- Edited on Oct 26, 2026 @ 00:55:00 -> Add Scaryoke Spin button to rotation toolbar -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1211,6 +1211,64 @@
                                                 <Setter Property="Background" Value="#2563EB" />
                                                 <Setter Property="BorderBrush" Value="#1D4ED8" />
                                                 <Setter Property="Foreground" Value="White" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button
+                            Command="{Binding ToggleScaryokeCommand}"
+                            Width="140"
+                            Margin="12,0,0,0"
+                            ToolTip="Toggle Scaryoke Wheel: displays the challenge wheel on the audience display screen and DJ tablet">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                        <Setter Property="Margin" Value="0,4" />
+                                        <Setter Property="FontSize" Value="14" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Setter Property="Content" Value="🎃 Scaryoke" />
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#6D28D9" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsScaryokeActive}" Value="True">
+                                                <Setter Property="Content" Value="🎃 Scaryoke (On)" />
+                                                <Setter Property="Background" Value="#FF6D00" />
+                                                <Setter Property="BorderBrush" Value="#E65100" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button
+                            Command="{Binding SpinScaryokeCommand}"
+                            Width="120"
+                            Margin="8,0,0,0"
+                            ToolTip="Spin the Scaryoke Wheel for the current performer">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                        <Setter Property="Margin" Value="0,4" />
+                                        <Setter Property="FontSize" Value="14" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Content" Value="🎲 Spin" />
+                                        <Setter Property="Background" Value="#FF6D00" />
+                                        <Setter Property="BorderBrush" Value="#E65100" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsScaryokeActive}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsScaryokeSpinning}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                                <Setter Property="Content" Value="⏳ Spinning..." />
                                             </DataTrigger>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter Property="Opacity" Value="0.9" />

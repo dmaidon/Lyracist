@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:55:00 -> Set WelcomeScreenService.IsPreShowActive in SetPreShowMode
+// Edited on Oct 26, 2026 @ 00:02:00 -> Support Scaryoke wheel display overlay and animations in DisplayWindowService
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -21,6 +21,79 @@ namespace KSRotation.Services
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
         private string? _lastSongBannerPath;
+        private bool _openedForScaryoke;
+        private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
+
+        public void SetScaryokeActive(bool isActive, ObservableCollection<SingerEntry>? singers = null)
+        {
+            _viewModel.IsScaryokeActive = isActive;
+            var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+
+            if (isActive)
+            {
+                if (_window == null)
+                {
+                    _openedForScaryoke = true;
+                    Show(singers ?? []);
+                }
+
+                dispatcher.InvokeAsync(() =>
+                {
+                    if (_window != null)
+                    {
+                        if (_cachedScaryokeSegments != null)
+                        {
+                            _window.BuildScaryokeWheel(_cachedScaryokeSegments);
+                        }
+                        _window.Topmost = true;
+                        _window.WindowState = WindowState.Normal;
+                        _window.WindowState = WindowState.Maximized;
+                        _window.Activate();
+                        _window.UpdateScaryokeOverlay(true);
+                    }
+                });
+            }
+            else
+            {
+                dispatcher.InvokeAsync(() =>
+                {
+                    if (_window != null)
+                    {
+                        _window.UpdateScaryokeOverlay(false);
+                        if (_openedForScaryoke)
+                        {
+                            _openedForScaryoke = false;
+                            Hide();
+                        }
+                    }
+                });
+            }
+        }
+
+        public void UpdateScaryokeWheel(IReadOnlyList<ScaryokeWheelSegment> segments)
+        {
+            _cachedScaryokeSegments = segments;
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.BuildScaryokeWheel(segments));
+            }
+        }
+
+        public void StartScaryokeSpin(double targetAngle, double duration)
+        {
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.StartScaryokeSpin(targetAngle, duration));
+            }
+        }
+
+        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle)
+        {
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.CompleteScaryokeSpin(resultText, resultDetail, isDjsChoice, finalAngle));
+            }
+        }
 
         public void SetLastRound(bool isLastRound)
         {

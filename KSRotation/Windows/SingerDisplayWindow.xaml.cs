@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Support Pre-Show mode and pass Wi-Fi QR credentials in RefreshSignUpInvite
+// Edited on Oct 25, 2026 @ 23:59:00 -> Implement Scaryoke wheel audience projection rendering and animations
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -1151,5 +1151,140 @@ namespace KSRotation.Windows
             rtb.Render(this);
             return rtb;
         }
+
+        #region Scaryoke Wheel Projection
+
+        private const double ScaryokeRadius = 220;
+
+        private static System.Windows.Point ScaryokePolarPoint(double angleDegrees, double radius)
+        {
+            double rad = angleDegrees * Math.PI / 180.0;
+            return new System.Windows.Point(ScaryokeRadius + (radius * Math.Sin(rad)), ScaryokeRadius - (radius * Math.Cos(rad)));
+        }
+
+        public void UpdateScaryokeOverlay(bool isVisible)
+        {
+            ScaryokeWheelOverlay.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            if (isVisible)
+            {
+                Topmost = true;
+                Activate();
+            }
+        }
+
+        public void BuildScaryokeWheel(IReadOnlyList<ScaryokeWheelSegment> segments)
+        {
+            ScaryokeWheelCanvas.Children.Clear();
+            if (segments == null || segments.Count == 0) return;
+
+            var strokeBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x13, 0x3A));
+            strokeBrush.Freeze();
+            double start = 0;
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                double sweep = segments[i].Sweep;
+                double end = start + sweep;
+
+                var figure = new PathFigure
+                {
+                    StartPoint = new System.Windows.Point(ScaryokeRadius, ScaryokeRadius),
+                    IsClosed = true
+                };
+                figure.Segments.Add(new LineSegment(ScaryokePolarPoint(start, ScaryokeRadius), true));
+                figure.Segments.Add(new ArcSegment(
+                    ScaryokePolarPoint(end, ScaryokeRadius),
+                    new System.Windows.Size(ScaryokeRadius, ScaryokeRadius),
+                    0,
+                    sweep > 180.0,
+                    SweepDirection.Clockwise,
+                    true));
+
+                var sliceColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(segments[i].Color);
+                var slice = new System.Windows.Shapes.Path
+                {
+                    Data = new PathGeometry(new[] { figure }),
+                    Fill = new SolidColorBrush(sliceColor),
+                    Stroke = strokeBrush,
+                    StrokeThickness = 2
+                };
+                ScaryokeWheelCanvas.Children.Add(slice);
+
+                // Label
+                double mid = start + (sweep / 2);
+                var labelPos = ScaryokePolarPoint(mid, ScaryokeRadius * 0.62);
+                double textAngle = mid - 90;
+                if (mid > 180) textAngle += 180;
+
+                var label = new Grid
+                {
+                    Width = 140,
+                    Height = 26,
+                    RenderTransformOrigin = new System.Windows.Point(0.5, 0.5),
+                    RenderTransform = new RotateTransform(textAngle)
+                };
+
+                var textColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(segments[i].TextColor);
+                bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
+
+                label.Children.Add(new TextBlock
+                {
+                    Text = isDjsChoice ? "💀" : segments[i].Name,
+                    Foreground = new SolidColorBrush(textColor),
+                    FontWeight = FontWeights.Bold,
+                    FontSize = isDjsChoice ? 18 : 12,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                });
+
+                Canvas.SetLeft(label, labelPos.X - 70);
+                Canvas.SetTop(label, labelPos.Y - 13);
+                ScaryokeWheelCanvas.Children.Add(label);
+
+                start = end;
+            }
+        }
+
+        public void StartScaryokeSpin(double targetAngle, double duration)
+        {
+            double current = ScaryokeWheelRotate.Angle % 360;
+            var animation = new DoubleAnimation(current, targetAngle, TimeSpan.FromSeconds(duration))
+            {
+                EasingFunction = new PowerEase { Power = 3.5, EasingMode = EasingMode.EaseOut },
+                FillBehavior = FillBehavior.HoldEnd
+            };
+            ScaryokeWheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
+        }
+
+        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle)
+        {
+            ScaryokeWheelRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+            ScaryokeWheelRotate.Angle = finalAngle % 360;
+
+            if (_vm != null)
+            {
+                _vm.ScaryokeResultText = resultText;
+                _vm.ScaryokeResultDetail = resultDetail;
+            }
+
+            // Animate result scale & shake
+            var scaleAnim = new DoubleAnimation(0.7, 1.0, TimeSpan.FromMilliseconds(400))
+            {
+                EasingFunction = new BackEase { Amplitude = 0.5, EasingMode = EasingMode.EaseOut }
+            };
+            ScaryokeResultScale.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnim);
+            ScaryokeResultScale.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnim);
+
+            if (isDjsChoice)
+            {
+                var flashAnim = new DoubleAnimationUsingKeyFrames();
+                flashAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.85, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(100))));
+                flashAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(500))));
+                ScaryokeFlashOverlay.BeginAnimation(UIElement.OpacityProperty, flashAnim);
+            }
+        }
+
+        #endregion
     }
 }

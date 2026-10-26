@@ -1,4 +1,4 @@
-<!-- Edited on Oct 24, 2026 @ 16:05:00 -> Adjust button and combo box dimensions and preserve laptop host window positioning -->
+<!-- Edited on Oct 25, 2026 @ 23:49:00 -> Clarify toggle label and tooltip to prevent 2 singers in a row getting same result -->
 <Window x:Class="ScaryokeWheel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -237,7 +237,7 @@
                         <StackPanel x:Name="OptionsPanel" Grid.Row="2" Margin="0,0,0,15">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                 <CheckBox Content="Mute sounds" IsChecked="{Binding IsMuted}" Foreground="#E0DDEC" Margin="0,0,20,0" />
-                                <CheckBox Content="Avoid repeats" IsChecked="{Binding AvoidRepeats}" Foreground="#E0DDEC" />
+                                <CheckBox Content="Prevent 2 singers in a row getting the same result" IsChecked="{Binding AvoidRepeats}" Foreground="#E0DDEC" ToolTip="When enabled, prevents consecutive spins from landing on the same challenge category back-to-back." />
                             </StackPanel>
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>

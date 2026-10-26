@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Subscribe to MonitorEnumerator.MonitorsChanged to auto-refresh available monitors
+// Edited on Oct 26, 2026 @ 00:20:00 -> Initialize and shutdown Scaryoke wheel in MainViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1643,6 +1643,7 @@ namespace KSRotation.ViewModels
             _ = AutoDetectVenueLocationAsync();
 #if !MAUI
             InitializeTrivia();
+            InitializeScaryoke();
             _ = LoadAllUsersAsync();
 #endif
         }
@@ -3806,7 +3807,10 @@ namespace KSRotation.ViewModels
             RunShutdownStep(nameof(RebuildRotationJsonCacheNow), RebuildRotationJsonCacheNow);
             RunShutdownStep("RequestServer.Stop", () => _requestServer?.Stop());
             RunShutdownStep("DisplayWindowService.Shutdown", _displayWindowService.Shutdown);
+#if !MAUI
             RunShutdownStep("DjBannerWindowService.Shutdown", _djBannerWindowService.Shutdown);
+            RunShutdownStep(nameof(StopScaryoke), StopScaryoke);
+#endif
         }
 
         private static void RunShutdownStep(string name, Action step)

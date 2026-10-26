@@ -1,9 +1,24 @@
-<!-- Edited on Oct 24, 2026 @ 15:33:00 -> Document Scaryoke Wheel dual-monitor projection and DJ's Choice toggle -->
-Last Edit: Oct 24, 2026 - Scaryoke Wheel DJ's Choice Toggle, Dual-Monitor Audience Projection & Fullscreen Presentation
+<!-- Edited on Oct 26, 2026 @ 00:42:00 -> Document Scaryoke Wheel integration into KSRotation, tablet sync, and consecutive duplicate prevention toggle -->
+Last Edit: Oct 26, 2026 - Scaryoke Wheel Integration into KSRotation, Display Precedence, Tablet Sync, and Consecutive Duplicate Prevention
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] - 2026-10-26
+
+### Added
+- **Scaryoke Wheel KSRotation Host Integration & Display Screen Precedence (`KSRotation/MainWindow.xaml`, `KSRotation/ViewModels/MainViewModel.Scaryoke.cs`, `KSRotation/Windows/ScaryokeControlWindow.xaml`, `KSRotation/Windows/SingerDisplayWindow.xaml`, `KSRotation/Services/DisplayWindowService.cs`)**:
+  - **Rotation Toolbar & Master Activation**: Added a dedicated `🎃 Scaryoke` toggle button to the primary Rotation toolbar (next to `Last Round`). Clicking it launches the host control window and immediately displays the live wheel on the singer display window (`SingerDisplayWindow`).
+  - **Screen Precedence Over Other Displays**: When Scaryoke is activated, the audience wheel overlay is assigned top Z-index (Z-Index 135/136) on `SingerDisplayWindow` and automatically brings the window forward (`Topmost = true`), taking absolute precedence over standard rotation lists, welcome screens, DJ announcements, and trivia. When unclicked, the wheel shuts down cleanly across all screens and tablets.
+  - **Host Control Console (`ScaryokeControlWindow`)**: Provides the host with a live spinning wheel canvas, performer name display, spin button, consecutive duplicate prevention toggle, mute toggle, and shut down button.
+  - **Synchronized Audio & Deceleration Physics**: Plays the ticking sound, bell ding, and fanfare using `ScaryokeAudio` with frame-accurate deceleration easing matching the standalone wheel.
+- **Interactive Tablet Remote DJ Control & Booth Spin Station (`KSRotation/Resources/dj.html`, `KSRotation/MainWindow.xaml`)**:
+  - **Remote & Host Spin Buttons**: Added dedicated `🎲 Spin Wheel` buttons to both the rotation queue header toolbar and the quick action button card on the DJ screen (`dj.html`), as well as a direct `🎲 Spin` button on the host laptop's `MainWindow.xaml` toolbar when Scaryoke is active.
+  - **DJ Booth Singer Spin Station (`#scaryoke-tablet-modal`)**: Because the full spinning wheel graphic is already projected on the host's laptop and audience big screen, the DJ tablet is streamlined without wheel canvas rendering. Features a giant, touch-friendly "🎲 TAP TO SPIN! 🎃" button for singers to step up to the DJ booth and spin their challenge directly, with live result card display and duplicate prevention toggle.
+- **Prevent 2 Singers in a Row Getting the Same Result Toggle (`ScaryokeWheel`, `KSRotation`, `Lyracist`)**:
+  - Added a configurable toggle across all three applications (`ScaryokeWheel/MainWindow.xaml`, `KSRotation/Windows/ScaryokeControlWindow.xaml`, `KSRotation/Resources/dj.html`, `Lyracist/Windows/ScaryokeWindow.xaml`, and `Lyracist/ViewModels/ScaryokeViewModel.cs`).
+  - When enabled, the spin engine checks the outcome of the immediate previous performer. If the newly selected landing slice matches the previous singer's challenge, it automatically rerolls to prevent back-to-back duplicate results.
 
 ## [Unreleased] - 2026-10-24
 

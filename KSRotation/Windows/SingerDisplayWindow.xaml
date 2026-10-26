@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 13:16:00 -> Use Ellipse ImageBrush for circular performer avatars to prevent square edge bleed -->
+<!-- Edited on Oct 25, 2026 @ 23:57:00 -> Add fullscreen ScaryokeWheelOverlay taking top precedence on audience display -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -2296,6 +2296,92 @@
                    VerticalAlignment="Center"
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
+
+        <!-- Scaryoke Wheel Overlay (takes precedence over all projection panels and banners) -->
+        <Border x:Name="ScaryokeWheelOverlay"
+                Grid.RowSpan="2"
+                Panel.ZIndex="135"
+                Background="#E504060B"
+                Visibility="Collapsed">
+            <Grid Margin="40">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.1*" />
+                    <ColumnDefinition Width="0.9*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Spin Wheel Graphic & Pointer -->
+                <Viewbox Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+                    <Grid Width="460" Height="480">
+                        <!-- Outer Glow Rim -->
+                        <Ellipse Width="456" Height="456" Fill="#050406" Stroke="#3E1A60" StrokeThickness="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#FF6D00" BlurRadius="30" ShadowDepth="0" Opacity="0.6" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <Canvas x:Name="ScaryokeWheelCanvas" Width="440" Height="440" HorizontalAlignment="Center" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
+                            <Canvas.RenderTransform>
+                                <RotateTransform x:Name="ScaryokeWheelRotate" Angle="0" />
+                            </Canvas.RenderTransform>
+                        </Canvas>
+
+                        <!-- Central Rim Cap -->
+                        <Ellipse Width="60" Height="60" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,190" Fill="#1E133A" Stroke="#FF6D00" StrokeThickness="4" />
+                        <TextBlock Text="💀" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,205" Foreground="#FF6D00" />
+
+                        <!-- Pointer pointing down at 12 o'clock -->
+                        <Polygon Points="212,10 248,10 230,48" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,-4,0,0">
+                            <Polygon.Effect>
+                                <DropShadowEffect Color="#FF3D00" BlurRadius="15" ShadowDepth="0" />
+                            </Polygon.Effect>
+                        </Polygon>
+                    </Grid>
+                </Viewbox>
+
+                <!-- Right: Header & Challenge Result Card -->
+                <Grid Grid.Column="1" Margin="30,20,20,20" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,35" HorizontalAlignment="Center">
+                        <TextBlock Text="🎃 SCARYOKE WHEEL 🎃" FontSize="44" FontWeight="ExtraBold" Foreground="#FF6D00" HorizontalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FF6D00" BlurRadius="18" ShadowDepth="0" Opacity="0.6" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="The Ultimate Singing Challenge" FontSize="22" Foreground="#8F8B9B" Margin="0,8,0,0" HorizontalAlignment="Center" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1" CornerRadius="20" Background="#16141C" BorderBrush="#332B45" BorderThickness="2" Padding="40,35" HorizontalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="CURRENT CHALLENGE" FontSize="18" FontWeight="Bold" Foreground="#8F8B9B" HorizontalAlignment="Center" Margin="0,0,0,20" />
+                            <TextBlock x:Name="ScaryokeResultTextBlock"
+                                       Text="{Binding ScaryokeResultText}"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"
+                                       FontSize="52"
+                                       FontWeight="Bold"
+                                       Foreground="#00E676"
+                                       HorizontalAlignment="Center"
+                                       RenderTransformOrigin="0.5,0.5">
+                                <TextBlock.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform x:Name="ScaryokeResultScale" />
+                                        <TranslateTransform x:Name="ScaryokeResultShake" />
+                                    </TransformGroup>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                            <TextBlock Text="{Binding ScaryokeResultDetail}" TextWrapping="Wrap" TextAlignment="Center" FontSize="24" Foreground="#C9C5D6" HorizontalAlignment="Center" Margin="0,20,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Full-window flash used for the DJ's Choice reveal on Scaryoke -->
+        <Border x:Name="ScaryokeFlashOverlay" Grid.RowSpan="2" Panel.ZIndex="136" Background="#FF3D00" Opacity="0" IsHitTestVisible="False" />
     </Grid>
     </Viewbox>
 </Window>

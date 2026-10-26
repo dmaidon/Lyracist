@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 17:41:00 -> Add SessionHandoffPayload and DiscoveredPeer to AppJsonContext
+// Edited on Oct 26, 2026 @ 00:27:00 -> Add ScaryokeStateDto and ScaryokeWheelSegment to AppJsonContext
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -28,6 +28,9 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(SessionHandoffPayload))]
     [JsonSerializable(typeof(DiscoveredPeer))]
     [JsonSerializable(typeof(List<DiscoveredPeer>))]
+    [JsonSerializable(typeof(ScaryokeStateDto))]
+    [JsonSerializable(typeof(ScaryokeWheelSegment))]
+    [JsonSerializable(typeof(List<ScaryokeWheelSegment>))]
     public partial class AppJsonContext : JsonSerializerContext;
 }
 

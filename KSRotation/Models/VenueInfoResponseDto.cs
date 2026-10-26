@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 11:58:15 -> Add defaultSongLengthMinutes property to VenueInfoResponseDto
+// Edited on Oct 26, 2026 @ 00:26:00 -> Add isScaryokeActive and scaryokeState to VenueInfoResponseDto
 namespace KSRotation.Models
 {
     /// <summary>
@@ -16,6 +16,8 @@ namespace KSRotation.Models
         public bool showQrCode { get; set; } = true;
         public bool listDjAndVenue { get; set; } = true;
         public double defaultSongLengthMinutes { get; set; } = 4.75;
+        public bool isScaryokeActive { get; set; }
+        public ScaryokeStateDto? scaryokeState { get; set; }
     }
 }
 

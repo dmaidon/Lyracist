@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:56:00 -> Sync IsPreShowActive with WelcomeScreenService in DisplayViewModel
+// Edited on Oct 25, 2026 @ 23:55:00 -> Add Scaryoke display properties to DisplayViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -13,6 +13,15 @@ namespace KSRotation.ViewModels
     {
         [ObservableProperty]
         public partial bool IsLastRound { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsScaryokeActive { get; set; }
+
+        [ObservableProperty]
+        public partial string ScaryokeResultText { get; set; } = "Spin the wheel to seal a singer's fate!";
+
+        [ObservableProperty]
+        public partial string ScaryokeResultDetail { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial int ActiveSingerCount { get; set; }

@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 08:52:30 -> Populate duetPartnerName in RebuildRotationJsonCacheNow
+// Edited on Oct 26, 2026 @ 00:35:00 -> Guard Scaryoke state and DJ actions with #if !MAUI for cross-platform MAUI build compatibility
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -518,7 +518,14 @@ namespace KSRotation.ViewModels
                 isLastRound = IsLastRound,
                 showQrCode = ShowQrCodeOnRotationScreen,
                 listDjAndVenue = ListDjAndVenueOnBillboard,
-                defaultSongLengthMinutes = DefaultSongLengthMinutes
+                defaultSongLengthMinutes = DefaultSongLengthMinutes,
+#if !MAUI
+                isScaryokeActive = IsScaryokeActive,
+                scaryokeState = GetScaryokeStateDto()
+#else
+                isScaryokeActive = false,
+                scaryokeState = null
+#endif
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }
@@ -779,6 +786,26 @@ namespace KSRotation.ViewModels
                         ClearLastRoundDone(singer);
                         return "";
                     }
+#if !MAUI
+                case "toggle-scaryoke":
+                    {
+                        ToggleScaryoke();
+                        return "";
+                    }
+                case "scaryoke-spin":
+                    {
+                        _ = SpinScaryokeWheelAsync();
+                        return "";
+                    }
+                case "set-scaryoke-avoid-repeats":
+                    {
+                        if (bool.TryParse(extraData, out bool avoidVal))
+                        {
+                            ScaryokeAvoidConsecutiveRepeats = avoidVal;
+                        }
+                        return "";
+                    }
+#endif
                 case "delete":
                     {
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));

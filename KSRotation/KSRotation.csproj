@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 08:41:00 -> Replace PDFsharp with SkiaSharp for PDF generation -->
+<!-- Edited on Oct 25, 2026 @ 23:51:00 -> Link ScaryokeAudio and ScaryokeSettings from ScaryokeWheel into KSRotation -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.24.762</AssemblyVersion>
-    <FileVersion>26.10.24.762</FileVersion>
+    <AssemblyVersion>26.10.26.765</AssemblyVersion>
+    <FileVersion>26.10.26.765</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -160,6 +160,8 @@
     <Compile Include="..\Shared\VenueLocationStore.cs" Link="VenueLocationStore.cs" />
     <Compile Include="..\Shared\ILocationService.cs" Link="ILocationService.cs" />
     <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
+    <Compile Include="..\ScaryokeWheel\ScaryokeAudio.cs" Link="Services\ScaryokeAudio.cs" />
+    <Compile Include="..\ScaryokeWheel\ScaryokeSettings.cs" Link="Models\ScaryokeSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />

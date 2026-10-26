@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 08:53:30 -> Support duet partner display via duetPartnerName or partner fallback -->
+<!-- Edited on Oct 26, 2026 @ 00:58:00 -> Add Scaryoke Spin button to DJ screen and streamline booth modal without wheel graphic -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -661,6 +661,38 @@
                     background-color: #1D4ED8 !important;
                 }
 
+        .btn-scaryoke {
+            background-color: #EA580C;
+            color: #FFFFFF;
+            border: 1px solid #C2410C;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+            .btn-scaryoke:hover {
+                background-color: #C2410C;
+                opacity: 0.95;
+            }
+
+            .btn-scaryoke.active {
+                background-color: #7E22CE !important;
+                border-color: #6B21A8 !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 0 10px rgba(126, 34, 206, 0.5);
+            }
+
+                .btn-scaryoke.active:hover {
+                    background-color: #6B21A8 !important;
+                }
+
         .last-round-banner {
             background: linear-gradient(135deg, #DC2626, #991B1B);
             color: #FFFFFF;
@@ -770,6 +802,8 @@
                         <span>Current Rotation</span>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                             <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="openAddPerformerModal()">+ Add Performer</button>
+                            <button id="scaryoke-btn" class="btn-scaryoke" style="font-size: 0.8rem; padding: 4px 10px;" onclick="sendAction('toggle-scaryoke')">🎃 Scaryoke</button>
+                            <button id="scaryoke-spin-toolbar-btn" class="btn-primary" style="background: linear-gradient(135deg, #FF7518, #EA580C); font-weight: bold; font-size: 0.8rem; padding: 4px 12px; display: none;" onclick="triggerScaryokeSpin()">🎲 Spin Wheel</button>
                             <button id="last-round-btn" class="btn-last-round" style="font-size: 0.8rem; padding: 4px 10px;" onclick="sendAction('toggle-last-round')">Last Round</button>
                             <button class="btn-outline" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('previous-singer')">◀ Previous</button>
                             <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('next-singer')">Next Singer ▶</button>
@@ -797,6 +831,12 @@
                     <div class="panel" style="display: flex; flex-direction: column; gap: 8px;">
                         <button type="button" class="btn-primary" onclick="openAddPerformerModal()" style="width: 100%; padding: 12px 16px; font-size: 1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                             <span>🎤</span> + Add Performer to Rotation
+                        </button>
+                        <button type="button" id="scaryoke-quick-btn" class="btn-scaryoke" onclick="sendAction('toggle-scaryoke')" style="width: 100%; padding: 10px 16px; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                            <span>🎃</span> <span class="scaryoke-label">Scaryoke Wheel</span>
+                        </button>
+                        <button type="button" id="scaryoke-quick-spin-btn" class="btn-primary" onclick="triggerScaryokeSpin()" style="width: 100%; padding: 12px 16px; font-size: 1rem; font-weight: 900; display: none; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; background: linear-gradient(135deg, #FF7518, #EA580C); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);">
+                            <span>🎲</span> <span class="scaryoke-spin-label">SPIN SCARYOKE WHEEL!</span>
                         </button>
                         <button type="button" id="last-round-quick-btn" class="btn-last-round" onclick="sendAction('toggle-last-round')" style="width: 100%; padding: 10px 16px; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                             <span>🌙</span> <span class="last-round-label">Last Round</span>
@@ -870,6 +910,47 @@
                                 <button type="button" class="btn-outline" onclick="closeAnnouncementModal()" style="flex: 1; padding: 10px;">Cancel</button>
                                 <button type="button" class="btn-primary" onclick="submitAnnouncementBanner()" style="flex: 1; padding: 10px; font-weight: bold; background-color: var(--amber);">📢 Launch Banner</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Scaryoke Spin Station Modal Overlay (Singer at DJ Booth) -->
+                    <div id="scaryoke-tablet-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 4, 20, 0.88); backdrop-filter: blur(8px); z-index: 99999; justify-content: center; align-items: center; padding: 16px;">
+                        <div class="scaryoke-card" style="max-width: 460px; width: 100%; background: linear-gradient(180deg, #201033 0%, #12081F 100%); border: 2.5px solid #FF7518; border-radius: 20px; box-shadow: 0 12px 50px rgba(255, 117, 24, 0.45); padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative;">
+                            <!-- Close / Exit button -->
+                            <button type="button" onclick="sendAction('toggle-scaryoke')" style="position: absolute; top: 14px; right: 16px; background: transparent; border: none; font-size: 1.6rem; color: #94A3B8; cursor: pointer; line-height: 1;" title="Shut down Scaryoke Wheel">✕</button>
+                            
+                            <!-- Header -->
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #FF7518; text-shadow: 0 0 15px rgba(255, 117, 24, 0.7); letter-spacing: 1px;">
+                                    🎃 SCARYOKE WHEEL 🎃
+                                </div>
+                                <div id="scaryoke-singer-title" style="font-size: 1.15rem; font-weight: 700; color: #E9D5FF; margin-top: 6px;">
+                                    Current Singer: <span id="scaryoke-singer-name" style="color: #38BDF8;">...</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: #C4B5FD; margin-top: 4px;">📺 Watch the big screen spin!</p>
+                            </div>
+
+                            <!-- Big Singer Spin Button (Tap to spin at DJ booth) -->
+                            <button id="scaryoke-spin-btn" type="button" onclick="triggerScaryokeSpin()" style="width: 100%; padding: 22px 16px; background: linear-gradient(135deg, #FF7518 0%, #EA580C 50%, #C2410C 100%); color: #FFFFFF; font-size: 1.45rem; font-weight: 900; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 6px 25px rgba(234, 88, 12, 0.6); transition: transform 0.1s, opacity 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <span>🎲</span> <span>TAP TO SPIN!</span> <span>🎃</span>
+                            </button>
+
+                            <!-- Result Box -->
+                            <div id="scaryoke-result-box" style="width: 100%; background: #26153B; border: 1.5px solid #A855F7; border-radius: 12px; padding: 14px 16px; text-align: center; min-height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <div id="scaryoke-result-title" style="font-size: 1.25rem; font-weight: 800; color: #FACC15;">Step up &amp; spin your fate!</div>
+                                <div id="scaryoke-result-detail" style="font-size: 0.9rem; color: #CBD5E1; margin-top: 6px; display: none;"></div>
+                            </div>
+
+                            <!-- Prevent 2 singers in a row toggle checkbox -->
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #E2E8F0; cursor: pointer; user-select: none; margin-top: 2px;">
+                                <input type="checkbox" id="scaryoke-avoid-repeats-chk" onchange="toggleScaryokeAvoidRepeats(this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #FF7518;">
+                                <span>Prevent 2 singers in a row getting the same result</span>
+                            </label>
+
+                            <!-- Shutdown / Close footer link -->
+                            <button type="button" onclick="sendAction('toggle-scaryoke')" style="background: transparent; border: 1px solid #475569; color: #94A3B8; font-size: 0.8rem; padding: 6px 16px; border-radius: 6px; cursor: pointer; margin-top: 2px;">
+                                ✕ Shut Down Wheel
+                            </button>
                         </div>
                     </div>
 
@@ -962,6 +1043,8 @@
                     // survive underneath. Without closing it explicitly here, re-entering the PIN pops it
                     // back open over the fresh dashboard with whatever was left in it before the lock.
                     closeAddPerformerModal();
+                    const scaryokeModal = document.getElementById("scaryoke-tablet-modal");
+                    if (scaryokeModal) scaryokeModal.style.display = "none";
                     document.getElementById("pin-input").value = "";
                     document.getElementById("lock-screen").style.display = "flex";
                     document.getElementById("dashboard").style.display = "none";
@@ -1027,6 +1110,7 @@
                                 cachedDefaultSongLengthMinutes = info.defaultSongLengthMinutes;
                             }
                             updateLastRoundState(info.isLastRound);
+                            updateScaryokeState(info);
                         }
                         updateRoundEstimation();
 
@@ -1068,6 +1152,137 @@
                         banner.style.display = isRoundActive ? "block" : "none";
                     }
                     updateRoundEstimation();
+                }
+
+                let scaryokeWheelAngle = 0;
+                let isScaryokeAnimating = false;
+                let currentScaryokeAnimation = null;
+                let lastKnownScaryokeState = null;
+
+                function updateScaryokeState(info) {
+                    if (!info) return;
+                    const isScaryActive = !!info.isScaryokeActive;
+                    const state = info.scaryokeState;
+
+                    // Update toolbar toggle button
+                    const btn = document.getElementById("scaryoke-btn");
+                    if (btn) {
+                        if (isScaryActive) {
+                            btn.classList.add("active");
+                            btn.textContent = "✓ Scaryoke";
+                            btn.title = "Scaryoke Wheel is active. Tap to shut down.";
+                        } else {
+                            btn.classList.remove("active");
+                            btn.textContent = "🎃 Scaryoke";
+                            btn.title = "Open Scaryoke Wheel for the current singer";
+                        }
+                    }
+
+                    // Update toolbar spin button
+                    const spinToolbarBtn = document.getElementById("scaryoke-spin-toolbar-btn");
+                    if (spinToolbarBtn) {
+                        spinToolbarBtn.style.display = isScaryActive ? "inline-flex" : "none";
+                        if (state && state.isSpinning) {
+                            spinToolbarBtn.disabled = true;
+                            spinToolbarBtn.textContent = "⏳ Spinning...";
+                        } else {
+                            spinToolbarBtn.disabled = false;
+                            spinToolbarBtn.textContent = "🎲 Spin Wheel";
+                        }
+                    }
+
+                    // Update quick toggle button
+                    const quickBtn = document.getElementById("scaryoke-quick-btn");
+                    if (quickBtn) {
+                        const label = quickBtn.querySelector(".scaryoke-label");
+                        if (isScaryActive) {
+                            quickBtn.classList.add("active");
+                            if (label) label.textContent = "✓ Scaryoke Active";
+                        } else {
+                            quickBtn.classList.remove("active");
+                            if (label) label.textContent = "Scaryoke Wheel";
+                        }
+                    }
+
+                    // Update quick spin button
+                    const quickSpinBtn = document.getElementById("scaryoke-quick-spin-btn");
+                    if (quickSpinBtn) {
+                        quickSpinBtn.style.display = isScaryActive ? "flex" : "none";
+                        const spinLabel = quickSpinBtn.querySelector(".scaryoke-spin-label");
+                        if (state && state.isSpinning) {
+                            quickSpinBtn.disabled = true;
+                            quickSpinBtn.style.opacity = "0.6";
+                            if (spinLabel) spinLabel.textContent = "Spinning on Big Screen...";
+                        } else {
+                            quickSpinBtn.disabled = false;
+                            quickSpinBtn.style.opacity = "1";
+                            if (spinLabel) spinLabel.textContent = "SPIN SCARYOKE WHEEL!";
+                        }
+                    }
+
+                    // Modal display for singer at DJ booth
+                    const modal = document.getElementById("scaryoke-tablet-modal");
+                    if (!modal) return;
+
+                    if (!isScaryActive) {
+                        modal.style.display = "none";
+                        return;
+                    }
+
+                    modal.style.display = "flex";
+
+                    if (!state) return;
+
+                    const singerEl = document.getElementById("scaryoke-singer-name");
+                    if (singerEl) {
+                        singerEl.textContent = state.currentSinger || state.CurrentSinger || "The Next Singer";
+                    }
+
+                    const chk = document.getElementById("scaryoke-avoid-repeats-chk");
+                    if (chk) {
+                        chk.checked = !!(state.avoidConsecutiveDuplicates !== undefined ? state.avoidConsecutiveDuplicates : state.AvoidConsecutiveDuplicates);
+                    }
+
+                    const spinBtn = document.getElementById("scaryoke-spin-btn");
+                    const isSpinning = !!(state.isSpinning !== undefined ? state.isSpinning : state.IsSpinning);
+                    if (spinBtn) {
+                        spinBtn.disabled = isSpinning;
+                        if (isSpinning) {
+                            spinBtn.innerHTML = "<span>⏳</span> <span>Spinning... Watch Big Screen!</span> <span>🎃</span>";
+                            spinBtn.style.opacity = "0.7";
+                            spinBtn.style.cursor = "not-allowed";
+                        } else {
+                            spinBtn.innerHTML = "<span>🎲</span> <span>TAP TO SPIN!</span> <span>🎃</span>";
+                            spinBtn.style.opacity = "1.0";
+                            spinBtn.style.cursor = "pointer";
+                        }
+                    }
+
+                    const resultTitleEl = document.getElementById("scaryoke-result-title");
+                    const resultDetailEl = document.getElementById("scaryoke-result-detail");
+                    const resultTitle = state.resultTitle || state.ResultTitle || "";
+                    const resultDetail = state.resultDetail || state.ResultDetail || "";
+                    if (resultTitle) {
+                        if (resultTitleEl) resultTitleEl.textContent = resultTitle;
+                        if (resultDetailEl) {
+                            resultDetailEl.textContent = resultDetail;
+                            resultDetailEl.style.display = resultDetail ? "block" : "none";
+                        }
+                    } else {
+                        if (resultTitleEl) resultTitleEl.textContent = "Step up & spin your fate!";
+                        if (resultDetailEl) {
+                            resultDetailEl.textContent = "";
+                            resultDetailEl.style.display = "none";
+                        }
+                    }
+                }
+
+                function triggerScaryokeSpin() {
+                    sendAction('scaryoke-spin');
+                }
+
+                function toggleScaryokeAvoidRepeats(isChecked) {
+                    sendAction('set-scaryoke-avoid-repeats', '', isChecked.toString());
                 }
 
                 function updateRoundEstimation() {

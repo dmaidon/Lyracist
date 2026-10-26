@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 15:34:00 -> Update Scaryoke Wheel manual documentation for dual-monitor audience projection
+// Edited on Oct 26, 2026 @ 01:18:00 -> Update Scaryoke Wheel manual documentation for KSRotation integration and DJ booth spin station
 using System;
 using System.IO;
 using Xunit;
@@ -4870,6 +4870,129 @@ Scaryoke Wheel now includes configurable DJ's Choice sliver inclusion, target mo
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeWheelAudienceProjectionAndMonitor";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeWheelKSRotationIntegration()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: KSRotation & ScaryokeWheel / Scaryoke Wheel Integration & DJ Booth Spin Station
+
+[Update Details]
+Scaryoke Wheel is now integrated into KSRotation with display screen precedence, DJ booth tablet controls, and consecutive duplicate prevention.
+
+1. Master Console Activation & Screen Precedence:
+   - Clicking [🎃 Scaryoke] on the Rotation toolbar launches the host wheel controller and immediately projects the wheel on the audience display screen (SingerDisplayWindow).
+   - The audience wheel overlay uses top Z-index (135/136) and brings the display window forward (Topmost = true), taking precedence over rotation queues, welcome screens, and trivia.
+   - Unclicking the button cleanly shuts down the wheel across the host console, the audience screen, and all connected tablets.
+
+2. DJ Booth Tablet Spin Station:
+   - When Scaryoke is active, the Remote DJ board (dj.html) displays a dedicated booth spin station modal with a prominent [🎲 TAP TO SPIN! 🎃] button.
+   - Singers can step up to the DJ booth to tap and spin their challenge directly, while the live wheel animates on the big screen and host laptop without heavy canvas rendering on the tablet.
+   - Includes toolbar [🎲 Spin Wheel] buttons on both the DJ screen and the host's laptop console.
+
+3. Consecutive Duplicate Prevention Toggle:
+   - Added a 'Prevent 2 singers in a row getting the same result' toggle across ScaryokeWheel, KSRotation, and Lyracist.
+   - Prevents back-to-back duplicate challenge outcomes between consecutive performers.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Wheel Integration & DJ Booth Spin Station"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Scaryoke Wheel Integration & DJ Booth Spin Station"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: KSRotation & ScaryokeWheel / Scaryoke Wheel Integration & DJ Booth Spin Station")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ScaryokeWheelKSRotationIntegration"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                            gfx.DrawString("Section: KSRotation & ScaryokeWheel / Scaryoke Wheel Integration & DJ Booth Spin Station", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 16), leftAlign);
+                                yPos += 18;
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeWheelKSRotationIntegration";
                             doc.Save(pdfPath);
                         }
                     }

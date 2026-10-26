@@ -1,4 +1,4 @@
-// Edited on Jul 16, 2026 @ 11:00:00 -> Manage scaryoke modes
+// Edited on Oct 25, 2026 @ 23:56:00 -> Add toggle and strict duplicate check to prevent two singers in a row from getting the same result
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Services.Display;
 using System.Collections.ObjectModel;
@@ -35,15 +35,18 @@ public partial class ScaryokeViewModel : BaseViewModel
     private const int RecentLimit = 8;
     private readonly List<string> _recent = [];
 
+    [ObservableProperty]
+    private bool _avoidRepeats = true;
+
     /// <summary>
-    /// True when <paramref name="name"/> was landed on in the last two spins, so a local spin can
-    /// skip it. The window is kept smaller than the wheel so a valid segment always remains.
+    /// True when <paramref name="name"/> was landed on in the last spin and <see cref="AvoidRepeats"/>
+    /// is enabled, preventing two singers in a row from getting the same result.
     /// </summary>
     public bool IsRecentRepeat(string name)
     {
-        int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        int window = Math.Min(2, distinct - 1);
-        return _recent.Take(window).Contains(name, StringComparer.OrdinalIgnoreCase);
+        if (!AvoidRepeats) return false;
+        if (_recent.Count == 0) return false;
+        return string.Equals(_recent[0], name, StringComparison.OrdinalIgnoreCase);
     }
 
     private readonly IDisplayService _display;

@@ -1,4 +1,4 @@
-// Edited on Oct 24, 2026 @ 15:53:00 -> Default audience monitor to secondary display
+// Edited on Oct 25, 2026 @ 23:48:00 -> Enforce strict consecutive duplicate prevention when AvoidRepeats is enabled
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -317,11 +317,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
     /// <summary>
     /// True when <paramref name="name"/> was landed on recently enough to be skipped.
+    /// Strictly prevents 2 singers in a row from getting the same result, and avoids recent duplicates.
     /// The window is kept smaller than the wheel so a valid segment always remains.
     /// </summary>
     public bool IsRecentRepeat(string name)
     {
         if (!AvoidRepeats) return false;
+
+        // Strictly prevent 2 singers in a row getting the same result
+        if (History.Count > 0 && string.Equals(History[0], name, StringComparison.OrdinalIgnoreCase))
+            return true;
 
         int distinct = WheelSegments.Select(s => s.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
         int window = Math.Min(2, distinct - 1);
