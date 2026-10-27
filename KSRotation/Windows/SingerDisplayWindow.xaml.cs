@@ -1,4 +1,4 @@
-// Edited on Oct 25, 2026 @ 23:59:00 -> Implement Scaryoke wheel audience projection rendering and animations
+// Edited on Oct 26, 2026 @ 22:55:00 -> Support full-screen overlay for all active special event banners
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -109,7 +109,7 @@ namespace KSRotation.Windows
                 _vm?.WifiPasswordDisplay);
         }
 
-        public void UpdateLastSongBanner(string? bannerPath)
+        public void UpdateSpecialEventBanner(string? bannerPath)
         {
             if (!string.IsNullOrWhiteSpace(bannerPath) && File.Exists(bannerPath))
             {
@@ -119,6 +119,7 @@ namespace KSRotation.Windows
                     bitmap.BeginInit();
                     bitmap.UriSource = new Uri(bannerPath, UriKind.Absolute);
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                     bitmap.EndInit();
                     bitmap.Freeze();
 
@@ -137,6 +138,8 @@ namespace KSRotation.Windows
             LastSongBannerImage.Source = null;
             RefreshSignUpInvite();
         }
+
+        public void UpdateLastSongBanner(string? bannerPath) => UpdateSpecialEventBanner(bannerPath);
 
         private void OnClosed(object? sender, EventArgs e)
         {

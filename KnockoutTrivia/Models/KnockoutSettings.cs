@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 11:13:30 -> Added SelectedGameMonitorDevice and SelectedBannerMonitorDevice for persistent monitor binding
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update HostName default to Guest DJ
 using System;
 using System.Collections.Generic;
 
@@ -37,7 +37,7 @@ public class KnockoutSettings
     public string WifiPassword { get; set; } = string.Empty;
     public int WebServerPort { get; set; } = 8088;
     public string VenueName { get; set; } = "Knockout Arena";
-    public string HostName { get; set; } = "DJ Host";
+    public string HostName { get; set; } = "Guest DJ";
 
     // Display Settings
     public int SelectedGameMonitorIndex { get; set; } = 0;

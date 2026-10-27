@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Add ScaryokeOverlayMonitor setting to select monitor where Scaryoke wheel is overlaid
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update DjName default to Guest DJ across AppSettings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -535,14 +535,15 @@ public static class AppSettings
 
     public static string DjName
     {
-        get { lock (_lock) { return _data.DjName; } }
+        get { lock (_lock) { return string.IsNullOrWhiteSpace(_data.DjName) ? "Guest DJ" : _data.DjName; } }
         set
         {
             lock (_lock)
             {
-                if (_data.DjName != value)
+                string resolved = string.IsNullOrWhiteSpace(value) ? "Guest DJ" : value.Trim();
+                if (_data.DjName != resolved)
                 {
-                    _data.DjName = value;
+                    _data.DjName = resolved;
                     Save();
                     VenueOrDjChanged?.Invoke();
                 }
@@ -1465,7 +1466,7 @@ public static class AppSettings
         public string ScaryokeOverlayMonitor { get; set; } = string.Empty;
 
         // Venues & DJ name
-        public string DjName { get; set; } = "DJ Karaoke";
+        public string DjName { get; set; } = "Guest DJ";
 
         public List<string> Venues { get; set; } = ["The Tavern", "The Stage", "The Pub"];
         public string SelectedVenue { get; set; } = "The Tavern";

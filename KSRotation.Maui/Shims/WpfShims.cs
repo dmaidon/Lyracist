@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 23:55:00 -> Add PreShowReset and WelcomeScreenService shims for MAUI
+// Edited on Oct 26, 2026 @ 23:25:00 -> Add SetSpecialEventBanner to DisplayWindowService shim for MAUI
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -175,6 +175,7 @@ namespace KSRotation.Services
         public void SetBannerText(string template, string venueName, string djName) { }
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
         public void SetSelectedMonitor(string deviceName) { }
+        public void SetSpecialEventBanner(string? path) { }
         public void SetLastSongBanner(string? path) { }
         public void SetLastRound(bool isLastRound) { }
         public void SetShowQrCode(bool show) { }

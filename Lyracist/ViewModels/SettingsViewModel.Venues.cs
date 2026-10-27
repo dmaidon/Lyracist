@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:12:00 -> Add GPS location tagging and auto-detection commands in SettingsViewModel.Venues.cs
+// Edited on Oct 26, 2026 @ 15:55:00 -> Enforce Guest DJ default in SettingsViewModel.Venues.cs
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +16,7 @@ public partial class SettingsViewModel
     public ObservableCollection<string> SelectedVenueGraphics { get; } = [];
 
     [ObservableProperty]
-    private string _djName = AppSettings.DjName;
+    private string _djName = string.IsNullOrWhiteSpace(AppSettings.DjName) ? "Guest DJ" : AppSettings.DjName;
 
     [ObservableProperty]
     private string? _selectedVenue = AppSettings.SelectedVenue;
@@ -52,7 +52,12 @@ public partial class SettingsViewModel
 
     partial void OnDjNameChanged(string value)
     {
-        AppSettings.DjName = value;
+        string resolved = string.IsNullOrWhiteSpace(value) ? "Guest DJ" : value.Trim();
+        if (_djName != resolved)
+        {
+            _djName = resolved;
+        }
+        AppSettings.DjName = resolved;
     }
 
     partial void OnSelectedVenueChanged(string? value)

@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:50:00 -> Fix TV display VM leak, rebind engine on ResetGame, debounce settings, and update roster in-place
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update _hostName fallback to Guest DJ
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -199,7 +199,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         _dbService = new TriviaDatabaseService();
 
         _venueName = !string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? AppSettings.SelectedVenue : _settings.VenueName;
-        _hostName = !string.IsNullOrWhiteSpace(AppSettings.DjName) ? AppSettings.DjName : _settings.HostName;
+        _hostName = !string.IsNullOrWhiteSpace(AppSettings.DjName) ? AppSettings.DjName : (string.IsNullOrWhiteSpace(_settings.HostName) ? "Guest DJ" : _settings.HostName);
         _instructionBannerText = string.IsNullOrWhiteSpace(_settings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : _settings.InstructionBannerText;
         _autoAdvanceQuestions = _settings.AutoAdvanceQuestions;
         _questionsPerGame = _settings.QuestionsPerGame > 0 ? _settings.QuestionsPerGame : 10;

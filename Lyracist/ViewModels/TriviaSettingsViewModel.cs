@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:18:00 -> Add live settings synchronization and persistence for all Trivia settings
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update GameMasterName fallback to Guest DJ
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,7 +22,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
 
     public string VenueName => !string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? AppSettings.SelectedVenue : "Main Venue";
 
-    public string GameMasterName => !string.IsNullOrWhiteSpace(AppSettings.DjName) ? AppSettings.DjName : "DJ / Host";
+    public string GameMasterName => !string.IsNullOrWhiteSpace(AppSettings.DjName) ? AppSettings.DjName : "Guest DJ";
 
     [ObservableProperty]
     private string _instructionBannerText = TriviaSettings.DefaultInstructionBannerText;

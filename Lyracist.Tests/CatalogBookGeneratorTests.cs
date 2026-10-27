@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Update user manuals for Scaryoke Settings tab, duplicate groupboxes removal, and overlay monitor selection
+// Edited on Oct 26, 2026 @ 23:05:00 -> Update user manuals for special event banner display on rotation screen
 using System;
 using System.IO;
 using Xunit;
@@ -5508,6 +5508,304 @@ Renamed the tab from 'Karaoke Settings' to 'Scaryoke Settings' to clarify its de
                             }
 
                             doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeSettingsTabAndOverlayMonitor";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForSingleDjNameEntryAndGuestDjDefault()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"KSRotation, Lyracist & KnockoutTrivia: Simplified Single DJ Name Entry & ""Guest DJ"" Default - (October 2026)
+
+Section: Application Settings / DJ & Host Configuration
+
+[Overview & Features]
+Streamlined DJ name management across all applications by transitioning to a unified single DJ name entry, removing multi-name list management overhead, and enforcing an automatic ""Guest DJ"" default when no DJ name is entered.
+
+1. Simplified Single DJ Name Entry (KSRotation):
+   - Replaced the multi-DJ ListBox and Add/Remove buttons in KSRotation Settings with a clean, single ""DJ / Host Name"" entry field.
+   - Streamlines the DJ Names settings column to a focused ""DJ Name"" GroupBox with immediate status display.
+   - Operators can simply enter their active DJ name directly without needing to manage a secondary list or manually add and select names.
+
+2. Universal ""Guest DJ"" Default:
+   - When no DJ name is entered or the field is left blank, the application automatically defaults to ""Guest DJ"".
+   - Applied consistently across KSRotation (WPF & MAUI), Lyracist, and KnockoutTrivia.
+   - Reflected dynamically on TV billboard headers, crawler banners, rotation reports, and live window titles.";
+
+            // 1. Update text file
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Simplified Single DJ Name Entry & \"Guest DJ\" Default"))
+                {
+                    File.WriteAllText(txtPath, "// Edited on Oct 26, 2026 @ 15:55:00 -> Document Simplified Single DJ Name Entry and Guest DJ default\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                }
+            }
+
+            // 2. Update DOCX manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (p.Text != null && p.Text.Contains("Simplified Single DJ Name Entry"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation, Lyracist & KnockoutTrivia: Simplified Single DJ Name Entry & \"Guest DJ\" Default")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                {
+                                    if (line.StartsWith("KSRotation, Lyracist & KnockoutTrivia:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string? keywords = doc.Info.Keywords;
+                        if (keywords == null || !keywords.Contains("SingleDjNameEntryAndGuestDjDefault"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.A4;
+
+                            using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                            {
+                                var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                double y = 40;
+                                gfx.DrawString("Simplified Single DJ Name Entry & Guest DJ Default", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                y += 24;
+
+                                var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                foreach (var line in lines)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line))
+                                    {
+                                        y += 8;
+                                        continue;
+                                    }
+                                    gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 14;
+
+                                    if (y > page.Height.Point - 40)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.A4;
+                                        gfx.Dispose();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " SingleDjNameEntryAndGuestDjDefault";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForSpecialEventBannerDisplayOnRotationScreen()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"KSRotation & Lyracist: Active Special Event Banner Display on Rotation Screen - (October 2026)
+
+Section: Display & Presentation / Special Event Banners & Overlays
+
+[Overview & Features]
+Ensured all active special event banners (Birthday, Wedding, Engagement, Anniversary, Last Song / Final Singer, Announcement, Connect Instructions, and Custom Events) display as full-screen overlays directly on the audience rotation display screen (SingerDisplayWindow in KSRotation and RotationWindow in Lyracist) when activated by the host or remote DJ.
+
+1. Unified Special Event Banner Full-Screen Overlay:
+   - Previously, only Last Song was configured to display as a full-screen overlay on the audience rotation screen, causing other active special events (such as Birthday, Wedding, Engagement, Anniversary, Connect Instructions, and Custom Banners) to not appear on the rotation screen.
+   - All active special event banners now trigger the high-visibility full-screen overlay directly on the rotation display screen across both KSRotation and Lyracist.
+   - When any special event is selected or activated from the host window or remote DJ web station (dj.html), the rotation screen instantly transitions to show the event banner overlay.
+   - When the special event is cleared or set to None, the overlay collapses cleanly and restores the live rotation performer list and TV billboard.
+
+2. Personalization & Real-Time Cache Invalidation:
+   - Dynamic event banners with customized text (such as personalized Birthday celebrant names or custom Announcement messages) are rendered on the fly and decoded using cache-bypassing image loading (BitmapCreateOptions.IgnoreImageCache).
+   - Ensures newly rendered personalized banners immediately display with the latest text without showing stale cached frames.
+
+3. Standard Event Banner Asset Deployment:
+   - All pre-packaged standard event banners (Birthday, Wedding, Engagement, Anniversary, Last Song, Announcement, Connect Instructions) are automatically verified, deployed, and bundled with build outputs under Banners/EventBanners/.
+   - If an asset is missing at runtime, the application generates standard placeholder banner files automatically.";
+
+            // 1. Update text file
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Active Special Event Banner Display on Rotation Screen"))
+                {
+                    File.WriteAllText(txtPath, "// Edited on Oct 26, 2026 @ 23:05:00 -> Document special event banner display on rotation screen\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                }
+            }
+
+            // 2. Update DOCX manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (p.Text != null && p.Text.Contains("Active Special Event Banner Display on Rotation Screen"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Active Special Event Banner Display on Rotation Screen")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                {
+                                    if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string? keywords = doc.Info.Keywords;
+                        if (keywords == null || !keywords.Contains("SpecialEventBannerDisplayOnRotationScreen"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.A4;
+
+                            using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                            {
+                                var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                double y = 40;
+                                gfx.DrawString("Active Special Event Banner Display on Rotation Screen", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                y += 24;
+
+                                var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                foreach (var line in lines)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line))
+                                    {
+                                        y += 8;
+                                        continue;
+                                    }
+                                    gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 14;
+
+                                    if (y > page.Height.Point - 40)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.A4;
+                                        gfx.Dispose();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialEventBannerDisplayOnRotationScreen";
                             doc.Save(pdfPath);
                         }
                     }

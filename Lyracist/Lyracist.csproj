@@ -168,8 +168,8 @@
     <!-- EventBanners is shared with KSRotation (see Globals.EventBannersDir /
          Shared/DjBannerFileManager.cs) - one folder, not a per-app copy. DJBanners and
          Announcements are per-venue, user-supplied content, not source content. -->
-    <Content Include="..\Banners\KSRotation\EventBanners\*">
-      <Link>Banners\KSRotation\EventBanners\%(Filename)%(Extension)</Link>
+    <Content Include="..\Banners\EventBanners\**\*">
+      <Link>Banners\EventBanners\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Data\**\*">

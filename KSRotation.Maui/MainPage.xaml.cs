@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 11:41:00 -> Use randomized test singers pool in OnLoadTestDataClicked
+// Edited on Oct 26, 2026 @ 15:55:00 -> Enforce Guest DJ default on DJ name in KSRotation.Maui
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,10 +30,11 @@ public partial class MainPage : ContentPage
         if (Microsoft.Maui.Storage.Preferences.Default.ContainsKey("DeviceDjName"))
         {
             string savedDj = Microsoft.Maui.Storage.Preferences.Default.Get("DeviceDjName", string.Empty);
-            if (!string.IsNullOrWhiteSpace(savedDj))
-            {
-                vm.DjName = savedDj;
-            }
+            vm.DjName = string.IsNullOrWhiteSpace(savedDj) ? "Guest DJ" : savedDj;
+        }
+        else
+        {
+            vm.DjName = "Guest DJ";
         }
         if (Microsoft.Maui.Storage.Preferences.Default.ContainsKey("DeviceVenueName"))
         {
@@ -299,12 +300,10 @@ public partial class MainPage : ContentPage
     {
         if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
-            string dj = DjNameEntry.Text?.Trim() ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(dj))
-            {
-                vm.DjName = dj;
-                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
-            }
+            string dj = string.IsNullOrWhiteSpace(DjNameEntry.Text?.Trim()) ? "Guest DJ" : DjNameEntry.Text.Trim();
+            DjNameEntry.Text = dj;
+            vm.DjName = dj;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
 
             string venue = VenueNameEntry.Text?.Trim() ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(venue))
@@ -523,13 +522,11 @@ public partial class MainPage : ContentPage
     {
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
-            string val = entry.Text?.Trim() ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(val))
-            {
-                vm.DjName = val;
-                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
-                PersistDjAndVenue(vm);
-            }
+            string val = string.IsNullOrWhiteSpace(entry.Text?.Trim()) ? "Guest DJ" : entry.Text.Trim();
+            entry.Text = val;
+            vm.DjName = val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            PersistDjAndVenue(vm);
         }
     }
 
@@ -537,13 +534,11 @@ public partial class MainPage : ContentPage
     {
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
-            string val = entry.Text?.Trim() ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(val))
-            {
-                vm.DjName = val;
-                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
-                PersistDjAndVenue(vm);
-            }
+            string val = string.IsNullOrWhiteSpace(entry.Text?.Trim()) ? "Guest DJ" : entry.Text.Trim();
+            entry.Text = val;
+            vm.DjName = val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            PersistDjAndVenue(vm);
         }
     }
 

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 00:02:00 -> Support Scaryoke wheel display overlay and animations in DisplayWindowService
+// Edited on Oct 26, 2026 @ 22:55:00 -> Add SetSpecialEventBanner to support displaying all active special event banners on the rotation display
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -20,7 +20,7 @@ namespace KSRotation.Services
         private string _connectionUrl = string.Empty;
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
-        private string? _lastSongBannerPath;
+        private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
 
@@ -115,14 +115,16 @@ namespace KSRotation.Services
             _viewModel.ShowSpectrum = show;
         }
 
-        public void SetLastSongBanner(string? path)
+        public void SetSpecialEventBanner(string? path)
         {
-            _lastSongBannerPath = path;
+            _specialEventBannerPath = path;
             if (_window != null)
             {
-                _window.Dispatcher.InvokeAsync(() => _window.UpdateLastSongBanner(_lastSongBannerPath));
+                _window.Dispatcher.InvokeAsync(() => _window.UpdateSpecialEventBanner(_specialEventBannerPath));
             }
         }
+
+        public void SetLastSongBanner(string? path) => SetSpecialEventBanner(path);
 
         private readonly CastingService _casting;
         private DisplayTarget _rotationTarget = DisplayTarget.Monitor;
@@ -253,7 +255,7 @@ namespace KSRotation.Services
             _viewModel.QrCodeImage = _qrCodeImage;
             _viewModel.UpdateFromRotation(rotation);
 
-            _window.UpdateLastSongBanner(_lastSongBannerPath);
+            _window.UpdateSpecialEventBanner(_specialEventBannerPath);
 
             if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
             {

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 07:45:00 -> Update UsersMainTabIndex for dedicated Karaoke Settings tab
+// Edited on Oct 26, 2026 @ 23:20:00 -> Add live active banner preview on host computer console and ensure special event display state updates
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -882,6 +882,20 @@ namespace KSRotation.ViewModels
         public ObservableCollection<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; } = [];
         public ObservableCollection<string> AvailableEventBannerFiles { get; } = [];
         public ObservableCollection<SpecialEventOptionViewModel> SpecialEventOptions { get; } = [];
+
+#if !MAUI
+        [ObservableProperty]
+        public partial System.Windows.Media.ImageSource? ActiveBannerPreviewImage { get; set; }
+
+        [ObservableProperty]
+        public partial bool HasActiveBannerPreview { get; set; }
+
+        [ObservableProperty]
+        public partial string ActiveBannerPreviewTitle { get; set; } = "No Banner Active";
+
+        [ObservableProperty]
+        public partial string ActiveBannerPreviewSubtitle { get; set; } = "Rotation Billboard Showing on Screen";
+#endif
 
         [ObservableProperty]
         public partial bool IsDjBannerQrCodeEnabled { get; set; } = true;
@@ -3265,9 +3279,9 @@ namespace KSRotation.ViewModels
         {
             try
             {
-                var settings = Services.ScaryokeSettingsService.Load();
+                var settings = KSRotation.Maui.Services.ScaryokeSettingsService.Load();
                 settings.SpinHistory.Clear();
-                Services.ScaryokeSettingsService.Save(settings);
+                KSRotation.Maui.Services.ScaryokeSettingsService.Save(settings);
             }
             catch { }
         }
@@ -3458,10 +3472,15 @@ namespace KSRotation.ViewModels
 
         private void SaveSettingsNow()
         {
+            if (string.IsNullOrWhiteSpace(DjName))
+            {
+                DjName = "Guest DJ";
+            }
+
             AppSettings settings = new()
             {
                 VenueName = string.IsNullOrWhiteSpace(VenueName) ? "Karaoke Night" : VenueName.Trim(),
-                DjName = string.IsNullOrWhiteSpace(DjName) ? "Guest DJ" : DjName.Trim(),
+                DjName = DjName.Trim(),
                 ListDjAndVenueOnBillboard = ListDjAndVenueOnBillboard,
                 Theme = NormalizeTheme(SelectedTheme),
                 IsDisplayEnabled = IsDisplayEnabled,
@@ -3886,57 +3905,142 @@ namespace KSRotation.ViewModels
             }
         }
 
-        private string ResolveActiveBannerPath()
+        private string? ResolveActiveSpecialEventBannerPath()
         {
-            if (!string.IsNullOrEmpty(ActiveSpecialEvent) &&
-                !ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(ActiveSpecialEvent) ||
+                ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
-                if (ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
-                {
-                    string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
-                    if (File.Exists(lastSongPath))
-                    {
-                        return lastSongPath;
-                    }
-                }
+                return null;
+            }
 
-                var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
-                if (eventConfig != null && !ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase)) // the configured "Announcement" entry is a static file; the generated one wins
+            if (ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
+            {
+                string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
+                if (File.Exists(lastSongPath))
                 {
-                    string fullPath = Path.Combine(Globals.EventBannersDir, eventConfig.BannerFileName);
+                    return lastSongPath;
+                }
+            }
+            else if (ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+            {
+                string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
+                if (announcementPath != null && File.Exists(announcementPath))
+                {
+                    return announcementPath;
+                }
+            }
+            else
+            {
+                var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
+                string fileName = eventConfig != null && !string.IsNullOrWhiteSpace(eventConfig.BannerFileName)
+                    ? eventConfig.BannerFileName
+                    : DjBannerFileManager.GetStandardBannerFileName(ActiveSpecialEvent);
+
+                if (!string.IsNullOrWhiteSpace(fileName) && !fileName.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    string fullPath = Path.Combine(Globals.EventBannersDir, fileName);
+                    if (!File.Exists(fullPath) && DjBannerFileManager.StandardEventNames.Any(s => s.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        DjBannerFileManager.EnsureStandardEventBanners(Globals.EventBannersDir);
+                    }
                     if (File.Exists(fullPath))
                     {
                         return fullPath;
                     }
                 }
-                else if (ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
-                {
-                    string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
-                    if (announcementPath != null)
-                    {
-                        return announcementPath;
-                    }
-                }
+            }
+
+            return null;
+        }
+
+        private string ResolveActiveBannerPath()
+        {
+            string? specialBanner = ResolveActiveSpecialEventBannerPath();
+            if (!string.IsNullOrEmpty(specialBanner))
+            {
+                return specialBanner;
             }
             return SelectedDjBannerPath;
         }
 
-        private void UpdateLastSongState()
+        private void UpdateSpecialEventDisplayState()
         {
-            bool isLastSong = !string.IsNullOrEmpty(ActiveSpecialEvent) &&
-                              ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase);
-
-            string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
-            string? activePath = (isLastSong && File.Exists(lastSongPath)) ? lastSongPath : null;
-
-            _displayWindowService.SetLastSongBanner(activePath);
+            string? activePath = ResolveActiveSpecialEventBannerPath();
+            _displayWindowService.SetSpecialEventBanner(activePath);
+            UpdateActiveBannerPreview();
         }
+
+        private void UpdateLastSongState() => UpdateSpecialEventDisplayState();
 
         private void UpdateDjBannerPath()
         {
             _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
             ApplySpectrumSettings(); // DJ banner vs special event may have just flipped
+            UpdateActiveBannerPreview();
         }
+
+#if !MAUI
+        public void UpdateActiveBannerPreview()
+        {
+            string? specialPath = ResolveActiveSpecialEventBannerPath();
+            string? displayPath = !string.IsNullOrEmpty(specialPath) ? specialPath : (IsDjBannerEnabled ? SelectedDjBannerPath : null);
+
+            if (!string.IsNullOrEmpty(displayPath) && File.Exists(displayPath))
+            {
+                try
+                {
+                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmap.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
+                    bitmap.DecodePixelWidth = 480;
+                    bitmap.UriSource = new Uri(displayPath, UriKind.Absolute);
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+
+                    ActiveBannerPreviewImage = bitmap;
+                    HasActiveBannerPreview = true;
+                    ActiveBannerPreviewTitle = !string.IsNullOrEmpty(specialPath)
+                        ? $"Active Special Event: {ActiveSpecialEvent}"
+                        : $"Active DJ Banner: {Path.GetFileName(displayPath)}";
+                    ActiveBannerPreviewSubtitle = !string.IsNullOrEmpty(specialPath)
+                        ? $"{Path.GetFileName(specialPath)} — Live on Screen"
+                        : "DJ Banner Screen Active";
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.LogError("MainViewModel.UpdateActiveBannerPreview", ex);
+                }
+            }
+
+            ActiveBannerPreviewImage = null;
+            HasActiveBannerPreview = false;
+            ActiveBannerPreviewTitle = "No Banner Active";
+            ActiveBannerPreviewSubtitle = "Rotation Billboard Showing on Screen";
+        }
+
+        [RelayCommand]
+        public void PreviewActiveBanner()
+        {
+            string? specialPath = ResolveActiveSpecialEventBannerPath();
+            string? displayPath = !string.IsNullOrEmpty(specialPath) ? specialPath : SelectedDjBannerPath;
+
+            if (!string.IsNullOrEmpty(displayPath) && File.Exists(displayPath))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(displayPath) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.LogError("MainViewModel.PreviewActiveBanner", ex);
+                }
+            }
+        }
+#else
+        public void UpdateActiveBannerPreview() { }
+#endif
 
         public void RefreshAvailableEventBannerFiles()
         {
@@ -4018,6 +4122,7 @@ namespace KSRotation.ViewModels
             ActiveSpecialEvent = value;
             // Re-launching the already-active announcement changes no property, so refresh the banner explicitly.
             UpdateDjBannerPath();
+            UpdateSpecialEventDisplayState();
         }
 
         private void SyncSpecialEventOptions(string eventName)

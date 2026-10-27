@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update filename to ksrotation_djs.json with legacy djs.json fallback
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update DefaultDj to Guest DJ
 using System.Collections.Generic;
 
 namespace KSRotation.Services
@@ -8,7 +8,7 @@ namespace KSRotation.Services
     {
         private const string FileName = "ksrotation_djs.json";
         private const string LegacyFileName = "djs.json";
-        private const string DefaultDj = "Default DJ";
+        private const string DefaultDj = "Guest DJ";
 
         /// <summary>Loads saved DJ names from disk.</summary>
         public static List<string> Load() => StringListStore.Load(FileName, DefaultDj, LegacyFileName);

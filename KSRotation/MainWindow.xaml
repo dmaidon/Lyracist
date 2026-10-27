@@ -1,4 +1,4 @@
-<!-- Edited on Oct 26, 2026 @ 08:35:00 -> Rename tab to Scaryoke Settings and remove duplicate rotation rules -->
+<!-- Edited on Oct 27, 2026 @ 05:58:00 -> Update help documentation for single DJ name, active banner preview, and special event rotation overlays -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1788,141 +1788,39 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- DJ Names in the 3rd column -->
-                    <GroupBox Header="DJ Names"
+                    <!-- DJ Name in the 3rd column -->
+                    <GroupBox Header="DJ Name"
                                   Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.Row="1"
                                   Grid.RowSpan="2"
                                   Margin="15,0,0,12">
-                        <Grid Margin="0,4,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
+                        <StackPanel Margin="0,4,0,0">
                             <!-- Active DJ Label -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
+                            <StackPanel Orientation="Horizontal" Margin="4,0,0,12">
                                 <TextBlock Text="Active DJ: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13" />
                                 <TextBlock Text="{Binding DjName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource AppHeaderBrush}" FontSize="13" />
                             </StackPanel>
 
-                            <ListBox x:Name="LbDjs"
-                                         Grid.Row="1"
-                                         ItemsSource="{Binding Djs}"
-                                         SelectedItem="{Binding SelectedDj, UpdateSourceTrigger=PropertyChanged}"
-                                         Margin="0,0,0,8"
-                                         BorderThickness="1"
-                                         BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                         Background="{DynamicResource MaterialDesignCardBackground}"
-                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                         Padding="4" IsTabStop="True">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="4,2">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
-                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                                       Width="14" Height="14"
-                                                       Stretch="Uniform"
-                                                       VerticalAlignment="Center"
-                                                       Margin="0,0,8,0" />
-                                            <TextBlock Grid.Column="1"
-                                                            Text="{Binding}"
-                                                            FontSize="14"
-                                                            VerticalAlignment="Center">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="FontWeight" Value="Medium" />
-                                                        <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                <Setter Property="FontWeight" Value="Bold" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <Path Grid.Column="2"
-                                                       Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
-                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                                       Width="14" Height="14"
-                                                       Stretch="Uniform"
-                                                       VerticalAlignment="Center"
-                                                       Margin="8,0,4,0">
-                                                <Path.Style>
-                                                    <Style TargetType="Path">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Path.Style>
-                                            </Path>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="8,6" />
-                                        <Setter Property="Margin" Value="0,1" />
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border x:Name="Bd"
-                                                                 Background="{TemplateBinding Background}"
-                                                                 BorderThickness="0"
-                                                                 CornerRadius="6"
-                                                                 Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsSelected" Value="True">
-                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
+                            <TextBlock Text="DJ / Host Name"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       FontSize="13"
+                                       Margin="4,0,0,6" />
 
-                            <TextBox
-                                     Grid.Row="2"
-                                     Text="{Binding NewDjName, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,0,8"
-                                     ToolTip="Type a new DJ name"
+                            <TextBox x:Name="TbDjName"
+                                     Text="{Binding DjName, UpdateSourceTrigger=PropertyChanged}"
+                                     LostFocus="OnDjNameLostFocus"
+                                     Margin="0,0,0,10"
+                                     ToolTip="Enter DJ or Host name (Default: Guest DJ)"
                                      Style="{StaticResource ModernTextBoxStyle}" />
 
-                            <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                <Button
-                                         Content="Add DJ"
-                                         Command="{Binding AddDjCommand}"
-                                         Width="110"
-                                         Margin="0,0,8,10"
-                                         Style="{StaticResource ModernButtonStyle}" />
-                                <Button
-                                         Content="Remove"
-                                         Command="{Binding RemoveDjCommand}"
-                                         Width="90"
-                                           Margin="0,0,8,10"
-                                         Style="{StaticResource ModernSecondaryButtonStyle}" />
-                            </StackPanel>
-                        </Grid>
+                            <TextBlock Text="Name of the DJ or karaoke host. Displayed on TV billboard, reports, and banners. Defaults to 'Guest DJ' if left blank."
+                                       TextWrapping="Wrap"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Margin="4,0,0,0" />
+                        </StackPanel>
                     </GroupBox>
 
                     <!-- Column 3: Network IP Setup & Rotation Settings -->
@@ -2835,6 +2733,58 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+
+                                    <!-- Live Active Banner Preview on Host Computer -->
+                                    <Border Margin="0,10,0,0"
+                                            Background="#141420"
+                                            BorderBrush="{DynamicResource AppHeaderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="8"
+                                            SnapsToDevicePixels="True">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,6">
+                                                <TextBlock Text="Active Banner Live Preview" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource AppHeaderBrush}" VerticalAlignment="Center" />
+                                                <Button Content="👁️ Full Screen"
+                                                        Command="{Binding PreviewActiveBannerCommand}"
+                                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                        FontSize="11"
+                                                        Height="22"
+                                                        Padding="6,1"
+                                                        HorizontalAlignment="Right"
+                                                        ToolTip="Open full-size banner preview" />
+                                            </Grid>
+                                            <Border Height="110"
+                                                    Background="#0A0A10"
+                                                    BorderBrush="#2A2A3C"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    ClipToBounds="True">
+                                                <Grid>
+                                                    <Image Source="{Binding ActiveBannerPreviewImage}"
+                                                           Stretch="Uniform"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                           Visibility="{Binding HasActiveBannerPreview, Converter={StaticResource BoolToVis}}" />
+                                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                Visibility="{Binding HasActiveBannerPreview, Converter={StaticResource InverseBoolToVis}}">
+                                                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalAlignment="Center" Foreground="#5A5A72" Margin="0,0,0,4" />
+                                                        <TextBlock Text="No Banner Active" FontWeight="SemiBold" FontSize="11" Foreground="#8A8A9E" HorizontalAlignment="Center" />
+                                                        <TextBlock Text="Rotation Billboard Showing on Screen" FontSize="10" FontStyle="Italic" Foreground="#6A6A7E" HorizontalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock Text="{Binding ActiveBannerPreviewTitle}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppContrastTextBrush}"
+                                                       Margin="0,6,0,1"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding ActiveBannerPreviewSubtitle}"
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
 
                                 <!-- Column 2: Upload & Select Banner & Mapping -->
@@ -4666,8 +4616,8 @@
                                 <TextBlock Text="Venues List" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                 <TextBlock Text="Add all your regular venues to the list. Selecting a venue updates the active venue name instantly. Venue files are saved in 'Settings/venues.json'." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
-                                <TextBlock Text="DJs List" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <TextBlock Text="Add all your DJs to the list. Selecting a DJ updates the active DJ name instantly. Use '{dj}' in your banner and crawl text templates to automatically substitute the selected DJ's name. DJ files are saved in 'Settings/djs.json'." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                <TextBlock Text="DJ / Host Name" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Enter the active host or DJ name for your show. If left blank, the app defaults to 'Guest DJ'. Use '{dj}' in your banner, announcement, and news crawl templates to automatically substitute the DJ name." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
                                 <TextBlock Text="Theme Engine" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                 <TextBlock Text="Choose between Light, Dark, or System themes. Changing the theme instantly adjusts the main application visual styles dynamically using the Material Design in XAML Toolkit. With System selected, the app also follows live Windows light/dark switches automatically." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
@@ -4721,6 +4671,8 @@
                                     <StackPanel>
                                         <TextBlock Text="🎏 DJ Banners &amp; Collision Priority" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
                                         <TextBlock Text="• DJ Banner Window: Select a target screen for your DJ Banner under Settings and toggle it on to display full-screen borderless branding banners (supports PNG, JPG, JPEG, GIF, BMP, and looping MP4 video)." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Special Event Banners: Choose birthday, wedding, anniversary, announcement, or last song banners. Active event banners display immediately across both standalone banner monitors and as prominent centered overlays on the live rotation display screen." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Live Banner Preview: The Settings tab includes an Active Banner Live Preview thumbnail card with a full-screen preview button (👁️ Full Screen) so you can review graphics and media before projecting." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Deconfliction Logic: If you select the same screen for both the DJ Banner and the main Rotation Display, the Rotation Display takes priority. The DJ Banner will automatically hide when the Rotation window is enabled or moved to that monitor, preventing any overlap collision." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>

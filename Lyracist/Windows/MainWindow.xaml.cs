@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:10:00 -> Wire IPerformanceRecorderService.RecordingStateChanged to IsRecordingActive
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update DjTitleText to default to Guest DJ
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -37,7 +37,7 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
     public IRelayCommand<int> MoveLyricsToScreenCommand { get; }
 
     public string VenueTitleText => $"Venue: {(string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? "None" : AppSettings.SelectedVenue)}";
-    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "None" : AppSettings.DjName)}";
+    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "Guest DJ" : AppSettings.DjName)}";
 
     // Drive Status Monitoring
     private System.Windows.Threading.DispatcherTimer? _driveCheckTimer;

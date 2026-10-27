@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Ensure ShowRotationWindow is invoked on OpenScaryokeWheel
+// Edited on Oct 26, 2026 @ 15:55:00 -> Update DjTitleText to default to Guest DJ
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -587,7 +587,7 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     public string VenueTitleText => $"Venue: {(string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? "None" : AppSettings.SelectedVenue)}";
-    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "None" : AppSettings.DjName)}";
+    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "Guest DJ" : AppSettings.DjName)}";
 
     public KaraokeViewModel(
         IMediaEngine mediaEngine,

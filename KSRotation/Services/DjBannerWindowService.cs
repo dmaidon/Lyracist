@@ -1,4 +1,4 @@
-// Edited on Sep 12, 2026 @ 11:26:00 -> Clean up unused imports and obsolete comments
+// Edited on Oct 26, 2026 @ 22:55:00 -> Add Dispatcher check in UpdateImage to prevent cross-thread exceptions from remote banner calls
 
 using KSRotation.Windows;
 using Lyracist.Shared;
@@ -39,6 +39,12 @@ namespace KSRotation.Services
         private void UpdateImage()
         {
             if (_window == null) return;
+            var dispatcher = _window.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.InvokeAsync(() => _window.UpdateBanner(_bannerPath));
+                return;
+            }
             _window.UpdateBanner(_bannerPath);
         }
 

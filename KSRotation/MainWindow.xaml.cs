@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:58:00 -> Commit singer welcome on SingerNameTextBox lost focus
+// Edited on Oct 26, 2026 @ 15:55:00 -> Add OnDjNameLostFocus to enforce Guest DJ default on empty DJ name
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -65,6 +65,17 @@ namespace KSRotation
                 vm.Shutdown();
             }
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void OnDjNameLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is WpfTextBox tb && DataContext is ViewModels.MainViewModel vm)
+            {
+                if (string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    vm.DjName = "Guest DJ";
+                }
+            }
         }
 
         private void OnPortalTitleClicked(object sender, MouseButtonEventArgs e)

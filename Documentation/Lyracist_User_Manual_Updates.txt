@@ -1,3 +1,48 @@
+// Edited on Oct 26, 2026 @ 23:05:00 -> Document special event banner display on rotation screen
+
+KSRotation & Lyracist: Active Special Event Banner Display on Rotation Screen - (October 2026)
+
+Section: Display & Presentation / Special Event Banners & Overlays
+
+[Overview & Features]
+Ensured all active special event banners (Birthday, Wedding, Engagement, Anniversary, Last Song / Final Singer, Announcement, Connect Instructions, and Custom Events) display as full-screen overlays directly on the audience rotation display screen (SingerDisplayWindow in KSRotation and RotationWindow in Lyracist) when activated by the host or remote DJ.
+
+1. Unified Special Event Banner Full-Screen Overlay:
+   - Previously, only Last Song was configured to display as a full-screen overlay on the audience rotation screen, causing other active special events (such as Birthday, Wedding, Engagement, Anniversary, Connect Instructions, and Custom Banners) to not appear on the rotation screen.
+   - All active special event banners now trigger the high-visibility full-screen overlay directly on the rotation display screen across both KSRotation and Lyracist.
+   - When any special event is selected or activated from the host window or remote DJ web station (dj.html), the rotation screen instantly transitions to show the event banner overlay.
+   - When the special event is cleared or set to None, the overlay collapses cleanly and restores the live rotation performer list and TV billboard.
+
+2. Personalization & Real-Time Cache Invalidation:
+   - Dynamic event banners with customized text (such as personalized Birthday celebrant names or custom Announcement messages) are rendered on the fly and decoded using cache-bypassing image loading (BitmapCreateOptions.IgnoreImageCache).
+   - Ensures newly rendered personalized banners immediately display with the latest text without showing stale cached frames.
+
+3. Standard Event Banner Asset Deployment:
+   - All pre-packaged standard event banners (Birthday, Wedding, Engagement, Anniversary, Last Song, Announcement, Connect Instructions) are automatically verified, deployed, and bundled with build outputs under Banners/EventBanners/.
+   - If an asset is missing at runtime, the application generates standard placeholder banner files automatically.
+
+4. Host Console Live Banner Preview & Quick-View:
+   - Added an 'Active Banner Live Preview' card with thumbnail preview and single-click full-screen launcher (👁️ Full Screen) inside the DJ & Special Event Banners settings tab on the host computer.
+   - The host can visually verify the exact active banner graphic (or see the rotation billboard indicator when None is selected) directly from the DJ console.
+
+
+KSRotation, Lyracist & KnockoutTrivia: Simplified Single DJ Name Entry & "Guest DJ" Default - (October 2026)
+
+Section: Application Settings / DJ & Host Configuration
+
+[Overview & Features]
+Streamlined DJ name management across all applications by transitioning to a unified single DJ name entry, removing multi-name list management overhead, and enforcing an automatic "Guest DJ" default when no DJ name is entered.
+
+1. Simplified Single DJ Name Entry (KSRotation):
+   - Replaced the multi-DJ ListBox and Add/Remove buttons in KSRotation Settings with a clean, single "DJ / Host Name" entry field.
+   - Streamlines the DJ Names settings column to a focused "DJ Name" GroupBox with immediate status display.
+   - Operators can simply enter their active DJ name directly without needing to manage a secondary list or manually add and select names.
+
+2. Universal "Guest DJ" Default:
+   - When no DJ name is entered or the field is left blank, the application automatically defaults to "Guest DJ".
+   - Applied consistently across KSRotation (WPF & MAUI), Lyracist, and KnockoutTrivia.
+   - Reflected dynamically on TV billboard headers, crawler banners, rotation reports, and live window titles.
+
 // Edited on Oct 26, 2026 @ 08:37:00 -> Document Dedicated Scaryoke Settings Tab, 11 categories, custom/auto color, DJ/singer/dupe toggles, and Display scrollable columns
 
 KSRotation & Lyracist: Dedicated Scaryoke Settings Tab, 11 Categories, Custom & Auto Color Selection, Wheel Rule Toggles, and Display Tab Independent Column Scrolling - (October 2026)

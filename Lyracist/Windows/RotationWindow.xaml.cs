@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Position ScaryokeWheelOverlay on ScaryokeOverlayMonitor and restore default on close
+// Edited on Oct 26, 2026 @ 22:55:00 -> Support full-screen overlay for all active special event banners
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -119,7 +119,7 @@ public partial class RotationWindow : Window, ICaptureSource
             _vm?.WifiPasswordDisplay);
     }
 
-    public void UpdateLastSongBanner(string? bannerPath)
+    public void UpdateSpecialEventBanner(string? bannerPath)
     {
         if (!string.IsNullOrWhiteSpace(bannerPath) && File.Exists(bannerPath))
         {
@@ -129,6 +129,7 @@ public partial class RotationWindow : Window, ICaptureSource
                 bitmap.BeginInit();
                 bitmap.UriSource = new Uri(bannerPath, UriKind.Absolute);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                 bitmap.EndInit();
                 bitmap.Freeze();
 
@@ -147,6 +148,8 @@ public partial class RotationWindow : Window, ICaptureSource
         LastSongBannerImage.Source = null;
         RefreshSignUpInvite();
     }
+
+    public void UpdateLastSongBanner(string? bannerPath) => UpdateSpecialEventBanner(bannerPath);
 
     private void OnClosed(object? sender, EventArgs e)
     {

@@ -1,5 +1,5 @@
-<!-- Edited on Oct 26, 2026 @ 08:58:00 -> Update changelog with Scaryoke Settings tab, duplicate removal, spin history persistence, and display column scrolling -->
-Last Edit: Oct 26, 2026 - Dedicated Scaryoke Settings Tab, Overlay Monitor Selection, Category Colors & Rules, and Scrollable Display Columns
+<!-- Edited on Oct 27, 2026 @ 06:05:00 -> Update changelog with Special Event Banner Display on Rotation Screen, Live Preview, and in-app help system -->
+Last Edit: Oct 27, 2026 - Special Event Banner Display on Rotation Screen and Live Preview
 
 # Changelog
 
@@ -7,7 +7,20 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ## [Unreleased] - 2026-10-26
 
+### Fixed
+- **Active Special Event Banner Display on Audience Rotation Screen (`KSRotation`, `Lyracist`)**:
+  - **Universal Overlay Triggering (`KSRotation/ViewModels/MainViewModel.cs`, `KSRotation/Windows/SingerDisplayWindow.xaml.cs`, `KSRotation/Services/DisplayWindowService.cs`, `Lyracist/Services/Display/DisplayService.cs`, `Lyracist/Windows/RotationWindow.xaml.cs`)**: Fixed an issue where selecting special event banners (Birthday, Wedding, Engagement, Anniversary, Connect Instructions, Custom Events) failed to display on the audience rotation display screen (`SingerDisplayWindow` in KSRotation, `RotationWindow` in Lyracist), leaving only "Last Song" functioning as a full-screen overlay.
+  - **Live Active Banner Preview on Host Console (`KSRotation/MainWindow.xaml`, `KSRotation/ViewModels/MainViewModel.cs`)**: Added a dedicated high-visibility 'Active Banner Live Preview' card with high-quality thumbnail preview, banner title indicator, status subtitle, and an instant full-screen preview button (`👁️ Full Screen`) directly within the DJ & Special Event Banners settings tab, allowing the host to always see what banner is currently live without glancing at the secondary screen.
+  - **Dynamic Special Event Banner Path Resolution**: Replaced the strict `"Last Song"`-only string check in `MainViewModel` and `DisplayService` with comprehensive `ResolveActiveSpecialEventBannerPath()` logic that dynamically maps any active special event banner (including customized Birthday and Announcement graphics) and delivers it to the rotation window's full-screen banner overlay.
+  - **Cache-Bypassing Personalized Image Refresh**: Updated `SingerDisplayWindow.xaml.cs` and `RotationWindow.xaml.cs` to instantiate `BitmapImage` with `BitmapCreateOptions.IgnoreImageCache`, ensuring newly generated personalized banners (e.g. customized Birthday celebrant names or custom Announcements) display the latest text immediately without serving cached image frames.
+  - **Remote DJ Dispatcher Safety (`KSRotation/Services/DjBannerWindowService.cs`)**: Added `Dispatcher.CheckAccess()` safety check to `DjBannerWindowService.UpdateImage`, preventing cross-thread exceptions when special events are triggered remotely via `dj.html` on background HTTP request threads.
+  - **Standard Event Banner Project Deployment (`KSRotation/KSRotation.csproj`, `Lyracist/Lyracist.csproj`)**: Updated build packaging rules to include all standard banners under `..\Banners\EventBanners\**\*`, ensuring standard event graphics ship cleanly with application output directories.
+
 ### Added
+- **Single DJ Name Entry & "Guest DJ" Default Across Apps (`KSRotation`, `Lyracist`, `KSRotation.Maui`, `KnockoutTrivia`)**:
+  - **Single DJ Name Entry in KSRotation (`KSRotation/MainWindow.xaml`, `KSRotation/MainWindow.xaml.cs`)**: Replaced the multi-DJ ListBox and Add/Remove buttons in the KSRotation Settings tab with a single "DJ / Host Name" entry field (`TbDjName`). Streamlines the DJ setting column into a focused "DJ Name" GroupBox with immediate active DJ indication, eliminating unnecessary multi-name list management.
+  - **Universal "Guest DJ" Fallback Across All Apps (`KSRotation`, `Lyracist`, `KSRotation.Maui`, `KnockoutTrivia`)**: When no DJ name is entered, or when the DJ field is left blank/cleared, the application automatically defaults to `"Guest DJ"`.
+  - **Live Billboard, Banner, and Title Synchronization**: Dynamic updates across all apps ensure TV billboards, crawler banners, rotation reports, and live window title indicators immediately reflect the active or defaulted DJ name.
 - **Dedicated Scaryoke Settings Tab, 11 Wheel Categories, Color Customization, Overlay Monitor Routing & Display Tab Column Scrolling (`Lyracist/Views/Pages/SettingsPage.xaml`, `Lyracist/Core/Helpers/AppSettings.cs`, `Lyracist/ViewModels/SettingsViewModel.Scaryoke.cs`, `Lyracist/ViewModels/ScaryokeViewModel.cs`)**:
   - **Dedicated Scaryoke Settings Tab**: Added a new top-level tab 'Scaryoke Settings' in the main Settings page, centralizing all Scaryoke roulette wheel configuration, color customization, probability rules, presets, and audience overlay monitor routing into a balanced, clean 3-column view.
   - **Removed Redundant Duplicate Boxes**: Removed duplicate 'Rotation & Queue Rules' and 'Wait Times & Durations' sections from the Scaryoke tab that previously duplicated settings on the Presentation and Display tabs, avoiding operator confusion.
