@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 13:00:00 -> Invoke BatchSpinScaryokeAsync for remote scaryoke-batch-spin action
+// Edited on Oct 27, 2026 @ 17:05:00 -> Add scaryoke-toggle-project, scaryoke-set-batch, and scaryoke-spin-configured endpoints
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -847,6 +847,24 @@ namespace KSRotation.ViewModels
                 case "scaryoke-clear-all":
                     {
                         ClearAllScaryokeCategories();
+                        return "";
+                    }
+                case "scaryoke-toggle-project":
+                    {
+                        ToggleScaryokeProjected();
+                        return "";
+                    }
+                case "scaryoke-set-batch":
+                    {
+                        if (int.TryParse(targetId, out int bCount))
+                        {
+                            SetScaryokeBatchCount(bCount);
+                        }
+                        return "";
+                    }
+                case "scaryoke-spin-configured":
+                    {
+                        _ = SpinScaryokeConfiguredAsync();
                         return "";
                     }
 #endif

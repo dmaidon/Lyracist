@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 12:35:00 -> Set spinning status during Scaryoke spin and reveal result on complete
+// Edited on Oct 27, 2026 @ 17:05:00 -> Support persistent Scaryoke projection to screen prior to spinning
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -23,6 +23,7 @@ namespace KSRotation.Services
         private string _scaryokeMonitorDevice = string.Empty;
         private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
+        private bool _isScaryokeProjected = true;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
 
         public void SetScaryokeActive(bool isActive, ObservableCollection<SingerEntry>? singers = null)
@@ -46,6 +47,10 @@ namespace KSRotation.Services
                         if (_cachedScaryokeSegments != null)
                         {
                             _window.BuildScaryokeWheel(_cachedScaryokeSegments);
+                        }
+                        if (_isScaryokeProjected)
+                        {
+                            _window.UpdateScaryokeOverlay(true);
                         }
                         _window.Topmost = true;
                         _window.WindowState = WindowState.Normal;
@@ -80,6 +85,15 @@ namespace KSRotation.Services
             if (_window != null)
             {
                 _window.Dispatcher.InvokeAsync(() => _window.UpdateScaryokeOverlay(isVisible));
+            }
+        }
+
+        public void SetScaryokeProjected(bool isProjected)
+        {
+            _isScaryokeProjected = isProjected;
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.UpdateScaryokeOverlay(isProjected));
             }
         }
 

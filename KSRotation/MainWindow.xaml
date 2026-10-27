@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Restore multi-singer batch spin toolbar button and context menu with sequential post-spin reveals -->
+<!-- Edited on Oct 27, 2026 @ 17:05:00 -> Add project toggle and configured spin button to primary toolbar (project|select # of singers|spin) -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -674,7 +674,11 @@
     </Window.Resources>
 
     <Grid Margin="16">
-        <TabControl x:Name="Tc" SelectedIndex="{Binding SelectedMainTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="2" BorderBrush="{DynamicResource AppHeaderBrush}" Style="{StaticResource BorderedTabControlStyle}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="683*" />
+            <ColumnDefinition Width="51*" />
+        </Grid.ColumnDefinitions>
+        <TabControl x:Name="Tc" SelectedIndex="{Binding SelectedMainTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="2" BorderBrush="{DynamicResource AppHeaderBrush}" Style="{StaticResource BorderedTabControlStyle}" Grid.ColumnSpan="2">
             <TabControl.Resources>
                 <!-- Align the tab headers panel to the left so they sit next to each other without stretching -->
                 <Style TargetType="TabPanel">
@@ -1299,16 +1303,48 @@
                                 </Button.Style>
                             </Button>
                             <Button
-                            Command="{Binding SpinScaryokeWheelCommand}"
-                            Width="120"
-                            Margin="8,0,0,0"
-                            ToolTip="Spin the Scaryoke Wheel for the current performer">
+                                Command="{Binding ToggleScaryokeProjectedCommand}"
+                                Width="110"
+                                Margin="6,0,0,0"
+                                ToolTip="Toggle whether the Scaryoke Wheel is projected live on the audience screen or kept booth-only">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
                                         <Setter Property="Margin" Value="0,4" />
-                                        <Setter Property="FontSize" Value="14" />
+                                        <Setter Property="FontSize" Value="12" />
                                         <Setter Property="FontWeight" Value="Bold" />
-                                        <Setter Property="Content" Value="🎲 Spin" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Setter Property="Background" Value="#332B45" />
+                                        <Setter Property="BorderBrush" Value="#4C3D66" />
+                                        <Setter Property="Foreground" Value="#CBD5E1" />
+                                        <Setter Property="Content" Value="📺 Off Screen" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsScaryokeActive}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsScaryokeProjected}" Value="True">
+                                                <Setter Property="Background" Value="#15803D" />
+                                                <Setter Property="BorderBrush" Value="#16A34A" />
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="Content" Value="📺 Projected" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button
+                                Command="{Binding SpinScaryokeWheelCommand}"
+                                Width="140"
+                                Margin="6,0,0,0"
+                                ToolTip="Start Scaryoke spin(s) for the selected number of singers">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                        <Setter Property="Margin" Value="0,4" />
+                                        <Setter Property="FontSize" Value="13" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Content" Value="{Binding ScaryokeSpinButtonText}" />
                                         <Setter Property="Background" Value="#FF6D00" />
                                         <Setter Property="BorderBrush" Value="#E65100" />
                                         <Setter Property="Foreground" Value="White" />
@@ -1317,9 +1353,13 @@
                                             <DataTrigger Binding="{Binding IsScaryokeActive}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBatchSpinning}" Value="True">
+                                                <Setter Property="Background" Value="#DC2626" />
+                                                <Setter Property="BorderBrush" Value="#B91C1C" />
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsScaryokeSpinning}" Value="True">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                                <Setter Property="Content" Value="⏳ Spinning..." />
+                                                <Setter Property="Background" Value="#DC2626" />
+                                                <Setter Property="BorderBrush" Value="#B91C1C" />
                                             </DataTrigger>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter Property="Opacity" Value="0.9" />
@@ -1332,13 +1372,13 @@
                                     Click="BtnScaryokeBatch_Click"
                                     Width="120"
                                     Margin="6,0,0,0"
-                                    ToolTip="Spin categories sequentially for multiple upcoming singers or the entire rotation">
+                                    ToolTip="Select # of singers to target (1 Singer, Next 3, Next 5, Entire Rotation)">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
                                         <Setter Property="Margin" Value="0,4" />
                                         <Setter Property="FontSize" Value="13" />
                                         <Setter Property="FontWeight" Value="Bold" />
-                                        <Setter Property="Content" Value="⚡ Multi-Spin ▾" />
+                                        <Setter Property="Content" Value="⚡ # Singers ▾" />
                                         <Setter Property="Background" Value="#4A148C" />
                                         <Setter Property="BorderBrush" Value="#7B1FA2" />
                                         <Setter Property="Foreground" Value="White" />
@@ -1360,10 +1400,11 @@
                                 </Button.Style>
                                 <Button.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Spin Next 3 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="3" />
-                                        <MenuItem Header="Spin Next 5 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="5" />
-                                        <MenuItem Header="Spin Next 10 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="10" />
-                                        <MenuItem Header="Spin Entire Rotation (All Active)" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="0" />
+                                        <MenuItem Header="1 Singer (Selected / Current)" Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="1" />
+                                        <MenuItem Header="Next 3 Singers" Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="3" />
+                                        <MenuItem Header="Next 5 Singers" Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="5" />
+                                        <MenuItem Header="Next 10 Singers" Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="10" />
+                                        <MenuItem Header="Entire Rotation (All Active)" Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="0" />
                                         <Separator />
                                         <MenuItem Header="✕ Clear All Scaryoke Categories" Command="{Binding ClearAllScaryokeCategoriesCommand}" />
                                     </ContextMenu>

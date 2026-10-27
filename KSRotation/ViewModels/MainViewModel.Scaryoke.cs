@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 13:00:00 -> Support multi-singer sequential spinning and cancellation with post-spin category reveals
+// Edited on Oct 27, 2026 @ 17:05:00 -> Add project toggle, singer count selection, and configured spin workflow (project|select # of singers|spin)
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -68,11 +68,64 @@ namespace KSRotation.ViewModels
 
         partial void OnSelectedSingerForScaryokeChanged(SingerEntry? value)
         {
-            if (value != null)
+            UpdateScaryokeTargetDisplay();
+        }
+
+        [ObservableProperty]
+        private bool _isScaryokeProjected = true;
+
+        partial void OnIsScaryokeProjectedChanged(bool value)
+        {
+            _displayWindowService.SetScaryokeProjected(value);
+            OnPropertyChanged(nameof(ScaryokeProjectButtonText));
+        }
+
+        [ObservableProperty]
+        private int _scaryokeBatchCount = 1;
+
+        partial void OnScaryokeBatchCountChanged(int value)
+        {
+            OnPropertyChanged(nameof(IsSingleSingerSelected));
+            OnPropertyChanged(nameof(ScaryokeSpinButtonText));
+            UpdateScaryokeTargetDisplay();
+        }
+
+        public bool IsSingleSingerSelected => ScaryokeBatchCount == 1;
+
+        public string ScaryokeProjectButtonText => IsScaryokeProjected ? "📺 Projected (Live on Screen)" : "📺 Booth Only (Off Screen)";
+
+        public string ScaryokeSpinButtonText
+        {
+            get
             {
-                ScaryokeTargetSingerName = value.IsDuet ? $"{value.Name} & {value.DuetPartnerName}" : value.Name;
-                _displayWindowService.SetScaryokeTargetSinger(ScaryokeTargetSingerName);
+                if (IsBatchSpinning || IsScaryokeSpinning) return "⏹ STOP SPIN";
+                if (ScaryokeBatchCount == 1)
+                {
+                    var name = SelectedSingerForScaryoke?.Name ?? CurrentSinger?.Name;
+                    return string.IsNullOrWhiteSpace(name) ? "🎲 START SPIN" : $"🎲 START SPIN ({name})";
+                }
+                if (ScaryokeBatchCount == 0) return "🎲 START SPIN (ALL ACTIVE)";
+                return $"🎲 START SPIN (NEXT {ScaryokeBatchCount})";
             }
+        }
+
+        public void UpdateScaryokeTargetDisplay()
+        {
+            if (ScaryokeBatchCount == 1)
+            {
+                var targetSinger = SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic);
+                ScaryokeTargetSingerName = targetSinger != null ? (targetSinger.IsDuet ? $"{targetSinger.Name} & {targetSinger.DuetPartnerName}" : targetSinger.Name) : "Stage Open";
+            }
+            else if (ScaryokeBatchCount == 0)
+            {
+                ScaryokeTargetSingerName = "Entire Rotation";
+            }
+            else
+            {
+                ScaryokeTargetSingerName = $"Next {ScaryokeBatchCount} Performers";
+            }
+            _displayWindowService.SetScaryokeTargetSinger(ScaryokeTargetSingerName);
+            OnPropertyChanged(nameof(ScaryokeSpinButtonText));
         }
 
         [ObservableProperty]
@@ -514,6 +567,8 @@ namespace KSRotation.ViewModels
 
             _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
             _displayWindowService.SetScaryokeActive(true, Singers);
+            _displayWindowService.SetScaryokeProjected(IsScaryokeProjected);
+            UpdateScaryokeTargetDisplay();
 
             // Open non-modal desktop control window
             var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
@@ -641,10 +696,49 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        public Task SpinScaryokeWheelAsync() => SpinScaryokeForSingerAsync(SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic), projectToAudience: true);
+        public void ToggleScaryokeProjected()
+        {
+            IsScaryokeProjected = !IsScaryokeProjected;
+        }
 
         [RelayCommand]
-        public Task SpinScaryokeAsync() => SpinScaryokeWheelAsync();
+        public void SetScaryokeBatchCount(object? parameter)
+        {
+            if (parameter is int intVal)
+            {
+                ScaryokeBatchCount = intVal;
+            }
+            else if (parameter is string strVal && int.TryParse(strVal, out int parsed))
+            {
+                ScaryokeBatchCount = parsed;
+            }
+        }
+
+        [RelayCommand]
+        public async Task SpinScaryokeConfiguredAsync()
+        {
+            if (IsScaryokeSpinning || IsBatchSpinning)
+            {
+                CancelBatchSpin();
+                return;
+            }
+
+            if (ScaryokeBatchCount <= 1)
+            {
+                var target = SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic);
+                await SpinScaryokeForSingerAsync(target, projectToAudience: IsScaryokeProjected);
+            }
+            else
+            {
+                await BatchSpinScaryokeAsync(ScaryokeBatchCount);
+            }
+        }
+
+        [RelayCommand]
+        public Task SpinScaryokeWheelAsync() => SpinScaryokeConfiguredAsync();
+
+        [RelayCommand]
+        public Task SpinScaryokeAsync() => SpinScaryokeConfiguredAsync();
 
         [RelayCommand]
         public Task SpinScaryokeBoothAsync() => SpinScaryokeForSingerAsync(SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic), projectToAudience: false);
@@ -654,6 +748,16 @@ namespace KSRotation.ViewModels
 
         [RelayCommand]
         public Task SpinScaryokeForSingerProjectedCommand(SingerEntry? singer) => SpinScaryokeForSingerAsync(singer, projectToAudience: true);
+
+        partial void OnIsScaryokeSpinningChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ScaryokeSpinButtonText));
+        }
+
+        partial void OnIsBatchSpinningChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ScaryokeSpinButtonText));
+        }
 
         public async Task SpinScaryokeForSingerAsync(SingerEntry? singer, bool projectToAudience = false)
         {
@@ -876,7 +980,7 @@ namespace KSRotation.ViewModels
                     SelectedSingerForScaryoke = singer;
 
                     // Wheel spins for this singer; category is assigned and revealed only after the spin completes!
-                    await SpinScaryokeForSingerAsync(singer, projectToAudience: false);
+                    await SpinScaryokeForSingerAsync(singer, projectToAudience: IsScaryokeProjected);
 
                     if (token.IsCancellationRequested || !IsScaryokeActive) break;
 

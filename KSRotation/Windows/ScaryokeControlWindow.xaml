@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Restore multi-singer sequential spin controls with stop cancellation support -->
+<!-- Edited on Oct 27, 2026 @ 17:05:00 -> Natural Scaryoke workflow: project | select # of singers | spin -->
 <Window x:Class="KSRotation.Windows.ScaryokeControlWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="🎃 Scaryoke Wheel Controller"
-        Height="760" Width="540"
+        Height="840" Width="550"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#0F0C1B"
@@ -22,45 +22,188 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
 
-    <Grid Margin="18">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Header & Target Singer Selector -->
-        <Border Grid.Row="0" Margin="0,0,0,10" Background="#181328" BorderBrush="#35264F" BorderThickness="1.5" CornerRadius="10" Padding="12,8">
+        <!-- Step 1: Title & Project to Screen Toggle -->
+        <Border Grid.Row="0" Margin="0,0,0,8" Background="#181328" BorderBrush="#35264F" BorderThickness="1.5" CornerRadius="10" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="🎃 SCARYOKE WHEEL" FontSize="18" FontWeight="ExtraBold" Foreground="#FF6D00" />
+                    <TextBlock Text="1. Set wheel projection to audience screen" FontSize="11" Foreground="#94A3B8" Margin="0,1,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Command="{Binding ToggleScaryokeProjectedCommand}"
+                        Height="34" Padding="12,0"
+                        FontSize="11" FontWeight="Bold"
+                        materialDesign:ButtonAssist.CornerRadius="6"
+                        Cursor="Hand"
+                        ToolTip="Toggle whether the Scaryoke Wheel is projected live on the audience screen or kept booth-only">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                            <Setter Property="Background" Value="#332B45" />
+                            <Setter Property="BorderBrush" Value="#4C3D66" />
+                            <Setter Property="Foreground" Value="#CBD5E1" />
+                            <Setter Property="Content" Value="📺 Booth Only (Off Screen)" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsScaryokeProjected}" Value="True">
+                                    <Setter Property="Background" Value="#15803D" />
+                                    <Setter Property="BorderBrush" Value="#16A34A" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Content" Value="📺 Projected (Live on Screen)" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Step 2: Select # of Singers -->
+        <Border Grid.Row="1" Margin="0,0,0,8" Background="#161224" BorderBrush="#35264F" BorderThickness="1.5" CornerRadius="10" Padding="12,8">
             <StackPanel>
-                <TextBlock Text="🎃 SCARYOKE WHEEL 🎃" FontSize="24" FontWeight="ExtraBold" Foreground="#FF6D00" HorizontalAlignment="Center">
-                    <TextBlock.Effect>
-                        <DropShadowEffect Color="#FF6D00" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />
-                    </TextBlock.Effect>
-                </TextBlock>
-                <Grid Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="2. Select # of Singers:" FontWeight="Bold" FontSize="12" Foreground="#FFB74D" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Command="{Binding ClearAllScaryokeCategoriesCommand}"
+                            Content="✕ Clear All" Height="22" Padding="6,0" FontSize="10"
+                            Background="Transparent" BorderBrush="#EF4444" Foreground="#F87171"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
+                            ToolTip="Clear Scaryoke categories from all singers" />
+                </Grid>
+                <UniformGrid Columns="5" Margin="0,6,0,6">
+                    <Button Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="1"
+                            Content="1 Singer" Height="28" FontSize="11" FontWeight="Bold"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand" Margin="0,0,3,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Background" Value="#251F38" />
+                                <Setter Property="BorderBrush" Value="#3D3259" />
+                                <Setter Property="Foreground" Value="#CBD5E1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ScaryokeBatchCount}" Value="1">
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#8B5CF6" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="3"
+                            Content="Next 3" Height="28" FontSize="11" FontWeight="Bold"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand" Margin="0,0,3,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Background" Value="#251F38" />
+                                <Setter Property="BorderBrush" Value="#3D3259" />
+                                <Setter Property="Foreground" Value="#CBD5E1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ScaryokeBatchCount}" Value="3">
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#8B5CF6" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="5"
+                            Content="Next 5" Height="28" FontSize="11" FontWeight="Bold"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand" Margin="0,0,3,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Background" Value="#251F38" />
+                                <Setter Property="BorderBrush" Value="#3D3259" />
+                                <Setter Property="Foreground" Value="#CBD5E1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ScaryokeBatchCount}" Value="5">
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#8B5CF6" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="10"
+                            Content="Next 10" Height="28" FontSize="11" FontWeight="Bold"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand" Margin="0,0,3,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Background" Value="#251F38" />
+                                <Setter Property="BorderBrush" Value="#3D3259" />
+                                <Setter Property="Foreground" Value="#CBD5E1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ScaryokeBatchCount}" Value="10">
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#8B5CF6" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Command="{Binding SetScaryokeBatchCountCommand}" CommandParameter="0"
+                            Content="All Active" Height="28" FontSize="11" FontWeight="Bold"
+                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Setter Property="Background" Value="#251F38" />
+                                <Setter Property="BorderBrush" Value="#3D3259" />
+                                <Setter Property="Foreground" Value="#CBD5E1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ScaryokeBatchCount}" Value="0">
+                                        <Setter Property="Background" Value="#7C3AED" />
+                                        <Setter Property="BorderBrush" Value="#8B5CF6" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </UniformGrid>
+                <!-- Target Singer dropdown (when 1 Singer is selected) -->
+                <Grid Margin="0,2,0,0" Visibility="{Binding IsSingleSingerSelected, Converter={StaticResource BoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Target Singer:" Foreground="#C4B5FD" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Text="Target:" Foreground="#C4B5FD" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <ComboBox Grid.Column="1"
                               ItemsSource="{Binding Singers}"
                               SelectedItem="{Binding SelectedSingerForScaryoke, Mode=TwoWay}"
                               DisplayMemberPath="DisplayNameWithDuet"
                               Background="#100C1F"
                               Foreground="White"
-                              FontSize="13"
-                              ToolTip="Choose an upcoming singer to spin and prepare a song for ahead of time" />
+                              FontSize="12"
+                              ToolTip="Choose specific singer to challenge" />
                 </Grid>
+                <!-- Skip already assigned toggle (when multi-singer is selected) -->
+                <CheckBox Content="Skip singers who already have an assigned category"
+                          IsChecked="{Binding ScaryokeBatchOnlyUnassigned, Mode=TwoWay}"
+                          Foreground="#A5B4FC" FontSize="11" Margin="0,4,0,0"
+                          Visibility="{Binding IsSingleSingerSelected, Converter={StaticResource InverseBooleanConverter}}" />
             </StackPanel>
         </Border>
 
         <!-- Wheel Graphic -->
-        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="10,0,10,10">
+        <Viewbox Grid.Row="2" Stretch="Uniform" Margin="10,0,10,6">
             <Grid Width="450" Height="470">
                 <!-- Outer Shadow Rim -->
                 <Ellipse Width="446" Height="446" Fill="#050406" Stroke="#3E1A60" StrokeThickness="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">
@@ -90,11 +233,11 @@
         </Viewbox>
 
         <!-- Result Banner -->
-        <Border Grid.Row="2" Background="#1B1728" BorderBrush="#3D2E5A" BorderThickness="1.5" CornerRadius="12" Padding="14,10" Margin="0,0,0,12">
+        <Border Grid.Row="3" Background="#1B1728" BorderBrush="#3D2E5A" BorderThickness="1.5" CornerRadius="10" Padding="12,8" Margin="0,0,0,8">
             <StackPanel HorizontalAlignment="Center">
                 <TextBlock x:Name="HostResultTextBlock"
                            Text="{Binding ScaryokeResultText}"
-                           FontSize="22" FontWeight="Bold"
+                           FontSize="20" FontWeight="Bold"
                            Foreground="#00E676"
                            TextAlignment="Center" TextWrapping="Wrap"
                            HorizontalAlignment="Center"
@@ -106,99 +249,45 @@
                         </TransformGroup>
                     </TextBlock.RenderTransform>
                 </TextBlock>
-                <TextBlock Text="{Binding ScaryokeResultDetail}" FontSize="12" Foreground="#C9C5D6" TextAlignment="Center" TextWrapping="Wrap" Margin="0,4,0,0" />
+                <TextBlock Text="{Binding ScaryokeResultDetail}" FontSize="11" Foreground="#C9C5D6" TextAlignment="Center" TextWrapping="Wrap" Margin="0,3,0,0" />
             </StackPanel>
         </Border>
 
-        <!-- Spin Buttons (Booth Quiet vs Project Audience) -->
-        <Grid Grid.Row="3" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0"
-                    Command="{Binding SpinScaryokeBoothCommand}"
-                    IsEnabled="{Binding IsScaryokeSpinning, Converter={StaticResource InverseBooleanConverter}, FallbackValue=True}"
-                    Height="44"
-                    Background="#6A0DAD"
-                    BorderBrush="#9333EA"
-                    Foreground="White"
-                    FontSize="13"
-                    FontWeight="Bold"
-                    materialDesign:ButtonAssist.CornerRadius="8"
-                    Cursor="Hand"
-                    ToolTip="Spin quietly at the booth to assign challenge to upcoming singer without interrupting the stage screen">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🎧 BOOTH SPIN (QUIET)" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Grid.Column="2"
-                    Command="{Binding SpinScaryokeWheelCommand}"
-                    IsEnabled="{Binding IsScaryokeSpinning, Converter={StaticResource InverseBooleanConverter}, FallbackValue=True}"
-                    Height="44"
-                    Background="#FF6D00"
-                    BorderBrush="#E65100"
-                    Foreground="White"
-                    FontSize="13"
-                    FontWeight="ExtraBold"
-                    materialDesign:ButtonAssist.CornerRadius="8"
-                    Cursor="Hand"
-                    ToolTip="Project animated wheel on audience screen to announce the challenge">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="📺 PROJECT SPIN" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-        </Grid>
-
-        <!-- Multi-Singer Spin Section -->
-        <Border Grid.Row="4" Background="#161224" BorderBrush="#35264F" BorderThickness="1.5" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="⚡ Multi-Singer Spin:" FontWeight="Bold" FontSize="12" Foreground="#FFB74D" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="3"
-                                Content="Next 3" Height="26" Padding="8,0" Margin="0,0,4,0" FontSize="11" FontWeight="Bold"
-                                Background="#311B92" BorderBrush="#512DA8" Foreground="White"
-                                materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
-                                ToolTip="Spin categories sequentially for the next 3 unassigned singers" />
-                        <Button Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="5"
-                                Content="Next 5" Height="26" Padding="8,0" Margin="0,0,4,0" FontSize="11" FontWeight="Bold"
-                                Background="#311B92" BorderBrush="#512DA8" Foreground="White"
-                                materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
-                                ToolTip="Spin categories sequentially for the next 5 unassigned singers" />
-                        <Button Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="0"
-                                Content="Entire Rotation" Height="26" Padding="8,0" Margin="0,0,6,0" FontSize="11" FontWeight="Bold"
-                                Background="#4A148C" BorderBrush="#7B1FA2" Foreground="White"
-                                materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
-                                ToolTip="Spin categories sequentially for all active singers in the rotation" />
-                    </StackPanel>
-                    <Button Grid.Column="2" Command="{Binding CancelBatchSpinCommand}"
-                            Content="⏹ Stop" Height="26" Padding="8,0" FontSize="11"
-                            Background="#DC2626" BorderBrush="#B91C1C" Foreground="White"
-                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
-                            ToolTip="Stop multi-singer spinning in progress"
-                            Visibility="{Binding IsBatchSpinning, Converter={StaticResource BoolToVis}}" />
-                    <Button Grid.Column="2" Command="{Binding ClearAllScaryokeCategoriesCommand}"
-                            Content="✕ Clear All" Height="26" Padding="8,0" FontSize="11"
-                            Background="Transparent" BorderBrush="#EF4444" Foreground="#F87171"
-                            materialDesign:ButtonAssist.CornerRadius="4" Cursor="Hand"
-                            ToolTip="Clear Scaryoke categories from all singers"
-                            Visibility="{Binding IsBatchSpinning, Converter={StaticResource InverseBooleanConverter}}" />
-                </Grid>
-                <CheckBox Content="Skip singers who already have an assigned category"
-                          IsChecked="{Binding ScaryokeBatchOnlyUnassigned, Mode=TwoWay}"
-                          Foreground="#A5B4FC" FontSize="11" Margin="0,6,0,0" />
-            </StackPanel>
-        </Border>
+        <!-- Step 3: Big Spin Action Button -->
+        <Button Grid.Row="4"
+                Command="{Binding SpinScaryokeConfiguredCommand}"
+                Height="48"
+                Margin="0,0,0,8"
+                FontSize="15"
+                FontWeight="ExtraBold"
+                materialDesign:ButtonAssist.CornerRadius="8"
+                Cursor="Hand"
+                ToolTip="3. Start the spin(s) according to the configured project and singer selection above">
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                    <Setter Property="Background" Value="#FF6D00" />
+                    <Setter Property="BorderBrush" Value="#E65100" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Content" Value="{Binding ScaryokeSpinButtonText}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBatchSpinning}" Value="True">
+                            <Setter Property="Background" Value="#DC2626" />
+                            <Setter Property="BorderBrush" Value="#B91C1C" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsScaryokeSpinning}" Value="True">
+                            <Setter Property="Background" Value="#DC2626" />
+                            <Setter Property="BorderBrush" Value="#B91C1C" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.92" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
 
         <!-- Options Row -->
-        <Border Grid.Row="5" Background="#151221" BorderBrush="#2A223B" BorderThickness="1" CornerRadius="8" Padding="10,6" Margin="0,0,0,10">
+        <Border Grid.Row="5" Background="#151221" BorderBrush="#2A223B" BorderThickness="1" CornerRadius="8" Padding="10,6" Margin="0,0,0,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -209,7 +298,7 @@
                           Content="Prevent 2 singers in a row getting the same result"
                           IsChecked="{Binding ScaryokeAvoidConsecutiveRepeats, Mode=TwoWay}"
                           Foreground="#E2E8F0"
-                          FontSize="12"
+                          FontSize="11"
                           ToolTip="When enabled, prevents consecutive spins from landing on the same challenge category back-to-back."
                           VerticalAlignment="Center" />
 
@@ -217,8 +306,8 @@
                     <CheckBox Content="Mute"
                               IsChecked="{Binding ScaryokeIsMuted, Mode=TwoWay}"
                               Foreground="#94A3B8"
-                              FontSize="12"
-                              Margin="0,0,8,0" />
+                              FontSize="11"
+                              Margin="0,0,4,0" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -226,12 +315,12 @@
         <!-- Footer / Close -->
         <Button Grid.Row="6"
                 Command="{Binding ToggleScaryokeCommand}"
-                Height="32"
+                Height="30"
                 Style="{StaticResource MaterialDesignOutlinedButton}"
                 BorderBrush="#EF4444"
                 Foreground="#EF4444"
                 Content="✕ Shut Down Wheel (Return to Normal Screen)"
-                FontSize="12"
+                FontSize="11"
                 FontWeight="SemiBold"
                 HorizontalAlignment="Stretch"
                 ToolTip="Turn off Scaryoke Wheel and restore normal audience and tablet screens" />

@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 12:35:00 -> Set spinning status during Scaryoke wheel spin and show category only after landing
+// Edited on Oct 27, 2026 @ 17:05:00 -> Keep Scaryoke wheel overlay visible while Scaryoke mode is active and projected
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -1298,12 +1298,16 @@ namespace KSRotation.Windows
                 ScaryokeFlashOverlay.BeginAnimation(UIElement.OpacityProperty, flashAnim);
             }
 
-            // Auto dismiss the full-screen wheel overlay after 4.5s so audience returns to rotation screen
-            _scaryokeAutoDismissTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4.5) };
-            _scaryokeAutoDismissTimer.Tick -= OnScaryokeAutoDismissTick;
-            _scaryokeAutoDismissTimer.Tick += OnScaryokeAutoDismissTick;
-            _scaryokeAutoDismissTimer.Stop();
-            _scaryokeAutoDismissTimer.Start();
+            // Only auto-dismiss the overlay if Scaryoke mode is NOT active (i.e. one-off trigger).
+            // When Scaryoke mode is active, the wheel remains projected on the audience display.
+            if (!(_vm?.IsScaryokeActive ?? false))
+            {
+                _scaryokeAutoDismissTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4.5) };
+                _scaryokeAutoDismissTimer.Tick -= OnScaryokeAutoDismissTick;
+                _scaryokeAutoDismissTimer.Tick += OnScaryokeAutoDismissTick;
+                _scaryokeAutoDismissTimer.Stop();
+                _scaryokeAutoDismissTimer.Start();
+            }
         }
 
         private void OnScaryokeAutoDismissTick(object? sender, EventArgs e)
