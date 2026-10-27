@@ -1,4 +1,4 @@
-// Edited on Jul 27, 2026 @ 13:35:00 -> Add tick sound buffering and throttling to prevent laptop audio driver choke
+// Edited on Oct 27, 2026 @ 12:35:00 -> Set ResultText to SPINNING... while wheel is in motion
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -275,6 +275,7 @@ public partial class ScaryokeWindow : Window
         if (_isSpinning) return;
         _isSpinning = true;
         SpinButton.IsEnabled = false;
+        _vm.ResultText = "SPINNING...";
 
         _lastTickIndex = -1;
         _lastTickTimestamp = 0;

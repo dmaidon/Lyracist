@@ -259,51 +259,9 @@ public class DisplayService : IDisplayService
     }
 
     private string? ResolveActiveSpecialEventBannerPath()
+    
     {
-        if (string.IsNullOrEmpty(_preferences.SelectedSpecialEvent) ||
-            _preferences.SelectedSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        if (_preferences.SelectedSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
-        {
-            string lastSongPath = System.IO.Path.Combine(Globals.EventBannersDir, "LastSong.png");
-            if (System.IO.File.Exists(lastSongPath))
-            {
-                return lastSongPath;
-            }
-        }
-        else if (_preferences.SelectedSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
-        {
-            string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
-            if (announcementPath != null && System.IO.File.Exists(announcementPath))
-            {
-                return announcementPath;
-            }
-        }
-        else
-        {
-            var eventConfig = Lyracist.Core.Helpers.AppSettings.SpecialEvents.FirstOrDefault(e => e.EventName.Equals(_preferences.SelectedSpecialEvent, StringComparison.OrdinalIgnoreCase));
-            string fileName = eventConfig != null && !string.IsNullOrWhiteSpace(eventConfig.BannerFileName)
-                ? eventConfig.BannerFileName
-                : DjBannerFileManager.GetStandardBannerFileName(_preferences.SelectedSpecialEvent);
-
-            if (!string.IsNullOrWhiteSpace(fileName) && !fileName.Equals("None", StringComparison.OrdinalIgnoreCase))
-            {
-                string fullPath = System.IO.Path.Combine(Globals.EventBannersDir, fileName);
-                if (!System.IO.File.Exists(fullPath) && DjBannerFileManager.StandardEventNames.Any(s => s.Equals(_preferences.SelectedSpecialEvent, StringComparison.OrdinalIgnoreCase)))
-                {
-                    DjBannerFileManager.EnsureStandardEventBanners(Globals.EventBannersDir);
-                }
-                if (System.IO.File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
-            }
-        }
-
-        return null;
+        return DjBannerFileManager.ResolveSpecialEventBannerPath(_preferences.SelectedSpecialEvent, Lyracist.Core.Helpers.AppSettings.SpecialEvents, Globals.EventBannersDir);
     }
 
     private string ResolveActiveBannerPath()
@@ -321,7 +279,7 @@ public class DisplayService : IDisplayService
         if (_rotationWindow != null && _rotationWindow.IsLoaded)
         {
             string? activePath = ResolveActiveSpecialEventBannerPath();
-            _rotationWindow.Dispatcher.InvokeAsync(() => _rotationWindow.UpdateLastSongBanner(activePath));
+            _rotationWindow.Dispatcher.InvokeAsync(() => _rotationWindow.UpdateSpecialEventBanner(activePath));
         }
     }
 

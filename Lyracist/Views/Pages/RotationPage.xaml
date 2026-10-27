@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 12:14:00 -> Add drag grip handle and empty area drop to rotation list -->
+<!-- Edited on Oct 27, 2026 @ 12:22:00 -> Add Scaryoke challenge category badge to rotation queue rows -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -363,6 +363,11 @@
                                                 </Border>
                                                 <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
                                                     <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
+                                                </Border>
+                                                <Border Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+                                                        Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                        ToolTip="{Binding ScaryokeCategory, StringFormat='Scaryoke Challenge: {0}'}">
+                                                    <TextBlock Text="{Binding ScaryokeCategory, StringFormat='🎃 {0}'}" FontSize="9" FontWeight="ExtraBold" Foreground="White" VerticalAlignment="Center" />
                                                 </Border>
                                                 <Button Command="{Binding DataContext.ClearLastRoundDoneCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"

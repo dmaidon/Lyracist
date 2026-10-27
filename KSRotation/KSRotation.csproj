@@ -1,4 +1,4 @@
-<!-- Edited on Oct 25, 2026 @ 23:51:00 -> Link ScaryokeAudio and ScaryokeSettings from ScaryokeWheel into KSRotation -->
+<!-- Edited on Oct 27, 2026 @ 11:25:00 -> Update build version for Scaryoke Mode and singer spin ahead -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.27.773</AssemblyVersion>
-    <FileVersion>26.10.27.773</FileVersion>
+    <AssemblyVersion>26.10.27.781</AssemblyVersion>
+    <FileVersion>26.10.27.781</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

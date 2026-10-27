@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 22:55:00 -> Add SetSpecialEventBanner to support displaying all active special event banners on the rotation display
+// Edited on Oct 27, 2026 @ 12:35:00 -> Set spinning status during Scaryoke spin and reveal result on complete
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -20,6 +20,7 @@ namespace KSRotation.Services
         private string _connectionUrl = string.Empty;
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
+        private string _scaryokeMonitorDevice = string.Empty;
         private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
@@ -41,6 +42,7 @@ namespace KSRotation.Services
                 {
                     if (_window != null)
                     {
+                        PositionWindowOnTargetMonitor(_window, GetEffectiveMonitorDevice());
                         if (_cachedScaryokeSegments != null)
                         {
                             _window.BuildScaryokeWheel(_cachedScaryokeSegments);
@@ -49,7 +51,6 @@ namespace KSRotation.Services
                         _window.WindowState = WindowState.Normal;
                         _window.WindowState = WindowState.Maximized;
                         _window.Activate();
-                        _window.UpdateScaryokeOverlay(true);
                     }
                 });
             }
@@ -65,8 +66,20 @@ namespace KSRotation.Services
                             _openedForScaryoke = false;
                             Hide();
                         }
+                        else
+                        {
+                            PositionWindowOnTargetMonitor(_window, _selectedMonitorDevice);
+                        }
                     }
                 });
+            }
+        }
+
+        public void SetScaryokeOverlayVisible(bool isVisible)
+        {
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.UpdateScaryokeOverlay(isVisible));
             }
         }
 
@@ -79,8 +92,15 @@ namespace KSRotation.Services
             }
         }
 
+        public void SetScaryokeTargetSinger(string singerName)
+        {
+            _viewModel.ScaryokeTargetSingerName = singerName ?? string.Empty;
+        }
+
         public void StartScaryokeSpin(double targetAngle, double duration)
         {
+            _viewModel.ScaryokeResultText = "SPINNING...";
+            _viewModel.ScaryokeResultDetail = "Spinning the wheel to seal a singer's fate...";
             if (_window != null)
             {
                 _window.Dispatcher.InvokeAsync(() => _window.StartScaryokeSpin(targetAngle, duration));
@@ -124,8 +144,6 @@ namespace KSRotation.Services
             }
         }
 
-        public void SetLastSongBanner(string? path) => SetSpecialEventBanner(path);
-
         private readonly CastingService _casting;
         private DisplayTarget _rotationTarget = DisplayTarget.Monitor;
 
@@ -147,6 +165,30 @@ namespace KSRotation.Services
         public void SetSelectedMonitor(string deviceName)
         {
             _selectedMonitorDevice = deviceName ?? string.Empty;
+        }
+
+        public void SetScaryokeMonitor(string deviceName)
+        {
+            _scaryokeMonitorDevice = deviceName ?? string.Empty;
+            if (_window != null && _viewModel.IsScaryokeActive)
+            {
+                _window.Dispatcher.InvokeAsync(() =>
+                {
+                    if (_window != null)
+                    {
+                        PositionWindowOnTargetMonitor(_window, GetEffectiveMonitorDevice());
+                    }
+                });
+            }
+        }
+
+        private string GetEffectiveMonitorDevice()
+        {
+            if (_viewModel.IsScaryokeActive && !string.IsNullOrWhiteSpace(_scaryokeMonitorDevice))
+            {
+                return _scaryokeMonitorDevice;
+            }
+            return _selectedMonitorDevice;
         }
 
         public async Task<bool> MoveRotationTo(DisplayTarget target)
@@ -470,12 +512,13 @@ namespace KSRotation.Services
             _window = null;
         }
 
-        private bool PositionWindowOnTargetMonitor(Window window)
+        private bool PositionWindowOnTargetMonitor(Window window, string? overrideDevice = null)
         {
             ArgumentNullException.ThrowIfNull(window);
 
             Screen[] screens = Screen.AllScreens;
-            Screen? targetScreen = WindowPositioner.ResolveByDeviceName(screens, _selectedMonitorDevice);
+            string targetDevice = !string.IsNullOrEmpty(overrideDevice) ? overrideDevice : GetEffectiveMonitorDevice();
+            Screen? targetScreen = WindowPositioner.ResolveByDeviceName(screens, targetDevice);
             if (targetScreen == null)
             {
                 return false;

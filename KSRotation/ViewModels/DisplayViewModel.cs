@@ -1,4 +1,4 @@
-// Edited on Oct 25, 2026 @ 23:55:00 -> Add Scaryoke display properties to DisplayViewModel
+// Edited on Oct 27, 2026 @ 10:55:00 -> Add ScaryokeTargetSingerName and HasScaryokeTargetSinger properties
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -22,6 +22,12 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string ScaryokeResultDetail { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasScaryokeTargetSinger))]
+        public partial string ScaryokeTargetSingerName { get; set; } = string.Empty;
+
+        public bool HasScaryokeTargetSinger => !string.IsNullOrWhiteSpace(ScaryokeTargetSingerName);
 
         [ObservableProperty]
         public partial int ActiveSingerCount { get; set; }
@@ -104,6 +110,41 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ShowSpectrum { get; set; }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasCurrentSingerScaryoke))]
+        [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeBrush))]
+        public partial string CurrentSingerScaryokeCategory { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeBrush))]
+        public partial string CurrentSingerScaryokeColor { get; set; } = string.Empty;
+
+        public bool HasCurrentSingerScaryoke => !string.IsNullOrWhiteSpace(CurrentSingerScaryokeCategory);
+
+        public System.Windows.Media.Brush CurrentSingerScaryokeBrush => GetBrushFromHex(CurrentSingerScaryokeColor);
+
+        private static readonly Dictionary<string, System.Windows.Media.SolidColorBrush> _scaryokeBrushCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public static System.Windows.Media.SolidColorBrush GetBrushFromHex(string? hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex)) hex = "#FF6D00";
+            if (_scaryokeBrushCache.TryGetValue(hex, out var brush)) return brush;
+            try
+            {
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+                var b = new System.Windows.Media.SolidColorBrush(color);
+                b.Freeze();
+                if (_scaryokeBrushCache.Count < 128) _scaryokeBrushCache[hex] = b;
+                return b;
+            }
+            catch
+            {
+                var fallback = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x6D, 0x00));
+                fallback.Freeze();
+                return fallback;
+            }
+        }
+
         public sealed record NextSingerDisplay
         {
             public string Text { get; init; }
@@ -115,8 +156,12 @@ namespace KSRotation.ViewModels
             public string WaitTime { get; init; }
             public bool HasSong => !string.IsNullOrWhiteSpace(Song);
             public bool HasWaitTime => !string.IsNullOrWhiteSpace(WaitTime);
+            public string ScaryokeCategory { get; init; } = string.Empty;
+            public string ScaryokeColor { get; init; } = string.Empty;
+            public bool HasScaryokeCategory => !string.IsNullOrWhiteSpace(ScaryokeCategory);
+            public System.Windows.Media.Brush ScaryokeBrush => DisplayViewModel.GetBrushFromHex(ScaryokeColor);
 
-            public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "", bool isSpecial = false)
+            public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "", bool isSpecial = false, string scaryokeCategory = "", string scaryokeColor = "")
             {
                 Text = text;
                 IsRotationStart = isRotationStart;
@@ -124,6 +169,8 @@ namespace KSRotation.ViewModels
                 SingerName = string.IsNullOrWhiteSpace(singerName) ? text : singerName;
                 Song = song;
                 WaitTime = waitTime;
+                ScaryokeCategory = scaryokeCategory ?? string.Empty;
+                ScaryokeColor = scaryokeColor ?? string.Empty;
             }
         }
 
@@ -324,6 +371,8 @@ namespace KSRotation.ViewModels
                 CurrentSingerIsSpecial = false;
                 CurrentSingerAvatar = null;
                 HasCurrentSingerAvatar = false;
+                CurrentSingerScaryokeCategory = string.Empty;
+                CurrentSingerScaryokeColor = string.Empty;
                 ActiveSingerCount = 0;
                 ActiveSingerCountText = "0 Singers in Rotation";
                 HasActiveSingers = false;
@@ -362,6 +411,8 @@ namespace KSRotation.ViewModels
                 IsCurrentMusic = false;
                 CurrentSingerAvatar = null;
                 HasCurrentSingerAvatar = false;
+                CurrentSingerScaryokeCategory = string.Empty;
+                CurrentSingerScaryokeColor = string.Empty;
                 NextSingers.Clear();
                 FullRotation.Clear();
                 RotationEntries.Clear();
@@ -372,6 +423,8 @@ namespace KSRotation.ViewModels
                 CurrentSingerIsRotationStart = current.IsRotationStart;
                 CurrentSingerIsSpecial = current.IsSpecial;
                 IsCurrentMusic = current.IsMusic;
+                CurrentSingerScaryokeCategory = current.ScaryokeCategory ?? string.Empty;
+                CurrentSingerScaryokeColor = current.ScaryokeColor ?? string.Empty;
                 if (current.IsMusic)
                 {
                     CurrentSinger = $"[MUSIC] {current.Song} (Req. by {current.Name})";
@@ -436,14 +489,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
-                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial));
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
                     }
                 }
             }
@@ -459,14 +512,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
-                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial));
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
                     }
                 }
             }
@@ -503,7 +556,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart, singer.IsSpecial));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
                 }
             }
             else
@@ -526,7 +579,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false, singer.IsRotationStart, singer.IsSpecial));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false, singer.IsRotationStart, singer.IsSpecial, singer.ScaryokeCategory ?? "", singer.ScaryokeColor ?? ""));
 
                     index++;
                 }
@@ -566,6 +619,12 @@ namespace KSRotation.ViewModels
             string ArtistInParentheses,
             bool IsCurrent,
             bool IsRotationStart,
-            bool IsSpecial = false);
+            bool IsSpecial = false,
+            string ScaryokeCategory = "",
+            string ScaryokeColor = "")
+        {
+            public bool HasScaryoke => !string.IsNullOrWhiteSpace(ScaryokeCategory);
+            public System.Windows.Media.Brush ScaryokeBrush => DisplayViewModel.GetBrushFromHex(ScaryokeColor);
+        }
     }
 }

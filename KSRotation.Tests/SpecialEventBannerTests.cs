@@ -71,4 +71,37 @@ public class SpecialEventBannerTests
             }
         }
     }
+
+    [Fact]
+    public void ResolveSpecialEventBannerPath_ReturnsNullForNoneOrEmpty()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), $"banner_test_{Guid.NewGuid():N}");
+        Assert.Null(DjBannerFileManager.ResolveSpecialEventBannerPath(null, [], dir));
+        Assert.Null(DjBannerFileManager.ResolveSpecialEventBannerPath("", [], dir));
+        Assert.Null(DjBannerFileManager.ResolveSpecialEventBannerPath("None", [], dir));
+    }
+
+    [Fact]
+    public void ResolveSpecialEventBannerPath_GeneratesMissingStandardBannerAndHonorsCustomFile()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), $"banner_test_{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(dir);
+
+            string? birthday = DjBannerFileManager.ResolveSpecialEventBannerPath("Birthday", [], dir);
+            Assert.Equal(Path.Combine(dir, "Birthday.png"), birthday);
+            Assert.True(File.Exists(birthday));
+
+            File.WriteAllBytes(Path.Combine(dir, "finals.png"), [1]);
+            var custom = new[] { new SpecialEventConfig { EventName = "Trivia Finals", BannerFileName = "finals.png" } };
+            Assert.Equal(Path.Combine(dir, "finals.png"), DjBannerFileManager.ResolveSpecialEventBannerPath("Trivia Finals", custom, dir));
+
+            Assert.Null(DjBannerFileManager.ResolveSpecialEventBannerPath("Unknown Event", [], dir));
+        }
+        finally
+        {
+            try { Directory.Delete(dir, true); } catch { }
+        }
+    }
 }

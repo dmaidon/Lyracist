@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 13:17:00 -> Use Ellipse ImageBrush for circular performer avatars to prevent square edge bleed -->
+<!-- Edited on Oct 27, 2026 @ 12:20:00 -> Add Scaryoke category badges to all themed projection panels and singer displays -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -171,6 +171,11 @@
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
                     </Border>
+                    <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,3" Margin="0,12,14,0" VerticalAlignment="Top"
+                            ToolTip="Scaryoke Challenge Category"
+                            Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
                     <TextBlock Text="{Binding CurrentSinger}"
                                FontSize="72"
                                FontWeight="ExtraBold"
@@ -238,6 +243,11 @@
                                                          ToolTip="Rotation Anchor (marks where a round begins)"
                                                          Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                      <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                                 </Border>
+                                                 <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                         ToolTip="Scaryoke Challenge Category"
+                                                         Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                     <TextBlock Text="{Binding ScaryokeCategory}" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                                  </Border>
                                                  <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center">
                                                      <TextBlock.Style>
@@ -488,6 +498,11 @@
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                         </Border>
+                        <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="12,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                ToolTip="Scaryoke Challenge Category"
+                                Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                        </Border>
                         <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSinger}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
@@ -566,6 +581,11 @@
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                            </Border>
+                                            <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                    ToolTip="Scaryoke Challenge Category"
+                                                    Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding ScaryokeCategory}" FontSize="10" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                             <TextBlock Text="{Binding Text}"
                                                        FontSize="18"
@@ -674,6 +694,14 @@
                             </Border.Effect>
                             <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                         </Border>
+                        <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="12,4" Margin="6,0"
+                                ToolTip="Scaryoke Challenge Category"
+                                Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="0" Opacity="0.8" />
+                            </Border.Effect>
+                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                        </Border>
                     </StackPanel>
 
                     <!-- Current Singer Name (Viewbox for auto-fit scaling, pure white with black drop shadow) -->
@@ -778,6 +806,11 @@
                                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                                 Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                        </Border>
+                                        <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                ToolTip="Scaryoke Challenge Category"
+                                                Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding ScaryokeCategory}" FontSize="10" FontWeight="ExtraBold" Foreground="White" />
                                         </Border>
                                         <TextBlock Text="{Binding Text}"
                                                    FontSize="18"
@@ -952,6 +985,11 @@
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="⚓ ANCHOR" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
                     </Border>
+                    <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
+                            ToolTip="Scaryoke Challenge Category"
+                            Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
                     <TextBlock Text="{Binding CurrentSinger}"
                                TextWrapping="Wrap"
                                FontSize="78"
@@ -1002,6 +1040,11 @@
                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                    </Border>
+                                    <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                            ToolTip="Scaryoke Challenge Category"
+                                            Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding ScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
                                     </Border>
                                     <TextBlock Text="{Binding Text}"
                                                FontSize="24"
@@ -1133,6 +1176,11 @@
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                         </Border>
+                        <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                ToolTip="Scaryoke Challenge Category"
+                                Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                        </Border>
 
                         <TextBlock Text="{Binding CurrentSinger}"
                                    HorizontalAlignment="Center"
@@ -1185,6 +1233,11 @@
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                            </Border>
+                                            <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                    ToolTip="Scaryoke Challenge Category"
+                                                    Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding ScaryokeCategory}" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                             </Border>
                                             <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE6DCFF" />
                                         </StackPanel>
@@ -1285,6 +1338,11 @@
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                     </Border>
+                    <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                            ToolTip="Scaryoke Challenge Category"
+                            Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
 
                     <TextBlock Text="{Binding CurrentSinger}"
                                HorizontalAlignment="Center"
@@ -1337,6 +1395,11 @@
                                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                                 Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                        </Border>
+                                        <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                ToolTip="Scaryoke Challenge Category"
+                                                Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding ScaryokeCategory}" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                         </Border>
                                         <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE0F0FF" />
                                     </StackPanel>
@@ -1394,6 +1457,11 @@
                         Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                 </Border>
+                <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                        ToolTip="Scaryoke Challenge Category"
+                        Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                </Border>
 
                 <TextBlock Text="{Binding CurrentSinger}"
                            HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
@@ -1441,6 +1509,11 @@
                                         ToolTip="Rotation Anchor (marks where a round begins)"
                                         Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="⚓" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+                                <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        ToolTip="Scaryoke Challenge Category"
+                                        Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding ScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
                                 </Border>
                                 <TextBlock Text="{Binding Text}" Foreground="#FFF0E0FF" FontWeight="SemiBold" TextAlignment="Center">
                                     <TextBlock.FontSize>
@@ -1705,6 +1778,11 @@
                                             Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Text="⭐ SPECIAL" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
                                     </Border>
+                                    <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,3" Margin="8,0,0,0"
+                                            ToolTip="Scaryoke Challenge Category"
+                                            Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
+                                    </Border>
                                 </StackPanel>
                                 <TextBlock Text="{Binding CurrentSinger}"
                                            TextWrapping="Wrap" FontSize="52" FontWeight="Black" Foreground="#FFFFFAF0" TextOptions.TextFormattingMode="Ideal">
@@ -1778,6 +1856,11 @@
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                                    </Border>
+                                                    <Border Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="4,1" Margin="0,0,0,4" HorizontalAlignment="Center"
+                                                            ToolTip="Scaryoke Challenge Category"
+                                                            Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="{Binding ScaryokeCategory}" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                                     </Border>
                                                     <TextBlock Text="{Binding Text}" FontSize="16" FontWeight="Bold" Foreground="#FFFFF0D0" TextAlignment="Center" TextWrapping="Wrap" />
                                                 </StackPanel>
@@ -1955,6 +2038,11 @@
                                     Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="⭐ SPECIAL" FontSize="16" FontWeight="ExtraBold" Foreground="White"/>
                             </Border>
+                            <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,8" HorizontalAlignment="Center"
+                                    ToolTip="Scaryoke Challenge Category"
+                                    Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="16" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
 
                             <TextBlock Text="{Binding CurrentSinger}"
                                        HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
@@ -2040,6 +2128,11 @@
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                    </Border>
+                                                    <Border Background="{Binding ScaryokeBrush}" CornerRadius="5" Padding="5,2" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                            ToolTip="Scaryoke Challenge Category"
+                                                            Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="{Binding ScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                                     </Border>
                                                 </StackPanel>
 
@@ -2155,6 +2248,11 @@
                                                     Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <TextBlock Text="⭐ SPECIAL" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
                                             </Border>
+                                            <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,2" Margin="8,0,0,0"
+                                                    ToolTip="Scaryoke Challenge Category"
+                                                    Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
+                                            </Border>
                                         </StackPanel>
                                         <TextBlock Text="{Binding CurrentSinger}"
                                                    TextWrapping="Wrap"
@@ -2215,6 +2313,11 @@
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                    </Border>
+                                                    <Border Grid.Row="0" Background="{Binding ScaryokeBrush}" CornerRadius="4" Padding="4,2" HorizontalAlignment="Right" Margin="0,0,0,4"
+                                                            ToolTip="Scaryoke Challenge Category"
+                                                            Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="{Binding ScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                                     </Border>
                                                     <TextBlock Grid.Row="1" Text="{Binding Text}" FontSize="23" Foreground="#FF00FF88" FontFamily="Consolas, Segoe UI" FontWeight="Bold"
                                                                TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />

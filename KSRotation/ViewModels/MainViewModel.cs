@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 23:20:00 -> Add live active banner preview on host computer console and ensure special event display state updates
+// Edited on Oct 27, 2026 @ 11:52:00 -> Ensure ScaryokeMonitorDevice is loaded before monitor refresh and defaulted if unassigned
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -473,7 +473,7 @@ namespace KSRotation.ViewModels
                 case nameof(ActiveSpecialEvent):
                     SyncSpecialEventOptions(ActiveSpecialEvent);
                     UpdateDjBannerPath();
-                    UpdateLastSongState();
+                    UpdateSpecialEventDisplayState();
                     QueueSaveSettings();
                     RebuildRotationJsonCacheNow();
 #if !MAUI
@@ -1536,12 +1536,14 @@ namespace KSRotation.ViewModels
 
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
+            ScaryokeMonitorDevice = _scaryokeSettings.SelectedMonitorDevice ?? string.Empty;
             ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
                 ? "All Screens / Monitors"
                 : settings.ConnectInstructionsScreen;
 
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+            _displayWindowService.SetScaryokeMonitor(ScaryokeMonitorDevice);
             RefreshAvailableMonitors();
 #if !MAUI
             MonitorEnumerator.MonitorsChanged += (s, e) => RefreshAvailableMonitors();
@@ -1603,7 +1605,7 @@ namespace KSRotation.ViewModels
 
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
             _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
-            UpdateLastSongState();
+            UpdateSpecialEventDisplayState();
 
             RefreshAvailableDjBanners();
             _displayWindowService.SetJumbotronBanner(SelectedJumbotronBannerPath);
@@ -2282,6 +2284,10 @@ namespace KSRotation.ViewModels
                         entry.Song = string.Empty;
                         entry.Artist = string.Empty;
                     }
+
+                    // Clear any Scaryoke challenge assignment until their next spin
+                    entry.ScaryokeCategory = null;
+                    entry.ScaryokeColor = null;
 
                     if (IsLastRound)
                     {
@@ -3664,6 +3670,7 @@ namespace KSRotation.ViewModels
                 string currentSelection = SelectedMonitorDevice;
                 string currentDjBannerSelection = DjBannerMonitorDevice;
                 string currentConnectSelection = ConnectInstructionsScreen;
+                string currentScaryokeSelection = ScaryokeMonitorDevice;
 
                 AvailableMonitors.Clear();
                 AvailableMonitorsWithAll.Clear();
@@ -3743,6 +3750,33 @@ namespace KSRotation.ViewModels
                 {
                     ConnectInstructionsScreen = "All Screens / Monitors";
                 }
+
+                // 4. Restore or default ScaryokeMonitorDevice
+                var matchedScaryoke = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, currentScaryokeSelection, StringComparison.OrdinalIgnoreCase));
+                if (matchedScaryoke != null)
+                {
+                    ScaryokeMonitorDevice = matchedScaryoke.DeviceName;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(SelectedMonitorDevice) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        ScaryokeMonitorDevice = SelectedMonitorDevice;
+                    }
+                    else if (monitors.Count > 1)
+                    {
+                        ScaryokeMonitorDevice = monitors[1].DeviceName;
+                    }
+                    else if (monitors.Count > 0)
+                    {
+                        ScaryokeMonitorDevice = monitors[0].DeviceName;
+                    }
+                    else
+                    {
+                        ScaryokeMonitorDevice = string.Empty;
+                    }
+                }
+                _displayWindowService.SetScaryokeMonitor(ScaryokeMonitorDevice);
             }
             finally
             {
@@ -3906,51 +3940,9 @@ namespace KSRotation.ViewModels
         }
 
         private string? ResolveActiveSpecialEventBannerPath()
+        
         {
-            if (string.IsNullOrEmpty(ActiveSpecialEvent) ||
-                ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-
-            if (ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
-            {
-                string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
-                if (File.Exists(lastSongPath))
-                {
-                    return lastSongPath;
-                }
-            }
-            else if (ActiveSpecialEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
-            {
-                string? announcementPath = DjBannerFileManager.GetCurrentAnnouncementPath(Globals.EventBannersDir);
-                if (announcementPath != null && File.Exists(announcementPath))
-                {
-                    return announcementPath;
-                }
-            }
-            else
-            {
-                var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
-                string fileName = eventConfig != null && !string.IsNullOrWhiteSpace(eventConfig.BannerFileName)
-                    ? eventConfig.BannerFileName
-                    : DjBannerFileManager.GetStandardBannerFileName(ActiveSpecialEvent);
-
-                if (!string.IsNullOrWhiteSpace(fileName) && !fileName.Equals("None", StringComparison.OrdinalIgnoreCase))
-                {
-                    string fullPath = Path.Combine(Globals.EventBannersDir, fileName);
-                    if (!File.Exists(fullPath) && DjBannerFileManager.StandardEventNames.Any(s => s.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        DjBannerFileManager.EnsureStandardEventBanners(Globals.EventBannersDir);
-                    }
-                    if (File.Exists(fullPath))
-                    {
-                        return fullPath;
-                    }
-                }
-            }
-
-            return null;
+            return DjBannerFileManager.ResolveSpecialEventBannerPath(ActiveSpecialEvent, SpecialEvents, Globals.EventBannersDir);
         }
 
         private string ResolveActiveBannerPath()
@@ -3969,8 +3961,6 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetSpecialEventBanner(activePath);
             UpdateActiveBannerPreview();
         }
-
-        private void UpdateLastSongState() => UpdateSpecialEventDisplayState();
 
         private void UpdateDjBannerPath()
         {

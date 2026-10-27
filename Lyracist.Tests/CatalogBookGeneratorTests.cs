@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 23:05:00 -> Update user manuals for special event banner display on rotation screen
+// Edited on Oct 27, 2026 @ 13:00:00 -> Update user manuals for multi-singer sequential spin targeting with post-spin reveals
 using System;
 using System.IO;
 using Xunit;
@@ -5813,6 +5813,928 @@ Ensured all active special event banners (Birthday, Wedding, Engagement, Anniver
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeModeAndSingerSpinAhead()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"KSRotation & Lyracist: Scaryoke Mode, Upcoming Singer Wheel Spin Ahead & Category Badges - (October 2026)
+
+Section: Entertainment & Gamification / Scaryoke Mode & Singer Preparation
+
+[Overview & Features]
+Introduced comprehensive 'Scaryoke Mode' workflow enhancements allowing the host DJ or remote tablet operator to spin the challenge wheel for upcoming singers 4-5 or more slots ahead in the rotation, giving singers time to select and prepare their songs before taking the stage.
+
+1. Scaryoke Mode Activation & Host Controls:
+   - Dedicated 'Scaryoke Mode' toggle button on the main toolbar switches the rotation system into Scaryoke event mode.
+   - The desktop Scaryoke Controller window provides an upcoming Singer Selector ComboBox and split spin buttons:
+     * '🎧 BOOTH SPIN (QUIET)': Performs a fast, quiet wheel spin on the host laptop or tablet to assign the challenge category to the selected upcoming singer without interrupting the stage screen or current performer.
+     * '📺 PROJECT SPIN': Shows the full-screen animated spinning wheel overlay on the audience projection display, announces the winning challenge, and auto-dismisses after 4.5 seconds to smoothly return to the rotation queue.
+
+2. Singer List Challenge Badges & Actions:
+   - Singer rows in the main rotation list display high-contrast category badges (e.g., 🎃 [80s Hits]) in the wheel segment's distinct color.
+   - Singer rows feature an inline '🎃 Spin' / '🎃 Re-Spin' button when Scaryoke Mode is active.
+   - The singer context menu includes dedicated actions:
+     * '🎃 Scaryoke: Spin for Singer (Booth / Quiet)'
+     * '🎃 Scaryoke: Spin & Project to Screen'
+     * '✕ Clear Scaryoke Challenge'
+
+3. Live Audience Projection Display:
+   - The audience rotation screen displays the assigned Scaryoke challenge category badge next to each performer's name in both standard and themed projection views (Marquee, Curtain, etc.).
+   - When a performer takes the stage, their 'Now Singing' and 'Up Next' banners prominently highlight their assigned Scaryoke category badge in the wheel segment color.
+
+4. Remote DJ Web Station (dj.html):
+   - Queue cards on the DJ portal display the Scaryoke category badge in real time.
+   - Each singer card provides a quick '🎃 Spin' button for convenient booth-side assignment.
+   - The Scaryoke popup modal includes an upcoming singer selection dropdown and dual '🎧 BOOTH SPIN' vs '📺 PROJECT SPIN' controls.";
+
+            // 1. Update text file
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Mode, Upcoming Singer Wheel Spin Ahead"))
+                {
+                    File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 11:35:00 -> Document Scaryoke Mode upcoming singer spin and category badges\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                }
+            }
+
+            // 2. Update DOCX manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (p.Text != null && p.Text.Contains("Scaryoke Mode, Upcoming Singer Wheel Spin Ahead"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Scaryoke Mode & Singer Preparation")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                {
+                                    if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string? keywords = doc.Info.Keywords;
+                        if (keywords == null || !keywords.Contains("ScaryokeModeSingerSpinAhead"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.A4;
+
+                            using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                            {
+                                var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                double y = 40;
+                                gfx.DrawString("Scaryoke Mode: Upcoming Singer Wheel Spin Ahead & Category Badges", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                y += 24;
+
+                                var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                foreach (var line in lines)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line))
+                                    {
+                                        y += 8;
+                                        continue;
+                                    }
+                                    gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 14;
+
+                                    if (y > page.Height.Point - 40)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.A4;
+                                        gfx.Dispose();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeModeSingerSpinAhead";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeBatchSpinAheadAndClearAll()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"KSRotation & Lyracist: Scaryoke Batch Spin Ahead & Entire Rotation Assignment - (October 2026)
+
+Section: Entertainment & Gamification / Scaryoke Batch Spin Ahead & Entire Rotation
+
+[Overview & Features]
+Added an automated batch spinning feature allowing the host DJ or tablet manager to spin ahead for multiple upcoming singers (e.g. Next 3, Next 5, Next 10) or spin the entire rotation at once in a single operation.
+
+1. Batch Spin Ahead Options:
+   - Host Controller Window (ScaryokeControlWindow):
+     * Added '⚡ Batch Spin Ahead' controls directly below the main spin buttons.
+     * Quick-action buttons: 'Next 3', 'Next 5', and 'Entire Rotation' to assign categories across the rotation in fractions of a second.
+     * 'Skip singers who already have an assigned category' checkbox prevents overwriting singers who have already received and rehearsed their challenges.
+     * '✕ Clear All' button to reset all Scaryoke categories across the rotation in one click.
+
+2. Main Rotation Toolbar & Singer Context Menu:
+   - Dedicated '⚡ Batch ▾' button on the main toolbar when Scaryoke Mode is active.
+   - Left-clicking drops down batch spin commands: 'Spin Next 3 Singers', 'Spin Next 5 Singers', 'Spin Next 10 Singers', 'Spin Entire Rotation (All Active)', and 'Clear All Scaryoke Categories'.
+   - The singer list row context menu includes a matching '⚡ Scaryoke: Batch Spin Ahead' submenu.
+
+3. Mobile DJ Web Station (dj.html):
+   - Added a '⚡ Batch Spin Ahead' card in the Scaryoke popup modal on mobile tablets and remote phones.
+   - Remote DJs can trigger 'Next 3', 'Next 5', 'Entire Rotation', and '✕ Clear All' remotely over Wi-Fi.
+
+4. Smart Randomization & Consecutive Duplicate Avoidance:
+   - Batch spins automatically cycle through wheel slices while adhering to consecutive duplicate avoidance rules, ensuring adjacent singers in the queue do not receive the same category challenge.";
+
+            // 1. Update text file
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Scaryoke Batch Spin Ahead & Entire Rotation Assignment"))
+                {
+                    File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 11:25:00 -> Document Scaryoke batch spin ahead and entire rotation assignment\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                }
+            }
+
+            // 2. Update DOCX manual
+            if (File.Exists(docxPath))
+            {
+                try
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (p.Text != null && p.Text.Contains("Scaryoke Batch Spin Ahead & Entire Rotation Assignment"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Scaryoke Batch Spin Ahead")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                {
+                                    if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                }
+            }
+
+            // 3. Update PDF manual
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                    {
+                        PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                    }
+
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string? keywords = doc.Info.Keywords;
+                        if (keywords == null || !keywords.Contains("ScaryokeBatchSpinAhead"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.A4;
+
+                            using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                            {
+                                var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                double y = 40;
+                                gfx.DrawString("Scaryoke Batch Spin Ahead & Entire Rotation Assignment", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                y += 24;
+
+                                var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                foreach (var line in lines)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line))
+                                    {
+                                        y += 8;
+                                        continue;
+                                    }
+                                    gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 14;
+
+                                    if (y > page.Height.Point - 40)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.A4;
+                                        gfx.Dispose();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeBatchSpinAhead";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeBadgeClearMonitorSelectAndDisplayColumns()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string txtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                string updateText = @"KSRotation & Lyracist: Scaryoke Challenge Badge Auto-Clear, Dedicated Wheel Monitor Routing, and Display Layout Optimizations
+
+1. Performer Challenge Badge Lifecycle & Auto-Clearing:
+   - When a performer finishes their performance and is marked finished/done (via DJ console, remote portal, or auto-advance), their assigned Scaryoke category challenge badge and wheel slice color automatically clear.
+   - The singer's badge remains clean during subsequent wait times in the queue until the DJ or host spins the wheel for them again.
+   - Applies seamlessly across booth spins, audience project spins, batch spin aheads, and mobile DJ remote actions.
+
+2. Dedicated Audience Wheel Monitor Routing in KSRotation:
+   - Added an 'Audience Wheel Display & Monitor Routing' configuration section in the KSRotation Scaryoke Settings tab.
+   - Allows DJs and hosts to select which physical screen or projection display will present the interactive Scaryoke Wheel to the crowd.
+   - Supports multi-monitor setups with secondary audience screens, projectors, and video walls, with persistent device memory across application restarts.
+   - Includes an 'Identify' button to flash screen numbers across all connected physical monitors for rapid configuration at venue setups.
+
+3. KSRotation Display Page Column Layout Optimizations:
+   - Refined column width proportions on the Display settings tab to optimize layout density on standard 1920x1080 venue laptops and consoles:
+     * Screen Rotation column width narrowed from 1.0x to 0.7x to eliminate excess empty whitespace.
+     * Columns 3 and 4 (hosting DJ & Special Event Banners) expanded from 2.0x combined to 2.5x combined (a 25% width increase).
+     * Special Event Banners Mapping header grid reorganized to vertically align the mapping title, 'Upload Banner', and 'Add Event' buttons on a single clean row, eliminating button truncation, clipping, and text overlapping.";
+
+                // 1. Update text file
+                if (File.Exists(txtPath))
+                {
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Scaryoke Challenge Badge Auto-Clear, Dedicated Wheel Monitor Routing"))
+                    {
+                        File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 11:35:00 -> Document Scaryoke badge clearing, monitor routing, and display layout adjustments\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                    }
+                }
+
+                // 2. Update DOCX manual
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Scaryoke Challenge Badge Auto-Clear, Dedicated Wheel Monitor Routing"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Scaryoke Badge Clear, Monitor Select, & Display Layout")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                // 3. Update PDF manual
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("ScaryokeBadgeClearMonitorSelect"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Scaryoke Badge Clear, Monitor Selection, and Display Layout", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeBadgeClearMonitorSelect";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeCategoryOnRotationScreens()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string txtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                string updateText = @"KSRotation & Lyracist: Scaryoke Challenge Category Display Across All Rotation Screens & Themed Views
+
+1. Venue Projection & Stage Display Integration:
+   - Added color-coded Scaryoke Challenge Category badges ('🎃 {Category}') to all singer projection screens in both KSRotation and Lyracist.
+   - For Current Performer / On-Stage view: prominent badge with customized wheel slice palette background color and bold white typography.
+   - For Upcoming / On-Deck / Next Singers lists: every queued singer with an assigned challenge displays their category badge alongside their name, estimated wait time, and anchor status.
+   - Supported across all 11 themed projection styles:
+     * Standard / Normal Rotation Panel
+     * Retro Theatre Marquee Panel
+     * Theatre Curtain Call Panel
+     * Stadium Arena Jumbotron Panel
+     * Vinyl Record Lounge Panel
+     * Studio Disco Panel
+     * Synthwave Neon Grid Panel
+     * Outdoor Music Festival Panel
+     * Las Vegas Slot Reels Panel
+     * Classic Chrome Jukebox Panel
+     * Sports Stadium Scoreboard Panel
+   - Star Wars 3D Crawl: dynamically incorporates the performer's challenge category ('[🎃 {Category}]') trailing their name in the 3D perspective scroll.
+
+2. DJ Management Console Rotation Views:
+   - Lyracist Rotation Page: Each singer row in the rotation queue displays their custom color-coded '🎃 {Category}' badge adjacent to Special Performer and Anchor badges.
+   - Lyracist Karaoke Page: Singer rotation queue items present the assigned Scaryoke badge with informative tooltips.
+   - KSRotation Console: Singer cards and queue rows feature matching custom-styled category badges.";
+
+                // 1. Update text file
+                if (File.Exists(txtPath))
+                {
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Scaryoke Challenge Category Display Across All Rotation Screens"))
+                    {
+                        File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 12:26:00 -> Document Scaryoke category badges on all rotation screens and themed displays\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                    }
+                }
+
+                // 2. Update DOCX manual
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Scaryoke Challenge Category Display Across All Rotation Screens"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Scaryoke Category Display on Rotation Screens")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                // 3. Update PDF manual
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("ScaryokeCategoryOnRotationScreens"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Scaryoke Category Display on All Rotation Screens", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokeCategoryOnRotationScreens";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeCategoryPostSpinOnly()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string txtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                string updateText = @"KSRotation & Lyracist: Scaryoke Category Display Post-Spin Requirement - (October 2026)
+
+Section: Entertainment & Gamification / Scaryoke Wheel Spin & Challenge Assignment
+
+1. Real-Time Spin Roulette & Post-Spin Category Reveal:
+   - Challenge categories are strictly assigned and revealed AFTER the Scaryoke Wheel has completed its spin animation and decelerated onto the winning slice.
+   - While the wheel is actively spinning, the stage banner and result screens display 'SPINNING...' to preserve genuine roulette suspense for the audience and performer.
+   - Batch spin-ahead mechanisms that pre-assigned categories across upcoming singers in advance have been decommissioned from host and remote toolbars.
+   - The primary '🎲 Spin' toolbar button in KSRotation instantly triggers the active spin for the current or selected performer.
+   - Hosts and DJs retain the '✕ Clear All' button and per-singer context menu controls to reset challenges at any time.";
+
+                // 1. Update text file
+                if (File.Exists(txtPath))
+                {
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Scaryoke Category Display Post-Spin Requirement"))
+                    {
+                        File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 12:40:00 -> Document Scaryoke category post-spin reveal and removal of pre-assignment\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                    }
+                }
+
+                // 2. Update DOCX manual
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Scaryoke Category Display Post-Spin Requirement"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Scaryoke Post-Spin Category Reveal")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                // 3. Update PDF manual
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("ScaryokePostSpinReveal"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Scaryoke Category Display Post-Spin Requirement", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ScaryokePostSpinReveal";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForScaryokeMultiSingerSequentialSpinning()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string txtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                string updateText = @"KSRotation & Lyracist: Multi-Singer & Entire Rotation Sequential Spin Targeting - (October 2026)
+
+Section: Entertainment & Gamification / Scaryoke Multi-Singer & Entire Rotation Spinning
+
+1. Multi-Singer & Entire Rotation Targeting:
+   - Restored full capability to target multiple singers or the entire rotation at once ('Next 3', 'Next 5', 'Next 10', 'Entire Rotation').
+   - Accessible via the main toolbar button ('⚡ Multi-Spin ▾'), the singer context menu ('⚡ Scaryoke: Multi-Singer Spin'), the Scaryoke Controller window, and the remote mobile DJ board ('dj.html').
+   - Operates sequentially: the wheel spins for each targeted singer one after another, building excitement and assigning/revealing their category ONLY as each spin lands.
+   - Includes an in-flight '⏹ Stop' button on the controller and toolbar ('CancelBatchSpin') allowing hosts to halt multi-singer spinning at any point.
+   - Preserves duplicate avoidance rules across consecutive singers and respects the 'Skip singers who already have an assigned category' preference.";
+
+                // 1. Update text file
+                if (File.Exists(txtPath))
+                {
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Multi-Singer & Entire Rotation Sequential Spin Targeting"))
+                    {
+                        File.WriteAllText(txtPath, "// Edited on Oct 27, 2026 @ 13:00:00 -> Document restored multi-singer and entire rotation sequential spin targeting with post-spin reveals\r\n\r\n" + updateText + "\r\n\r\n" + content);
+                    }
+                }
+
+                // 2. Update DOCX manual
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Multi-Singer & Entire Rotation Sequential Spin Targeting"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Multi-Singer Sequential Spin")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                // 3. Update PDF manual
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("MultiSingerSequentialSpin"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Multi-Singer & Entire Rotation Sequential Spin Targeting", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " MultiSingerSequentialSpin";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
                 }
             }
         }

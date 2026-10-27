@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:53:00 -> Sync IsPreShowActive with WelcomeScreenService to hold welcome screens
+// Edited on Oct 27, 2026 @ 12:15:00 -> Add ScaryokeCategory, ScaryokeBrush and properties to RotationWindowViewModel and NextSingerDisplay
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -57,6 +57,39 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _currentSingerHasRatings = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCurrentSingerScaryoke))]
+    [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeBrush))]
+    private string _currentSingerScaryokeCategory = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeBrush))]
+    private string _currentSingerScaryokeColor = string.Empty;
+
+    public bool HasCurrentSingerScaryoke => !string.IsNullOrWhiteSpace(CurrentSingerScaryokeCategory);
+    public System.Windows.Media.Brush CurrentSingerScaryokeBrush => GetBrushFromHex(CurrentSingerScaryokeColor);
+
+    private static readonly Dictionary<string, System.Windows.Media.SolidColorBrush> _scaryokeBrushCache = new(System.StringComparer.OrdinalIgnoreCase);
+
+    public static System.Windows.Media.Brush GetBrushFromHex(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return System.Windows.Media.Brushes.DarkOrange;
+        if (_scaryokeBrushCache.TryGetValue(hex, out var brush)) return brush;
+        try
+        {
+            var converted = System.Windows.Media.ColorConverter.ConvertFromString(hex);
+            if (converted is System.Windows.Media.Color c)
+            {
+                var b = new System.Windows.Media.SolidColorBrush(c);
+                b.Freeze();
+                if (_scaryokeBrushCache.Count < 128) _scaryokeBrushCache[hex] = b;
+                return b;
+            }
+        }
+        catch { }
+        return System.Windows.Media.Brushes.DarkOrange;
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowQueue))]
@@ -310,20 +343,28 @@ public partial class RotationWindowViewModel : BaseViewModel
     {
         public string Text { get; init; }
         public bool IsRotationStart { get; init; }
+        public bool IsSpecial { get; init; }
         public string SingerName { get; init; }
         public string Song { get; init; }
         public string SongTitle => Song;
         public string WaitTime { get; init; }
         public bool HasSong => !string.IsNullOrWhiteSpace(Song);
         public bool HasWaitTime => !string.IsNullOrWhiteSpace(WaitTime);
+        public string ScaryokeCategory { get; init; } = string.Empty;
+        public string ScaryokeColor { get; init; } = string.Empty;
+        public bool HasScaryokeCategory => !string.IsNullOrWhiteSpace(ScaryokeCategory);
+        public System.Windows.Media.Brush ScaryokeBrush => RotationWindowViewModel.GetBrushFromHex(ScaryokeColor);
 
-        public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "")
+        public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "", bool isSpecial = false, string scaryokeCategory = "", string scaryokeColor = "")
         {
             Text = text;
             IsRotationStart = isRotationStart;
             SingerName = string.IsNullOrWhiteSpace(singerName) ? text : singerName;
             Song = song;
             WaitTime = waitTime;
+            IsSpecial = isSpecial;
+            ScaryokeCategory = scaryokeCategory ?? string.Empty;
+            ScaryokeColor = scaryokeColor ?? string.Empty;
         }
     }
 
@@ -443,6 +484,8 @@ public partial class RotationWindowViewModel : BaseViewModel
             }
             CurrentSingerAvatar = avatar;
             HasCurrentSingerAvatar = avatar != null;
+            CurrentSingerScaryokeCategory = now.ScaryokeCategory ?? string.Empty;
+            CurrentSingerScaryokeColor = now.ScaryokeColor ?? string.Empty;
         }
         else
         {
@@ -457,6 +500,8 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerIsSpecial = false;
             CurrentSingerAvatar = null;
             HasCurrentSingerAvatar = false;
+            CurrentSingerScaryokeCategory = string.Empty;
+            CurrentSingerScaryokeColor = string.Empty;
         }
 
         var next = visibleSingers.FirstOrDefault(s => s.IsNext);
@@ -490,7 +535,7 @@ public partial class RotationWindowViewModel : BaseViewModel
                     ? (string.IsNullOrWhiteSpace(candidate.Artist) ? candidate.SongTitle : $"{candidate.SongTitle} – {candidate.Artist}")
                     : candidate.SongTitle;
                 string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
-                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart, sName, songText ?? string.Empty, waitTime));
+                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart, sName, songText ?? string.Empty, waitTime, candidate.IsSpecial, candidate.ScaryokeCategory ?? string.Empty, candidate.ScaryokeColor ?? string.Empty));
             }
         }
         else
@@ -506,7 +551,7 @@ public partial class RotationWindowViewModel : BaseViewModel
                     ? (string.IsNullOrWhiteSpace(singer.Artist) ? singer.SongTitle : $"{singer.SongTitle} – {singer.Artist}")
                     : singer.SongTitle;
                 string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
-                nextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart, sName, songText ?? string.Empty, waitTime));
+                nextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart, sName, songText ?? string.Empty, waitTime, singer.IsSpecial, singer.ScaryokeCategory ?? string.Empty, singer.ScaryokeColor ?? string.Empty));
             }
         }
         SyncNextSingers(NextSingers, nextSingers);

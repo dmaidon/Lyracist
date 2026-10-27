@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 00:35:00 -> Guard Scaryoke state and DJ actions with #if !MAUI for cross-platform MAUI build compatibility
+// Edited on Oct 27, 2026 @ 13:00:00 -> Invoke BatchSpinScaryokeAsync for remote scaryoke-batch-spin action
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -456,6 +456,9 @@ namespace KSRotation.ViewModels
                 hasSungInLastRound = s.HasSungInLastRound,
                 vocalRange = s.VocalRange,
                 customTitle = s.CustomTitle,
+                scaryokeCategory = s.ScaryokeCategory ?? string.Empty,
+                scaryokeColor = s.ScaryokeColor ?? string.Empty,
+                hasScaryokeCategory = s.HasScaryokeCategory,
                 queuedSongs = s.QueuedSongs.ConvertAll(q => new QueuedSongDto { song = q.Song, artist = q.Artist }),
                 song1Completed = s.Song1Completed,
                 song2Completed = s.Song2Completed,
@@ -794,7 +797,27 @@ namespace KSRotation.ViewModels
                     }
                 case "scaryoke-spin":
                     {
-                        _ = SpinScaryokeWheelAsync();
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        bool project = string.Equals(extraData, "project", StringComparison.OrdinalIgnoreCase);
+                        _ = SpinScaryokeForSingerAsync(singer, projectToAudience: project);
+                        return "";
+                    }
+                case "scaryoke-clear":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer != null)
+                        {
+                            ClearScaryokeForSinger(singer);
+                        }
+                        return "";
+                    }
+                case "scaryoke-assign":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer != null && !string.IsNullOrWhiteSpace(extraData))
+                        {
+                            AssignScaryokeCategory(singer, extraData);
+                        }
                         return "";
                     }
                 case "set-scaryoke-avoid-repeats":
@@ -803,6 +826,27 @@ namespace KSRotation.ViewModels
                         {
                             ScaryokeAvoidConsecutiveRepeats = avoidVal;
                         }
+                        return "";
+                    }
+                case "scaryoke-batch-spin":
+                    {
+                        int count = 0;
+                        if (int.TryParse(targetId, out int parsedTarget))
+                        {
+                            count = parsedTarget;
+                        }
+                        else if (int.TryParse(extraData, out int parsedExtra))
+                        {
+                            count = parsedExtra;
+                        }
+                        bool onlyUnassigned = !string.Equals(extraData, "all", StringComparison.OrdinalIgnoreCase);
+                        ScaryokeBatchOnlyUnassigned = onlyUnassigned;
+                        _ = BatchSpinScaryokeAsync(count);
+                        return "";
+                    }
+                case "scaryoke-clear-all":
+                    {
+                        ClearAllScaryokeCategories();
                         return "";
                     }
 #endif
@@ -937,7 +981,7 @@ namespace KSRotation.ViewModels
                         }
                         ActiveSpecialEvent = targetId;
                         UpdateDjBannerPath();
-                        UpdateLastSongState();
+                        UpdateSpecialEventDisplayState();
                         return "";
                     }
                 case "toggle-last-round":

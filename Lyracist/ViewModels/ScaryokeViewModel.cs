@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 07:20:00 -> Support dynamic toggles for DJ's Choice and Singer's Choice, and AvoidRepeats
+// Edited on Oct 27, 2026 @ 12:35:00 -> Assign and show Scaryoke category on current singer after wheel finishes spinning
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Services.Display;
 using System.Collections.ObjectModel;
@@ -191,6 +191,13 @@ public partial class ScaryokeViewModel : BaseViewModel
 
         var singer = _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
         string singerName = singer?.Name ?? "The singer";
+
+        if (singer != null)
+        {
+            singer.ScaryokeCategory = category;
+            var matchedSegment = WheelSegments.FirstOrDefault(s => string.Equals(s.Name, category, StringComparison.OrdinalIgnoreCase));
+            singer.ScaryokeColor = matchedSegment?.Color ?? "#FF6D00";
+        }
 
         ResultText = category switch
         {

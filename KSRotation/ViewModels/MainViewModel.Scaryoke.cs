@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 07:45:00 -> Add max 11 categories, custom/auto color management, presets, and wheel toggles
+// Edited on Oct 27, 2026 @ 13:00:00 -> Support multi-singer sequential spinning and cancellation with post-spin category reveals
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -64,10 +64,42 @@ namespace KSRotation.ViewModels
         public partial string ScaryokeResultDetail { get; set; } = string.Empty;
 
         [ObservableProperty]
+        public partial SingerEntry? SelectedSingerForScaryoke { get; set; }
+
+        partial void OnSelectedSingerForScaryokeChanged(SingerEntry? value)
+        {
+            if (value != null)
+            {
+                ScaryokeTargetSingerName = value.IsDuet ? $"{value.Name} & {value.DuetPartnerName}" : value.Name;
+                _displayWindowService.SetScaryokeTargetSinger(ScaryokeTargetSingerName);
+            }
+        }
+
+        [ObservableProperty]
+        public partial string ScaryokeTargetSingerName { get; set; } = string.Empty;
+
+        [ObservableProperty]
         public partial bool ScaryokeIsMuted { get; set; }
 
         [ObservableProperty]
+        public partial bool ScaryokeBatchOnlyUnassigned { get; set; } = true;
+
+        [ObservableProperty]
         public partial double ScaryokeVolume { get; set; } = 1.0;
+
+        [ObservableProperty]
+        public partial string ScaryokeMonitorDevice { get; set; } = string.Empty;
+
+        partial void OnScaryokeMonitorDeviceChanged(string value)
+        {
+            if (_isRefreshingMonitors) return;
+            if (!string.IsNullOrEmpty(value))
+            {
+                _scaryokeSettings.SelectedMonitorDevice = value;
+                _scaryokeSettings.Save();
+            }
+            _displayWindowService.SetScaryokeMonitor(value ?? string.Empty);
+        }
 
         public ObservableCollection<ScaryokeWheelSegment> ScaryokeWheelSegments { get; } = [];
 
@@ -126,6 +158,28 @@ namespace KSRotation.ViewModels
                 }
                 RefreshScaryokePresets();
                 SelectedScaryokeCategory = ScaryokeCategories.FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(_scaryokeSettings.SelectedMonitorDevice) &&
+                    AvailableMonitors.Any(m => string.Equals(m.DeviceName, _scaryokeSettings.SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase)))
+                {
+                    ScaryokeMonitorDevice = _scaryokeSettings.SelectedMonitorDevice;
+                }
+                else if (string.IsNullOrEmpty(ScaryokeMonitorDevice) || !AvailableMonitors.Any(m => string.Equals(m.DeviceName, ScaryokeMonitorDevice, StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (!string.IsNullOrEmpty(SelectedMonitorDevice) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        ScaryokeMonitorDevice = SelectedMonitorDevice;
+                    }
+                    else if (AvailableMonitors.Count > 1)
+                    {
+                        ScaryokeMonitorDevice = AvailableMonitors[1].DeviceName;
+                    }
+                    else if (AvailableMonitors.Count > 0)
+                    {
+                        ScaryokeMonitorDevice = AvailableMonitors[0].DeviceName;
+                    }
+                }
+                _displayWindowService.SetScaryokeMonitor(ScaryokeMonitorDevice);
             }
             catch
             {
@@ -490,6 +544,7 @@ namespace KSRotation.ViewModels
         {
             if (!IsScaryokeActive) return;
 
+            CancelBatchSpin();
             IsScaryokeActive = false;
             _displayWindowService.SetScaryokeActive(false);
 
@@ -586,13 +641,41 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        public async Task SpinScaryokeWheelAsync()
+        public Task SpinScaryokeWheelAsync() => SpinScaryokeForSingerAsync(SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic), projectToAudience: true);
+
+        [RelayCommand]
+        public Task SpinScaryokeAsync() => SpinScaryokeWheelAsync();
+
+        [RelayCommand]
+        public Task SpinScaryokeBoothAsync() => SpinScaryokeForSingerAsync(SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic), projectToAudience: false);
+
+        [RelayCommand]
+        public Task SpinScaryokeForSingerCommand(SingerEntry? singer) => SpinScaryokeForSingerAsync(singer, projectToAudience: false);
+
+        [RelayCommand]
+        public Task SpinScaryokeForSingerProjectedCommand(SingerEntry? singer) => SpinScaryokeForSingerAsync(singer, projectToAudience: true);
+
+        public async Task SpinScaryokeForSingerAsync(SingerEntry? singer, bool projectToAudience = false)
         {
             if (IsScaryokeSpinning || ScaryokeWheelSegments.Count == 0) return;
 
+            var targetSinger = singer ?? SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic);
+            ScaryokeTargetSingerName = targetSinger != null ? (targetSinger.IsDuet ? $"{targetSinger.Name} & {targetSinger.DuetPartnerName}" : targetSinger.Name) : "Stage Open";
+            _displayWindowService.SetScaryokeTargetSinger(ScaryokeTargetSingerName);
+
+            // While the wheel is in motion, ensure no category is assigned or visible for the singer
+            if (targetSinger != null)
+            {
+                targetSinger.ScaryokeCategory = null;
+                targetSinger.ScaryokeColor = null;
+                _displayWindowService.Update(Singers);
+            }
+
             IsScaryokeSpinning = true;
             ScaryokeResultText = "Spinning...";
-            ScaryokeResultDetail = "Spinning the wheel to seal a singer's fate...";
+            ScaryokeResultDetail = targetSinger != null
+                ? $"Spinning the wheel to choose a category for {targetSinger.Name}..."
+                : "Spinning the wheel to seal a singer's fate...";
 
             RebuildScaryokeWheelSegments();
             _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
@@ -619,7 +702,7 @@ namespace KSRotation.ViewModels
             double desired = (360 - landing) % 360;
             double baseAngle = _scaryokeCurrentAngle + 1440 + (_scaryokeRng.Next(0, 2) * 360);
             double targetAngle = baseAngle + (((desired - (baseAngle % 360)) + 360) % 360);
-            double duration = 4.0 + (_scaryokeRng.NextDouble() * 1.5);
+            double duration = projectToAudience ? (4.0 + (_scaryokeRng.NextDouble() * 1.5)) : 2.0;
 
             // Audio: whoosh start & ticks
             if (!ScaryokeIsMuted)
@@ -636,9 +719,12 @@ namespace KSRotation.ViewModels
                 });
             }
 
-            // Raise spin event for desktop host window and projection screen
+            // Raise spin event for desktop host window and, if projected, the audience projection screen
             ScaryokeSpinStarted?.Invoke(this, new ScaryokeSpinEventArgs(targetAngle, duration));
-            _displayWindowService.StartScaryokeSpin(targetAngle, duration);
+            if (projectToAudience)
+            {
+                _displayWindowService.StartScaryokeSpin(targetAngle, duration);
+            }
 
             // Wait for deceleration
             await Task.Delay(TimeSpan.FromSeconds(duration));
@@ -650,9 +736,9 @@ namespace KSRotation.ViewModels
             ScaryokeResultText = landed.Name.ToUpper();
             ScaryokeResultDetail = landed.Name switch
             {
-                "Singer's Choice" => "Singer picks any song they like!",
-                "DJ's Choice" => "The DJ picks your song... be afraid.",
-                _ => $"Pick a song from: {landed.Name}"
+                "Singer's Choice" => targetSinger != null ? $"{targetSinger.Name} picks any song they like!" : "Singer picks any song they like!",
+                "DJ's Choice" => targetSinger != null ? $"The DJ picks the song for {targetSinger.Name}... be afraid." : "The DJ picks your song... be afraid.",
+                _ => targetSinger != null ? $"{targetSinger.Name}: Pick a song from {landed.Name}!" : $"Pick a song from: {landed.Name}"
             };
 
             // Add to history
@@ -663,11 +749,24 @@ namespace KSRotation.ViewModels
             }
             _scaryokeSettings.RecordSpin(landed.Name);
 
+            // Assign category and color to target singer
+            if (targetSinger != null)
+            {
+                targetSinger.ScaryokeCategory = landed.Name;
+                targetSinger.ScaryokeColor = landed.Color;
+                _displayWindowService.Update(Singers);
+                RebuildRotationJsonCacheNow();
+                QueueSaveDatabase();
+            }
+
             bool isDjsChoice = string.Equals(landed.Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
 
-            // Raise spin finished for desktop host window and projection screen
+            // Raise spin finished for desktop host window
             ScaryokeSpinFinished?.Invoke(this, new ScaryokeSpinCompletedEventArgs(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle));
-            _displayWindowService.CompleteScaryokeSpin(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle);
+            if (projectToAudience)
+            {
+                _displayWindowService.CompleteScaryokeSpin(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle);
+            }
 
             // Sound effect on finish
             if (!ScaryokeIsMuted)
@@ -691,6 +790,196 @@ namespace KSRotation.ViewModels
                     }
                     catch { }
                 });
+            }
+        }
+
+        [RelayCommand]
+        public void ClearScaryokeForSinger(SingerEntry? singer)
+        {
+            if (singer == null) return;
+            singer.ScaryokeCategory = null;
+            singer.ScaryokeColor = null;
+            _displayWindowService.Update(Singers);
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+        }
+
+        public void AssignScaryokeCategory(SingerEntry? singer, string categoryName)
+        {
+            if (singer == null || string.IsNullOrWhiteSpace(categoryName)) return;
+            var seg = ScaryokeWheelSegments.FirstOrDefault(s => string.Equals(s.Name, categoryName, StringComparison.OrdinalIgnoreCase));
+            string color = seg?.Color ?? ScaryokePaletteColor(ScaryokeCategories.IndexOf(categoryName));
+            singer.ScaryokeCategory = categoryName;
+            singer.ScaryokeColor = color;
+            _displayWindowService.Update(Singers);
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+        }
+
+        [ObservableProperty]
+        private bool _isBatchSpinning;
+
+        private CancellationTokenSource? _batchSpinCts;
+
+        [RelayCommand]
+        public void CancelBatchSpin()
+        {
+            if (_batchSpinCts != null && !_batchSpinCts.IsCancellationRequested)
+            {
+                try { _batchSpinCts.Cancel(); } catch { }
+            }
+            IsBatchSpinning = false;
+        }
+
+        [RelayCommand]
+        public async Task BatchSpinScaryokeAsync(object? parameter)
+        {
+            if (IsScaryokeSpinning || IsBatchSpinning) return;
+
+            int count = 0;
+            if (parameter is int intVal)
+            {
+                count = intVal;
+            }
+            else if (parameter is string strVal && int.TryParse(strVal, out int parsed))
+            {
+                count = parsed;
+            }
+
+            RebuildScaryokeWheelSegments();
+            if (ScaryokeWheelSegments.Count == 0) return;
+
+            // Select active, non-music performers
+            var eligibleSingers = Singers
+                .Where(s => !s.IsInactive && !s.IsMusic)
+                .Where(s => !ScaryokeBatchOnlyUnassigned || string.IsNullOrWhiteSpace(s.ScaryokeCategory))
+                .ToList();
+
+            if (eligibleSingers.Count == 0) return;
+
+            var targetSingers = count > 0 ? eligibleSingers.Take(count).ToList() : eligibleSingers;
+            if (targetSingers.Count == 0) return;
+
+            _batchSpinCts?.Dispose();
+            _batchSpinCts = new CancellationTokenSource();
+            var token = _batchSpinCts.Token;
+
+            IsBatchSpinning = true;
+
+            try
+            {
+                for (int i = 0; i < targetSingers.Count; i++)
+                {
+                    if (token.IsCancellationRequested || !IsScaryokeActive) break;
+
+                    var singer = targetSingers[i];
+                    SelectedSingerForScaryoke = singer;
+
+                    // Wheel spins for this singer; category is assigned and revealed only after the spin completes!
+                    await SpinScaryokeForSingerAsync(singer, projectToAudience: false);
+
+                    if (token.IsCancellationRequested || !IsScaryokeActive) break;
+
+                    if (i < targetSingers.Count - 1)
+                    {
+                        try
+                        {
+                            await Task.Delay(1000, token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                IsBatchSpinning = false;
+            }
+        }
+
+        [RelayCommand]
+        public void ClearAllScaryokeCategories()
+        {
+            bool modified = false;
+            foreach (var singer in Singers)
+            {
+                if (singer.HasScaryokeCategory)
+                {
+                    singer.ScaryokeCategory = null;
+                    singer.ScaryokeColor = null;
+                    modified = true;
+                }
+            }
+
+            if (modified)
+            {
+                _displayWindowService.Update(Singers);
+                RebuildRotationJsonCacheNow();
+                QueueSaveDatabase();
+            }
+        }
+
+        public void BatchSpinScaryokeInternal(int count, bool onlyUnassigned)
+        {
+            RebuildScaryokeWheelSegments();
+            if (ScaryokeWheelSegments.Count == 0) return;
+
+            // Select active, non-music performers
+            var eligibleSingers = Singers
+                .Where(s => !s.IsInactive && !s.IsMusic)
+                .Where(s => !onlyUnassigned || string.IsNullOrWhiteSpace(s.ScaryokeCategory))
+                .ToList();
+
+            if (eligibleSingers.Count == 0) return;
+
+            var targetSingers = count > 0 ? eligibleSingers.Take(count).ToList() : eligibleSingers;
+            if (targetSingers.Count == 0) return;
+
+            string lastAssigned = ScaryokeHistory.FirstOrDefault() ?? string.Empty;
+            bool modified = false;
+
+            foreach (var singer in targetSingers)
+            {
+                ScaryokeWheelSegment? chosen = null;
+
+                for (int attempt = 0; attempt < 50; attempt++)
+                {
+                    double landing = _scaryokeRng.NextDouble() * 360;
+                    var cand = SegmentAtPointerAngle(landing);
+
+                    if (ScaryokeAvoidConsecutiveRepeats && !string.IsNullOrWhiteSpace(lastAssigned) &&
+                        string.Equals(cand.Name, lastAssigned, StringComparison.OrdinalIgnoreCase) &&
+                        ScaryokeWheelSegments.Count > 1)
+                    {
+                        continue;
+                    }
+
+                    chosen = cand;
+                    break;
+                }
+
+                chosen ??= ScaryokeWheelSegments[_scaryokeRng.Next(ScaryokeWheelSegments.Count)];
+                lastAssigned = chosen.Name;
+
+                singer.ScaryokeCategory = chosen.Name;
+                singer.ScaryokeColor = chosen.Color;
+                modified = true;
+
+                ScaryokeHistory.Insert(0, chosen.Name);
+                while (ScaryokeHistory.Count > 8)
+                {
+                    ScaryokeHistory.RemoveAt(ScaryokeHistory.Count - 1);
+                }
+                _scaryokeSettings.RecordSpin(chosen.Name);
+            }
+
+            if (modified)
+            {
+                _displayWindowService.Update(Singers);
+                RebuildRotationJsonCacheNow();
+                QueueSaveDatabase();
             }
         }
 

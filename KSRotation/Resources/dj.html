@@ -1,4 +1,4 @@
-<!-- Edited on Oct 26, 2026 @ 00:58:00 -> Add Scaryoke Spin button to DJ screen and streamline booth modal without wheel graphic -->
+<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Restore multi-singer sequential spin controls to dj.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -927,13 +927,24 @@
                                 <div id="scaryoke-singer-title" style="font-size: 1.15rem; font-weight: 700; color: #E9D5FF; margin-top: 6px;">
                                     Current Singer: <span id="scaryoke-singer-name" style="color: #38BDF8;">...</span>
                                 </div>
-                                <p style="font-size: 0.85rem; color: #C4B5FD; margin-top: 4px;">📺 Watch the big screen spin!</p>
+                                <div style="display: flex; flex-direction: column; gap: 4px; width: 100%; margin-top: 8px; text-align: left;">
+                                    <label style="font-size: 0.85rem; color: #E9D5FF; font-weight: bold;">Target Singer (spin ahead):</label>
+                                    <select id="scaryoke-singer-select" style="background: #12081F; border: 1.5px solid #A855F7; border-radius: 8px; color: white; padding: 8px; font-size: 0.95rem;">
+                                        <option value="">-- Auto (Current / Next) --</option>
+                                    </select>
+                                </div>
+                                <p style="font-size: 0.85rem; color: #C4B5FD; margin-top: 4px;">Choose Quiet Booth Spin or Project on Audience Screen</p>
                             </div>
 
-                            <!-- Big Singer Spin Button (Tap to spin at DJ booth) -->
-                            <button id="scaryoke-spin-btn" type="button" onclick="triggerScaryokeSpin()" style="width: 100%; padding: 22px 16px; background: linear-gradient(135deg, #FF7518 0%, #EA580C 50%, #C2410C 100%); color: #FFFFFF; font-size: 1.45rem; font-weight: 900; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 6px 25px rgba(234, 88, 12, 0.6); transition: transform 0.1s, opacity 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 10px;">
-                                <span>🎲</span> <span>TAP TO SPIN!</span> <span>🎃</span>
-                            </button>
+                            <!-- Singer Spin Buttons (Booth Quiet vs Project Audience) -->
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <button type="button" onclick="triggerScaryokeSpin('booth')" style="flex: 1; padding: 14px 8px; background: #6A0DAD; color: #FFFFFF; font-size: 0.95rem; font-weight: 800; border: 1.5px solid #9333EA; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <span>🎧</span> <span>BOOTH SPIN</span>
+                                </button>
+                                <button id="scaryoke-spin-btn" type="button" onclick="triggerScaryokeSpin('project')" style="flex: 1; padding: 14px 8px; background: linear-gradient(135deg, #FF7518 0%, #EA580C 100%); color: #FFFFFF; font-size: 0.95rem; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 18px rgba(234, 88, 12, 0.5); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <span>📺</span> <span>PROJECT SPIN</span>
+                                </button>
+                            </div>
 
                             <!-- Result Box -->
                             <div id="scaryoke-result-box" style="width: 100%; background: #26153B; border: 1.5px solid #A855F7; border-radius: 12px; padding: 14px 16px; text-align: center; min-height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -944,8 +955,25 @@
                             <!-- Prevent 2 singers in a row toggle checkbox -->
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #E2E8F0; cursor: pointer; user-select: none; margin-top: 2px;">
                                 <input type="checkbox" id="scaryoke-avoid-repeats-chk" onchange="toggleScaryokeAvoidRepeats(this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #FF7518;">
-                                <span>Prevent 2 singers in a row getting the same result</span>
+                                <span>Prevent repeats back-to-back</span>
                             </label>
+
+                            <!-- Multi-Singer Spin Section -->
+                            <div style="width: 100%; background: #1B102B; border: 1.5px solid #4C1D95; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.85rem; font-weight: 800; color: #F59E0B;">⚡ Multi-Singer Spin:</span>
+                                    <button type="button" onclick="sendAction('scaryoke-clear-all')" style="background: transparent; border: 1px solid #EF4444; color: #F87171; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; cursor: pointer;" title="Clear categories from all singers">✕ Clear All</button>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 6px;">
+                                    <button type="button" onclick="triggerScaryokeBatchSpin(3)" style="padding: 8px 4px; background: #311B92; color: #FFFFFF; font-size: 0.8rem; font-weight: 700; border: 1px solid #512DA8; border-radius: 8px; cursor: pointer;">Next 3</button>
+                                    <button type="button" onclick="triggerScaryokeBatchSpin(5)" style="padding: 8px 4px; background: #311B92; color: #FFFFFF; font-size: 0.8rem; font-weight: 700; border: 1px solid #512DA8; border-radius: 8px; cursor: pointer;">Next 5</button>
+                                    <button type="button" onclick="triggerScaryokeBatchSpin(0)" style="padding: 8px 4px; background: #4A148C; color: #FFFFFF; font-size: 0.8rem; font-weight: 800; border: 1px solid #7B1FA2; border-radius: 8px; cursor: pointer;">Entire Rotation</button>
+                                </div>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #C4B5FD; cursor: pointer; user-select: none;">
+                                    <input type="checkbox" id="scaryoke-batch-skip-assigned" checked style="width: 14px; height: 14px; cursor: pointer; accent-color: #FF7518;">
+                                    <span>Skip singers who already have a category</span>
+                                </label>
+                            </div>
 
                             <!-- Shutdown / Close footer link -->
                             <button type="button" onclick="sendAction('toggle-scaryoke')" style="background: transparent; border: 1px solid #475569; color: #94A3B8; font-size: 0.8rem; padding: 6px 16px; border-radius: 6px; cursor: pointer; margin-top: 2px;">
@@ -1238,6 +1266,21 @@
                         singerEl.textContent = state.currentSinger || state.CurrentSinger || "The Next Singer";
                     }
 
+                    const singerSelect = document.getElementById("scaryoke-singer-select");
+                    if (singerSelect && cachedRotation) {
+                        const curVal = singerSelect.value;
+                        singerSelect.innerHTML = '<option value="">-- Auto (Current / Next) --</option>';
+                        cachedRotation.filter(s => !s.isInactive && !s.isMusic).forEach(s => {
+                            const opt = document.createElement("option");
+                            opt.value = s.id;
+                            const duet = s.duetPartnerName ? ` & ${s.duetPartnerName}` : '';
+                            const cat = s.scaryokeCategory ? ` [🎃 ${s.scaryokeCategory}]` : '';
+                            opt.textContent = `${s.name}${duet}${cat}`;
+                            if (s.id === curVal) opt.selected = true;
+                            singerSelect.appendChild(opt);
+                        });
+                    }
+
                     const chk = document.getElementById("scaryoke-avoid-repeats-chk");
                     if (chk) {
                         chk.checked = !!(state.avoidConsecutiveDuplicates !== undefined ? state.avoidConsecutiveDuplicates : state.AvoidConsecutiveDuplicates);
@@ -1277,12 +1320,20 @@
                     }
                 }
 
-                function triggerScaryokeSpin() {
-                    sendAction('scaryoke-spin');
+                function triggerScaryokeSpin(mode) {
+                    const sel = document.getElementById("scaryoke-singer-select");
+                    const targetId = sel ? sel.value : "";
+                    const spinMode = mode === 'booth' ? 'booth' : 'project';
+                    sendAction('scaryoke-spin', targetId, spinMode);
                 }
 
                 function toggleScaryokeAvoidRepeats(isChecked) {
                     sendAction('set-scaryoke-avoid-repeats', '', isChecked.toString());
+                }
+
+                function triggerScaryokeBatchSpin(count) {
+                    const skipAssigned = document.getElementById("scaryoke-batch-skip-assigned")?.checked ?? true;
+                    sendAction('scaryoke-batch-spin', String(count), skipAssigned ? 'unassigned' : 'all');
                 }
 
                 function updateRoundEstimation() {
@@ -1574,6 +1625,10 @@
                             cardClass += ' sung-last-round';
                             badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px; cursor: pointer;" title="Singer completed song in last round. Click to remove flag if marked by accident." onclick="sendAction(\'clear-last-round-done\', \'' + s.id + '\')">DONE (LAST ROUND) ✕</span>';
                         }
+                        if (s.scaryokeCategory) {
+                            const scColor = s.scaryokeColor || '#FF7518';
+                            badges += `<span class="badge" style="background-color: ${escapeHtml(scColor)}; color: white; font-weight: bold; margin-left: 4px;" title="Scaryoke Challenge">🎃 ${escapeHtml(s.scaryokeCategory)}</span>`;
+                        }
 
                         // Render rounds checkboxes
                         let roundsHtml = '';
@@ -1639,6 +1694,10 @@
                             nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(duetName)})</span>`;
                         }
 
+                        const scaryokeBtnHtml = (!s.isInactive && !s.isMusic)
+                            ? `<button class="btn-text" style="background: #6A0DAD; color: white; border: 1px solid #9333EA; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;" title="Spin Scaryoke wheel for this singer (quietly at booth)" onclick="sendAction('scaryoke-spin', '${s.id}', 'booth')">🎃 ${s.scaryokeCategory ? 'Re-Spin' : 'Spin'}</button>`
+                            : '';
+
                         const innerHTML = `
                                     <div class="singer-details">
                                         <div class="singer-info">
@@ -1657,6 +1716,7 @@
                                         <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                                         <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
                                         <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                                        ${scaryokeBtnHtml}
                                         ${specialHtml}
                                         ${skipHtml}
                                         ${pauseHtml}

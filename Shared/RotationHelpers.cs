@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:31:00 -> Restore skipped anchor singer upon round completion and prevent flushing to queue bottom
+// Edited on Oct 27, 2026 @ 11:35:00 -> Clear singer Scaryoke challenge badge and color when performance completes
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -636,6 +636,10 @@ namespace Lyracist.Shared
 
             int count = singers.Count;
             int anchorIndex = FindAnchorIndex(singers);
+
+            // Once a singer finishes their performance, clear any assigned Scaryoke challenge badge until their next spin
+            finishedEntry.ScaryokeCategory = null;
+            finishedEntry.ScaryokeColor = null;
 
             // If someone was designated as Next (e.g. displaced when a special singer or manual override sang),
             // preserve them so the rotation resumes with them seamlessly.

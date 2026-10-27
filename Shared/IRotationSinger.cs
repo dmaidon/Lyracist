@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:45:00 -> Add IsSpecial property for one-time performance special singers
+// Edited on Oct 27, 2026 @ 10:45:00 -> Add ScaryokeCategory and ScaryokeColor properties to IRotationSinger
 using System;
 
 namespace Lyracist.Shared
@@ -42,6 +42,12 @@ namespace Lyracist.Shared
         /// <see cref="RotationHelpers.RecalculateEstimatedWaits{T}"/>.
         /// </summary>
         int EstimatedWaitMinutes { get; set; }
+
+        /// <summary>Assigned Scaryoke challenge category (e.g., "80s Hits", "Country", "Elvis", etc.), or null/empty if unassigned.</summary>
+        string? ScaryokeCategory { get; set; }
+
+        /// <summary>Wheel segment color hex code (e.g., "#FF6D00") for the assigned Scaryoke challenge category.</summary>
+        string? ScaryokeColor { get; set; }
     }
 }
 

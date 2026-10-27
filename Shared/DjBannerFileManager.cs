@@ -72,6 +72,40 @@ public static class DjBannerFileManager
         return $"{eventName}.png";
     }
 
+    /// <summary>Resolves the banner file for the active special event, or null when none is active or the file is missing.</summary>
+    public static string? ResolveSpecialEventBannerPath(string? activeEvent, IEnumerable<SpecialEventConfig> configuredEvents, string eventBannersDir)
+    {
+        if (string.IsNullOrEmpty(activeEvent) || activeEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        if (activeEvent.Equals("Announcement", StringComparison.OrdinalIgnoreCase))
+        {
+            string? announcementPath = GetCurrentAnnouncementPath(eventBannersDir);
+            return announcementPath != null && File.Exists(announcementPath) ? announcementPath : null;
+        }
+
+        var eventConfig = configuredEvents.FirstOrDefault(e => e.EventName.Equals(activeEvent, StringComparison.OrdinalIgnoreCase));
+        string fileName = activeEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase)
+            ? "LastSong.png"
+            : eventConfig != null && !string.IsNullOrWhiteSpace(eventConfig.BannerFileName)
+                ? eventConfig.BannerFileName
+                : GetStandardBannerFileName(activeEvent);
+
+        if (string.IsNullOrWhiteSpace(fileName) || fileName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        string fullPath = Path.Combine(eventBannersDir, fileName);
+        if (!File.Exists(fullPath) && StandardEventNames.Any(s => s.Equals(activeEvent, StringComparison.OrdinalIgnoreCase)))
+        {
+            EnsureStandardEventBanners(eventBannersDir);
+        }
+        return File.Exists(fullPath) ? fullPath : null;
+    }
+
     public static void EnsureStandardEventBanners(string directory)
     {
         lock (_bannerInitLock)

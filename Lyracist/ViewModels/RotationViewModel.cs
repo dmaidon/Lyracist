@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:55:00 -> Add RotationCleared event and clear Scaryoke spin history on rotation clear
+// Edited on Oct 27, 2026 @ 11:35:00 -> Clear singer Scaryoke challenge badge and color when performance completes
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1057,8 +1057,10 @@ public partial class RotationViewModel : BaseViewModel
         SavePerformanceHistory(name, title, artist, singer.Key, singer.Tempo, singer.Source, singer.ExternalLink);
         RecordPerformedSong(name, title, artist, singer.Key, singer.DuetPartnerName, singer.Tempo);
 
-        // Clear duet partner for subsequent rounds/songs in rotation
+        // Clear duet partner and Scaryoke category challenge for subsequent rounds/songs in rotation
         singer.DuetPartnerName = string.Empty;
+        singer.ScaryokeCategory = null;
+        singer.ScaryokeColor = null;
 
         // Advance rotation to next active singer relative to singer
         RunRotationOrderChange(() =>

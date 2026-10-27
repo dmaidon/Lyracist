@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 22:55:00 -> Support full-screen overlay for all active special event banners
+// Edited on Oct 27, 2026 @ 12:16:00 -> Include Scaryoke category in Star Wars crawl signature and text generator
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -148,8 +148,6 @@ public partial class RotationWindow : Window, ICaptureSource
         LastSongBannerImage.Source = null;
         RefreshSignUpInvite();
     }
-
-    public void UpdateLastSongBanner(string? bannerPath) => UpdateSpecialEventBanner(bannerPath);
 
     private void OnClosed(object? sender, EventArgs e)
     {
@@ -360,7 +358,7 @@ public partial class RotationWindow : Window, ICaptureSource
         foreach (var s in _vm.FullRotation)
         {
             sb.Append('\u0001').Append(s.Name).Append('\u0002').Append(s.SongTitle).Append('\u0002')
-              .Append(s.Artist).Append('\u0002').Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes);
+              .Append(s.Artist).Append('\u0002').Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes).Append('\u0002').Append(s.ScaryokeCategory);
         }
         return sb.ToString();
     }
@@ -731,6 +729,10 @@ public partial class RotationWindow : Window, ICaptureSource
             });
 
             string nameText = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name;
+            if (!string.IsNullOrWhiteSpace(entry.ScaryokeCategory))
+            {
+                nameText += $" [🎃 {entry.ScaryokeCategory}]";
+            }
             if (entry.EstimatedWaitMinutes > 0)
             {
                 nameText += $" {{{entry.EstimatedWaitMinutes}}}";

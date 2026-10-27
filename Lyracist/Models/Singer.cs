@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial property for one-time performance special singers
+// Edited on Oct 27, 2026 @ 12:12:00 -> Add ScaryokeBrush and brush cache for Scaryoke category display
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -139,6 +139,39 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
     [NotifyPropertyChangedFor(nameof(LevelName))]
     [NotifyPropertyChangedFor(nameof(Badges))]
     private int _totalSongsSung = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasScaryokeCategory))]
+    private string? _scaryokeCategory;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ScaryokeBrush))]
+    private string? _scaryokeColor;
+
+    public bool HasScaryokeCategory => !string.IsNullOrWhiteSpace(ScaryokeCategory);
+
+    public System.Windows.Media.Brush ScaryokeBrush => GetBrushFromHex(ScaryokeColor);
+
+    private static readonly System.Collections.Generic.Dictionary<string, System.Windows.Media.SolidColorBrush> _scaryokeBrushCache = new(StringComparer.OrdinalIgnoreCase);
+
+    public static System.Windows.Media.Brush GetBrushFromHex(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return System.Windows.Media.Brushes.DarkOrange;
+        if (_scaryokeBrushCache.TryGetValue(hex, out var brush)) return brush;
+        try
+        {
+            var converted = System.Windows.Media.ColorConverter.ConvertFromString(hex);
+            if (converted is System.Windows.Media.Color c)
+            {
+                var b = new System.Windows.Media.SolidColorBrush(c);
+                b.Freeze();
+                if (_scaryokeBrushCache.Count < 128) _scaryokeBrushCache[hex] = b;
+                return b;
+            }
+        }
+        catch { }
+        return System.Windows.Media.Brushes.DarkOrange;
+    }
 
     public bool HasRatings => RatingCount > 0;
 

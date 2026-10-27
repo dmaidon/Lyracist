@@ -176,7 +176,6 @@ namespace KSRotation.Services
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
         public void SetSelectedMonitor(string deviceName) { }
         public void SetSpecialEventBanner(string? path) { }
-        public void SetLastSongBanner(string? path) { }
         public void SetLastRound(bool isLastRound) { }
         public void SetShowQrCode(bool show) { }
         public void SetShowEstimatedWaitTime(bool show) { }

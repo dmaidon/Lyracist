@@ -1,11 +1,67 @@
-<!-- Edited on Oct 27, 2026 @ 06:05:00 -> Update changelog with Special Event Banner Display on Rotation Screen, Live Preview, and in-app help system -->
-Last Edit: Oct 27, 2026 - Special Event Banner Display on Rotation Screen and Live Preview
+<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Update changelog with multi-singer sequential spin targeting and post-spin reveals -->
+Last Edit: Oct 27, 2026 - Multi-Singer Sequential Spin Targeting & Post-Spin Category Reveals
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-26
+## [Unreleased] - 2026-10-27
+
+### Added
+- **Multi-Singer & Entire Rotation Sequential Spin Targeting (`KSRotation`, `ScaryokeControlWindow`, `dj.html`)**:
+  - Restored full capability to target multiple performers (`Next 3`, `Next 5`, `Next 10`) or the `Entire Rotation` at once.
+  - Re-introduced the toolbar dropdown button (`⚡ Multi-Spin ▾`), the singer context menu submenu (`⚡ Scaryoke: Multi-Singer Spin`), the Scaryoke Controller section, and the mobile DJ portal (`dj.html`).
+  - Spins sequentially for each targeted singer one after another, building genuine suspense and determining, assigning, and revealing each category strictly AFTER the wheel finishes spinning for that singer.
+  - Added in-flight cancellation via `⏹ Stop Spin` button on the toolbar and controller (`CancelBatchSpinCommand`), allowing hosts to cleanly halt multi-singer spinning at any point.
+- **Scaryoke Post-Spin Category Reveal & Pre-Assignment Decommissioning (`KSRotation`, `Lyracist`, `ScaryokeControlWindow`, `dj.html`)**:
+  - Enforced strict post-spin category determination: categories are now only assigned and revealed to the performer and audience after the wheel spin animation finishes and comes to a full stop on the winning slice.
+  - While spinning, stage banners, overlay texts, and host cards show "SPINNING..." to build suspense, preventing category spoilers before or during the spin.
+  - Decommissioned batch spin-ahead controls from toolbar, host window, context menus, and mobile DJ board, replacing them with streamlined single-performer spins and instant "✕ Clear All" resets.
+  - Fixed toolbar `🎲 Spin` button binding to `SpinScaryokeWheelCommand` (with backward-compatible `SpinScaryokeCommand` alias).
+- **Scaryoke Challenge Category Badges Across All Rotation Screens & Themed Views (`KSRotation`, `Lyracist`)**:
+  - Rendered custom color-coded Scaryoke category badges (`🎃 {Category}`) for Current Singer and Next Singers across all 11 themed projection panels: Normal, Marquee, Curtain, Jumbotron, Vinyl, Disco, Synthwave, Festival, Slot Reels, Jukebox, and Scoreboard.
+  - Dynamically appended challenge category tags (`[🎃 {Category}]`) to Star Wars 3D crawl perspective scrolling text.
+  - Added matching Scaryoke category badges to DJ console singer rows in `Lyracist` (`RotationPage.xaml` and `KaraokePage.xaml`) and `KSRotation` (`MainWindow.xaml`).
+  - Added cached thread-safe brush resolution `GetBrushFromHex` and `ScaryokeBrush` property to `Lyracist.Models.Singer`, `RotationWindowViewModel`, and `DisplayViewModel`.
+- **Performer Scaryoke Badge Auto-Clearing on Finish (`Shared/RotationHelpers.cs`, `KSRotation/ViewModels/MainViewModel.cs`, `Lyracist/ViewModels/RotationViewModel.cs`)**:
+  - Automatically resets and clears a performer's assigned `ScaryokeCategory` and `ScaryokeColor` when their performance completes and they are marked finished/done.
+  - The singer's badge stays clear until their next turn when the wheel is spun for them again.
+  - Applies universally across KSRotation and Lyracist via `RotationHelpers.AdvanceRotationAfterFinished<T>` as well as local finish handlers.
+- **Dedicated Audience Wheel Display Monitor Routing (`KSRotation/MainWindow.xaml`, `MainViewModel.Scaryoke.cs`, `DisplayWindowService.cs`)**:
+  - Added an 'Audience Wheel Display & Monitor Routing' section to the Scaryoke Settings tab in KSRotation.
+  - Enables DJs and hosts to select which physical monitor or projector presents the interactive Scaryoke Wheel to the audience.
+  - Window positioning automatically maps and scales to the designated monitor when Scaryoke is active and smoothly restores to the default rotation monitor upon deactivation.
+  - Restores and preserves the selected Scaryoke monitor device setting across system monitor re-scans.
+- **Display Page Column Layout Optimizations & Button Alignment (`KSRotation/MainWindow.xaml`)**:
+  - Re-proportioned Display settings tab columns to optimize UI density on standard 1920x1080 screens:
+    * Column 1 (`🔀 Screen Rotation`) narrowed from `1.0*` to `0.7*` to trim empty space.
+    * Columns 3 & 4 (`DJ & Special Event Banners`) expanded from `1.0*` each to `1.25*` each (a combined 25% width expansion).
+    * Re-aligned the Special Event Banners Mapping header grid to vertically center the title and action buttons ('Upload Banner' and 'Add Event') on a clean single row, eliminating button clipping, overlapping, and text truncation.
+- **Scaryoke Mode: Upcoming Singer Wheel Spin Ahead, Booth vs Project Spin Modes, and Category Badge Projection (`KSRotation`, `Lyracist`, `Shared`, `dj.html`)**:
+  - **Advance Singer Spin Ahead (4–5+ Singers Out)**: Allowed DJs and hosts to spin the Scaryoke roulette wheel for performers several slots ahead in the queue so singers can choose their songs and prepare before taking the stage.
+  - **Automated Batch Spin Ahead & Entire Rotation Assignment**:
+    - **Multi-Performer Batch Spin**: DJs and rotation managers can select and spin ahead in blocks (`Next 3`, `Next 5`, `Next 10`) or assign challenges across the `Entire Rotation` all at once in a fraction of a second.
+    - **Host Window Controls (`ScaryokeControlWindow.xaml`)**: Added a dedicated '⚡ Batch Spin Ahead' control panel with fast buttons (`Next 3`, `Next 5`, `Entire Rotation`), a 'Skip singers who already have an assigned category' checkbox, and a single-click '✕ Clear All' category reset button.
+    - **Main Rotation Toolbar & Context Menu (`MainWindow.xaml`, `MainWindow.xaml.cs`)**: Added a dedicated `⚡ Batch ▾` dropdown button to the primary toolbar when Scaryoke Mode is active, and a '⚡ Scaryoke: Batch Spin Ahead' sub-menu on singer row context menus.
+    - **Mobile DJ Tablet Portal (`dj.html`, `MainViewModel.Requests.cs`)**: Added batch spin buttons and clear-all controls to the mobile Scaryoke modal, backed by `scaryoke-batch-spin` and `scaryoke-clear-all` API handlers.
+    - **Consecutive Duplicate Avoidance**: Batch assignments enforce consecutive duplicate prevention across adjacent singers in the queue.
+  - **Audience & Billboard Screen Category Badges**: Rendered prominent, color-coded Scaryoke category badges beside singer names across all billboard layouts (Normal, Themed Marquee, Themed Curtain) and on the large "Now Singing" / "Up Next" performer stage banners using the slice's exact wheel hex color.
+  - **Dual Spin Execution ("Booth Spin" vs "Project Spin")**:
+    - **Booth Spin (Quiet / Laptop Mode)**: Performs a silent, instantaneous spin on the host console or mobile tablet (`dj.html`) and awards the challenge category without interrupting the live rotation billboard or the active performer on stage.
+    - **Project Spin (Audience Projection)**: Displays the full, high-energy animated wheel overlay on the audience projection monitor with target singer callout banner, realistic deceleration physics, ticking sound effects, fanfare, and an automatic 4.5-second reveal dismiss timer returning cleanly to the live rotation queue.
+  - **Host Console Controls (`MainWindow.xaml`, `ScaryokeControlWindow.xaml`, `MainViewModel.Scaryoke.cs`)**:
+    - Added dedicated target singer selection ComboBox dropdown in the Scaryoke host control window.
+    - Added inline `🎃 Spin` / `🎃 Re-Spin` row action buttons in the main singer list.
+    - Added singer context menu commands: "🎃 Scaryoke: Spin for Singer (Booth / Quiet)", "🎃 Scaryoke: Spin & Project to Screen", and "✕ Clear Scaryoke Challenge".
+    - Added color-coded category badges with tooltips directly in the main singer queue.
+  - **Remote DJ Tablet Portal (`Resources/dj.html`, `MainViewModel.Requests.cs`)**:
+    - Added target singer dropdown selector and dual "🎧 BOOTH SPIN" vs "📺 PROJECT SPIN" buttons to the Scaryoke modal.
+    - Added inline Scaryoke category badges and one-tap spin buttons to queue cards.
+    - Added remote backend endpoints: `scaryoke-spin` (with target singer ID and `"booth"` vs `"project"` spin mode), `scaryoke-clear`, and `scaryoke-assign`.
+  - **Shared Data & Serialization (`Shared/IRotationSinger.cs`, `KSRotation/Models/SingerEntry.cs`, `Lyracist/Models/Singer.cs`, `KSRotation/Models/RotationItemDto.cs`)**:
+    - Added `ScaryokeCategory` and `ScaryokeColor` properties across singer models and DTOs.
+    - Added `[JsonIgnore]` on `SingerEntry.ScaryokeBrush` with self-contained `ParseHexBrush` parsing to prevent recursion errors during JSON serialization while maintaining instant WPF UI binding.
+  - **Unit Testing Coverage (`KSRotation.Tests/ScaryokeModeTests.cs`)**: Added full unit test suite verifying singer model assignment, booth vs project wheel spinning, rotation item DTO serialization, and display entry conversions.
 
 ### Fixed
 - **Active Special Event Banner Display on Audience Rotation Screen (`KSRotation`, `Lyracist`)**:

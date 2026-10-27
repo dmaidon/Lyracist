@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 05:58:00 -> Update help documentation for single DJ name, active banner preview, and special event rotation overlays -->
+<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Restore multi-singer batch spin toolbar button and context menu with sequential post-spin reveals -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -177,6 +177,27 @@
                                 </Style>
                             </MenuItem.Style>
                         </MenuItem>
+                        <Separator />
+                        <MenuItem Header="🎃 Scaryoke: Spin for Singer (Booth / Quiet)"
+                                  Command="{Binding Path=PlacementTarget.Tag.SpinScaryokeForSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="🎃 Scaryoke: Spin &amp; Project to Screen"
+                                  Command="{Binding Path=PlacementTarget.Tag.SpinScaryokeForSingerProjectedCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="⚡ Scaryoke: Multi-Singer Spin">
+                            <MenuItem Header="Spin Next 3 Singers" Command="{Binding Path=PlacementTarget.Tag.BatchSpinScaryokeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="3" />
+                            <MenuItem Header="Spin Next 5 Singers" Command="{Binding Path=PlacementTarget.Tag.BatchSpinScaryokeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="5" />
+                            <MenuItem Header="Spin Next 10 Singers" Command="{Binding Path=PlacementTarget.Tag.BatchSpinScaryokeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="10" />
+                            <MenuItem Header="Spin Entire Rotation (All Active)" Command="{Binding Path=PlacementTarget.Tag.BatchSpinScaryokeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="0" />
+                            <Separator />
+                            <MenuItem Header="✕ Clear All Scaryoke Categories" Command="{Binding Path=PlacementTarget.Tag.ClearAllScaryokeCategoriesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        </MenuItem>
+                        <MenuItem Header="✕ Clear Scaryoke Challenge"
+                                  Command="{Binding Path=PlacementTarget.Tag.ClearScaryokeForSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  Visibility="{Binding Path=PlacementTarget.DataContext.HasScaryokeCategory, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource BoolToVis}}" />
+                        <MenuItem Header="✕ Clear All Scaryoke Challenges"
+                                  Command="{Binding Path=PlacementTarget.Tag.ClearAllScaryokeCategoriesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                         <Separator />
                         <MenuItem Header="Remove Singer Permanently"
                                   Command="{Binding Path=PlacementTarget.Tag.RemoveSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -929,6 +950,15 @@
                                                                 Visibility="{Binding HasEstimatedWait, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock Text="{Binding EstimatedWaitMinutes, StringFormat='⏳ {0}m'}" FontSize="10" FontWeight="Bold" Foreground="#0EA5E9" VerticalAlignment="Center" />
                                                         </Border>
+                                                        <Border Background="{Binding ScaryokeBrush}"
+                                                                CornerRadius="4"
+                                                                Padding="5,2"
+                                                                Margin="0,0,4,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="{Binding ScaryokeCategory, StringFormat='Scaryoke Challenge: {0}'}"
+                                                                Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="{Binding ScaryokeCategory, StringFormat='🎃 {0}'}" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                        </Border>
                                                     </StackPanel>
                                                     <TextBox
                                                     Grid.Column="1"
@@ -1132,6 +1162,27 @@
                                                         </Button.Style>
                                                     </Button>
 
+                                                    <Button Command="{Binding DataContext.SpinScaryokeForSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="72"
+                                                            Margin="0,0,4,0"
+                                                            Background="#6A0DAD"
+                                                            BorderBrush="#9333EA"
+                                                            Foreground="White"
+                                                            ToolTip="Spin Scaryoke wheel for this singer (Booth / Quiet)"
+                                                            Visibility="{Binding DataContext.IsScaryokeActive, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource BoolToVis}}">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                                <Setter Property="Content" Value="🎃 Spin" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasScaryokeCategory}" Value="True">
+                                                                        <Setter Property="Content" Value="🎃 Re-Spin" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+
                                                     <Button Content="▲"
                                                             Style="{StaticResource GridButtonStyle}"
                                                             Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
@@ -1221,7 +1272,7 @@
                             </Button>
                             <Button
                             Command="{Binding ToggleScaryokeCommand}"
-                            Width="140"
+                            Width="160"
                             Margin="12,0,0,0"
                             ToolTip="Toggle Scaryoke Wheel: displays the challenge wheel on the audience display screen and DJ tablet">
                                 <Button.Style>
@@ -1229,7 +1280,7 @@
                                         <Setter Property="Margin" Value="0,4" />
                                         <Setter Property="FontSize" Value="14" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
-                                        <Setter Property="Content" Value="🎃 Scaryoke" />
+                                        <Setter Property="Content" Value="🎃 Scaryoke Mode" />
                                         <Setter Property="Background" Value="#7C3AED" />
                                         <Setter Property="BorderBrush" Value="#6D28D9" />
                                         <Setter Property="Foreground" Value="White" />
@@ -1248,7 +1299,7 @@
                                 </Button.Style>
                             </Button>
                             <Button
-                            Command="{Binding SpinScaryokeCommand}"
+                            Command="{Binding SpinScaryokeWheelCommand}"
                             Width="120"
                             Margin="8,0,0,0"
                             ToolTip="Spin the Scaryoke Wheel for the current performer">
@@ -1276,6 +1327,47 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Button.Style>
+                            </Button>
+                            <Button x:Name="BtnScaryokeBatch"
+                                    Click="BtnScaryokeBatch_Click"
+                                    Width="120"
+                                    Margin="6,0,0,0"
+                                    ToolTip="Spin categories sequentially for multiple upcoming singers or the entire rotation">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                        <Setter Property="Margin" Value="0,4" />
+                                        <Setter Property="FontSize" Value="13" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Content" Value="⚡ Multi-Spin ▾" />
+                                        <Setter Property="Background" Value="#4A148C" />
+                                        <Setter Property="BorderBrush" Value="#7B1FA2" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsScaryokeActive}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBatchSpinning}" Value="True">
+                                                <Setter Property="Content" Value="⏹ Stop Spin" />
+                                                <Setter Property="Background" Value="#DC2626" />
+                                                <Setter Property="BorderBrush" Value="#B91C1C" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Spin Next 3 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="3" />
+                                        <MenuItem Header="Spin Next 5 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="5" />
+                                        <MenuItem Header="Spin Next 10 Singers" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="10" />
+                                        <MenuItem Header="Spin Entire Rotation (All Active)" Command="{Binding BatchSpinScaryokeCommand}" CommandParameter="0" />
+                                        <Separator />
+                                        <MenuItem Header="✕ Clear All Scaryoke Categories" Command="{Binding ClearAllScaryokeCategoriesCommand}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -2224,6 +2316,34 @@
                     <!-- Column 2: Wheel Rules & Toggles -->
                     <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="7,0,0,0">
                         <StackPanel Margin="0,0,0,12">
+                            <!-- Audience Wheel Display & Monitor Routing -->
+                            <GroupBox Header="Wheel Display &amp; Monitor Routing" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Audience Wheel Display Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <TextBlock Text="Select which physical monitor or projector displays the Scaryoke Wheel when projected for the crowd."
+                                               FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox ItemsSource="{Binding AvailableMonitors}"
+                                                  SelectedValue="{Binding ScaryokeMonitorDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  SelectedValuePath="DeviceName"
+                                                  DisplayMemberPath="FriendlyName"
+                                                  Style="{StaticResource ModernComboBoxStyle}"
+                                                  ToolTip="Select which monitor or screen displays the Scaryoke Wheel" />
+                                        <Button Grid.Column="1"
+                                                Content="Identify"
+                                                Command="{Binding IdentifyMonitorsCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Margin="6,0,0,0"
+                                                Height="32"
+                                                ToolTip="Flash large monitor numbers on all connected screens" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+
                             <GroupBox Header="Wheel Rules &amp; Toggles" Style="{StaticResource GreenSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                 <StackPanel Margin="0,4,0,0">
                                     <CheckBox Content="Include DJ's Choice Slivers"
@@ -2306,11 +2426,11 @@
             <TabItem Header="Display" Width="65" Height="45">
                 <Grid Margin="12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="0.9*" />
+                        <ColumnDefinition Width="0.7*" />
+                        <ColumnDefinition Width="0.9*" />
+                        <ColumnDefinition Width="1.25*" />
+                        <ColumnDefinition Width="1.25*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Column 0: Target Monitor, Connect & Request Instructions, Casting Controls -->
@@ -2843,9 +2963,9 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Top" Foreground="{DynamicResource AppHeaderBrush}" Margin="24,10,21,0" Width="200" Grid.ColumnSpan="2" />
-                                        <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,30,0,0" ToolTip="Upload an image or video file to the EventBanners folder" />
-                                        <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,30,0,0" ToolTip="Add a new special event banner entry" />
+                                        <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="8,2" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Upload an image or video file to the EventBanners folder" />
+                                        <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="8,2" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Add a new special event banner entry" />
                                     </Grid>
                                     <ItemsControl ItemsSource="{Binding SpecialEvents}" Margin="0,0,0,12">
                                         <ItemsControl.ItemTemplate>

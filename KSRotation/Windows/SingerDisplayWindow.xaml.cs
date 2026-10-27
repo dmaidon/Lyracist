@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 22:55:00 -> Support full-screen overlay for all active special event banners
+// Edited on Oct 27, 2026 @ 12:35:00 -> Set spinning status during Scaryoke wheel spin and show category only after landing
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -138,8 +138,6 @@ namespace KSRotation.Windows
             LastSongBannerImage.Source = null;
             RefreshSignUpInvite();
         }
-
-        public void UpdateLastSongBanner(string? bannerPath) => UpdateSpecialEventBanner(bannerPath);
 
         private void OnClosed(object? sender, EventArgs e)
         {
@@ -324,7 +322,7 @@ namespace KSRotation.Windows
             {
                 sb.Append('\u0001').Append(s.Name).Append('\u0002').Append(s.Song).Append('\u0002')
                   .Append(s.Artist).Append('\u0002').Append(s.IsMusic).Append('\u0002')
-                  .Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes);
+                  .Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes).Append('\u0002').Append(s.ScaryokeCategory);
             }
             return sb.ToString();
         }
@@ -888,6 +886,10 @@ namespace KSRotation.Windows
                     });
 
                     string crawlNameText = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name;
+                    if (!string.IsNullOrWhiteSpace(entry.ScaryokeCategory))
+                    {
+                        crawlNameText += $" [🎃 {entry.ScaryokeCategory}]";
+                    }
                     if (showEstimatedWaitTime && entry.EstimatedWaitMinutes > 0)
                     {
                         crawlNameText += $" {{{entry.EstimatedWaitMinutes}}}";
@@ -1249,8 +1251,17 @@ namespace KSRotation.Windows
             }
         }
 
+        private System.Windows.Threading.DispatcherTimer? _scaryokeAutoDismissTimer;
+
         public void StartScaryokeSpin(double targetAngle, double duration)
         {
+            _scaryokeAutoDismissTimer?.Stop();
+            UpdateScaryokeOverlay(true);
+            if (_vm != null)
+            {
+                _vm.ScaryokeResultText = "SPINNING...";
+                _vm.ScaryokeResultDetail = "Spinning the wheel to seal a singer's fate...";
+            }
             double current = ScaryokeWheelRotate.Angle % 360;
             var animation = new DoubleAnimation(current, targetAngle, TimeSpan.FromSeconds(duration))
             {
@@ -1286,6 +1297,19 @@ namespace KSRotation.Windows
                 flashAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(500))));
                 ScaryokeFlashOverlay.BeginAnimation(UIElement.OpacityProperty, flashAnim);
             }
+
+            // Auto dismiss the full-screen wheel overlay after 4.5s so audience returns to rotation screen
+            _scaryokeAutoDismissTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4.5) };
+            _scaryokeAutoDismissTimer.Tick -= OnScaryokeAutoDismissTick;
+            _scaryokeAutoDismissTimer.Tick += OnScaryokeAutoDismissTick;
+            _scaryokeAutoDismissTimer.Stop();
+            _scaryokeAutoDismissTimer.Start();
+        }
+
+        private void OnScaryokeAutoDismissTick(object? sender, EventArgs e)
+        {
+            _scaryokeAutoDismissTimer?.Stop();
+            UpdateScaryokeOverlay(false);
         }
 
         #endregion

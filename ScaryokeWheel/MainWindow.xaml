@@ -1,4 +1,4 @@
-<!-- Edited on Oct 26, 2026 @ 07:35:00 -> Add ContextMenu with Reset to Auto option on category color button -->
+<!-- Edited on Oct 27, 2026 @ 11:52:00 -> Set ComboBox foreground and background for monitor selection on Settings page -->
 <Window x:Class="ScaryokeWheel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -579,6 +579,10 @@
                                                   ItemsSource="{Binding AvailableMonitors}"
                                                   SelectedItem="{Binding SelectedMonitor}"
                                                   Height="35"
+                                                  FontSize="12"
+                                                  Background="#1E1A26" Foreground="#E0DDEC"
+                                                  BorderBrush="#332B45"
+                                                  VerticalContentAlignment="Center"
                                                   Margin="0,0,8,0">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>

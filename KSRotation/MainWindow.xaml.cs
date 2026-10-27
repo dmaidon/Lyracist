@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Add OnDjNameLostFocus to enforce Guest DJ default on empty DJ name
+// Edited on Oct 27, 2026 @ 13:00:00 -> Restore BtnScaryokeBatch_Click with cancellation support for multi-singer spin
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -612,5 +612,21 @@ namespace KSRotation
         }
 
         #endregion
+
+        private void BtnScaryokeBatch_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm && vm.IsBatchSpinning)
+            {
+                vm.CancelBatchSpin();
+                return;
+            }
+
+            if (sender is System.Windows.Controls.Button btn && btn.ContextMenu != null)
+            {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                btn.ContextMenu.IsOpen = true;
+            }
+        }
     }
 }

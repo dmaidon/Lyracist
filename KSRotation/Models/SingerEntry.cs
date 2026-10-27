@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:46:30 -> Add IsNewPlaceholder and clean singer name in Name setter
+// Edited on Oct 27, 2026 @ 11:22:00 -> Add JsonIgnore to ScaryokeBrush to prevent JSON serialization of Brush graph
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -161,6 +161,43 @@ namespace KSRotation.Models
         /// <summary>True when this singer has completed their turn in the final round of the night.</summary>
         [ObservableProperty]
         public partial bool HasSungInLastRound { get; set; }
+
+        /// <summary>Assigned Scaryoke challenge category (e.g. "80s Hits", "Country", "Elvis", etc.), or null/empty if unassigned.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasScaryokeCategory))]
+        public partial string? ScaryokeCategory { get; set; }
+
+        /// <summary>Hex color code for the assigned Scaryoke challenge category (e.g. "#FF6D00").</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ScaryokeBrush))]
+        public partial string? ScaryokeColor { get; set; }
+
+        /// <summary>True when this singer has a Scaryoke category challenge assigned.</summary>
+        public bool HasScaryokeCategory => !string.IsNullOrWhiteSpace(ScaryokeCategory);
+
+#if !MAUI
+        /// <summary>Brush representation of ScaryokeColor for UI display.</summary>
+        [JsonIgnore]
+        public System.Windows.Media.Brush ScaryokeBrush => ParseHexBrush(ScaryokeColor);
+
+        private static System.Windows.Media.SolidColorBrush ParseHexBrush(string? hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex)) hex = "#FF6D00";
+            try
+            {
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+                var b = new System.Windows.Media.SolidColorBrush(color);
+                b.Freeze();
+                return b;
+            }
+            catch
+            {
+                var fallback = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x6D, 0x00));
+                fallback.Freeze();
+                return fallback;
+            }
+        }
+#endif
 
         [ObservableProperty] public partial bool Song1Completed { get; set; }
         [ObservableProperty] public partial bool Song2Completed { get; set; }

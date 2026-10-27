@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 08:52:00 -> Add duetPartnerName to RotationItemDto for DJ tablet and web portal compatibility
+// Edited on Oct 27, 2026 @ 10:45:00 -> Add scaryokeCategory, scaryokeColor, and hasScaryokeCategory to RotationItemDto
 using System.Collections.Generic;
 
 namespace KSRotation.Models
@@ -30,6 +30,9 @@ namespace KSRotation.Models
         public bool hasSungInLastRound { get; set; }
         public string vocalRange { get; set; } = string.Empty;
         public string customTitle { get; set; } = string.Empty;
+        public string scaryokeCategory { get; set; } = string.Empty;
+        public string scaryokeColor { get; set; } = string.Empty;
+        public bool hasScaryokeCategory { get; set; }
         public List<QueuedSongDto> queuedSongs { get; set; } = [];
 
         public bool song1Completed { get; set; }
