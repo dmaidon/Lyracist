@@ -723,7 +723,7 @@ namespace KSRotation.ViewModels
                 return;
             }
 
-            if (ScaryokeBatchCount <= 1)
+            if (ScaryokeBatchCount == 1)
             {
                 var target = SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic);
                 await SpinScaryokeForSingerAsync(target, projectToAudience: IsScaryokeProjected);
