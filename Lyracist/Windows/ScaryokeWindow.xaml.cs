@@ -276,6 +276,7 @@ public partial class ScaryokeWindow : Window
         _isSpinning = true;
         SpinButton.IsEnabled = false;
         _vm.ResultText = "SPINNING...";
+        _vm.BeginSpin();
 
         _lastTickIndex = -1;
         _lastTickTimestamp = 0;

@@ -121,11 +121,11 @@ namespace KSRotation.Services
             }
         }
 
-        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle)
+        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle, bool keepVisible = true)
         {
             if (_window != null)
             {
-                _window.Dispatcher.InvokeAsync(() => _window.CompleteScaryokeSpin(resultText, resultDetail, isDjsChoice, finalAngle));
+                _window.Dispatcher.InvokeAsync(() => _window.CompleteScaryokeSpin(resultText, resultDetail, isDjsChoice, finalAngle, keepVisible));
             }
         }
 

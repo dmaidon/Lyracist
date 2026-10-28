@@ -4,6 +4,9 @@
 
 ## 2026-10-27
 
+- **Scaryoke review fixes (`MainViewModel.Scaryoke.cs`, `ScaryokeControlWindow.xaml.cs`, `SingerDisplayWindow.xaml.cs`, `DisplayWindowService.cs`, `SingerEntry.cs`)**:
+  - Maui build restored; stopping mid-spin skips results; wheel rebuilds coalesced; no focus steal on projected spins; "SPINNING..." label instead of dead STOP SPIN; Booth Only projected spins auto-hide the overlay; batch spins save settings once.
+
 - **Multi-Singer & Entire Rotation Sequential Spin Targeting (`MainWindow.xaml`, `MainWindow.xaml.cs`, `ViewModels/MainViewModel.Scaryoke.cs`, `Windows/ScaryokeControlWindow.xaml`, `Resources/dj.html`)**:
   - Restored multi-singer targeting buttons: `Next 3`, `Next 5`, `Next 10`, and `Entire Rotation (All Active)`.
   - Wheel spins sequentially for each targeted singer one-by-one, keeping category challenges hidden until the wheel decelerates and lands for that specific singer.

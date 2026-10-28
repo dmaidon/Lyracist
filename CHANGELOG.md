@@ -7,6 +7,14 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ## [Unreleased] - 2026-10-27
 
+### Fixed
+- **Scaryoke review fixes (`KSRotation`, `Lyracist`, `KSRotation.Maui`)**:
+  - `KSRotation.Maui` compiles again (`#if !MAUI` guards around `ScaryokeBrush` and Scaryoke monitor calls).
+  - Stopping Scaryoke mid-spin no longer assigns categories, fires events or plays sounds; the control window coalesces wheel rebuilds; projected spins no longer steal keyboard focus; scaryoke brushes are cached.
+  - Single spins show "SPINNING..." instead of a non-functional STOP SPIN; a projected spin in Booth Only mode now auto-hides the audience overlay.
+  - Lyracist and Maui now capture the singer at spin start, clear their old category, and reveal the new one only when the wheel stops (Maui also assigns the category to the current singer).
+  - Batch spins save Scaryoke settings once instead of once per singer.
+
 ### Added
 - **Multi-Singer & Entire Rotation Sequential Spin Targeting (`KSRotation`, `ScaryokeControlWindow`, `dj.html`)**:
   - Restored full capability to target multiple performers (`Next 3`, `Next 5`, `Next 10`) or the `Entire Rotation` at once.

@@ -371,6 +371,20 @@ namespace KSRotation.Maui.ViewModels
         /// <summary>Builds the result message for the category the wheel landed on, naming whoever is
         /// currently up in the rotation (falling back to the first active singer if nobody is flagged
         /// current yet).</summary>
+        private KSRotation.Models.SingerEntry? _spinSinger;
+
+        /// <summary>Captures the singer the spin is for and clears any previous challenge, so the category is revealed only once the wheel stops.</summary>
+        public void BeginSpin()
+        {
+            _spinSinger = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
+            if (_spinSinger != null)
+            {
+                _spinSinger.ScaryokeCategory = null;
+                _spinSinger.ScaryokeColor = null;
+            }
+        }
+
         public void ApplyResult(string category)
         {
             _recent.Insert(0, category);
@@ -381,9 +395,16 @@ namespace KSRotation.Maui.ViewModels
             _settings.SpinHistory = [.. _recent];
             ScaryokeSettingsService.Save(_settings);
 
-            var singer = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+            var singer = _spinSinger ?? _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
                 ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
+            _spinSinger = null;
             string singerName = singer?.Name ?? "The singer";
+
+            if (singer != null)
+            {
+                singer.ScaryokeCategory = category;
+                singer.ScaryokeColor = WheelSegments.FirstOrDefault(s => string.Equals(s.Name, category, StringComparison.OrdinalIgnoreCase))?.Color ?? "#FF6D00";
+            }
 
             ResultText = category switch
             {

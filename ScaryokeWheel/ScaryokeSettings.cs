@@ -81,7 +81,7 @@ public class ScaryokeSettings
     public List<string> SpinHistory { get; set; } = [];
 
     /// <summary>Appends a landed category to the spin history and persists settings.</summary>
-    public void RecordSpin(string category)
+    public void RecordSpin(string category, bool save = true)
     {
         if (string.IsNullOrWhiteSpace(category) || string.Equals(category, "Spin Again", StringComparison.OrdinalIgnoreCase))
             return;
@@ -92,7 +92,7 @@ public class ScaryokeSettings
         {
             SpinHistory.RemoveAt(SpinHistory.Count - 1);
         }
-        Save();
+        if (save) Save();
     }
 
     /// <summary>Clears the landed category history and persists settings.</summary>

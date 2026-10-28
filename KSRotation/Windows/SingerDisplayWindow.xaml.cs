@@ -1275,7 +1275,7 @@ namespace KSRotation.Windows
             ScaryokeWheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
         }
 
-        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle)
+        public void CompleteScaryokeSpin(string resultText, string resultDetail, bool isDjsChoice, double finalAngle, bool keepVisible = true)
         {
             ScaryokeWheelRotate.BeginAnimation(RotateTransform.AngleProperty, null);
             ScaryokeWheelRotate.Angle = finalAngle % 360;
@@ -1302,9 +1302,9 @@ namespace KSRotation.Windows
                 ScaryokeFlashOverlay.BeginAnimation(UIElement.OpacityProperty, flashAnim);
             }
 
-            // Only auto-dismiss the overlay if Scaryoke mode is NOT active (i.e. one-off trigger).
-            // When Scaryoke mode is active, the wheel remains projected on the audience display.
-            if (!(_vm?.IsScaryokeActive ?? false))
+            // Auto-dismiss unless Scaryoke mode is active AND the wheel is meant to stay projected
+            // (a booth-only mode one-off projected spin must not leave the overlay stuck on screen).
+            if (!keepVisible || !(_vm?.IsScaryokeActive ?? false))
             {
                 _scaryokeAutoDismissTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4.5) };
                 _scaryokeAutoDismissTimer.Tick -= OnScaryokeAutoDismissTick;

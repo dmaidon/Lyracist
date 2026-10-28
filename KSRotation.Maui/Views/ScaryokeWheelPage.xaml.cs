@@ -39,6 +39,7 @@ public partial class ScaryokeWheelPage : ContentPage
         _vm.IsSpinning = true;
         SpinButton.IsEnabled = false;
         _vm.ResultText = "Spinning...";
+        _vm.BeginSpin();
 
         // Re-roll where the DJ's Choice slivers land for this spin, matching the desktop wheel.
         _vm.RebuildWheelSegments();

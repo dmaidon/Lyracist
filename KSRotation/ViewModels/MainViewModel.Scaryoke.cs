@@ -98,7 +98,8 @@ namespace KSRotation.ViewModels
         {
             get
             {
-                if (IsBatchSpinning || IsScaryokeSpinning) return "⏹ STOP SPIN";
+                if (IsBatchSpinning) return "⏹ STOP SPIN";
+                if (IsScaryokeSpinning) return "🎲 SPINNING...";
                 if (ScaryokeBatchCount == 1)
                 {
                     var name = SelectedSingerForScaryoke?.Name ?? CurrentSinger?.Name;
@@ -872,7 +873,7 @@ namespace KSRotation.ViewModels
             ScaryokeSpinFinished?.Invoke(this, new ScaryokeSpinCompletedEventArgs(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle));
             if (projectToAudience)
             {
-                _displayWindowService.CompleteScaryokeSpin(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle);
+                _displayWindowService.CompleteScaryokeSpin(ScaryokeResultText, ScaryokeResultDetail, isDjsChoice, _scaryokeCurrentAngle, IsScaryokeProjected);
             }
 
             // Sound effect on finish
@@ -1079,11 +1080,12 @@ namespace KSRotation.ViewModels
                 {
                     ScaryokeHistory.RemoveAt(ScaryokeHistory.Count - 1);
                 }
-                _scaryokeSettings.RecordSpin(chosen.Name);
+                _scaryokeSettings.RecordSpin(chosen.Name, save: false);
             }
 
             if (modified)
             {
+                _scaryokeSettings.Save();
                 _displayWindowService.Update(Singers);
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();

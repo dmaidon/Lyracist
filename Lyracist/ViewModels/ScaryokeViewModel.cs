@@ -170,6 +170,19 @@ public partial class ScaryokeViewModel : BaseViewModel
     /// Handles the category the wheel landed on. Returns true when the wheel
     /// should immediately spin again ("Spin Again" segment).
     /// </summary>
+    private Models.Singer? _spinSinger;
+
+    /// <summary>Captures the singer the spin is for and clears their previous challenge, so the new category is revealed only once the wheel stops.</summary>
+    public void BeginSpin()
+    {
+        _spinSinger = _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        if (_spinSinger != null)
+        {
+            _spinSinger.ScaryokeCategory = null;
+            _spinSinger.ScaryokeColor = null;
+        }
+    }
+
     public bool ApplyResult(string category)
     {
         if (category != "Spin Again")
@@ -189,7 +202,8 @@ public partial class ScaryokeViewModel : BaseViewModel
             return true;
         }
 
-        var singer = _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        var singer = _spinSinger ?? _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        _spinSinger = null;
         string singerName = singer?.Name ?? "The singer";
 
         if (singer != null)
