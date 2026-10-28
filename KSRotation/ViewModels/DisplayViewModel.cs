@@ -113,6 +113,8 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasCurrentSingerScaryoke))]
         [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeBrush))]
+        [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeLabel))]
+        [NotifyPropertyChangedFor(nameof(IsCurrentSingerCursed))]
         public partial string CurrentSingerScaryokeCategory { get; set; } = string.Empty;
 
         [ObservableProperty]
@@ -120,6 +122,36 @@ namespace KSRotation.ViewModels
         public partial string CurrentSingerScaryokeColor { get; set; } = string.Empty;
 
         public bool HasCurrentSingerScaryoke => !string.IsNullOrWhiteSpace(CurrentSingerScaryokeCategory);
+
+        /// <summary>Curse twist rolled for the current singer (empty when none).</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CurrentSingerScaryokeLabel))]
+        [NotifyPropertyChangedFor(nameof(IsCurrentSingerCursed))]
+        public partial string CurrentSingerScaryokeCurse { get; set; } = string.Empty;
+
+        /// <summary>Category badge text, with the curse appended when one was rolled.</summary>
+        public string CurrentSingerScaryokeLabel =>
+            string.IsNullOrWhiteSpace(CurrentSingerScaryokeCurse)
+                ? CurrentSingerScaryokeCategory
+                : $"{CurrentSingerScaryokeCategory} ☠ {CurrentSingerScaryokeCurse}";
+
+        /// <summary>True while the current singer carries a curse or landed on DJ's Choice; drives the red pulsing frame.</summary>
+        public bool IsCurrentSingerCursed =>
+            !string.IsNullOrWhiteSpace(CurrentSingerScaryokeCurse) ||
+            string.Equals(CurrentSingerScaryokeCategory, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Live text shown on the wheel overlay while the curse mini-spin cycles.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasScaryokeCurseText))]
+        public partial string ScaryokeCurseText { get; set; } = string.Empty;
+
+        public bool HasScaryokeCurseText => !string.IsNullOrWhiteSpace(ScaryokeCurseText);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasScaryokeFortune))]
+        public partial string ScaryokeFortuneText { get; set; } = string.Empty;
+
+        public bool HasScaryokeFortune => !string.IsNullOrWhiteSpace(ScaryokeFortuneText);
 
         public System.Windows.Media.Brush CurrentSingerScaryokeBrush => GetBrushFromHex(CurrentSingerScaryokeColor);
 
@@ -373,6 +405,7 @@ namespace KSRotation.ViewModels
                 HasCurrentSingerAvatar = false;
                 CurrentSingerScaryokeCategory = string.Empty;
                 CurrentSingerScaryokeColor = string.Empty;
+                CurrentSingerScaryokeCurse = string.Empty;
                 ActiveSingerCount = 0;
                 ActiveSingerCountText = "0 Singers in Rotation";
                 HasActiveSingers = false;
@@ -413,6 +446,7 @@ namespace KSRotation.ViewModels
                 HasCurrentSingerAvatar = false;
                 CurrentSingerScaryokeCategory = string.Empty;
                 CurrentSingerScaryokeColor = string.Empty;
+                CurrentSingerScaryokeCurse = string.Empty;
                 NextSingers.Clear();
                 FullRotation.Clear();
                 RotationEntries.Clear();
@@ -425,6 +459,7 @@ namespace KSRotation.ViewModels
                 IsCurrentMusic = current.IsMusic;
                 CurrentSingerScaryokeCategory = current.ScaryokeCategory ?? string.Empty;
                 CurrentSingerScaryokeColor = current.ScaryokeColor ?? string.Empty;
+                CurrentSingerScaryokeCurse = current.ScaryokeCurse ?? string.Empty;
                 if (current.IsMusic)
                 {
                     CurrentSinger = $"[MUSIC] {current.Song} (Req. by {current.Name})";

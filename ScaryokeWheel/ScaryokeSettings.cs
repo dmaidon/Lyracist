@@ -66,6 +66,15 @@ public class ScaryokeSettings
 
     public bool ShowSingersChoice { get; set; } = true;
 
+    /// <summary>Seasonal haunted effects (candlelight, fog, flying bats) on the audience rotation screen.</summary>
+    public bool HauntedScreen { get; set; }
+
+    /// <summary>After a category lands, a second mini-spin assigns a "curse" twist.</summary>
+    public bool CursesEnabled { get; set; } = true;
+
+    /// <summary>Shows a fortune-teller line on the audience screen when the wheel lands.</summary>
+    public bool FortunesEnabled { get; set; } = true;
+
     public bool ShowDjsChoice { get; set; } = true;
 
     /// <summary>Target monitor device name to display the wheel on (e.g. \\.\DISPLAY2).</summary>

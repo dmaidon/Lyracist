@@ -23,6 +23,7 @@ namespace KSRotation.Services
         private string _scaryokeMonitorDevice = string.Empty;
         private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
+        private bool _hauntedScreen;
         private bool _isScaryokeProjected = true;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
 
@@ -78,6 +79,22 @@ namespace KSRotation.Services
                     }
                 });
             }
+        }
+
+        public void SetHauntedScreen(bool on)
+        {
+            _hauntedScreen = on;
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.SetHauntedScreen(on));
+            }
+        }
+
+        /// <summary>Drives the live curse mini-spin text and fortune line on the audience wheel overlay.</summary>
+        public void SetScaryokeFlavorText(string curseText, string fortuneText)
+        {
+            _viewModel.ScaryokeCurseText = curseText ?? string.Empty;
+            _viewModel.ScaryokeFortuneText = fortuneText ?? string.Empty;
         }
 
         public void SetScaryokeOverlayVisible(bool isVisible)
@@ -312,6 +329,7 @@ namespace KSRotation.Services
             _viewModel.UpdateFromRotation(rotation);
 
             _window.UpdateSpecialEventBanner(_specialEventBannerPath);
+            _window.SetHauntedScreen(_hauntedScreen);
 
             if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
             {

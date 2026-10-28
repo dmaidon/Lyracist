@@ -58,6 +58,26 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ScaryokeShowDjsChoice { get; set; } = true;
 
+        /// <summary>Seasonal candlelight / fog / flying-bat effects on the audience rotation screen.</summary>
+        [ObservableProperty]
+        public partial bool ScaryokeHauntedScreen { get; set; }
+
+        /// <summary>After the category lands, roll a second "curse" twist for the singer.</summary>
+        [ObservableProperty]
+        public partial bool ScaryokeCursesEnabled { get; set; } = true;
+
+        /// <summary>Show a fortune-teller line on the audience screen when the wheel lands.</summary>
+        [ObservableProperty]
+        public partial bool ScaryokeFortunesEnabled { get; set; } = true;
+
+        private bool _isScaryokeCursing;
+
+        private void SetScaryokeCursing(bool value)
+        {
+            _isScaryokeCursing = value;
+            OnPropertyChanged(nameof(ScaryokeSpinButtonText));
+        }
+
         [ObservableProperty]
         public partial string ScaryokeResultText { get; set; } = "Spin the wheel for a challenge!";
 
@@ -100,7 +120,7 @@ namespace KSRotation.ViewModels
             get
             {
                 if (IsBatchSpinning) return "⏹ STOP SPIN";
-                if (IsScaryokeSpinning) return "🎲 SPINNING...";
+                if (IsScaryokeSpinning || _isScaryokeCursing) return "🎲 SPINNING...";
                 if (ScaryokeBatchCount == 1)
                 {
                     var name = SelectedSingerForScaryoke?.Name ?? CurrentSinger?.Name;
@@ -201,6 +221,14 @@ namespace KSRotation.ViewModels
                 ScaryokeShowDjsChoice = _scaryokeSettings.ShowDjsChoice;
                 ScaryokeIsMuted = _scaryokeSettings.IsMuted;
                 ScaryokeVolume = _scaryokeSettings.Volume;
+                ScaryokeHauntedScreen = _scaryokeSettings.HauntedScreen;
+                ScaryokeCursesEnabled = _scaryokeSettings.CursesEnabled;
+                ScaryokeFortunesEnabled = _scaryokeSettings.FortunesEnabled;
+                _displayWindowService.SetHauntedScreen(ScaryokeHauntedScreen);
+                if (ScaryokeFlavor.EnsureHalloweenPreset(_scaryokeSettings))
+                {
+                    _scaryokeSettings.Save();
+                }
                 ScaryokeHistory.Clear();
                 foreach (var spin in _scaryokeSettings.SpinHistory)
                 {
@@ -265,6 +293,25 @@ namespace KSRotation.ViewModels
             _scaryokeSettings.Save();
             RebuildScaryokeWheelSegments();
             _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
+        }
+
+        partial void OnScaryokeHauntedScreenChanged(bool value)
+        {
+            _scaryokeSettings.HauntedScreen = value;
+            _scaryokeSettings.Save();
+            _displayWindowService.SetHauntedScreen(value);
+        }
+
+        partial void OnScaryokeCursesEnabledChanged(bool value)
+        {
+            _scaryokeSettings.CursesEnabled = value;
+            _scaryokeSettings.Save();
+        }
+
+        partial void OnScaryokeFortunesEnabledChanged(bool value)
+        {
+            _scaryokeSettings.FortunesEnabled = value;
+            _scaryokeSettings.Save();
         }
 
         partial void OnScaryokeIsMutedChanged(bool value)
@@ -607,6 +654,7 @@ namespace KSRotation.ViewModels
 
             CancelBatchSpin();
             IsScaryokeActive = false;
+            _displayWindowService.SetScaryokeFlavorText(string.Empty, string.Empty);
             _displayWindowService.SetScaryokeActive(false);
 
             var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
@@ -777,7 +825,7 @@ namespace KSRotation.ViewModels
 
         public async Task SpinScaryokeForSingerAsync(SingerEntry? singer, bool projectToAudience = false)
         {
-            if (IsScaryokeSpinning || ScaryokeWheelSegments.Count == 0) return;
+            if (IsScaryokeSpinning || _isScaryokeCursing || ScaryokeWheelSegments.Count == 0) return;
 
             var targetSinger = singer ?? SelectedSingerForScaryoke ?? CurrentSinger ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic);
             ScaryokeTargetSingerName = targetSinger != null ? (targetSinger.IsDuet ? $"{targetSinger.Name} & {targetSinger.DuetPartnerName}" : targetSinger.Name) : "Stage Open";
@@ -788,8 +836,10 @@ namespace KSRotation.ViewModels
             {
                 targetSinger.ScaryokeCategory = null;
                 targetSinger.ScaryokeColor = null;
+                targetSinger.ScaryokeCurse = null;
                 _displayWindowService.Update(Singers);
             }
+            _displayWindowService.SetScaryokeFlavorText(string.Empty, string.Empty);
 
             IsScaryokeSpinning = true;
             ScaryokeResultText = "Spinning...";
@@ -914,6 +964,50 @@ namespace KSRotation.ViewModels
                     catch { }
                 });
             }
+
+            // Halloween flavor: fortune line first, then the curse mini-spin
+            string fortune = string.Empty;
+            if (ScaryokeFortunesEnabled)
+            {
+                fortune = ScaryokeFlavor.Fortune(landed.Name, targetSinger?.Name);
+                if (projectToAudience) _displayWindowService.SetScaryokeFlavorText(string.Empty, fortune);
+            }
+
+            if (ScaryokeCursesEnabled && targetSinger != null)
+            {
+                await RevealScaryokeCurseAsync(targetSinger, fortune, projectToAudience);
+            }
+        }
+
+        /// <summary>Rolls the second "curse" mini-spin: cycles twists on the audience overlay, then settles on one and stores it on the singer.</summary>
+        private async Task RevealScaryokeCurseAsync(SingerEntry singer, string fortune, bool projectToAudience)
+        {
+            SetScaryokeCursing(true);
+            try
+            {
+                string final = ScaryokeFlavor.RandomCurse();
+                const int steps = 14;
+                for (int i = 0; i < steps; i++)
+                {
+                    string shown = i == steps - 1 ? final : ScaryokeFlavor.RandomCurse();
+                    if (projectToAudience) _displayWindowService.SetScaryokeFlavorText(shown, fortune);
+                    await Task.Delay(60 + (i * 10));
+                    if (!IsScaryokeActive) return;
+                }
+
+                if (ScaryokeFlavor.IsRealCurse(final))
+                {
+                    singer.ScaryokeCurse = final;
+                    ScaryokeResultDetail = $"{ScaryokeResultDetail}  ☠ Curse: {final}";
+                    _displayWindowService.Update(Singers);
+                    RebuildRotationJsonCacheNow();
+                    QueueSaveDatabase();
+                }
+            }
+            finally
+            {
+                SetScaryokeCursing(false);
+            }
         }
 
         [RelayCommand]
@@ -922,6 +1016,7 @@ namespace KSRotation.ViewModels
             if (singer == null) return;
             singer.ScaryokeCategory = null;
             singer.ScaryokeColor = null;
+            singer.ScaryokeCurse = null;
             _displayWindowService.Update(Singers);
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
@@ -934,6 +1029,7 @@ namespace KSRotation.ViewModels
             string color = seg?.Color ?? ScaryokePaletteColor(ScaryokeCategories.IndexOf(categoryName));
             singer.ScaryokeCategory = categoryName;
             singer.ScaryokeColor = color;
+            singer.ScaryokeCurse = null;
             _displayWindowService.Update(Singers);
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
@@ -1032,6 +1128,7 @@ namespace KSRotation.ViewModels
                 {
                     singer.ScaryokeCategory = null;
                     singer.ScaryokeColor = null;
+                    singer.ScaryokeCurse = null;
                     modified = true;
                 }
             }

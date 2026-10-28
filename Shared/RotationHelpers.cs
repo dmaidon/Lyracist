@@ -640,6 +640,7 @@ namespace Lyracist.Shared
             // Once a singer finishes their performance, clear any assigned Scaryoke challenge badge until their next spin
             finishedEntry.ScaryokeCategory = null;
             finishedEntry.ScaryokeColor = null;
+            finishedEntry.ScaryokeCurse = null;
 
             // If someone was designated as Next (e.g. displaced when a special singer or manual override sang),
             // preserve them so the rotation resumes with them seamlessly.

@@ -2404,6 +2404,24 @@
                                               Style="{StaticResource ModernCheckBoxStyle}"
                                               Margin="0,4,0,6"
                                               ToolTip="When checked, ensures two consecutive singers never receive the same challenge. Persists across wheel dismissals and restarts." />
+
+                                    <CheckBox Content="☠ Curse Round (second mini-spin twist)"
+                                              IsChecked="{Binding ScaryokeCursesEnabled, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="After the category lands, a second mini-spin assigns a twist like 'Monster voice' or 'Eyes closed'. The curse shows on the singer's badge until they finish." />
+
+                                    <CheckBox Content="🔮 Fortune-Teller Reading"
+                                              IsChecked="{Binding ScaryokeFortunesEnabled, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="Shows a spooky fortune line on the audience screen when the wheel lands." />
+
+                                    <CheckBox Content="🦇 Haunted Rotation Screen"
+                                              IsChecked="{Binding ScaryokeHauntedScreen, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,4,0,6"
+                                              ToolTip="Seasonal effects on the audience rotation screen: candlelight flicker, drifting fog and flying bats. Works even when Scaryoke mode is off." />
                                 </StackPanel>
                             </GroupBox>
 

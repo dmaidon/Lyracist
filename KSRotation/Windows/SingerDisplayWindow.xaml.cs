@@ -151,6 +151,7 @@ namespace KSRotation.Windows
             // the static CompositionTarget.Rendering event - left running, that kept the closed
             // window alive and ticking every frame, one more copy per reopen.
             _projectionTransitionGen++; // cancels a crossfade that's still mid-fade
+            SetHauntedScreen(false);
             StopAllProjectionAnimations();
             HookViewModel(null);
         }
@@ -1300,6 +1301,7 @@ namespace KSRotation.Windows
                 flashAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.85, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(100))));
                 flashAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(500))));
                 ScaryokeFlashOverlay.BeginAnimation(UIElement.OpacityProperty, flashAnim);
+                PlayLightningStrike();
             }
 
             // Auto-dismiss unless Scaryoke mode is active AND the wheel is meant to stay projected
@@ -1314,10 +1316,120 @@ namespace KSRotation.Windows
             }
         }
 
+        /// <summary>White double-strobe plus a violent shake of the wheel overlay, for the DJ's Choice reveal.</summary>
+        private void PlayLightningStrike()
+        {
+            var strobe = new DoubleAnimationUsingKeyFrames();
+            (double Opacity, int Ms)[] frames = [(0.95, 40), (0.05, 130), (0.85, 190), (0, 420), (0.6, 560), (0, 900)];
+            foreach (var (opacity, ms) in frames)
+            {
+                strobe.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+            }
+            ScaryokeLightningOverlay.BeginAnimation(UIElement.OpacityProperty, strobe);
+
+            var shake = new DoubleAnimationUsingKeyFrames();
+            double[] offsets = [-26, 26, -20, 20, -14, 14, -8, 8, -3, 0];
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                shake.KeyFrames.Add(new LinearDoubleKeyFrame(offsets[i], KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds((i + 1) * 55))));
+            }
+            ScaryokeOverlayShake.BeginAnimation(TranslateTransform.XProperty, shake);
+        }
+
         private void OnScaryokeAutoDismissTick(object? sender, EventArgs e)
         {
             _scaryokeAutoDismissTimer?.Stop();
             UpdateScaryokeOverlay(false);
+        }
+
+        #endregion
+
+        #region Haunted Screen
+
+        private System.Windows.Threading.DispatcherTimer? _hauntedFlyerTimer;
+        private bool _hauntedOn;
+
+        /// <summary>Turns the seasonal candlelight / fog / flying-bat effects on or off. Animations only run while enabled.</summary>
+        public void SetHauntedScreen(bool on)
+        {
+            if (on == _hauntedOn) return;
+            _hauntedOn = on;
+            HauntedLayer.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!on)
+            {
+                _hauntedFlyerTimer?.Stop();
+                HauntedFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
+                HauntedFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
+                HauntedCandle.BeginAnimation(UIElement.OpacityProperty, null);
+                HauntedFlyerShift.BeginAnimation(TranslateTransform.XProperty, null);
+                HauntedFlyerShift.BeginAnimation(TranslateTransform.YProperty, null);
+                HauntedFlyer.BeginAnimation(UIElement.OpacityProperty, null);
+                HauntedFlyer.Opacity = 0;
+                return;
+            }
+
+            var drift1 = new DoubleAnimation(-500, -60, TimeSpan.FromSeconds(42))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+            HauntedFog1Shift.BeginAnimation(TranslateTransform.XProperty, drift1);
+
+            var drift2 = new DoubleAnimation(-60, -620, TimeSpan.FromSeconds(58))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+            HauntedFog2Shift.BeginAnimation(TranslateTransform.XProperty, drift2);
+
+            // Irregular flicker so it reads as candlelight rather than a metronome
+            var flicker = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
+            (double Opacity, int Ms)[] steps = [(0.85, 0), (0.7, 160), (0.95, 330), (0.75, 410), (0.9, 700), (0.62, 790), (0.88, 1150), (0.8, 1400), (0.85, 1700)];
+            foreach (var (opacity, ms) in steps)
+            {
+                flicker.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+            }
+            HauntedCandle.BeginAnimation(UIElement.OpacityProperty, flicker);
+
+            _hauntedFlyerTimer ??= new System.Windows.Threading.DispatcherTimer();
+            _hauntedFlyerTimer.Tick -= OnHauntedFlyerTick;
+            _hauntedFlyerTimer.Tick += OnHauntedFlyerTick;
+            _hauntedFlyerTimer.Interval = TimeSpan.FromSeconds(4);
+            _hauntedFlyerTimer.Start();
+        }
+
+        private void OnHauntedFlyerTick(object? sender, EventArgs e)
+        {
+            if (!_hauntedOn) return;
+            if (_hauntedFlyerTimer != null) _hauntedFlyerTimer.Interval = TimeSpan.FromSeconds(14 + _rng.Next(0, 14));
+
+            string[] flyers = ["🦇", "🦇", "👻", "🦇", "🕷️"];
+            HauntedFlyer.Text = flyers[_rng.Next(flyers.Length)];
+
+            bool leftToRight = _rng.Next(2) == 0;
+            double y = _rng.Next(60, 640);
+            TimeSpan flight = TimeSpan.FromSeconds(6.5);
+
+            HauntedFlyerShift.BeginAnimation(TranslateTransform.XProperty,
+                new DoubleAnimation(leftToRight ? -200 : 2100, leftToRight ? 2100 : -200, flight));
+
+            var wobble = new DoubleAnimationUsingKeyFrames { Duration = flight };
+            double[] ys = [y, y - 90, y + 50, y - 60, y + 30, y];
+            for (int i = 0; i < ys.Length; i++)
+            {
+                wobble.KeyFrames.Add(new EasingDoubleKeyFrame(ys[i], KeyTime.FromPercent((i + 1) / (double)ys.Length),
+                    new SineEase { EasingMode = EasingMode.EaseInOut }));
+            }
+            HauntedFlyerShift.BeginAnimation(TranslateTransform.YProperty, wobble);
+
+            var fade = new DoubleAnimationUsingKeyFrames { Duration = flight };
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.1)));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.9)));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1.0)));
+            HauntedFlyer.BeginAnimation(UIElement.OpacityProperty, fade);
         }
 
         #endregion

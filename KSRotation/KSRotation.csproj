@@ -162,6 +162,7 @@
     <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
     <Compile Include="..\ScaryokeWheel\ScaryokeAudio.cs" Link="Services\ScaryokeAudio.cs" />
     <Compile Include="..\ScaryokeWheel\ScaryokeSettings.cs" Link="Models\ScaryokeSettings.cs" />
+    <Compile Include="..\ScaryokeWheel\ScaryokeFlavor.cs" Link="Models\ScaryokeFlavor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />

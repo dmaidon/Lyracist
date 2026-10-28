@@ -48,6 +48,9 @@ namespace Lyracist.Shared
 
         /// <summary>Wheel segment color hex code (e.g., "#FF6D00") for the assigned Scaryoke challenge category.</summary>
         string? ScaryokeColor { get; set; }
+
+        /// <summary>Short Scaryoke "curse" twist rolled after the category; only KSRotation uses it, so other implementers may ignore it.</summary>
+        string? ScaryokeCurse { get => null; set { } }
     }
 }
 

@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 2026-10-28
+
+- **Halloween Scaryoke additions (`ScaryokeFlavor.cs`, `MainViewModel.Scaryoke.cs`, `SingerDisplayWindow.xaml/.cs`, `DisplayViewModel.cs`, `MainWindow.xaml`)**:
+  - Curse Round: after the category lands, a second mini-spin cycles twists (Monster voice, Eyes closed, ...) and stores one on the singer; it shows on the badge until they finish. Toggle in Scaryoke Settings.
+  - Fortune-Teller reading on the audience wheel screen after each landing. Toggle in Scaryoke Settings.
+  - DJ's Choice reveal now adds a white lightning strobe and violent shake of the overlay.
+  - Cursed singers (curse or DJ's Choice) get a pulsing red frame around the whole rotation screen until they finish.
+  - Haunted Rotation Screen toggle: candlelight flicker, drifting fog and flying bats/ghosts/spiders; works with Scaryoke off.
+  - Built-in "🎃 Halloween" category preset (Monster Mash, Ghostbusters, Thriller, Addams Family, Spooky Rock, Villain Songs, ...), auto-added to the preset list.
+
 ## 2026-10-27
 
 - **Scaryoke review fixes (`MainViewModel.Scaryoke.cs`, `ScaryokeControlWindow.xaml.cs`, `SingerDisplayWindow.xaml.cs`, `DisplayWindowService.cs`, `SingerEntry.cs`)**:

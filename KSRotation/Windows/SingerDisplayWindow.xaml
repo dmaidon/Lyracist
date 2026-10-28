@@ -287,7 +287,7 @@
                         <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="12,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                                 ToolTip="Scaryoke Challenge Category"
                                 Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                            <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
                         <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSingerName}"
                                    HorizontalAlignment="Center"
@@ -482,7 +482,7 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="0" Opacity="0.8" />
                             </Border.Effect>
-                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                            <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
                     </StackPanel>
 
@@ -762,7 +762,7 @@
                     <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
                             ToolTip="Scaryoke Challenge Category"
                             Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="18" FontWeight="ExtraBold" Foreground="White" />
+                        <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="18" FontWeight="ExtraBold" Foreground="White" />
                     </Border>
                     <TextBlock Text="{Binding CurrentSingerName}"
                                TextWrapping="Wrap"
@@ -952,7 +952,7 @@
                         <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                                 ToolTip="Scaryoke Challenge Category"
                                 Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                            <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
 
                         <TextBlock Text="{Binding CurrentSingerName}"
@@ -1109,7 +1109,7 @@
                     <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                             ToolTip="Scaryoke Challenge Category"
                             Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                        <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                     </Border>
 
                     <TextBlock Text="{Binding CurrentSingerName}"
@@ -1223,7 +1223,7 @@
                 <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                         ToolTip="Scaryoke Challenge Category"
                         Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="20" FontWeight="ExtraBold" Foreground="White" />
+                    <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="20" FontWeight="ExtraBold" Foreground="White" />
                 </Border>
 
                 <TextBlock Text="{Binding CurrentSingerName}"
@@ -1540,7 +1540,7 @@
                                     <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,3" Margin="8,0,0,0"
                                             ToolTip="Scaryoke Challenge Category"
                                             Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="14" FontWeight="ExtraBold" Foreground="White" />
+                                        <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="14" FontWeight="ExtraBold" Foreground="White" />
                                     </Border>
                                 </StackPanel>
                                 <TextBlock Text="{Binding CurrentSingerName}"
@@ -1790,7 +1790,7 @@
                             <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="8" Padding="10,4" Margin="0,0,0,8" HorizontalAlignment="Center"
                                     ToolTip="Scaryoke Challenge Category"
                                     Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="16" FontWeight="ExtraBold" Foreground="White" />
+                                <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="16" FontWeight="ExtraBold" Foreground="White" />
                             </Border>
 
                             <TextBlock Text="{Binding CurrentSingerName}"
@@ -1990,7 +1990,7 @@
                                             <Border Background="{Binding CurrentSingerScaryokeBrush}" CornerRadius="6" Padding="8,2" Margin="8,0,0,0"
                                                     ToolTip="Scaryoke Challenge Category"
                                                     Visibility="{Binding HasCurrentSingerScaryoke, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="{Binding CurrentSingerScaryokeCategory}" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
+                                                <TextBlock Text="{Binding CurrentSingerScaryokeLabel}" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                         </StackPanel>
                                         <TextBlock Text="{Binding CurrentSingerName}"
@@ -2400,13 +2400,69 @@
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
 
+        <!-- Haunted screen: candlelight vignette, drifting fog and flying bats (toggled from Scaryoke Settings) -->
+        <Grid x:Name="HauntedLayer" Grid.RowSpan="2" Panel.ZIndex="104" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True">
+            <Border x:Name="HauntedFog1" Width="2600" Height="420" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.35">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                        <GradientStop Color="#CCB9C0D6" Offset="0" />
+                        <GradientStop Color="#00B9C0D6" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform><TranslateTransform x:Name="HauntedFog1Shift" X="-500" /></Border.RenderTransform>
+            </Border>
+            <Border x:Name="HauntedFog2" Width="2600" Height="300" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.25">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                        <GradientStop Color="#CC9FA8C4" Offset="0" />
+                        <GradientStop Color="#009FA8C4" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.RenderTransform><TranslateTransform x:Name="HauntedFog2Shift" X="-100" /></Border.RenderTransform>
+            </Border>
+            <Border x:Name="HauntedCandle">
+                <Border.Background>
+                    <RadialGradientBrush Center="0.5,0.5" RadiusX="0.75" RadiusY="0.75">
+                        <GradientStop Color="#00000000" Offset="0.55" />
+                        <GradientStop Color="#CC1A0800" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            <TextBlock x:Name="HauntedFlyer" Text="🦇" FontSize="64" Opacity="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <TextBlock.RenderTransform>
+                    <TranslateTransform x:Name="HauntedFlyerShift" X="-200" Y="120" />
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </Grid>
+
+        <!-- Cursed frame: pulses red around the whole screen while the current singer carries a curse or DJ's Choice -->
+        <Border x:Name="CursedFrame" Grid.RowSpan="2" Panel.ZIndex="108" IsHitTestVisible="False"
+                BorderBrush="#FF1744" BorderThickness="14" Opacity="0.45"
+                Visibility="{Binding IsCurrentSingerCursed, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border.Effect>
+                <DropShadowEffect Color="#FF1744" BlurRadius="40" ShadowDepth="0" Opacity="0.9" />
+            </Border.Effect>
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.25" To="0.85" Duration="0:0:1.1" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+        </Border>
+
         <!-- Scaryoke Wheel Overlay (takes precedence over all projection panels and banners) -->
         <Border x:Name="ScaryokeWheelOverlay"
                 Grid.RowSpan="2"
                 Panel.ZIndex="135"
                 Background="#E504060B"
                 Visibility="Collapsed">
-            <Grid Margin="40">
+            <Grid Margin="40" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="ScaryokeOverlayShake" />
+                </Grid.RenderTransform>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.1*" />
                     <ColumnDefinition Width="0.9*" />
@@ -2480,6 +2536,14 @@
                                 </TextBlock.RenderTransform>
                             </TextBlock>
                             <TextBlock Text="{Binding ScaryokeResultDetail}" TextWrapping="Wrap" TextAlignment="Center" FontSize="24" Foreground="#C9C5D6" HorizontalAlignment="Center" Margin="0,20,0,0" />
+                            <TextBlock Text="{Binding ScaryokeFortuneText}" TextWrapping="Wrap" TextAlignment="Center" FontSize="22" FontStyle="Italic" Foreground="#B388FF" HorizontalAlignment="Center" Margin="0,18,0,0"
+                                       Visibility="{Binding HasScaryokeFortune, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <TextBlock Text="{Binding ScaryokeCurseText, StringFormat='☠ CURSE: {0} ☠'}" TextWrapping="Wrap" TextAlignment="Center" FontSize="34" FontWeight="ExtraBold" Foreground="#FF1744" HorizontalAlignment="Center" Margin="0,22,0,0"
+                                       Visibility="{Binding HasScaryokeCurseText, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#FF1744" BlurRadius="16" ShadowDepth="0" Opacity="0.7" />
+                                </TextBlock.Effect>
+                            </TextBlock>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -2488,6 +2552,9 @@
 
         <!-- Full-window flash used for the DJ's Choice reveal on Scaryoke -->
         <Border x:Name="ScaryokeFlashOverlay" Grid.RowSpan="2" Panel.ZIndex="136" Background="#FF3D00" Opacity="0" IsHitTestVisible="False" />
+
+        <!-- White lightning strobe for the DJ's Choice reveal -->
+        <Border x:Name="ScaryokeLightningOverlay" Grid.RowSpan="2" Panel.ZIndex="137" Background="#F4F7FF" Opacity="0" IsHitTestVisible="False" />
     </Grid>
     </Viewbox>
 </Window>

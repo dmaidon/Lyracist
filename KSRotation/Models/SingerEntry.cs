@@ -174,6 +174,10 @@ namespace KSRotation.Models
 #endif
         public partial string? ScaryokeColor { get; set; }
 
+        /// <summary>Short curse twist rolled after the category (e.g. "Monster voice"), or null if none.</summary>
+        [ObservableProperty]
+        public partial string? ScaryokeCurse { get; set; }
+
         /// <summary>True when this singer has a Scaryoke category challenge assigned.</summary>
         public bool HasScaryokeCategory => !string.IsNullOrWhiteSpace(ScaryokeCategory);
 
