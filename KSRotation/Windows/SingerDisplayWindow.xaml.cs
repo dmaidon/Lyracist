@@ -151,7 +151,7 @@ namespace KSRotation.Windows
             // the static CompositionTarget.Rendering event - left running, that kept the closed
             // window alive and ticking every frame, one more copy per reopen.
             _projectionTransitionGen++; // cancels a crossfade that's still mid-fade
-            SetHauntedScreen(false);
+            SetHolidayTheme(null);
             StopAllProjectionAnimations();
             HookViewModel(null);
         }
@@ -1344,92 +1344,201 @@ namespace KSRotation.Windows
 
         #endregion
 
-        #region Haunted Screen
+        #region Holiday Screen
 
-        private System.Windows.Threading.DispatcherTimer? _hauntedFlyerTimer;
-        private bool _hauntedOn;
+        private System.Windows.Threading.DispatcherTimer? _holidayCrossTimer;
+        private System.Windows.Threading.DispatcherTimer? _holidayAmbientTimer;
+        private HolidayTheme? _holiday;
+        // Kept low on purpose: too much motion distracts from the rotation text
+        private const int HolidayMaxParticles = 7;
+        private const int HolidayMaxAmbient = 4;
+        private static readonly Dictionary<string, (SolidColorBrush Brush, System.Windows.Media.Effects.DropShadowEffect Glow)> _holidayLooks = new(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>Turns the seasonal candlelight / fog / flying-bat effects on or off. Animations only run while enabled.</summary>
-        public void SetHauntedScreen(bool on)
+        private static (SolidColorBrush Brush, System.Windows.Media.Effects.DropShadowEffect Glow) HolidayLook(string hex)
         {
-            if (on == _hauntedOn) return;
-            _hauntedOn = on;
-            HauntedLayer.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            if (_holidayLooks.TryGetValue(hex, out var look)) return look;
+            var color = ParseColor(hex);
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            var glow = new System.Windows.Media.Effects.DropShadowEffect { Color = color, BlurRadius = 18, ShadowDepth = 0, Opacity = 0.9 };
+            glow.Freeze();
+            return _holidayLooks[hex] = (brush, glow);
+        }
 
-            if (!on)
+        private static System.Windows.Media.Color ParseColor(string hex) =>
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+
+        /// <summary>Applies a holiday theme (null = off). Animations and timers only run while a theme is active.</summary>
+        public void SetHolidayTheme(HolidayTheme? theme)
+        {
+            if (ReferenceEquals(theme, _holiday)) return;
+            _holiday = theme;
+
+            _holidayCrossTimer?.Stop();
+            _holidayAmbientTimer?.Stop();
+            HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
+            HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
+            HolidayVignette.BeginAnimation(UIElement.OpacityProperty, null);
+            HolidayVignette.Opacity = 1;
+            HolidayParticles.Children.Clear();
+
+            if (theme == null)
             {
-                _hauntedFlyerTimer?.Stop();
-                HauntedFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
-                HauntedFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
-                HauntedCandle.BeginAnimation(UIElement.OpacityProperty, null);
-                HauntedFlyerShift.BeginAnimation(TranslateTransform.XProperty, null);
-                HauntedFlyerShift.BeginAnimation(TranslateTransform.YProperty, null);
-                HauntedFlyer.BeginAnimation(UIElement.OpacityProperty, null);
-                HauntedFlyer.Opacity = 0;
+                HolidayLayer.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            var drift1 = new DoubleAnimation(-500, -60, TimeSpan.FromSeconds(42))
-            {
-                AutoReverse = true,
-                RepeatBehavior = RepeatBehavior.Forever,
-                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
-            };
-            HauntedFog1Shift.BeginAnimation(TranslateTransform.XProperty, drift1);
+            HolidayLayer.Visibility = Visibility.Visible;
+            HolidayVignetteEdge.Color = ParseColor(theme.VignetteColor);
 
-            var drift2 = new DoubleAnimation(-60, -620, TimeSpan.FromSeconds(58))
+            bool fog = !string.IsNullOrEmpty(theme.FogColor);
+            HolidayFog1.Visibility = HolidayFog2.Visibility = fog ? Visibility.Visible : Visibility.Collapsed;
+            if (fog)
             {
-                AutoReverse = true,
-                RepeatBehavior = RepeatBehavior.Forever,
-                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
-            };
-            HauntedFog2Shift.BeginAnimation(TranslateTransform.XProperty, drift2);
+                var fogColor = ParseColor("#" + theme.FogColor);
+                HolidayFog1Bottom.Color = System.Windows.Media.Color.FromArgb(0xCC, fogColor.R, fogColor.G, fogColor.B);
+                HolidayFog1Top.Color = System.Windows.Media.Color.FromArgb(0, fogColor.R, fogColor.G, fogColor.B);
+                HolidayFog2Bottom.Color = HolidayFog1Bottom.Color;
+                HolidayFog2Top.Color = HolidayFog1Top.Color;
+                HolidayFog1.Opacity = theme.FogOpacity;
+                HolidayFog2.Opacity = theme.FogOpacity * 0.7;
 
-            // Irregular flicker so it reads as candlelight rather than a metronome
-            var flicker = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
-            (double Opacity, int Ms)[] steps = [(0.85, 0), (0.7, 160), (0.95, 330), (0.75, 410), (0.9, 700), (0.62, 790), (0.88, 1150), (0.8, 1400), (0.85, 1700)];
-            foreach (var (opacity, ms) in steps)
-            {
-                flicker.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+                HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-500, -60, TimeSpan.FromSeconds(42))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+                });
+                HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-60, -620, TimeSpan.FromSeconds(58))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+                });
             }
-            HauntedCandle.BeginAnimation(UIElement.OpacityProperty, flicker);
 
-            _hauntedFlyerTimer ??= new System.Windows.Threading.DispatcherTimer();
-            _hauntedFlyerTimer.Tick -= OnHauntedFlyerTick;
-            _hauntedFlyerTimer.Tick += OnHauntedFlyerTick;
-            _hauntedFlyerTimer.Interval = TimeSpan.FromSeconds(4);
-            _hauntedFlyerTimer.Start();
+            if (theme.Flicker)
+            {
+                // Irregular flicker so it reads as candlelight rather than a metronome
+                var flicker = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
+                (double Opacity, int Ms)[] steps = [(0.85, 0), (0.7, 160), (0.95, 330), (0.75, 410), (0.9, 700), (0.62, 790), (0.88, 1150), (0.8, 1400), (0.85, 1700)];
+                foreach (var (opacity, ms) in steps)
+                {
+                    flicker.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+                }
+                HolidayVignette.BeginAnimation(UIElement.OpacityProperty, flicker);
+            }
+
+            _holidayCrossTimer ??= new System.Windows.Threading.DispatcherTimer();
+            _holidayCrossTimer.Tick -= OnHolidayCrossTick;
+            _holidayCrossTimer.Tick += OnHolidayCrossTick;
+            _holidayCrossTimer.Interval = TimeSpan.FromSeconds(1.5);
+            _holidayCrossTimer.Start();
+
+            _holidayAmbientTimer ??= new System.Windows.Threading.DispatcherTimer();
+            _holidayAmbientTimer.Tick -= OnHolidayAmbientTick;
+            _holidayAmbientTimer.Tick += OnHolidayAmbientTick;
+            _holidayAmbientTimer.Interval = TimeSpan.FromSeconds(0.5);
+            _holidayAmbientTimer.Start();
         }
 
-        private void OnHauntedFlyerTick(object? sender, EventArgs e)
+        private void OnHolidayCrossTick(object? sender, EventArgs e)
         {
-            if (!_hauntedOn) return;
-            if (_hauntedFlyerTimer != null) _hauntedFlyerTimer.Interval = TimeSpan.FromSeconds(14 + _rng.Next(0, 14));
-
-            string[] flyers = ["🦇", "🦇", "👻", "🦇", "🕷️"];
-            HauntedFlyer.Text = flyers[_rng.Next(flyers.Length)];
-
-            bool leftToRight = _rng.Next(2) == 0;
-            double y = _rng.Next(60, 640);
-            TimeSpan flight = TimeSpan.FromSeconds(6.5);
-
-            HauntedFlyerShift.BeginAnimation(TranslateTransform.XProperty,
-                new DoubleAnimation(leftToRight ? -200 : 2100, leftToRight ? 2100 : -200, flight));
-
-            var wobble = new DoubleAnimationUsingKeyFrames { Duration = flight };
-            double[] ys = [y, y - 90, y + 50, y - 60, y + 30, y];
-            for (int i = 0; i < ys.Length; i++)
+            var theme = _holiday;
+            if (theme == null || theme.Crossers.Length == 0) return;
+            if (_holidayCrossTimer != null)
             {
-                wobble.KeyFrames.Add(new EasingDoubleKeyFrame(ys[i], KeyTime.FromPercent((i + 1) / (double)ys.Length),
-                    new SineEase { EasingMode = EasingMode.EaseInOut }));
+                _holidayCrossTimer.Interval = TimeSpan.FromSeconds(theme.CrossSeconds * (0.6 + (_rng.NextDouble() * 0.8)));
             }
-            HauntedFlyerShift.BeginAnimation(TranslateTransform.YProperty, wobble);
 
-            var fade = new DoubleAnimationUsingKeyFrames { Duration = flight };
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.1)));
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.9)));
+            SpawnHolidayParticle(theme.Crossers[_rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
+            if (_rng.Next(100) < 35)
+            {
+                SpawnHolidayParticle(theme.Crossers[_rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
+            }
+        }
+
+        private void OnHolidayAmbientTick(object? sender, EventArgs e)
+        {
+            var theme = _holiday;
+            if (theme == null || theme.Ambient.Length == 0) return;
+            if (_holidayAmbientTimer != null)
+            {
+                _holidayAmbientTimer.Interval = TimeSpan.FromSeconds(theme.AmbientSeconds * (0.7 + (_rng.NextDouble() * 0.6)));
+            }
+
+            SpawnHolidayParticle(theme.Ambient[_rng.Next(theme.Ambient.Length)], theme.AmbientMotion);
+        }
+
+        private void SpawnHolidayParticle(string glyph, HolidayMotion motion)
+        {
+            if (HolidayParticles.Children.Count >= HolidayMaxParticles) return;
+
+            bool ambient = motion != HolidayMotion.Cross;
+            // Ambient flakes/leaves/hearts may not crowd out the larger crossing characters
+            if (ambient && HolidayParticles.Children.OfType<TextBlock>().Count(c => c.Tag is "ambient") >= HolidayMaxAmbient) return;
+            double size = ambient ? _rng.Next(26, 52) : _rng.Next(52, 92);
+            double peak = ambient ? 0.55 + (_rng.NextDouble() * 0.3) : 0.9;
+            double seconds = ambient ? 9 + (_rng.NextDouble() * 6) : 6.5 + (_rng.NextDouble() * 3);
+
+            var shift = new TranslateTransform();
+            var tb = new TextBlock { Text = glyph, FontSize = size, Opacity = 0, IsHitTestVisible = false, RenderTransform = shift, Tag = ambient ? "ambient" : "cross" };
+            if (_holiday is { Palette.Length: > 0 } themed)
+            {
+                // Tints monochrome emoji outright; on color emoji the glow still carries the holiday color
+                var look = HolidayLook(themed.Palette[_rng.Next(themed.Palette.Length)]);
+                tb.Foreground = look.Brush;
+                tb.Effect = look.Glow;
+            }
+            Canvas.SetLeft(tb, 0);
+            Canvas.SetTop(tb, 0);
+            HolidayParticles.Children.Add(tb);
+
+            var duration = TimeSpan.FromSeconds(seconds);
+            DoubleAnimationUsingKeyFrames Wobble(double center, double amplitude, int points)
+            {
+                var anim = new DoubleAnimationUsingKeyFrames { Duration = duration };
+                for (int i = 0; i < points; i++)
+                {
+                    double v = center + ((i % 2 == 0 ? 1 : -1) * amplitude * (0.4 + (_rng.NextDouble() * 0.6)));
+                    anim.KeyFrames.Add(new EasingDoubleKeyFrame(i == points - 1 ? center : v,
+                        KeyTime.FromPercent((i + 1) / (double)points), new SineEase { EasingMode = EasingMode.EaseInOut }));
+                }
+                return anim;
+            }
+
+            switch (motion)
+            {
+                case HolidayMotion.Cross:
+                {
+                    bool leftToRight = _rng.Next(2) == 0;
+                    double y = _rng.Next(60, 820);
+                    shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(leftToRight ? -200 : 2100, leftToRight ? 2100 : -200, duration));
+                    shift.BeginAnimation(TranslateTransform.YProperty, Wobble(y, 80, 6));
+                    break;
+                }
+                case HolidayMotion.Fall:
+                {
+                    double x = _rng.Next(0, 1860);
+                    shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
+                    shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-100, 1160, duration));
+                    break;
+                }
+                default:
+                {
+                    double x = _rng.Next(0, 1860);
+                    shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
+                    shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(1160, -100, duration));
+                    break;
+                }
+            }
+
+            var fade = new DoubleAnimationUsingKeyFrames { Duration = duration };
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.1)));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.9)));
             fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1.0)));
-            HauntedFlyer.BeginAnimation(UIElement.OpacityProperty, fade);
+            fade.Completed += (_, _) => HolidayParticles.Children.Remove(tb);
+            tb.BeginAnimation(UIElement.OpacityProperty, fade);
         }
 
         #endregion

@@ -2400,39 +2400,35 @@
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
 
-        <!-- Haunted screen: candlelight vignette, drifting fog and flying bats (toggled from Scaryoke Settings) -->
-        <Grid x:Name="HauntedLayer" Grid.RowSpan="2" Panel.ZIndex="104" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True">
-            <Border x:Name="HauntedFog1" Width="2600" Height="420" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.35">
+        <!-- Holiday screen: tinted vignette, drifting fog and floating characters (chosen in Settings > Display & Projection) -->
+        <Grid x:Name="HolidayLayer" Grid.RowSpan="2" Panel.ZIndex="104" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True">
+            <Border x:Name="HolidayFog1" Width="2600" Height="420" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.35">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                        <GradientStop Color="#CCB9C0D6" Offset="0" />
-                        <GradientStop Color="#00B9C0D6" Offset="1" />
+                        <GradientStop x:Name="HolidayFog1Bottom" Color="#CCB9C0D6" Offset="0" />
+                        <GradientStop x:Name="HolidayFog1Top" Color="#00B9C0D6" Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>
-                <Border.RenderTransform><TranslateTransform x:Name="HauntedFog1Shift" X="-500" /></Border.RenderTransform>
+                <Border.RenderTransform><TranslateTransform x:Name="HolidayFog1Shift" X="-500" /></Border.RenderTransform>
             </Border>
-            <Border x:Name="HauntedFog2" Width="2600" Height="300" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.25">
+            <Border x:Name="HolidayFog2" Width="2600" Height="300" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.25">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                        <GradientStop Color="#CC9FA8C4" Offset="0" />
-                        <GradientStop Color="#009FA8C4" Offset="1" />
+                        <GradientStop x:Name="HolidayFog2Bottom" Color="#CC9FA8C4" Offset="0" />
+                        <GradientStop x:Name="HolidayFog2Top" Color="#009FA8C4" Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>
-                <Border.RenderTransform><TranslateTransform x:Name="HauntedFog2Shift" X="-100" /></Border.RenderTransform>
+                <Border.RenderTransform><TranslateTransform x:Name="HolidayFog2Shift" X="-100" /></Border.RenderTransform>
             </Border>
-            <Border x:Name="HauntedCandle">
+            <Border x:Name="HolidayVignette">
                 <Border.Background>
                     <RadialGradientBrush Center="0.5,0.5" RadiusX="0.75" RadiusY="0.75">
                         <GradientStop Color="#00000000" Offset="0.55" />
-                        <GradientStop Color="#CC1A0800" Offset="1" />
+                        <GradientStop x:Name="HolidayVignetteEdge" Color="#CC1A0800" Offset="1" />
                     </RadialGradientBrush>
                 </Border.Background>
             </Border>
-            <TextBlock x:Name="HauntedFlyer" Text="🦇" FontSize="64" Opacity="0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <TextBlock.RenderTransform>
-                    <TranslateTransform x:Name="HauntedFlyerShift" X="-200" Y="120" />
-                </TextBlock.RenderTransform>
-            </TextBlock>
+            <Canvas x:Name="HolidayParticles" Width="1920" Height="1080" HorizontalAlignment="Left" VerticalAlignment="Top" />
         </Grid>
 
         <!-- Cursed frame: pulses red around the whole screen while the current singer carries a curse or DJ's Choice -->

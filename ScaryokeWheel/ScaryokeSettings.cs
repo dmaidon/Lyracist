@@ -66,8 +66,11 @@ public class ScaryokeSettings
 
     public bool ShowSingersChoice { get; set; } = true;
 
-    /// <summary>Seasonal haunted effects (candlelight, fog, flying bats) on the audience rotation screen.</summary>
+    /// <summary>Legacy Halloween on/off flag, migrated into <see cref="HolidayTheme"/> on first load.</summary>
     public bool HauntedScreen { get; set; }
+
+    /// <summary>Holiday rotation-screen choice: "None", "Auto" (by date) or a holiday key such as "Christmas". Empty until first set.</summary>
+    public string HolidayTheme { get; set; } = string.Empty;
 
     /// <summary>After a category lands, a second mini-spin assigns a "curse" twist.</summary>
     public bool CursesEnabled { get; set; } = true;

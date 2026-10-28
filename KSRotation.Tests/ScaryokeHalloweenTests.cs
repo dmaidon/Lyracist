@@ -70,3 +70,56 @@ public class ScaryokeHalloweenTests
         Assert.Null(finished.ScaryokeCategory);
     }
 }
+
+public class HolidayThemeTests
+{
+    [Theory]
+    [InlineData(2026, 10, 28, "Halloween")]
+    [InlineData(2026, 11, 26, "Thanksgiving")]   // 4th Thursday of Nov 2026
+    [InlineData(2026, 12, 20, "Christmas")]
+    [InlineData(2026, 12, 31, "NewYears")]
+    [InlineData(2027, 1, 1, "NewYears")]
+    [InlineData(2027, 2, 14, "Valentines")]
+    [InlineData(2027, 3, 17, "StPatricks")]
+    [InlineData(2027, 3, 28, "Easter")]           // Easter Sunday 2027
+    [InlineData(2027, 3, 29, "Easter")]           // Easter Monday 2027
+    [InlineData(2027, 5, 9, "Mothers")]           // 2nd Sunday of May 2027
+    [InlineData(2027, 6, 20, "Fathers")]          // 3rd Sunday of June 2027
+    [InlineData(2027, 7, 4, "Independence")]
+    [InlineData(2027, 5, 31, "Memorial")]         // last Monday of May 2027
+    public void ForDate_PicksTheHolidayInSeason(int y, int m, int d, string expected)
+    {
+        Assert.Equal(expected, KSRotation.Models.HolidayThemes.ForDate(new System.DateTime(y, m, d))?.Key);
+    }
+
+    [Fact]
+    public void ForDate_ReturnsNullOutOfSeason()
+    {
+        Assert.Null(KSRotation.Models.HolidayThemes.ForDate(new System.DateTime(2026, 9, 15)));
+    }
+
+    [Fact]
+    public void Resolve_HandlesOffAutoAndExplicitChoices()
+    {
+        var today = new System.DateTime(2026, 10, 30);
+        Assert.Null(KSRotation.Models.HolidayThemes.Resolve("None", today));
+        Assert.Equal("Halloween", KSRotation.Models.HolidayThemes.Resolve("Auto", today)?.Key);
+        Assert.Equal("Christmas", KSRotation.Models.HolidayThemes.Resolve("Christmas", today)?.Key);
+        Assert.Null(KSRotation.Models.HolidayThemes.Resolve("bogus", today));
+    }
+
+    [Fact]
+    public void EveryTheme_HasValidColorsAndGlyphs()
+    {
+        foreach (var t in KSRotation.Models.HolidayThemes.All)
+        {
+            Assert.Matches("^#[0-9A-Fa-f]{8}$", t.VignetteColor);
+            Assert.Matches("^[0-9A-Fa-f]{6}$", t.FogColor);
+            Assert.NotEmpty(t.Crossers);
+            Assert.NotEmpty(t.Palette);
+            Assert.All(t.Palette, c => Assert.Matches("^#[0-9A-Fa-f]{6}$", c));
+            Assert.True(t.CrossSeconds > 0 && t.AmbientSeconds > 0);
+        }
+        Assert.True(KSRotation.Models.HolidayThemes.Find("Halloween")!.Crossers.Length >= 10);
+    }
+}

@@ -58,9 +58,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ScaryokeShowDjsChoice { get; set; } = true;
 
-        /// <summary>Seasonal candlelight / fog / flying-bat effects on the audience rotation screen.</summary>
+        /// <summary>Holiday rotation-screen choice: "None", "Auto" (by date) or a holiday key.</summary>
         [ObservableProperty]
-        public partial bool ScaryokeHauntedScreen { get; set; }
+        public partial string HolidayThemeChoice { get; set; } = HolidayThemes.None;
+
+        public IReadOnlyList<KeyValuePair<string, string>> HolidayThemeOptions => HolidayThemes.Options;
 
         /// <summary>After the category lands, roll a second "curse" twist for the singer.</summary>
         [ObservableProperty]
@@ -221,10 +223,12 @@ namespace KSRotation.ViewModels
                 ScaryokeShowDjsChoice = _scaryokeSettings.ShowDjsChoice;
                 ScaryokeIsMuted = _scaryokeSettings.IsMuted;
                 ScaryokeVolume = _scaryokeSettings.Volume;
-                ScaryokeHauntedScreen = _scaryokeSettings.HauntedScreen;
+                HolidayThemeChoice = string.IsNullOrEmpty(_scaryokeSettings.HolidayTheme)
+                    ? (_scaryokeSettings.HauntedScreen ? "Halloween" : HolidayThemes.None)
+                    : _scaryokeSettings.HolidayTheme;
                 ScaryokeCursesEnabled = _scaryokeSettings.CursesEnabled;
                 ScaryokeFortunesEnabled = _scaryokeSettings.FortunesEnabled;
-                _displayWindowService.SetHauntedScreen(ScaryokeHauntedScreen);
+                _displayWindowService.SetHolidayTheme(HolidayThemeChoice);
                 if (ScaryokeFlavor.EnsureHalloweenPreset(_scaryokeSettings))
                 {
                     _scaryokeSettings.Save();
@@ -295,11 +299,11 @@ namespace KSRotation.ViewModels
             _displayWindowService.UpdateScaryokeWheel(ScaryokeWheelSegments);
         }
 
-        partial void OnScaryokeHauntedScreenChanged(bool value)
+        partial void OnHolidayThemeChoiceChanged(string value)
         {
-            _scaryokeSettings.HauntedScreen = value;
+            _scaryokeSettings.HolidayTheme = value;
             _scaryokeSettings.Save();
-            _displayWindowService.SetHauntedScreen(value);
+            _displayWindowService.SetHolidayTheme(value);
         }
 
         partial void OnScaryokeCursesEnabledChanged(bool value)

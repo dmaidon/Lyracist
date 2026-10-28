@@ -23,7 +23,7 @@ namespace KSRotation.Services
         private string _scaryokeMonitorDevice = string.Empty;
         private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
-        private bool _hauntedScreen;
+        private string _holidayChoice = HolidayThemes.None;
         private bool _isScaryokeProjected = true;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
 
@@ -81,12 +81,13 @@ namespace KSRotation.Services
             }
         }
 
-        public void SetHauntedScreen(bool on)
+        /// <summary>Sets the holiday screen choice ("None", "Auto" or a holiday key); "Auto" is resolved against today's date.</summary>
+        public void SetHolidayTheme(string choice)
         {
-            _hauntedScreen = on;
+            _holidayChoice = choice ?? HolidayThemes.None;
             if (_window != null)
             {
-                _window.Dispatcher.InvokeAsync(() => _window.SetHauntedScreen(on));
+                _window.Dispatcher.InvokeAsync(() => _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Today)));
             }
         }
 
@@ -329,7 +330,7 @@ namespace KSRotation.Services
             _viewModel.UpdateFromRotation(rotation);
 
             _window.UpdateSpecialEventBanner(_specialEventBannerPath);
-            _window.SetHauntedScreen(_hauntedScreen);
+            _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Today));
 
             if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
             {

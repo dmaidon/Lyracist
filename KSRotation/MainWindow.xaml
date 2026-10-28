@@ -2416,12 +2416,6 @@
                                               Style="{StaticResource ModernCheckBoxStyle}"
                                               Margin="0,4,0,6"
                                               ToolTip="Shows a spooky fortune line on the audience screen when the wheel lands." />
-
-                                    <CheckBox Content="🦇 Haunted Rotation Screen"
-                                              IsChecked="{Binding ScaryokeHauntedScreen, Mode=TwoWay}"
-                                              Style="{StaticResource ModernCheckBoxStyle}"
-                                              Margin="0,4,0,6"
-                                              ToolTip="Seasonal effects on the audience rotation screen: candlelight flicker, drifting fog and flying bats. Works even when Scaryoke mode is off." />
                                 </StackPanel>
                             </GroupBox>
 
@@ -2720,6 +2714,23 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Holiday rotation screens -->
+                            <GroupBox Header="🎉 Holiday Rotation Screens" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,12,0,0">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Adds a seasonal tint, drifting fog and floating characters (bats, snowflakes, hearts, fireworks...) over the audience rotation screen. Choose Auto to switch on by date."
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Opacity="0.75"
+                                               Margin="0,0,0,8" />
+                                    <ComboBox ItemsSource="{Binding HolidayThemeOptions}"
+                                              SelectedValue="{Binding HolidayThemeChoice, Mode=TwoWay}"
+                                              SelectedValuePath="Key"
+                                              DisplayMemberPath="Value"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              ToolTip="Holiday theme for the audience rotation screen. Works even when Scaryoke mode is off." />
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
