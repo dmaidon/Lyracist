@@ -37,9 +37,18 @@ namespace KSRotation.Windows
             Closed += OnWindowClosed;
         }
 
+        private bool _rebuildPending;
+
+        // RebuildScaryokeWheelSegments does Clear() + N x Add(), so coalesce into a single rebuild
         private void OnSegmentsChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            BuildWheel();
+            if (_rebuildPending) return;
+            _rebuildPending = true;
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+            {
+                _rebuildPending = false;
+                BuildWheel();
+            });
         }
 
         private void OnWindowClosed(object? sender, EventArgs e)

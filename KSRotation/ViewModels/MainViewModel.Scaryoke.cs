@@ -836,6 +836,9 @@ namespace KSRotation.ViewModels
             _scaryokeCurrentAngle = targetAngle % 360;
             IsScaryokeSpinning = false;
 
+            // Scaryoke was stopped mid-spin: keep the wheel angle in sync but don't assign, announce or play results
+            if (!IsScaryokeActive) return;
+
             var landed = landedSegment;
             ScaryokeResultText = landed.Name.ToUpper();
             ScaryokeResultDetail = landed.Name switch

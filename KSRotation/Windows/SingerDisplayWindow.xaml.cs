@@ -1256,7 +1256,11 @@ namespace KSRotation.Windows
         public void StartScaryokeSpin(double targetAngle, double duration)
         {
             _scaryokeAutoDismissTimer?.Stop();
-            UpdateScaryokeOverlay(true);
+            // Only (re)show when hidden: UpdateScaryokeOverlay activates the window and would steal focus from the DJ's controls every spin
+            if (ScaryokeWheelOverlay.Visibility != Visibility.Visible)
+            {
+                UpdateScaryokeOverlay(true);
+            }
             if (_vm != null)
             {
                 _vm.ScaryokeResultText = "SPINNING...";

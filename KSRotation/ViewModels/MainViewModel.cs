@@ -1536,14 +1536,18 @@ namespace KSRotation.ViewModels
 
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
+#if !MAUI
             ScaryokeMonitorDevice = _scaryokeSettings.SelectedMonitorDevice ?? string.Empty;
+#endif
             ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
                 ? "All Screens / Monitors"
                 : settings.ConnectInstructionsScreen;
 
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+#if !MAUI
             _displayWindowService.SetScaryokeMonitor(ScaryokeMonitorDevice);
+#endif
             RefreshAvailableMonitors();
 #if !MAUI
             MonitorEnumerator.MonitorsChanged += (s, e) => RefreshAvailableMonitors();

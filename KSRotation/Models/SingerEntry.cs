@@ -169,7 +169,9 @@ namespace KSRotation.Models
 
         /// <summary>Hex color code for the assigned Scaryoke challenge category (e.g. "#FF6D00").</summary>
         [ObservableProperty]
+#if !MAUI
         [NotifyPropertyChangedFor(nameof(ScaryokeBrush))]
+#endif
         public partial string? ScaryokeColor { get; set; }
 
         /// <summary>True when this singer has a Scaryoke category challenge assigned.</summary>
@@ -180,14 +182,18 @@ namespace KSRotation.Models
         [JsonIgnore]
         public System.Windows.Media.Brush ScaryokeBrush => ParseHexBrush(ScaryokeColor);
 
+        private static readonly System.Collections.Generic.Dictionary<string, System.Windows.Media.SolidColorBrush> _scaryokeBrushCache = new(StringComparer.OrdinalIgnoreCase);
+
         private static System.Windows.Media.SolidColorBrush ParseHexBrush(string? hex)
         {
             if (string.IsNullOrWhiteSpace(hex)) hex = "#FF6D00";
+            if (_scaryokeBrushCache.TryGetValue(hex, out var cached)) return cached;
             try
             {
                 var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
                 var b = new System.Windows.Media.SolidColorBrush(color);
                 b.Freeze();
+                if (_scaryokeBrushCache.Count < 128) _scaryokeBrushCache[hex] = b;
                 return b;
             }
             catch
