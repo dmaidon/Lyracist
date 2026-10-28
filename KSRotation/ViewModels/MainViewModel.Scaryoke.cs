@@ -19,6 +19,7 @@ namespace KSRotation.ViewModels
     {
         private ScaryokeSettings _scaryokeSettings = ScaryokeSettings.Load();
         private ScaryokeControlWindow? _scaryokeControlWindow;
+        private WindowState _mainWindowStateBeforeScaryoke = WindowState.Normal;
         private double _scaryokeCurrentAngle;
         private static readonly Random _scaryokeRng = new();
 
@@ -556,6 +557,10 @@ namespace KSRotation.ViewModels
             if (IsScaryokeActive) return;
 
             IsScaryokeActive = true;
+            if (System.Windows.Application.Current?.MainWindow is { } mainWin && mainWin.WindowState != WindowState.Minimized)
+            {
+                _mainWindowStateBeforeScaryoke = mainWin.WindowState;
+            }
             _scaryokeSettings = ScaryokeSettings.Load();
             if (ScaryokeHistory.Count == 0 && _scaryokeSettings.SpinHistory.Count > 0)
             {
@@ -611,6 +616,16 @@ namespace KSRotation.ViewModels
                 {
                     _scaryokeControlWindow.Close();
                     _scaryokeControlWindow = null;
+                }
+
+                // Closing the fullscreen projection / owned control window can leave the main window minimized
+                if (System.Windows.Application.Current?.MainWindow is { } mainWin)
+                {
+                    if (mainWin.WindowState == WindowState.Minimized)
+                    {
+                        mainWin.WindowState = _mainWindowStateBeforeScaryoke;
+                    }
+                    mainWin.Activate();
                 }
             });
         }
