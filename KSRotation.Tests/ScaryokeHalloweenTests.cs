@@ -128,6 +128,7 @@ public class HolidayThemeTests
     [InlineData(2027, 1, 1, "NewYears")]
     [InlineData(2027, 2, 14, "Valentines")]
     [InlineData(2027, 3, 17, "StPatricks")]
+    [InlineData(2026, 11, 1, "Birthday")]
     [InlineData(2027, 3, 28, "Easter")]           // Easter Sunday 2027
     [InlineData(2027, 3, 29, "Easter")]           // Easter Monday 2027
     [InlineData(2027, 5, 9, "Mothers")]           // 2nd Sunday of May 2027

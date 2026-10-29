@@ -1,4 +1,4 @@
-// Created on Oct 28, 2026 @ 12:00:00 -> Holiday rotation-screen themes (Halloween, Christmas, Thanksgiving, New Year's Day, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day)
+// Created on Oct 28, 2026 @ 12:00:00 -> Holiday rotation-screen themes (Halloween, Christmas, Thanksgiving, New Year's Day, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Brenda's Birthday)
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +72,9 @@ namespace KSRotation.Models
             new("Fathers", "👔 Father's Day", "#CC0A1424", "90CAF9", 0.12, false,
                 ["👔", "🎣", "⛳", "🍔", "🔧", "🏆", "🚗", "🍺"],
                 ["⭐", "🔧", "⛳"], HolidayMotion.Fall, 7, 1.4, ["#1E88E5", "#0D47A1", "#8D6E63", "#B0BEC5", "#FFFFFF"]),
+            new("Birthday", "🎂 Brenda's Birthday", "#CC1E0A33", "CE93D8", 0.22, false,
+                ["🎂", "🧁", "🎈", "🎁", "🎉", "💜", "💐", "🌷", "🥂", "🎀", "🦋", "🌸"],
+                ["💜", "💜", "🌸", "🎈"], HolidayMotion.Rise, 6, 1.0, ["#9C27B0", "#BA68C8", "#7E57C2", "#E1BEE7", "#FFD54F"]),
             new("Independence", "🎇 Independence Day", "#CC0A1230", "FFFFFF", 0.10, false,
                 ["🎆", "🎇", "🗽", "🦅", "🇺🇸", "🧨", "⭐", "🍔"],
                 ["✨", "🎇", "⭐"], HolidayMotion.Rise, 6, 1.1, ["#E53935", "#FFFFFF", "#1E88E5", "#FFD54F"]),
@@ -117,6 +120,8 @@ namespace KSRotation.Models
             if (date >= new DateTime(y, 12, 30) || date <= new DateTime(y, 1, 2)) return Find("NewYears");
 
             if (Within(new DateTime(y, 2, 10), new DateTime(y, 2, 14))) return Find("Valentines");
+
+            if (date.Month == 11 && date.Day == 1) return Find("Birthday");
 
             if (Within(new DateTime(y, 3, 14), new DateTime(y, 3, 17))) return Find("StPatricks");
 
