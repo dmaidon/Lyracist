@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 17:05:00 -> Add project toggle and configured spin button to primary toolbar (project|select # of singers|spin) -->
+<!-- Edited on Oct 29, 2026 @ 04:13:00 -> Document Holiday Rotation Screens in the Display Projection help panel -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -4783,6 +4783,7 @@
                                         <TextBlock Text="⚙️ Customizing the Screen" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
                                         <TextBlock Text="• Marquee Speed: Adjust the slider in the Appearance group in Settings to control how fast the ticker scrolls at the top of the display." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Banner Template: Type custom text in Settings. Use '{venue}' and '{dj}' in the text to automatically substitute the selected venue and DJ names." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Holiday Rotation Screens: Under Display -> Holiday Rotation Screens, choose Auto (by date) or any holiday (Halloween, Christmas, Thanksgiving, New Year's, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Labor Day, Veterans Day, or Brenda's Birthday) to add a seasonal vignette, drifting fog, and full-color floating characters over the rotation display. Auto mode keeps the evening's holiday active through 6:00 AM for late-night shows." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

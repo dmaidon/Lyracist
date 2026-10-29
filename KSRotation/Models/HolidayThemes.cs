@@ -1,4 +1,4 @@
-// Created on Oct 28, 2026 @ 12:00:00 -> Holiday rotation-screen themes (Halloween, Christmas, Thanksgiving, New Year's Day, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Brenda's Birthday)
+// Edited on Oct 29, 2026 @ 04:05:00 -> Add Labor Day and Veterans Day holiday themes, rename New Year's display label, and add Auto date windows
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,14 +47,14 @@ namespace KSRotation.Models
         [
             new("Halloween", "🎃 Halloween", "#CC1A0800", "B9C0D6", 0.35, true,
                 ["🦇", "👻", "🕷️", "🎃", "💀", "🧛", "🧟", "🦉", "🐈", "🧙", "⚰️", "🕸️"],
-                ["🍂", "🍁", "🍂"], HolidayMotion.Fall, 5, 5, ["#FF6D00", "#9C27B0", "#76FF03", "#F5F5F5", "#FF1744"]),
+                ["🍂", "🍁", "🍂"], HolidayMotion.Fall, 5, 1.2, ["#FF6D00", "#9C27B0", "#76FF03", "#F5F5F5", "#FF1744"]),
             new("Christmas", "🎄 Christmas", "#CC0B1A0B", "FFFFFF", 0.22, false,
                 ["🎅", "🦌", "🛷", "🎄", "⭐", "🎁", "🔔", "⛄", "🤶"],
                 ["❄️", "❄️", "✨"], HolidayMotion.Fall, 9, 0.6, ["#E53935", "#43A047", "#FFFFFF", "#FFD54F", "#00ACC1"]),
             new("Thanksgiving", "🦃 Thanksgiving", "#CC241203", "FFB74D", 0.15, false,
                 ["🦃", "🌽", "🥧", "🍁", "🐿️", "🍂", "🥔"],
                 ["🍂", "🍁", "🍂"], HolidayMotion.Fall, 8, 0.9, ["#E65100", "#BF360C", "#FFB300", "#8D6E63", "#F9A825"]),
-            new("NewYears", "🎆 New Year's Day", "#CC050A24", "FFD54F", 0.12, false,
+            new("NewYears", "🎆 New Year's", "#CC050A24", "FFD54F", 0.12, false,
                 ["🥂", "🍾", "🎆", "🎇", "🎉", "⏰", "🕛", "🎊"],
                 ["🎊", "✨", "🎉"], HolidayMotion.Fall, 8, 0.7, ["#FFD54F", "#FFFFFF", "#C0C0C0", "#7C4DFF", "#40C4FF"]),
             new("Valentines", "💘 Valentine's Day", "#CC2A0612", "F8BBD0", 0.18, false,
@@ -81,6 +81,12 @@ namespace KSRotation.Models
             new("Memorial", "🇺🇸 Memorial Day", "#CC0A1230", "FFFFFF", 0.08, false,
                 ["🇺🇸", "🦅", "🎖️", "🕊️", "🌺", "⭐"],
                 ["🌺", "⭐"], HolidayMotion.Fall, 10, 2.2, ["#E53935", "#FFFFFF", "#1E88E5", "#B0BEC5"]),
+            new("Labor", "🛠️ Labor Day", "#CC0A1424", "FFFFFF", 0.10, false,
+                ["🇺🇸", "🔧", "🍔", "🍺", "🎆", "⭐", "🦅"],
+                ["⭐", "✨"], HolidayMotion.Rise, 8, 1.5, ["#E53935", "#FFFFFF", "#1E88E5", "#FFD54F"]),
+            new("Veterans", "🎖️ Veterans Day", "#CC0A1230", "FFFFFF", 0.10, false,
+                ["🇺🇸", "🎖️", "🦅", "🕊️", "⭐", "🏆"],
+                ["⭐", "✨"], HolidayMotion.Fall, 9, 1.8, ["#E53935", "#FFFFFF", "#1E88E5", "#FFD54F"]),
         ];
 
         /// <summary>File name (no extension) of the bundled Twemoji image for a glyph: lowercase hex code points joined by '-', variation selectors dropped.</summary>
@@ -98,9 +104,18 @@ namespace KSRotation.Models
         public static HolidayTheme? Find(string? key) =>
             All.FirstOrDefault(t => string.Equals(t.Key, key, StringComparison.OrdinalIgnoreCase));
 
-        /// <summary>Resolves a stored choice ("None", "Auto" or a holiday key) to the theme to show today, or null for none.</summary>
-        public static HolidayTheme? Resolve(string? choice, DateTime today) =>
-            string.Equals(choice, Auto, StringComparison.OrdinalIgnoreCase) ? ForDate(today) : Find(choice);
+        /// <summary>
+        /// Effective "karaoke night" date for <paramref name="now"/>: hours before 6:00 AM count as the
+        /// previous evening's show, so a gig running past midnight doesn't lose or flip its holiday theme at 12:00 AM.
+        /// </summary>
+        public static DateTime ShowDate(DateTime now) =>
+            now.TimeOfDay < TimeSpan.FromHours(6) && now.TimeOfDay > TimeSpan.Zero
+                ? now.Date.AddDays(-1)
+                : now.Date;
+
+        /// <summary>Resolves a stored choice ("None", "Auto" or a holiday key) to the theme to show for <paramref name="now"/>, or null for none.</summary>
+        public static HolidayTheme? Resolve(string? choice, DateTime now) =>
+            string.Equals(choice, Auto, StringComparison.OrdinalIgnoreCase) ? ForDate(ShowDate(now)) : Find(choice);
 
         /// <summary>The holiday whose window covers <paramref name="date"/>, or null.</summary>
         public static HolidayTheme? ForDate(DateTime date)
@@ -138,6 +153,11 @@ namespace KSRotation.Models
 
             var memorial = LastWeekday(y, 5, DayOfWeek.Monday);
             if (Within(memorial.AddDays(-3), memorial)) return Find("Memorial");
+
+            var labor = NthWeekday(y, 9, DayOfWeek.Monday, 1);
+            if (Within(labor.AddDays(-3), labor)) return Find("Labor");
+
+            if (Within(new DateTime(y, 11, 9), new DateTime(y, 11, 11))) return Find("Veterans");
 
             return null;
         }

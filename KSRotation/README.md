@@ -1,4 +1,4 @@
-<!-- Edited on Sep 27, 2026 @ 10:05:00 -> Update Settings tab summary with DJ banner TV overscan guidance -->
+<!-- Edited on Oct 29, 2026 @ 04:13:30 -> Document Holiday Rotation Screens under Display tab summary -->
 
 # KSRotation
 
@@ -9,7 +9,7 @@ KSRotation ("Karaoke Singer Rotation") is a WPF (.NET, C#, Material Design in XA
 - **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, dynamic round completion estimation and duration notices, singer pause/inactive states, round-scoped Singer Skip, and one-time Special Singers.
 - **Users** — Centralized user, performer, and staff management with high-DPI quick-search, profile management, and history.
 - **Settings** — Venue, DJ, banner, target monitor display & TV overscan guidance, and general app settings (theme, etc.).
-- **Display** — Controls the audience-facing display window(s)/monitor output.
+- **Display** — Controls the audience-facing display window(s)/monitor output, themed projection views, Holiday Rotation Screens (Off, Auto by show-night date, or explicit holiday themes with full-color Twemoji particles, glow halos, and drifting fog), live synth bars, and special event banners.
 - **Trivia** — Live "Game Master" controls for running a trivia round (question packs, questions-per-game, live question navigation, timer controls, scoring reveal, patron mobile portal status).
 - **Trivia Settings** — Configuration for trivia gameplay: question timers & flow, scoring & bonus multipliers, active venue/host (inherited from app settings), intermission/pre-game timing, and local network/Wi-Fi access for the mobile buzzer/patron portal.
 - **Help** / **About** — In-app help and version/about information.

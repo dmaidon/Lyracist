@@ -1,4 +1,4 @@
-// Created on Oct 28, 2026 @ 10:00:00 -> Unit tests for Halloween curses, fortunes, preset, and curse clearing on finish
+// Edited on Oct 29, 2026 @ 04:05:30 -> Add Labor Day and Veterans Day Auto date tests
 using System.Linq;
 using ScaryokeWheel;
 using Xunit;
@@ -135,6 +135,8 @@ public class HolidayThemeTests
     [InlineData(2027, 6, 20, "Fathers")]          // 3rd Sunday of June 2027
     [InlineData(2027, 7, 4, "Independence")]
     [InlineData(2027, 5, 31, "Memorial")]         // last Monday of May 2027
+    [InlineData(2026, 9, 7, "Labor")]             // 1st Monday of Sept 2026
+    [InlineData(2026, 11, 11, "Veterans")]        // Veterans Day
     public void ForDate_PicksTheHolidayInSeason(int y, int m, int d, string expected)
     {
         Assert.Equal(expected, KSRotation.Models.HolidayThemes.ForDate(new System.DateTime(y, m, d))?.Key);
@@ -154,6 +156,23 @@ public class HolidayThemeTests
         Assert.Equal("Halloween", KSRotation.Models.HolidayThemes.Resolve("Auto", today)?.Key);
         Assert.Equal("Christmas", KSRotation.Models.HolidayThemes.Resolve("Christmas", today)?.Key);
         Assert.Null(KSRotation.Models.HolidayThemes.Resolve("bogus", today));
+    }
+
+    [Fact]
+    public void Resolve_Auto_KeepsEveningShowThemePastMidnight()
+    {
+        // A Halloween show at 1:30 AM on Nov 1 still counts as the Oct 31 show night
+        var halloweenAfterMidnight = new System.DateTime(2026, 11, 1, 1, 30, 0);
+        Assert.Equal(new System.DateTime(2026, 10, 31), KSRotation.Models.HolidayThemes.ShowDate(halloweenAfterMidnight));
+        Assert.Equal("Halloween", KSRotation.Models.HolidayThemes.Resolve("Auto", halloweenAfterMidnight)?.Key);
+
+        // By 6:00 AM on Nov 1 (or any daytime/evening hour on Nov 1), it resolves to Brenda's Birthday
+        var birthdayDaytime = new System.DateTime(2026, 11, 1, 12, 0, 0);
+        Assert.Equal("Birthday", KSRotation.Models.HolidayThemes.Resolve("Auto", birthdayDaytime)?.Key);
+
+        // And Brenda's Birthday party running at 1:15 AM on Nov 2 stays on Birthday until 6:00 AM
+        var birthdayAfterMidnight = new System.DateTime(2026, 11, 2, 1, 15, 0);
+        Assert.Equal("Birthday", KSRotation.Models.HolidayThemes.Resolve("Auto", birthdayAfterMidnight)?.Key);
     }
 
     [Fact]

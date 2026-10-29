@@ -1,11 +1,26 @@
-<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Update changelog with multi-singer sequential spin targeting and post-spin reveals -->
-Last Edit: Oct 27, 2026 - Multi-Singer Sequential Spin Targeting & Post-Spin Category Reveals
+<!-- Edited on Oct 29, 2026 @ 04:14:00 -> Update root CHANGELOG with Holiday Rotation Screen fixes, performance optimizations, and new themes -->
+Last Edit: Oct 29, 2026 - Holiday Rotation Screen Fixes, Performance Optimizations & Additional Themes
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-27
+## [Unreleased] - 2026-10-29
+
+### Fixed
+- **Holiday Rotation Screen & Scaryoke Overlay Fixes (`KSRotation`)**:
+  - Late-night karaoke shows crossing midnight (until 6:00 AM) now retain the evening's holiday in `Auto` mode (`HolidayThemes.ShowDate`), with a 15-minute re-evaluation timer in `DisplayWindowService`.
+  - Stopped running `Opacity` and `TranslateTransform` animation clocks on floating holiday particles when clearing or switching themes, and replaced `CursedFrame`'s perpetual XAML `Loaded` storyboard with an on-demand animation stopped on close.
+  - Replaced per-particle `DropShadowEffect` blur shaders with cached, frozen `RadialGradientBrush` glow halos, added `BitmapCache` to fog, vignette, cursed frame, and particle elements, shared a frozen `SineEase` across wobble keyframes, and respected `ReducedEffects`.
+  - Lowered `HolidayLayer` (`ZIndex=95`) below the floating QR code overlay (`ZIndex=99`) so patron scan codes stay crisp, and completely suspended the holiday layer while full-screen overlays (Last Song banner, Scaryoke wheel, pre-show/empty-rotation invite) cover the rotation screen.
+  - Persisted legacy `HauntedScreen` -> `HolidayTheme` migration on startup so `StartScaryoke` reloads do not revert it.
+
+### Added
+- **Additional Holiday Rotation Themes (`KSRotation/Models/HolidayThemes.cs`)**:
+  - Added **Labor Day** (1st Monday of September, Fri–Mon window) and **Veterans Day** (Nov 9–11) themes, updated **New Year's** display label to fit both New Year's Eve and New Year's Day, and aligned Halloween's falling-leaf ambient interval (`1.2s`).
+  - Documented Holiday Rotation Screens in the KSRotation in-app Help tab (`Display Projection`).
+
+## [26.10.27] - 2026-10-27
 
 ### Fixed
 - **Scaryoke review fixes (`KSRotation`, `Lyracist`, `KSRotation.Maui`)**:

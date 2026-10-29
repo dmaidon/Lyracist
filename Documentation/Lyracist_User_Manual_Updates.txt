@@ -1,4 +1,14 @@
-// Edited on Oct 27, 2026 @ 13:00:00 -> Document restored multi-singer and entire rotation sequential spin targeting with post-spin reveals
+// Edited on Oct 29, 2026 @ 04:15:00 -> Document Holiday Rotation Screens, late-night Auto show-date resolution, Labor/Veterans Day themes, and performance optimizations
+
+KSRotation: Holiday Rotation Screens, Late-Night Show-Date Resolution & Performance Optimizations - (October 2026)
+
+Section: Display & Projection / Holiday Rotation Screens
+
+1. Holiday Rotation Screens (Settings -> Display -> 🎉 Holiday Rotation Screens):
+   - Adds a seasonal vignette tint, drifting ground fog, and floating full-color Twemoji characters with holiday-palette glow halos over the audience rotation display.
+   - Available options: Off, Auto (by date), 🎃 Halloween, 🦃 Thanksgiving, 🎄 Christmas, 🎆 New Year's, 💘 Valentine's Day, ☘️ St. Patrick's Day, 🐣 Easter, 💐 Mother's Day, 🇺🇸 Memorial Day, 👔 Father's Day, 🎇 Independence Day, 🛠️ Labor Day, 🎂 Brenda's Birthday (Nov 1), and 🎖️ Veterans Day.
+   - Late-Night Karaoke Show-Date Resolution: In 'Auto (by date)' mode, hours between midnight and 6:00 AM count as part of the previous evening's show night, so a late-night gig crossing midnight retains its active holiday theme until 6:00 AM.
+   - QR Code Priority & Reduced Effects: The holiday layer sits below the patron Scan-to-Request QR code overlay so QR codes remain bright and unobstructed, automatically suspends while full-screen overlays (Scaryoke Wheel, Last Song Banner, Pre-Show Invite) are active, and respects the 'Reduced Projection Effects' toggle for weaker venue PCs.
 
 KSRotation & Lyracist: Multi-Singer & Entire Rotation Sequential Spin Targeting - (October 2026)
 

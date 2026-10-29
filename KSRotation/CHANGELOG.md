@@ -1,6 +1,16 @@
-<!-- Edited on Oct 27, 2026 @ 13:00:00 -> Update KSRotation CHANGELOG with multi-singer sequential spin targeting and post-spin reveals -->
+<!-- Edited on Oct 29, 2026 @ 04:05:45 -> Update KSRotation CHANGELOG with Labor Day and Veterans Day holiday themes -->
 
 # Changelog
+
+## 2026-10-29
+
+- **Holiday Rotation Screen fixes & additions (`HolidayThemes.cs`, `DisplayWindowService.cs`, `SingerDisplayWindow.xaml/.cs`, `MainViewModel.Scaryoke.cs`)**:
+  - Added **Labor Day** (1st Monday of September, Fri–Mon window) and **Veterans Day** (Nov 9–11) themes, and updated **New Year's** display name to fit both New Year's Eve and New Year's Day.
+  - Late-night karaoke shows crossing midnight (until 6:00 AM) now keep the evening's holiday in `Auto` mode (`HolidayThemes.ShowDate`), with a periodic 15-minute re-evaluation timer so long-running sessions transition cleanly.
+  - Replaced per-particle `DropShadowEffect` blur shaders with cached, frozen `RadialGradientBrush` glow halos, stopped running `Opacity` and `TranslateTransform` animation clocks on floating holiday particles when clearing or switching themes, and replaced `CursedFrame`'s perpetual XAML storyboard with an on-demand animation.
+  - Respected `ReducedEffects` on holiday screens (disables glow halos, fog/vignette animations, and lowers max particle counts), added `BitmapCache` to fog, vignette, cursed frame, and particle elements, and shared a frozen `SineEase` across wobble keyframes.
+  - Placed `HolidayLayer` (`ZIndex=95`) below the floating QR code overlay (`ZIndex=99`) so patron scan codes stay crisp, and completely suspended the holiday layer (timers, fog/vignette animations, and particles) while full-screen overlays (Last Song banner, Scaryoke wheel, pre-show/empty-rotation invite) cover the rotation screen.
+  - Persisted legacy `HauntedScreen` -> `HolidayTheme` migration on startup so `StartScaryoke` reloads do not revert it.
 
 ## 2026-10-28
 

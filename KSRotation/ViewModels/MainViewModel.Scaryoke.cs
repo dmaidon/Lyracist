@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 17:05:00 -> Add project toggle, singer count selection, and configured spin workflow (project|select # of singers|spin)
+// Edited on Oct 29, 2026 @ 03:49:00 -> Persist migrated HolidayThemeChoice on initialization and preserve in-memory settings when starting Scaryoke
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -223,13 +223,17 @@ namespace KSRotation.ViewModels
                 ScaryokeShowDjsChoice = _scaryokeSettings.ShowDjsChoice;
                 ScaryokeIsMuted = _scaryokeSettings.IsMuted;
                 ScaryokeVolume = _scaryokeSettings.Volume;
-                HolidayThemeChoice = string.IsNullOrEmpty(_scaryokeSettings.HolidayTheme)
-                    ? (_scaryokeSettings.HauntedScreen ? "Halloween" : HolidayThemes.None)
-                    : _scaryokeSettings.HolidayTheme;
+                bool migratedHoliday = false;
+                if (string.IsNullOrEmpty(_scaryokeSettings.HolidayTheme))
+                {
+                    _scaryokeSettings.HolidayTheme = _scaryokeSettings.HauntedScreen ? "Halloween" : HolidayThemes.None;
+                    migratedHoliday = true;
+                }
+                HolidayThemeChoice = _scaryokeSettings.HolidayTheme;
                 ScaryokeCursesEnabled = _scaryokeSettings.CursesEnabled;
                 ScaryokeFortunesEnabled = _scaryokeSettings.FortunesEnabled;
                 _displayWindowService.SetHolidayTheme(HolidayThemeChoice);
-                if (ScaryokeFlavor.EnsureHalloweenPreset(_scaryokeSettings))
+                if (ScaryokeFlavor.EnsureHalloweenPreset(_scaryokeSettings) || migratedHoliday)
                 {
                     _scaryokeSettings.Save();
                 }

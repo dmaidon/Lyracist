@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 17:05:00 -> Support persistent Scaryoke projection to screen prior to spinning
+// Edited on Oct 29, 2026 @ 03:48:30 -> Resolve Auto holiday theme using DateTime.Now with a periodic re-evaluation timer across show nights
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -24,6 +24,7 @@ namespace KSRotation.Services
         private string? _specialEventBannerPath;
         private bool _openedForScaryoke;
         private string _holidayChoice = HolidayThemes.None;
+        private System.Windows.Threading.DispatcherTimer? _holidayAutoTimer;
         private bool _isScaryokeProjected = true;
         private IReadOnlyList<ScaryokeWheelSegment>? _cachedScaryokeSegments;
 
@@ -81,13 +82,39 @@ namespace KSRotation.Services
             }
         }
 
-        /// <summary>Sets the holiday screen choice ("None", "Auto" or a holiday key); "Auto" is resolved against today's date.</summary>
+        /// <summary>Sets the holiday screen choice ("None", "Auto" or a holiday key); "Auto" is resolved against the current show date.</summary>
         public void SetHolidayTheme(string choice)
         {
             _holidayChoice = choice ?? HolidayThemes.None;
+            UpdateAutoHolidayTimer();
             if (_window != null)
             {
-                _window.Dispatcher.InvokeAsync(() => _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Today)));
+                _window.Dispatcher.InvokeAsync(() => _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Now)));
+            }
+        }
+
+        private void UpdateAutoHolidayTimer()
+        {
+            if (string.Equals(_holidayChoice, HolidayThemes.Auto, StringComparison.OrdinalIgnoreCase) && _window != null)
+            {
+                _holidayAutoTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMinutes(15) };
+                _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+                _holidayAutoTimer.Tick += OnHolidayAutoTimerTick;
+                _holidayAutoTimer.Start();
+            }
+            else if (_holidayAutoTimer != null)
+            {
+                _holidayAutoTimer.Stop();
+                _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+                _holidayAutoTimer = null;
+            }
+        }
+
+        private void OnHolidayAutoTimerTick(object? sender, EventArgs e)
+        {
+            if (_window != null && string.Equals(_holidayChoice, HolidayThemes.Auto, StringComparison.OrdinalIgnoreCase))
+            {
+                _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Now));
             }
         }
 
@@ -330,7 +357,8 @@ namespace KSRotation.Services
             _viewModel.UpdateFromRotation(rotation);
 
             _window.UpdateSpecialEventBanner(_specialEventBannerPath);
-            _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Today));
+            _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Now));
+            UpdateAutoHolidayTimer();
 
             if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
             {
@@ -371,6 +399,12 @@ namespace KSRotation.Services
         /// </summary>
         public void Shutdown()
         {
+            if (_holidayAutoTimer != null)
+            {
+                _holidayAutoTimer.Stop();
+                _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+                _holidayAutoTimer = null;
+            }
             _ = _casting.StopCastingAsync();
             if (_window == null)
             {
@@ -535,6 +569,12 @@ namespace KSRotation.Services
 
         private void OnWindowClosed(object? sender, EventArgs e)
         {
+            if (_holidayAutoTimer != null)
+            {
+                _holidayAutoTimer.Stop();
+                _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+                _holidayAutoTimer = null;
+            }
             // Pre-show lives on this window; leaving it on would keep welcome screens suppressed and queued forever.
             if (_viewModel.IsPreShowModeActive)
             {

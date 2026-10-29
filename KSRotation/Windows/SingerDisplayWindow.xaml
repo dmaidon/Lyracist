@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 12:08:00 -> Add Scaryoke category badges to all themed projection panels and singer displays -->
+<!-- Edited on Oct 29, 2026 @ 03:55:00 -> Replace perpetual CursedFrame XAML EventTrigger storyboard with code-driven animation stopped on close -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -2401,8 +2401,9 @@
         </Grid>
 
         <!-- Holiday screen: tinted vignette, drifting fog and floating characters (chosen in Settings > Display & Projection) -->
-        <Grid x:Name="HolidayLayer" Grid.RowSpan="2" Panel.ZIndex="104" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True">
-            <Border x:Name="HolidayFog1" Width="2600" Height="420" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.35">
+        <!-- Panel.ZIndex=95 sits above projection panels and below the QR code overlay (ZIndex=99) so QR codes remain crisp and scannable -->
+        <Grid x:Name="HolidayLayer" Grid.RowSpan="2" Panel.ZIndex="95" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True">
+            <Border x:Name="HolidayFog1" Width="2600" Height="420" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.35" CacheMode="BitmapCache">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
                         <GradientStop x:Name="HolidayFog1Bottom" Color="#CCB9C0D6" Offset="0" />
@@ -2411,7 +2412,7 @@
                 </Border.Background>
                 <Border.RenderTransform><TranslateTransform x:Name="HolidayFog1Shift" X="-500" /></Border.RenderTransform>
             </Border>
-            <Border x:Name="HolidayFog2" Width="2600" Height="300" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.25">
+            <Border x:Name="HolidayFog2" Width="2600" Height="300" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.25" CacheMode="BitmapCache">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
                         <GradientStop x:Name="HolidayFog2Bottom" Color="#CC9FA8C4" Offset="0" />
@@ -2420,7 +2421,7 @@
                 </Border.Background>
                 <Border.RenderTransform><TranslateTransform x:Name="HolidayFog2Shift" X="-100" /></Border.RenderTransform>
             </Border>
-            <Border x:Name="HolidayVignette">
+            <Border x:Name="HolidayVignette" CacheMode="BitmapCache">
                 <Border.Background>
                     <RadialGradientBrush Center="0.5,0.5" RadiusX="0.75" RadiusY="0.75">
                         <GradientStop Color="#00000000" Offset="0.55" />
@@ -2433,20 +2434,11 @@
 
         <!-- Cursed frame: pulses red around the whole screen while the current singer carries a curse or DJ's Choice -->
         <Border x:Name="CursedFrame" Grid.RowSpan="2" Panel.ZIndex="108" IsHitTestVisible="False"
-                BorderBrush="#FF1744" BorderThickness="14" Opacity="0.45"
+                BorderBrush="#FF1744" BorderThickness="14" Opacity="0.45" CacheMode="BitmapCache"
                 Visibility="{Binding IsCurrentSingerCursed, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border.Effect>
                 <DropShadowEffect Color="#FF1744" BlurRadius="40" ShadowDepth="0" Opacity="0.9" />
             </Border.Effect>
-            <Border.Triggers>
-                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.25" To="0.85" Duration="0:0:1.1" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Border.Triggers>
         </Border>
 
         <!-- Scaryoke Wheel Overlay (takes precedence over all projection panels and banners) -->
