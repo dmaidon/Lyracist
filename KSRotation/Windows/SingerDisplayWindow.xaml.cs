@@ -1365,6 +1365,25 @@ namespace KSRotation.Windows
             return _holidayLooks[hex] = (brush, glow);
         }
 
+        private static readonly Dictionary<string, System.Windows.Media.Imaging.BitmapImage?> _emojiImages = new();
+
+        /// <summary>The bundled full-color Twemoji image for a glyph (cached, frozen), or null when none ships for it.</summary>
+        private static System.Windows.Media.Imaging.BitmapImage? EmojiImage(string glyph)
+        {
+            if (_emojiImages.TryGetValue(glyph, out var cached)) return cached;
+            System.Windows.Media.Imaging.BitmapImage? image = null;
+            try
+            {
+                image = new System.Windows.Media.Imaging.BitmapImage(new Uri($"pack://application:,,,/Resources/Emoji/{HolidayThemes.EmojiFileKey(glyph)}.png", UriKind.Absolute));
+                image.Freeze();
+            }
+            catch
+            {
+                image = null;
+            }
+            return _emojiImages[glyph] = image;
+        }
+
         private static System.Windows.Media.Color ParseColor(string hex) =>
             (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
 
@@ -1476,19 +1495,32 @@ namespace KSRotation.Windows
 
             bool ambient = motion != HolidayMotion.Cross;
             // Ambient flakes/leaves/hearts may not crowd out the larger crossing characters
-            if (ambient && HolidayParticles.Children.OfType<TextBlock>().Count(c => c.Tag is "ambient") >= HolidayMaxAmbient) return;
+            if (ambient && HolidayParticles.Children.OfType<FrameworkElement>().Count(c => c.Tag is "ambient") >= HolidayMaxAmbient) return;
             double size = ambient ? _rng.Next(26, 52) : _rng.Next(52, 92);
             double peak = ambient ? 0.55 + (_rng.NextDouble() * 0.3) : 0.9;
             double seconds = ambient ? 9 + (_rng.NextDouble() * 6) : 6.5 + (_rng.NextDouble() * 3);
 
             var shift = new TranslateTransform();
-            var tb = new TextBlock { Text = glyph, FontSize = size, Opacity = 0, IsHitTestVisible = false, RenderTransform = shift, Tag = ambient ? "ambient" : "cross" };
+            string tag = ambient ? "ambient" : "cross";
+            FrameworkElement tb;
+            var emoji = EmojiImage(glyph);
+            if (emoji != null)
+            {
+                var img = new System.Windows.Controls.Image { Source = emoji, Width = size, Height = size, Stretch = Stretch.Uniform, Opacity = 0, IsHitTestVisible = false, RenderTransform = shift, Tag = tag };
+                RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.HighQuality);
+                tb = img;
+            }
+            else
+            {
+                // No bundled image: fall back to the system font, tinted with the palette color
+                var text = new TextBlock { Text = glyph, FontSize = size, Opacity = 0, IsHitTestVisible = false, RenderTransform = shift, Tag = tag };
+                if (_holiday is { Palette.Length: > 0 } tinted) text.Foreground = HolidayLook(tinted.Palette[_rng.Next(tinted.Palette.Length)]).Brush;
+                tb = text;
+            }
             if (_holiday is { Palette.Length: > 0 } themed)
             {
-                // Tints monochrome emoji outright; on color emoji the glow still carries the holiday color
-                var look = HolidayLook(themed.Palette[_rng.Next(themed.Palette.Length)]);
-                tb.Foreground = look.Brush;
-                tb.Effect = look.Glow;
+                // Full-color images keep their own colors, so the holiday palette shows as a glow halo
+                tb.Effect = HolidayLook(themed.Palette[_rng.Next(themed.Palette.Length)]).Glow;
             }
             Canvas.SetLeft(tb, 0);
             Canvas.SetTop(tb, 0);

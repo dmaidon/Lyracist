@@ -74,6 +74,53 @@ public class ScaryokeHalloweenTests
 public class HolidayThemeTests
 {
     [Theory]
+    [InlineData("🦇", "1f987")]
+    [InlineData("🕷️", "1f577")]
+    [InlineData("🇺🇸", "1f1fa-1f1f8")]
+    public void EmojiFileKey_MatchesTwemojiNaming(string glyph, string expected) =>
+        Assert.Equal(expected, KSRotation.Models.HolidayThemes.EmojiFileKey(glyph));
+
+    [Fact]
+    public void EveryThemeGlyph_HasABundledImage()
+    {
+        var dir = AppContext.BaseDirectory;
+        string? emojiDir = null;
+        while (dir != null && emojiDir == null)
+        {
+            var candidate = Path.Combine(dir, "KSRotation", "Resources", "Emoji");
+            if (Directory.Exists(candidate)) emojiDir = candidate;
+            dir = Path.GetDirectoryName(dir);
+        }
+        Assert.NotNull(emojiDir);
+
+        var missing = KSRotation.Models.HolidayThemes.All
+            .SelectMany(t => t.Crossers.Concat(t.Ambient))
+            .Distinct()
+            .Where(g => !File.Exists(Path.Combine(emojiDir!, KSRotation.Models.HolidayThemes.EmojiFileKey(g) + ".png")))
+            .ToList();
+        Assert.Empty(missing);
+
+        // Every shipped image must actually decode in WPF
+        var undecodable = Directory.GetFiles(emojiDir!, "*.png")
+            .Where(f =>
+            {
+                try
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.UriSource = new System.Uri(f);
+                    bmp.EndInit();
+                    return bmp.PixelWidth <= 0;
+                }
+                catch { return true; }
+            })
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.Empty(undecodable);
+    }
+
+    [Theory]
     [InlineData(2026, 10, 28, "Halloween")]
     [InlineData(2026, 11, 26, "Thanksgiving")]   // 4th Thursday of Nov 2026
     [InlineData(2026, 12, 20, "Christmas")]

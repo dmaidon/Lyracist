@@ -46,8 +46,8 @@ namespace KSRotation.Models
         public static readonly IReadOnlyList<HolidayTheme> All =
         [
             new("Halloween", "🎃 Halloween", "#CC1A0800", "B9C0D6", 0.35, true,
-                ["🦇", "👻", "🕷️", "🎃", "💀", "🧛", "🧟", "🦉", "🐈‍⬛", "🧙", "⚰️", "🕸️"],
-                ["🕷️", "🍂"], HolidayMotion.Fall, 5, 3.5, ["#FF6D00", "#9C27B0", "#76FF03", "#F5F5F5", "#FF1744"]),
+                ["🦇", "👻", "🕷️", "🎃", "💀", "🧛", "🧟", "🦉", "🐈", "🧙", "⚰️", "🕸️"],
+                ["🍂", "🍁", "🍂"], HolidayMotion.Fall, 5, 5, ["#FF6D00", "#9C27B0", "#76FF03", "#F5F5F5", "#FF1744"]),
             new("Christmas", "🎄 Christmas", "#CC0B1A0B", "FFFFFF", 0.22, false,
                 ["🎅", "🦌", "🛷", "🎄", "⭐", "🎁", "🔔", "⛄", "🤶"],
                 ["❄️", "❄️", "✨"], HolidayMotion.Fall, 9, 0.6, ["#E53935", "#43A047", "#FFFFFF", "#FFD54F", "#00ACC1"]),
@@ -79,6 +79,10 @@ namespace KSRotation.Models
                 ["🇺🇸", "🦅", "🎖️", "🕊️", "🌺", "⭐"],
                 ["🌺", "⭐"], HolidayMotion.Fall, 10, 2.2, ["#E53935", "#FFFFFF", "#1E88E5", "#B0BEC5"]),
         ];
+
+        /// <summary>File name (no extension) of the bundled Twemoji image for a glyph: lowercase hex code points joined by '-', variation selectors dropped.</summary>
+        public static string EmojiFileKey(string glyph) =>
+            string.Join('-', glyph.EnumerateRunes().Where(r => r.Value != 0xFE0F).Select(r => r.Value.ToString("x")));
 
         /// <summary>Choices for the settings dropdown: Off, Auto, then each holiday.</summary>
         public static IReadOnlyList<KeyValuePair<string, string>> Options { get; } =
