@@ -1,4 +1,5 @@
-// Edited on Sep 22, 2026 @ 07:55:00 -> Add AutoRotateDurationSeconds to DisplayPreferences
+// Edited on Oct 29, 2026 @ 05:36:00 -> Add HolidayTheme preference to DisplayPreferences
+using KSRotation.Models;
 using Lyracist.Shared;
 
 namespace Lyracist.Services.Display;
@@ -35,5 +36,8 @@ public class DisplayPreferences
     /// <summary>Which projection views participate in the automatic rotation.
     /// One entry per known view; entries the DJ hasn't opted into stay disabled.</summary>
     public List<ProjectionRotationEntry> ProjectionRotationSchedule { get; set; } = [];
+
+    /// <summary>Holiday overlay theme for the rotation display ("None", "Auto", or a HolidayThemes key).</summary>
+    public string HolidayTheme { get; set; } = HolidayThemes.None;
 }
 

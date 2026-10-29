@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 12:22:00 -> Add Scaryoke challenge category badge to rotation queue rows -->
+<!-- Edited on Oct 29, 2026 @ 08:53:00 -> Color-code KaraokePage TabItem headers for dark venues -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -366,7 +366,7 @@
 
                     <!-- Search Results list -->
                     <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSearchTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
-                        <TabItem FontSize="12">
+                        <TabItem FontSize="12" Background="#CC047857" BorderBrush="#FF34D399">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Karaoke Library" VerticalAlignment="Center" />
@@ -414,7 +414,7 @@
                             </Border>
                         </TabItem>
 
-                        <TabItem FontSize="12">
+                        <TabItem FontSize="12" Background="#CCB45309" BorderBrush="#FFFBBF24">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Music Library" VerticalAlignment="Center" />
@@ -475,7 +475,7 @@
                             </Border>
                         </TabItem>
 
-                        <TabItem Header="Streaming Links" FontSize="12">
+                        <TabItem Header="Streaming Links" FontSize="12" Background="#CC0284C7" BorderBrush="#FF38BDF8">
                             <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="12" Margin="0,8,0,0">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -596,7 +596,7 @@
                             </Border>
                         </TabItem>
 
-                        <TabItem Header="Singer History" FontSize="12">
+                        <TabItem Header="Singer History" FontSize="12" Background="#CC5B21B6" BorderBrush="#FFA78BFA">
                             <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
                                 <DataGrid ItemsSource="{Binding SingerHistoryResults}"
                                        SelectedItem="{Binding SelectedHistoryEntry, Mode=TwoWay}"

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 6, 2026 @ 08:40:30 -> Remove PartyTyme tab -->
+<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code OccasionSearchWindow TabItem headers for dark venues -->
 <Window x:Class="Lyracist.Windows.OccasionSearchWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -42,7 +42,7 @@
         <!-- Tabs -->
         <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="0,0,0,16">
             <!-- Local Library Tab -->
-            <TabItem Header="Local Library">
+            <TabItem Header="Local Library" Background="#CC047857" BorderBrush="#FF34D399">
                 <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -65,7 +65,7 @@
 
 
             <!-- External Streams Tab -->
-            <TabItem Header="External Streams (YouTube/Spotify)">
+            <TabItem Header="External Streams (YouTube/Spotify)" Background="#CC0284C7" BorderBrush="#FF38BDF8">
                 <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>

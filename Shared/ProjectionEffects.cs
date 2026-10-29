@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:00:00 -> Replace per-bulb DropShadowEffect in CurtainMarqueeBulbChase with a shared frozen glow brush
+// Edited on Oct 29, 2026 @ 05:33:00 -> Add shared HolidayOverlayEffect for SingerDisplayWindow and RotationWindow
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,12 +9,15 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using KSRotation.Models;
 using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using Image = System.Windows.Controls.Image;
 using Orientation = System.Windows.Controls.Orientation;
 using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
@@ -1614,5 +1617,399 @@ internal sealed class TheaterEffects(Canvas filmStripCanvas, Canvas beamCanvas)
         }
         beamCanvas.Children.Clear();
         _beams.Clear();
+    }
+}
+
+// ── Holiday rotation screen overlay ──────────────────────────────────────────────────────────────
+internal sealed class HolidayOverlayEffect(
+    UIElement layer,
+    UIElement fog1,
+    UIElement fog2,
+    GradientStop fog1Bottom,
+    GradientStop fog1Top,
+    GradientStop fog2Bottom,
+    GradientStop fog2Top,
+    TranslateTransform fog1Shift,
+    TranslateTransform fog2Shift,
+    UIElement vignette,
+    GradientStop vignetteEdge,
+    Canvas particles,
+    Func<bool> isReducedEffects,
+    Func<bool> isObscured)
+{
+    // Kept low on purpose: too much motion distracts from the rotation text
+    private const int MaxParticles = 7;
+    private const int MaxAmbient = 4;
+
+    private static readonly SineEase SharedSineEase = ProjectionFx.Frozen(new SineEase { EasingMode = EasingMode.EaseInOut });
+    private static readonly BitmapCache SharedParticleCache = ProjectionFx.Frozen(new BitmapCache());
+    private static readonly Dictionary<string, (SolidColorBrush Brush, RadialGradientBrush Halo)> Looks = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, BitmapImage?> EmojiImages = new();
+
+    private DispatcherTimer? _crossTimer;
+    private DispatcherTimer? _ambientTimer;
+    private HolidayTheme? _theme;
+    private int _totalCount;
+    private int _ambientCount;
+
+    // Frozen solid brush + radial-gradient halo brush per palette color (same zero-shader technique as
+    // StarfieldEffect and MarqueeBulbChase: avoids per-particle DropShadowEffect pixel shaders that
+    // re-rasterize on every Opacity animation frame).
+    private static (SolidColorBrush Brush, RadialGradientBrush Halo) GetLook(string hex)
+    {
+        if (Looks.TryGetValue(hex, out var look)) return look;
+        var color = ParseColor(hex);
+        var brush = ProjectionFx.Frozen(new SolidColorBrush(color));
+        var halo = ProjectionFx.Frozen(new RadialGradientBrush
+        {
+            GradientStops =
+            {
+                new GradientStop(ProjectionFx.Argb(0xB8, color), 0.0),
+                new GradientStop(ProjectionFx.Argb(0x55, color), 0.48),
+                new GradientStop(ProjectionFx.Argb(0x00, color), 1.0)
+            }
+        });
+        return Looks[hex] = (brush, halo);
+    }
+
+    /// <summary>The bundled full-color Twemoji image for a glyph (cached, frozen), or null when none ships for it.</summary>
+    private static BitmapImage? EmojiImage(string glyph)
+    {
+        if (EmojiImages.TryGetValue(glyph, out var cached)) return cached;
+        BitmapImage? image = null;
+        try
+        {
+            image = new BitmapImage(new Uri($"pack://application:,,,/Resources/Emoji/{HolidayThemes.EmojiFileKey(glyph)}.png", UriKind.Absolute));
+            image.Freeze();
+        }
+        catch
+        {
+            image = null;
+        }
+        return EmojiImages[glyph] = image;
+    }
+
+    private static Color ParseColor(string hex) =>
+        (Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+
+    private void ClearParticles()
+    {
+        ProjectionFx.StopDriftAnimations(particles.Children.OfType<UIElement>());
+        particles.Children.Clear();
+        _totalCount = 0;
+        _ambientCount = 0;
+    }
+
+    /// <summary>Stops all holiday timers and animations, clears particles, and hides the layer.</summary>
+    public void Stop()
+    {
+        _theme = null;
+        if (_crossTimer != null)
+        {
+            _crossTimer.Stop();
+            _crossTimer.Tick -= OnCrossTick;
+            _crossTimer = null;
+        }
+        if (_ambientTimer != null)
+        {
+            _ambientTimer.Stop();
+            _ambientTimer.Tick -= OnAmbientTick;
+            _ambientTimer = null;
+        }
+        fog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
+        fog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
+        vignette.BeginAnimation(UIElement.OpacityProperty, null);
+        vignette.Opacity = 1;
+        ClearParticles();
+        layer.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>Applies a holiday theme (null = off). Animations and timers only run while a theme is active.</summary>
+    public void SetTheme(HolidayTheme? theme)
+    {
+        if (ReferenceEquals(theme, _theme)) return;
+        ApplyTheme(theme);
+    }
+
+    /// <summary>Re-applies the active theme when the DJ toggles Reduced Effects.</summary>
+    public void Reapply()
+    {
+        if (_theme != null)
+        {
+            ApplyTheme(_theme);
+        }
+    }
+
+    private void ApplyTheme(HolidayTheme? theme)
+    {
+        if (theme == null)
+        {
+            Stop();
+            return;
+        }
+
+        _theme = theme;
+
+        _crossTimer?.Stop();
+        _ambientTimer?.Stop();
+        fog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
+        fog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
+        vignette.BeginAnimation(UIElement.OpacityProperty, null);
+        vignette.Opacity = 1;
+        ClearParticles();
+
+        vignetteEdge.Color = ParseColor(theme.VignetteColor);
+
+        bool fog = !string.IsNullOrEmpty(theme.FogColor);
+        fog1.Visibility = fog2.Visibility = fog ? Visibility.Visible : Visibility.Collapsed;
+        if (fog)
+        {
+            var fogColor = ParseColor("#" + theme.FogColor);
+            fog1Bottom.Color = Color.FromArgb(0xCC, fogColor.R, fogColor.G, fogColor.B);
+            fog1Top.Color = Color.FromArgb(0, fogColor.R, fogColor.G, fogColor.B);
+            fog2Bottom.Color = fog1Bottom.Color;
+            fog2Top.Color = fog1Top.Color;
+            fog1.Opacity = theme.FogOpacity;
+            fog2.Opacity = theme.FogOpacity * 0.7;
+        }
+
+        RefreshActivity();
+    }
+
+    /// <summary>Suspends or resumes the holiday layer's timers and continuous animations when full-screen overlays or window hiding cover or uncover the rotation screen.</summary>
+    public void RefreshActivity()
+    {
+        var theme = _theme;
+        if (theme == null)
+        {
+            layer.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (isObscured())
+        {
+            _crossTimer?.Stop();
+            _ambientTimer?.Stop();
+            fog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
+            fog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
+            vignette.BeginAnimation(UIElement.OpacityProperty, null);
+            vignette.Opacity = 1;
+            ClearParticles();
+            layer.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        bool wasSuspended = layer.Visibility != Visibility.Visible || _crossTimer is not { IsEnabled: true };
+        layer.Visibility = Visibility.Visible;
+        if (!wasSuspended) return;
+
+        bool reduced = isReducedEffects();
+        if (!string.IsNullOrEmpty(theme.FogColor) && !reduced)
+        {
+            fog1Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-500, -60, TimeSpan.FromSeconds(42))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = SharedSineEase
+            });
+            fog2Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-60, -620, TimeSpan.FromSeconds(58))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = SharedSineEase
+            });
+        }
+
+        if (theme.Flicker && !reduced)
+        {
+            // Irregular flicker so it reads as candlelight rather than a metronome
+            var flicker = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
+            (double Opacity, int Ms)[] steps = [(0.85, 0), (0.7, 160), (0.95, 330), (0.75, 410), (0.9, 700), (0.62, 790), (0.88, 1150), (0.8, 1400), (0.85, 1700)];
+            foreach (var (opacity, ms) in steps)
+            {
+                flicker.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+            }
+            vignette.BeginAnimation(UIElement.OpacityProperty, flicker);
+        }
+
+        _crossTimer ??= new DispatcherTimer(DispatcherPriority.Background);
+        _crossTimer.Tick -= OnCrossTick;
+        _crossTimer.Tick += OnCrossTick;
+        _crossTimer.Interval = TimeSpan.FromSeconds(1.5);
+        _crossTimer.Start();
+
+        _ambientTimer ??= new DispatcherTimer(DispatcherPriority.Background);
+        _ambientTimer.Tick -= OnAmbientTick;
+        _ambientTimer.Tick += OnAmbientTick;
+        _ambientTimer.Interval = TimeSpan.FromSeconds(0.5);
+        _ambientTimer.Start();
+    }
+
+    private void OnCrossTick(object? sender, EventArgs e)
+    {
+        var theme = _theme;
+        if (theme == null || theme.Crossers.Length == 0 || isObscured()) return;
+        var rng = ProjectionFx.Rng;
+        if (_crossTimer != null)
+        {
+            _crossTimer.Interval = TimeSpan.FromSeconds(theme.CrossSeconds * (0.6 + (rng.NextDouble() * 0.8)));
+        }
+
+        SpawnParticle(theme.Crossers[rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
+        if (!isReducedEffects() && rng.Next(100) < 35)
+        {
+            SpawnParticle(theme.Crossers[rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
+        }
+    }
+
+    private void OnAmbientTick(object? sender, EventArgs e)
+    {
+        var theme = _theme;
+        if (theme == null || theme.Ambient.Length == 0 || isObscured()) return;
+        var rng = ProjectionFx.Rng;
+        if (_ambientTimer != null)
+        {
+            _ambientTimer.Interval = TimeSpan.FromSeconds(theme.AmbientSeconds * (0.7 + (rng.NextDouble() * 0.6)));
+        }
+
+        SpawnParticle(theme.Ambient[rng.Next(theme.Ambient.Length)], theme.AmbientMotion);
+    }
+
+    private void SpawnParticle(string glyph, HolidayMotion motion)
+    {
+        bool reduced = isReducedEffects();
+        int maxParticles = reduced ? 4 : MaxParticles;
+        int maxAmbient = reduced ? 2 : MaxAmbient;
+        if (_totalCount >= maxParticles) return;
+
+        bool ambient = motion != HolidayMotion.Cross;
+        // Ambient flakes/leaves/hearts may not crowd out the larger crossing characters
+        if (ambient && _ambientCount >= maxAmbient) return;
+
+        var rng = ProjectionFx.Rng;
+        double size = ambient ? rng.Next(26, 52) : rng.Next(52, 92);
+        double peak = ambient ? 0.55 + (rng.NextDouble() * 0.3) : 0.9;
+        double seconds = ambient ? 9 + (rng.NextDouble() * 6) : 6.5 + (rng.NextDouble() * 3);
+
+        var shift = new TranslateTransform();
+        double haloSize = size * 1.65;
+        var container = new Grid
+        {
+            Width = haloSize,
+            Height = haloSize,
+            Opacity = 0,
+            IsHitTestVisible = false,
+            RenderTransform = shift,
+            CacheMode = SharedParticleCache
+        };
+
+        (SolidColorBrush Brush, RadialGradientBrush Halo)? paletteLook = _theme is { Palette.Length: > 0 } themed
+            ? GetLook(themed.Palette[rng.Next(themed.Palette.Length)])
+            : null;
+
+        if (!reduced && paletteLook is { } glowLook)
+        {
+            container.Children.Add(new Ellipse
+            {
+                Width = haloSize,
+                Height = haloSize,
+                Fill = glowLook.Halo,
+                IsHitTestVisible = false
+            });
+        }
+
+        var emoji = EmojiImage(glyph);
+        if (emoji != null)
+        {
+            var img = new Image
+            {
+                Source = emoji,
+                Width = size,
+                Height = size,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
+            };
+            RenderOptions.SetBitmapScalingMode(img, reduced ? BitmapScalingMode.Linear : BitmapScalingMode.HighQuality);
+            container.Children.Add(img);
+        }
+        else
+        {
+            // No bundled image: fall back to the system font, tinted with the palette color
+            var text = new TextBlock
+            {
+                Text = glyph,
+                FontSize = size,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
+            };
+            if (paletteLook is { } tintedLook) text.Foreground = tintedLook.Brush;
+            container.Children.Add(text);
+        }
+
+        Canvas.SetLeft(container, 0);
+        Canvas.SetTop(container, 0);
+        particles.Children.Add(container);
+        _totalCount++;
+        if (ambient) _ambientCount++;
+
+        var duration = TimeSpan.FromSeconds(seconds);
+        DoubleAnimationUsingKeyFrames Wobble(double center, double amplitude, int points)
+        {
+            var anim = new DoubleAnimationUsingKeyFrames { Duration = duration };
+            for (int i = 0; i < points; i++)
+            {
+                double v = center + ((i % 2 == 0 ? 1 : -1) * amplitude * (0.4 + (rng.NextDouble() * 0.6)));
+                anim.KeyFrames.Add(new EasingDoubleKeyFrame(i == points - 1 ? center : v,
+                    KeyTime.FromPercent((i + 1) / (double)points), SharedSineEase));
+            }
+            return anim;
+        }
+
+        switch (motion)
+        {
+            case HolidayMotion.Cross:
+            {
+                bool leftToRight = rng.Next(2) == 0;
+                double y = rng.Next(60, 820);
+                shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(leftToRight ? -200 : 2100, leftToRight ? 2100 : -200, duration));
+                shift.BeginAnimation(TranslateTransform.YProperty, Wobble(y, 80, 6));
+                break;
+            }
+            case HolidayMotion.Fall:
+            {
+                double x = rng.Next(0, 1860);
+                shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
+                shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-100, 1160, duration));
+                break;
+            }
+            default:
+            {
+                double x = rng.Next(0, 1860);
+                shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
+                shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(1160, -100, duration));
+                break;
+            }
+        }
+
+        var fade = new DoubleAnimationUsingKeyFrames { Duration = duration };
+        fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.1)));
+        fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.9)));
+        fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1.0)));
+        fade.Completed += (_, _) =>
+        {
+            container.BeginAnimation(UIElement.OpacityProperty, null);
+            shift.BeginAnimation(TranslateTransform.XProperty, null);
+            shift.BeginAnimation(TranslateTransform.YProperty, null);
+            if (particles.Children.Contains(container))
+            {
+                particles.Children.Remove(container);
+                _totalCount = Math.Max(0, _totalCount - 1);
+                if (ambient) _ambientCount = Math.Max(0, _ambientCount - 1);
+            }
+        };
+        container.BeginAnimation(UIElement.OpacityProperty, fade);
     }
 }

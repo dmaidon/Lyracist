@@ -1,11 +1,33 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Add test for ScaryokeOverlayMonitor persistence
+// Edited on Oct 29, 2026 @ 05:40:00 -> Add tests for shared HolidayThemes and DisplayPreferences.HolidayTheme in Lyracist
+using KSRotation.Models;
 using Lyracist.Core.Helpers;
+using Lyracist.Services.Display;
 using Xunit;
 
 namespace Lyracist.Tests;
 
 public class ScaryokeHistoryTests
 {
+    [Fact]
+    public void HolidayThemes_SharedIntoLyracist_ResolvesAndPersistsInDisplayPreferences()
+    {
+        var prefs = new DisplayPreferences();
+        Assert.Equal(HolidayThemes.None, prefs.HolidayTheme);
+
+        prefs.HolidayTheme = "Halloween";
+        var resolved = HolidayThemes.Resolve(prefs.HolidayTheme, new DateTime(2026, 6, 15));
+        Assert.NotNull(resolved);
+        Assert.Equal("Halloween", resolved.Key);
+
+        var laborDay = HolidayThemes.ForDate(new DateTime(2026, 9, 7));
+        Assert.NotNull(laborDay);
+        Assert.Equal("Labor", laborDay.Key);
+
+        var veteransDay = HolidayThemes.ForDate(new DateTime(2026, 11, 11));
+        Assert.NotNull(veteransDay);
+        Assert.Equal("Veterans", veteransDay.Key);
+    }
+
     [Fact]
     public void AppSettings_RecordScaryokeSpin_PersistsAndCapsAtEleven()
     {

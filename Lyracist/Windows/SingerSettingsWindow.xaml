@@ -1,3 +1,4 @@
+<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code SingerSettingsWindow TabItem headers for dark venues -->
 <Window x:Class="Lyracist.Windows.SingerSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,7 +35,7 @@
         <!-- Tabbed Content -->
         <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="0,0,0,16">
             <!-- Lead Performer Tab -->
-            <TabItem Header="Lead Singer" FontSize="12" Height="26">
+            <TabItem Header="Lead Singer" FontSize="12" Background="#CC0284C7" BorderBrush="#FF38BDF8">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
                     <StackPanel Margin="0,0,12,0">
                         <!-- Gain/Volume -->
@@ -109,7 +110,7 @@
             <!-- Duet Partner Tab -->
             <TabItem Header="{Binding PartnerDisplayName, FallbackValue='Duet Partner'}" 
                      Visibility="{Binding IsDuet, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     FontSize="12" Height="26">
+                     FontSize="12" Background="#CC5B21B6" BorderBrush="#FFA78BFA">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
                     <StackPanel Margin="0,0,12,0">
                         <!-- Partner Gain/Volume -->

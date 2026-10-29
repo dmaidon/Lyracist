@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Initialize RefreshScaryokeOverlayChoices in constructor
+// Edited on Oct 29, 2026 @ 05:37:00 -> Initialize HolidayThemeChoice from DisplayPreferences in SettingsViewModel constructor
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -330,6 +330,7 @@ public partial class SettingsViewModel : BaseViewModel
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
         _autoRotateProjectionViews = prefs.AutoRotateProjectionViews;
         _reducedProjectionEffects = prefs.ReducedProjectionEffects;
+        _holidayThemeChoice = string.IsNullOrWhiteSpace(prefs.HolidayTheme) ? KSRotation.Models.HolidayThemes.None : prefs.HolidayTheme;
         _autoRotateDurationSeconds = prefs.AutoRotateDurationSeconds > 0 ? prefs.AutoRotateDurationSeconds : 180;
         LoadProjectionRotationSchedule(prefs.ProjectionRotationSchedule);
 

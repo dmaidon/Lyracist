@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 03:58:00 -> Replace per-particle DropShadowEffect shaders with frozen RadialGradientBrush halos and suspend HolidayLayer under full-screen overlays
+// Edited on Oct 29, 2026 @ 05:34:00 -> Use shared HolidayOverlayEffect from ProjectionEffects.cs
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -58,6 +58,7 @@ namespace KSRotation.Windows
         private readonly JukeboxBubblesEffect _jukeboxBubbles;
         private readonly JumbotronSpotlightsEffect _jumbotronSpotlights;
         private readonly TheaterEffects _theater;
+        private readonly HolidayOverlayEffect _holidayOverlay;
 
         // The DJ's "reduced projection effects" setting: fewer particles, no per-element blur.
         private bool ReducedEffects => _vm?.ReducedEffects == true;
@@ -84,6 +85,12 @@ namespace KSRotation.Windows
             _jukeboxBubbles = new JukeboxBubblesEffect(JukeboxBubbleCanvas);
             _jumbotronSpotlights = new JumbotronSpotlightsEffect(JumbotronSpotlightCanvas);
             _theater = new TheaterEffects(TheaterFilmStripCanvas, TheaterBeamCanvas);
+            _holidayOverlay = new HolidayOverlayEffect(
+                HolidayLayer, HolidayFog1, HolidayFog2,
+                HolidayFog1Bottom, HolidayFog1Top, HolidayFog2Bottom, HolidayFog2Top,
+                HolidayFog1Shift, HolidayFog2Shift,
+                HolidayVignette, HolidayVignetteEdge, HolidayParticles,
+                () => ReducedEffects, () => IsHolidayObscured);
 
             Loaded += OnLoaded;
             Closed += OnClosed;
@@ -274,7 +281,7 @@ namespace KSRotation.Windows
 
                 case nameof(DisplayViewModel.ReducedEffects):
                     ApplyProjectionViewMode();
-                    ApplyHolidayTheme(_holiday);
+                    _holidayOverlay.Reapply();
                     UpdateCursedFrameAnimation();
                     break;
 
@@ -1392,372 +1399,18 @@ namespace KSRotation.Windows
 
         #region Holiday Screen
 
-        private System.Windows.Threading.DispatcherTimer? _holidayCrossTimer;
-        private System.Windows.Threading.DispatcherTimer? _holidayAmbientTimer;
-        private HolidayTheme? _holiday;
-        // Kept low on purpose: too much motion distracts from the rotation text
-        private const int HolidayMaxParticles = 7;
-        private const int HolidayMaxAmbient = 4;
-        private int _holidayTotalCount;
-        private int _holidayAmbientCount;
-        private static readonly SineEase SharedHolidaySineEase = ProjectionFx.Frozen(new SineEase { EasingMode = EasingMode.EaseInOut });
-        private static readonly BitmapCache SharedHolidayParticleCache = ProjectionFx.Frozen(new BitmapCache());
-        private static readonly Dictionary<string, (SolidColorBrush Brush, RadialGradientBrush Halo)> _holidayLooks = new(StringComparer.OrdinalIgnoreCase);
-
-        // Frozen solid brush + radial-gradient halo brush per palette color (same zero-shader technique as
-        // StarfieldEffect and MarqueeBulbChase: avoids per-particle DropShadowEffect pixel shaders that
-        // re-rasterize on every Opacity animation frame).
-        private static (SolidColorBrush Brush, RadialGradientBrush Halo) HolidayLook(string hex)
-        {
-            if (_holidayLooks.TryGetValue(hex, out var look)) return look;
-            var color = ParseColor(hex);
-            var brush = ProjectionFx.Frozen(new SolidColorBrush(color));
-            var halo = ProjectionFx.Frozen(new RadialGradientBrush
-            {
-                GradientStops =
-                {
-                    new GradientStop(ProjectionFx.Argb(0xB8, color), 0.0),
-                    new GradientStop(ProjectionFx.Argb(0x55, color), 0.48),
-                    new GradientStop(ProjectionFx.Argb(0x00, color), 1.0)
-                }
-            });
-            return _holidayLooks[hex] = (brush, halo);
-        }
-
-        private static readonly Dictionary<string, System.Windows.Media.Imaging.BitmapImage?> _emojiImages = new();
-
-        /// <summary>The bundled full-color Twemoji image for a glyph (cached, frozen), or null when none ships for it.</summary>
-        private static System.Windows.Media.Imaging.BitmapImage? EmojiImage(string glyph)
-        {
-            if (_emojiImages.TryGetValue(glyph, out var cached)) return cached;
-            System.Windows.Media.Imaging.BitmapImage? image = null;
-            try
-            {
-                image = new System.Windows.Media.Imaging.BitmapImage(new Uri($"pack://application:,,,/Resources/Emoji/{HolidayThemes.EmojiFileKey(glyph)}.png", UriKind.Absolute));
-                image.Freeze();
-            }
-            catch
-            {
-                image = null;
-            }
-            return _emojiImages[glyph] = image;
-        }
-
-        private static System.Windows.Media.Color ParseColor(string hex) =>
-            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
-
-        private void ClearHolidayParticles()
-        {
-            ProjectionFx.StopDriftAnimations(HolidayParticles.Children.OfType<UIElement>());
-            HolidayParticles.Children.Clear();
-            _holidayTotalCount = 0;
-            _holidayAmbientCount = 0;
-        }
-
-        private void StopHolidayTimersAndAnimations()
-        {
-            _holiday = null;
-            if (_holidayCrossTimer != null)
-            {
-                _holidayCrossTimer.Stop();
-                _holidayCrossTimer.Tick -= OnHolidayCrossTick;
-                _holidayCrossTimer = null;
-            }
-            if (_holidayAmbientTimer != null)
-            {
-                _holidayAmbientTimer.Stop();
-                _holidayAmbientTimer.Tick -= OnHolidayAmbientTick;
-                _holidayAmbientTimer = null;
-            }
-            HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
-            HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
-            HolidayVignette.BeginAnimation(UIElement.OpacityProperty, null);
-            HolidayVignette.Opacity = 1;
-            ClearHolidayParticles();
-            HolidayLayer.Visibility = Visibility.Collapsed;
-        }
-
-        /// <summary>Applies a holiday theme (null = off). Animations and timers only run while a theme is active.</summary>
-        public void SetHolidayTheme(HolidayTheme? theme)
-        {
-            if (ReferenceEquals(theme, _holiday)) return;
-            ApplyHolidayTheme(theme);
-        }
-
-        private void ApplyHolidayTheme(HolidayTheme? theme)
-        {
-            if (theme == null)
-            {
-                StopHolidayTimersAndAnimations();
-                return;
-            }
-
-            _holiday = theme;
-
-            _holidayCrossTimer?.Stop();
-            _holidayAmbientTimer?.Stop();
-            HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
-            HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
-            HolidayVignette.BeginAnimation(UIElement.OpacityProperty, null);
-            HolidayVignette.Opacity = 1;
-            ClearHolidayParticles();
-
-            HolidayVignetteEdge.Color = ParseColor(theme.VignetteColor);
-
-            bool fog = !string.IsNullOrEmpty(theme.FogColor);
-            HolidayFog1.Visibility = HolidayFog2.Visibility = fog ? Visibility.Visible : Visibility.Collapsed;
-            if (fog)
-            {
-                var fogColor = ParseColor("#" + theme.FogColor);
-                HolidayFog1Bottom.Color = System.Windows.Media.Color.FromArgb(0xCC, fogColor.R, fogColor.G, fogColor.B);
-                HolidayFog1Top.Color = System.Windows.Media.Color.FromArgb(0, fogColor.R, fogColor.G, fogColor.B);
-                HolidayFog2Bottom.Color = HolidayFog1Bottom.Color;
-                HolidayFog2Top.Color = HolidayFog1Top.Color;
-                HolidayFog1.Opacity = theme.FogOpacity;
-                HolidayFog2.Opacity = theme.FogOpacity * 0.7;
-            }
-
-            RefreshHolidayLayerActivity();
-        }
-
         private bool IsHolidayObscured =>
             LastSongBannerOverlay.Visibility == Visibility.Visible ||
             ScaryokeWheelOverlay.Visibility == Visibility.Visible ||
             _vm?.IsRotationEmpty == true ||
             _vm?.IsPreShowModeActive == true;
 
-        /// <summary>Suspends or resumes the holiday layer's timers and continuous animations when full-screen overlays cover or uncover the rotation screen.</summary>
-        private void RefreshHolidayLayerActivity()
-        {
-            var theme = _holiday;
-            if (theme == null)
-            {
-                HolidayLayer.Visibility = Visibility.Collapsed;
-                return;
-            }
+        /// <summary>Applies a holiday theme (null = off). Animations and timers only run while a theme is active.</summary>
+        public void SetHolidayTheme(HolidayTheme? theme) => _holidayOverlay.SetTheme(theme);
 
-            if (IsHolidayObscured)
-            {
-                _holidayCrossTimer?.Stop();
-                _holidayAmbientTimer?.Stop();
-                HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, null);
-                HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, null);
-                HolidayVignette.BeginAnimation(UIElement.OpacityProperty, null);
-                HolidayVignette.Opacity = 1;
-                ClearHolidayParticles();
-                HolidayLayer.Visibility = Visibility.Collapsed;
-                return;
-            }
+        private void RefreshHolidayLayerActivity() => _holidayOverlay.RefreshActivity();
 
-            bool wasSuspended = HolidayLayer.Visibility != Visibility.Visible || _holidayCrossTimer is not { IsEnabled: true };
-            HolidayLayer.Visibility = Visibility.Visible;
-            if (!wasSuspended) return;
-
-            bool reduced = ReducedEffects;
-            if (!string.IsNullOrEmpty(theme.FogColor) && !reduced)
-            {
-                HolidayFog1Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-500, -60, TimeSpan.FromSeconds(42))
-                {
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    EasingFunction = SharedHolidaySineEase
-                });
-                HolidayFog2Shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-60, -620, TimeSpan.FromSeconds(58))
-                {
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    EasingFunction = SharedHolidaySineEase
-                });
-            }
-
-            if (theme.Flicker && !reduced)
-            {
-                // Irregular flicker so it reads as candlelight rather than a metronome
-                var flicker = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
-                (double Opacity, int Ms)[] steps = [(0.85, 0), (0.7, 160), (0.95, 330), (0.75, 410), (0.9, 700), (0.62, 790), (0.88, 1150), (0.8, 1400), (0.85, 1700)];
-                foreach (var (opacity, ms) in steps)
-                {
-                    flicker.KeyFrames.Add(new LinearDoubleKeyFrame(opacity, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
-                }
-                HolidayVignette.BeginAnimation(UIElement.OpacityProperty, flicker);
-            }
-
-            _holidayCrossTimer ??= new System.Windows.Threading.DispatcherTimer(DispatcherPriority.Background);
-            _holidayCrossTimer.Tick -= OnHolidayCrossTick;
-            _holidayCrossTimer.Tick += OnHolidayCrossTick;
-            _holidayCrossTimer.Interval = TimeSpan.FromSeconds(1.5);
-            _holidayCrossTimer.Start();
-
-            _holidayAmbientTimer ??= new System.Windows.Threading.DispatcherTimer(DispatcherPriority.Background);
-            _holidayAmbientTimer.Tick -= OnHolidayAmbientTick;
-            _holidayAmbientTimer.Tick += OnHolidayAmbientTick;
-            _holidayAmbientTimer.Interval = TimeSpan.FromSeconds(0.5);
-            _holidayAmbientTimer.Start();
-        }
-
-        private void OnHolidayCrossTick(object? sender, EventArgs e)
-        {
-            var theme = _holiday;
-            if (theme == null || theme.Crossers.Length == 0 || IsHolidayObscured) return;
-            if (_holidayCrossTimer != null)
-            {
-                _holidayCrossTimer.Interval = TimeSpan.FromSeconds(theme.CrossSeconds * (0.6 + (_rng.NextDouble() * 0.8)));
-            }
-
-            SpawnHolidayParticle(theme.Crossers[_rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
-            if (!ReducedEffects && _rng.Next(100) < 35)
-            {
-                SpawnHolidayParticle(theme.Crossers[_rng.Next(theme.Crossers.Length)], HolidayMotion.Cross);
-            }
-        }
-
-        private void OnHolidayAmbientTick(object? sender, EventArgs e)
-        {
-            var theme = _holiday;
-            if (theme == null || theme.Ambient.Length == 0 || IsHolidayObscured) return;
-            if (_holidayAmbientTimer != null)
-            {
-                _holidayAmbientTimer.Interval = TimeSpan.FromSeconds(theme.AmbientSeconds * (0.7 + (_rng.NextDouble() * 0.6)));
-            }
-
-            SpawnHolidayParticle(theme.Ambient[_rng.Next(theme.Ambient.Length)], theme.AmbientMotion);
-        }
-
-        private void SpawnHolidayParticle(string glyph, HolidayMotion motion)
-        {
-            bool reduced = ReducedEffects;
-            int maxParticles = reduced ? 4 : HolidayMaxParticles;
-            int maxAmbient = reduced ? 2 : HolidayMaxAmbient;
-            if (_holidayTotalCount >= maxParticles) return;
-
-            bool ambient = motion != HolidayMotion.Cross;
-            // Ambient flakes/leaves/hearts may not crowd out the larger crossing characters
-            if (ambient && _holidayAmbientCount >= maxAmbient) return;
-            double size = ambient ? _rng.Next(26, 52) : _rng.Next(52, 92);
-            double peak = ambient ? 0.55 + (_rng.NextDouble() * 0.3) : 0.9;
-            double seconds = ambient ? 9 + (_rng.NextDouble() * 6) : 6.5 + (_rng.NextDouble() * 3);
-
-            var shift = new TranslateTransform();
-            double haloSize = size * 1.65;
-            var container = new Grid
-            {
-                Width = haloSize,
-                Height = haloSize,
-                Opacity = 0,
-                IsHitTestVisible = false,
-                RenderTransform = shift,
-                CacheMode = SharedHolidayParticleCache
-            };
-
-            (SolidColorBrush Brush, RadialGradientBrush Halo)? paletteLook = _holiday is { Palette.Length: > 0 } themed
-                ? HolidayLook(themed.Palette[_rng.Next(themed.Palette.Length)])
-                : null;
-
-            if (!reduced && paletteLook is { } glowLook)
-            {
-                container.Children.Add(new Ellipse
-                {
-                    Width = haloSize,
-                    Height = haloSize,
-                    Fill = glowLook.Halo,
-                    IsHitTestVisible = false
-                });
-            }
-
-            var emoji = EmojiImage(glyph);
-            if (emoji != null)
-            {
-                var img = new System.Windows.Controls.Image
-                {
-                    Source = emoji,
-                    Width = size,
-                    Height = size,
-                    Stretch = Stretch.Uniform,
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    IsHitTestVisible = false
-                };
-                RenderOptions.SetBitmapScalingMode(img, reduced ? BitmapScalingMode.Linear : BitmapScalingMode.HighQuality);
-                container.Children.Add(img);
-            }
-            else
-            {
-                // No bundled image: fall back to the system font, tinted with the palette color
-                var text = new TextBlock
-                {
-                    Text = glyph,
-                    FontSize = size,
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    IsHitTestVisible = false
-                };
-                if (paletteLook is { } tintedLook) text.Foreground = tintedLook.Brush;
-                container.Children.Add(text);
-            }
-
-            Canvas.SetLeft(container, 0);
-            Canvas.SetTop(container, 0);
-            HolidayParticles.Children.Add(container);
-            _holidayTotalCount++;
-            if (ambient) _holidayAmbientCount++;
-
-            var duration = TimeSpan.FromSeconds(seconds);
-            DoubleAnimationUsingKeyFrames Wobble(double center, double amplitude, int points)
-            {
-                var anim = new DoubleAnimationUsingKeyFrames { Duration = duration };
-                for (int i = 0; i < points; i++)
-                {
-                    double v = center + ((i % 2 == 0 ? 1 : -1) * amplitude * (0.4 + (_rng.NextDouble() * 0.6)));
-                    anim.KeyFrames.Add(new EasingDoubleKeyFrame(i == points - 1 ? center : v,
-                        KeyTime.FromPercent((i + 1) / (double)points), SharedHolidaySineEase));
-                }
-                return anim;
-            }
-
-            switch (motion)
-            {
-                case HolidayMotion.Cross:
-                {
-                    bool leftToRight = _rng.Next(2) == 0;
-                    double y = _rng.Next(60, 820);
-                    shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(leftToRight ? -200 : 2100, leftToRight ? 2100 : -200, duration));
-                    shift.BeginAnimation(TranslateTransform.YProperty, Wobble(y, 80, 6));
-                    break;
-                }
-                case HolidayMotion.Fall:
-                {
-                    double x = _rng.Next(0, 1860);
-                    shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
-                    shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-100, 1160, duration));
-                    break;
-                }
-                default:
-                {
-                    double x = _rng.Next(0, 1860);
-                    shift.BeginAnimation(TranslateTransform.XProperty, Wobble(x, 60, 6));
-                    shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(1160, -100, duration));
-                    break;
-                }
-            }
-
-            var fade = new DoubleAnimationUsingKeyFrames { Duration = duration };
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.1)));
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peak, KeyTime.FromPercent(0.9)));
-            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1.0)));
-            fade.Completed += (_, _) =>
-            {
-                container.BeginAnimation(UIElement.OpacityProperty, null);
-                shift.BeginAnimation(TranslateTransform.XProperty, null);
-                shift.BeginAnimation(TranslateTransform.YProperty, null);
-                if (HolidayParticles.Children.Contains(container))
-                {
-                    HolidayParticles.Children.Remove(container);
-                    _holidayTotalCount = Math.Max(0, _holidayTotalCount - 1);
-                    if (ambient) _holidayAmbientCount = Math.Max(0, _holidayAmbientCount - 1);
-                }
-            };
-            container.BeginAnimation(UIElement.OpacityProperty, fade);
-        }
+        private void StopHolidayTimersAndAnimations() => _holidayOverlay.Stop();
 
         #endregion
     }

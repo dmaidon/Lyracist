@@ -1,4 +1,5 @@
-// Edited on Oct 27, 2026 @ 12:16:00 -> Include Scaryoke category in Star Wars crawl signature and text generator
+// Edited on Oct 29, 2026 @ 05:35:00 -> Wire shared HolidayOverlayEffect into RotationWindow
+using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -51,9 +52,17 @@ public partial class RotationWindow : Window, ICaptureSource
     private readonly JukeboxBubblesEffect _jukeboxBubbles;
     private readonly JumbotronSpotlightsEffect _jumbotronSpotlights;
     private readonly TheaterEffects _theater;
+    private readonly HolidayOverlayEffect _holidayOverlay;
 
     // The DJ's "reduced projection effects" setting: fewer particles, no per-element blur.
     private bool ReducedEffects => _vm?.ReducedEffects == true;
+
+    private bool IsHolidayObscured =>
+        !IsVisible ||
+        LastSongBannerOverlay.Visibility == Visibility.Visible ||
+        ScaryokeWheelOverlay.Visibility == Visibility.Visible ||
+        _vm?.IsRotationEmpty == true ||
+        _vm?.IsPreShowModeActive == true;
 
     private RotationWindowViewModel? _vm;
     private int _crawlGen;   // incremented to invalidate in-flight loops
@@ -89,6 +98,12 @@ public partial class RotationWindow : Window, ICaptureSource
         _jukeboxBubbles = new JukeboxBubblesEffect(JukeboxBubbleCanvas);
         _jumbotronSpotlights = new JumbotronSpotlightsEffect(JumbotronSpotlightCanvas);
         _theater = new TheaterEffects(TheaterFilmStripCanvas, TheaterBeamCanvas);
+        _holidayOverlay = new HolidayOverlayEffect(
+            HolidayLayer, HolidayFog1, HolidayFog2,
+            HolidayFog1Bottom, HolidayFog1Top, HolidayFog2Bottom, HolidayFog2Top,
+            HolidayFog1Shift, HolidayFog2Shift,
+            HolidayVignette, HolidayVignetteEdge, HolidayParticles,
+            () => ReducedEffects, () => IsHolidayObscured);
 
         DataContext = viewModel;
 
@@ -117,7 +132,11 @@ public partial class RotationWindow : Window, ICaptureSource
             showQr ? _vm?.WifiQrCodeImage : null,
             _vm?.WifiSsid,
             _vm?.WifiPasswordDisplay);
+        _holidayOverlay.RefreshActivity();
     }
+
+    /// <summary>Applies a holiday theme (null = off). Animations and timers only run while a theme is active.</summary>
+    public void SetHolidayTheme(HolidayTheme? theme) => _holidayOverlay.SetTheme(theme);
 
     public void UpdateSpecialEventBanner(string? bannerPath)
     {
@@ -159,6 +178,7 @@ public partial class RotationWindow : Window, ICaptureSource
         PreviewKeyDown -= OnPreviewKeyDown;
         HookViewModel(null);
         _projectionTransitionGen++; // cancels a crossfade that's still mid-fade
+        _holidayOverlay.Stop();
         StopAllProjectionAnimations();
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived -= OnReactionReceived;
@@ -226,6 +246,7 @@ public partial class RotationWindow : Window, ICaptureSource
             _displayedProjectionView = null;
             StopAllProjectionAnimations();
         }
+        _holidayOverlay.RefreshActivity();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -300,6 +321,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
             case nameof(RotationWindowViewModel.ReducedEffects):
                 ApplyProjectionViewMode();
+                _holidayOverlay.Reapply();
                 break;
 
             case nameof(RotationWindowViewModel.CrawlBannerText):
@@ -1230,6 +1252,7 @@ public partial class RotationWindow : Window, ICaptureSource
             ScaryokeWheelOverlay.Visibility = Visibility.Collapsed;
             RestoreDefaultRotationPlacement();
         }
+        _holidayOverlay.RefreshActivity();
     }
 
     private void ApplyScaryokeMonitorPlacement()

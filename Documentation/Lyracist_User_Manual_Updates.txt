@@ -1,11 +1,14 @@
-// Edited on Oct 29, 2026 @ 04:15:00 -> Document Holiday Rotation Screens, late-night Auto show-date resolution, Labor/Veterans Day themes, and performance optimizations
+// Edited on Oct 29, 2026 @ 08:54:00 -> Document high-contrast color-coded navigation and page tabs in Lyracist
 
-KSRotation: Holiday Rotation Screens, Late-Night Show-Date Resolution & Performance Optimizations - (October 2026)
+KSRotation & Lyracist: Shared Holiday Rotation Screens, Color-Coded Venue Tabs, Late-Night Show-Date Resolution & Performance Optimizations - (October 2026)
 
-Section: Display & Projection / Holiday Rotation Screens
+Section: Display & Projection / Holiday Rotation Screens & Dark Venue Tab Styling
 
-1. Holiday Rotation Screens (Settings -> Display -> 🎉 Holiday Rotation Screens):
-   - Adds a seasonal vignette tint, drifting ground fog, and floating full-color Twemoji characters with holiday-palette glow halos over the audience rotation display.
+1. High-Contrast Color-Coded Navigation & Page Tabs (Lyracist):
+   - All 14 top navigation bar tabs (Karaoke, Rotation, Lyrics, Trivia, Playlists, Sample Pad, Requests, Store, Users, Settings, Trivia Settings, Casting, Help, About) and all in-page TabControl tabs (Settings, Karaoke Library / Music Library / Streaming Links / Singer History, Rotation Performed Songs, Users Profile & Defaults, Occasion Search, and Singer Vocal Settings) now feature distinct, color-coded backgrounds and borders with bright active selection indicators so individual tabs are easy to distinguish in dark venues.
+
+2. Holiday Rotation Screens (Settings -> Display -> 🎉 Holiday Rotation Screens in both KSRotation and Lyracist):
+   - Adds a seasonal vignette tint, drifting ground fog, and floating full-color Twemoji characters with holiday-palette glow halos over the audience rotation display (`SingerDisplayWindow` in KSRotation and `RotationWindow` in Lyracist across all 12 projection view modes).
    - Available options: Off, Auto (by date), 🎃 Halloween, 🦃 Thanksgiving, 🎄 Christmas, 🎆 New Year's, 💘 Valentine's Day, ☘️ St. Patrick's Day, 🐣 Easter, 💐 Mother's Day, 🇺🇸 Memorial Day, 👔 Father's Day, 🎇 Independence Day, 🛠️ Labor Day, 🎂 Brenda's Birthday (Nov 1), and 🎖️ Veterans Day.
    - Late-Night Karaoke Show-Date Resolution: In 'Auto (by date)' mode, hours between midnight and 6:00 AM count as part of the previous evening's show night, so a late-night gig crossing midnight retains its active holiday theme until 6:00 AM.
    - QR Code Priority & Reduced Effects: The holiday layer sits below the patron Scan-to-Request QR code overlay so QR codes remain bright and unobstructed, automatically suspends while full-screen overlays (Scaryoke Wheel, Last Song Banner, Pre-Show Invite) are active, and respects the 'Reduced Projection Effects' toggle for weaker venue PCs.

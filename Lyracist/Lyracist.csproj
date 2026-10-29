@@ -1,4 +1,4 @@
-<!-- Edited on Oct 7, 2026 @ 20:07:00 -> Bump version to 26.10.7.572 with Filler Automix, Sample Pad, and Performance Recording -->
+<!-- Edited on Oct 29, 2026 @ 05:32:00 -> Link HolidayThemes and Twemoji emoji resources into Lyracist -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.29.599</AssemblyVersion>
-    <FileVersion>26.10.29.599</FileVersion>
+    <AssemblyVersion>26.10.29.607</AssemblyVersion>
+    <FileVersion>26.10.29.607</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -53,6 +53,9 @@
     <Resource Include="Assets\lyracist_modern.png" />
     <Resource Include="Assets\LyracistLogo.png" />
     <Resource Include="Assets\LyracistIcon.ico" />
+    <Resource Include="..\KSRotation\Resources\Emoji\*.png">
+      <Link>Resources\Emoji\%(Filename)%(Extension)</Link>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -104,6 +107,7 @@
     <Compile Include="..\Shared\MonoSampleConverter.cs" Link="MonoSampleConverter.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
+    <Compile Include="..\KSRotation\Models\HolidayThemes.cs" Link="Models\HolidayThemes.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
     <Compile Include="..\Shared\AvatarImageHelper.cs" Link="AvatarImageHelper.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />

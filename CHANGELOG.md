@@ -1,11 +1,25 @@
-<!-- Edited on Oct 29, 2026 @ 04:14:00 -> Update root CHANGELOG with Holiday Rotation Screen fixes, performance optimizations, and new themes -->
-Last Edit: Oct 29, 2026 - Holiday Rotation Screen Fixes, Performance Optimizations & Additional Themes
+<!-- Edited on Oct 29, 2026 @ 08:54:00 -> Document high-contrast color-coded navigation and page tabs in Lyracist -->
+Last Edit: Oct 29, 2026 - High-Contrast Color-Coded Tabs & Shared Holiday Rotation Screens in Lyracist
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] - 2026-10-29
+
+### Added
+- **High-Contrast Color-Coded Navigation & Page Tabs (`Lyracist/Themes/LyracistTheme.xaml`, `MainWindow.xaml`, `SettingsPage.xaml`, `KaraokePage.xaml`, `RotationPage.xaml`, `UsersPage.xaml`, `OccasionSearchWindow.xaml`, `SingerSettingsWindow.xaml`)**:
+  - Overrode WPF-UI's default transparent `TabItem` style and `TopCompactNavigationViewItemTemplate` in `LyracistTheme.xaml` so tabs render rounded colored pills with contrasting borders, crisp white text, hover brightening, and a bright white active border + bottom indicator bar.
+  - Assigned distinct, venue-friendly color palettes to all 14 top navigation tabs (`Karaoke`, `Rotation`, `Lyrics`, `Trivia`, `Playlists`, `Sample Pad`, `Requests`, `Store`, `Users`, `Settings`, `Trivia Settings`, `Casting`, `Help`, `About`) and all sub-page `TabItem` headers across `SettingsPage`, `KaraokePage`, `RotationPage`, `UsersPage`, `OccasionSearchWindow`, and `SingerSettingsWindow` for instant visual differentiation in dark venues.
+- **Shared Holiday Rotation Screens in Main Lyracist App (`Shared/ProjectionEffects.cs`, `Lyracist`, `KSRotation`)**:
+  - Extracted the holiday overlay rendering engine into a shared `HolidayOverlayEffect` class in `Shared/ProjectionEffects.cs` and refactored `KSRotation/Windows/SingerDisplayWindow.xaml.cs` to use it, eliminating ~350 lines of duplicate code.
+  - Linked `KSRotation/Models/HolidayThemes.cs` and `KSRotation/Resources/Emoji/*.png` into `Lyracist.csproj` so both applications share the exact same holiday catalog and Twemoji PNG assets without duplicating files on disk.
+  - Added `HolidayLayer` (`ZIndex=95`, below the floating QR code badge) to `Lyracist/Windows/RotationWindow.xaml` and wired `HolidayOverlayEffect` in `RotationWindow.xaml.cs` with automatic suspension when hidden or obscured by full-screen overlays (`LastSongBannerOverlay`, `ScaryokeWheelOverlay`, Pre-Show / Empty Rotation invite) and live `ReducedEffects` support.
+  - Added `DisplayPreferences.HolidayTheme`, `IDisplayService.SetHolidayTheme`, and a 15-minute `Auto` date re-evaluation timer in `Lyracist/Services/Display/DisplayService.cs`.
+  - Added the `🎉 Holiday Rotation Screens` configuration group box to Column 3 of the `Display` settings tab in `Lyracist/Views/Pages/SettingsPage.xaml` (`SettingsViewModel.Display.cs`), and documented it in `Lyracist/ViewModels/HelpViewModel.cs`.
+- **Additional Holiday Rotation Themes (`KSRotation/Models/HolidayThemes.cs`)**:
+  - Added **Labor Day** (1st Monday of September, Fri–Mon window) and **Veterans Day** (Nov 9–11) themes, updated **New Year's** display label to fit both New Year's Eve and New Year's Day, and aligned Halloween's falling-leaf ambient interval (`1.2s`).
+  - Documented Holiday Rotation Screens in the KSRotation in-app Help tab (`Display Projection`).
 
 ### Fixed
 - **Holiday Rotation Screen & Scaryoke Overlay Fixes (`KSRotation`)**:
@@ -14,11 +28,6 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Replaced per-particle `DropShadowEffect` blur shaders with cached, frozen `RadialGradientBrush` glow halos, added `BitmapCache` to fog, vignette, cursed frame, and particle elements, shared a frozen `SineEase` across wobble keyframes, and respected `ReducedEffects`.
   - Lowered `HolidayLayer` (`ZIndex=95`) below the floating QR code overlay (`ZIndex=99`) so patron scan codes stay crisp, and completely suspended the holiday layer while full-screen overlays (Last Song banner, Scaryoke wheel, pre-show/empty-rotation invite) cover the rotation screen.
   - Persisted legacy `HauntedScreen` -> `HolidayTheme` migration on startup so `StartScaryoke` reloads do not revert it.
-
-### Added
-- **Additional Holiday Rotation Themes (`KSRotation/Models/HolidayThemes.cs`)**:
-  - Added **Labor Day** (1st Monday of September, Fri–Mon window) and **Veterans Day** (Nov 9–11) themes, updated **New Year's** display label to fit both New Year's Eve and New Year's Day, and aligned Halloween's falling-leaf ambient interval (`1.2s`).
-  - Documented Holiday Rotation Screens in the KSRotation in-app Help tab (`Display Projection`).
 
 ## [26.10.27] - 2026-10-27
 

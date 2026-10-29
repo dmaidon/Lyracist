@@ -1,4 +1,4 @@
-<!-- Edited on Oct 7, 2026 @ 20:15:00 -> Add singer AllowRecording opt-in and Recorded Performances tab -->
+<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code UsersPage TabItem headers for dark venues -->
 <Page x:Class="Lyracist.Views.Pages.UsersPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -301,7 +301,7 @@
                         <!-- Editor Tabs -->
                         <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0">
                             <!-- TAB 1: Profile & Credentials -->
-                            <TabItem Header="Profile &amp; Credentials">
+                            <TabItem Header="Profile &amp; Credentials" Background="#CC0284C7" BorderBrush="#FF38BDF8">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
                                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                                         <!-- Performer Name -->
@@ -383,7 +383,7 @@
                             </TabItem>
 
                             <!-- TAB 2: Audio & Voice Defaults -->
-                            <TabItem Header="Vocal &amp; Audio Defaults">
+                            <TabItem Header="Vocal &amp; Audio Defaults" Background="#CC0F766E" BorderBrush="#FF2DD4BF">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
                                     <StackPanel MaxWidth="650" HorizontalAlignment="Left">
                                         <TextBlock Text="These defaults automatically preload whenever this singer performs:"
@@ -488,7 +488,7 @@
                             </TabItem>
 
                             <!-- TAB 3: Song Performance History -->
-                            <TabItem Header="Performance History">
+                            <TabItem Header="Performance History" Background="#CC5B21B6" BorderBrush="#FFA78BFA">
                                 <Grid Margin="0,10,0,0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -560,7 +560,7 @@
                             </TabItem>
 
                             <!-- TAB 4: Recorded Performances -->
-                            <TabItem Header="Recorded Performances">
+                            <TabItem Header="Recorded Performances" Background="#CCBE123C" BorderBrush="#FFFB7185">
                                 <Grid Margin="0,10,0,0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />

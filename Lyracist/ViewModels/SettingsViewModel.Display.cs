@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Refresh Scaryoke overlay screen choices when displays change
+// Edited on Oct 29, 2026 @ 05:37:00 -> Add HolidayThemeOptions and HolidayThemeChoice to SettingsViewModel.Display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using KSRotation.Models;
 using Lyracist.Core.Helpers;
 using Lyracist.Services.Display;
 using Lyracist.Services.Integration;
@@ -447,6 +448,17 @@ public partial class SettingsViewModel
     partial void OnReducedProjectionEffectsChanged(bool value)
     {
         _display.SetReducedProjectionEffects(value);
+    }
+
+    public IReadOnlyList<KeyValuePair<string, string>> HolidayThemeOptions { get; } = HolidayThemes.Options;
+
+    /// <summary>Holiday rotation-screen choice: "None", "Auto" (by date) or a holiday key.</summary>
+    [ObservableProperty]
+    private string _holidayThemeChoice = HolidayThemes.None;
+
+    partial void OnHolidayThemeChoiceChanged(string value)
+    {
+        _display.SetHolidayTheme(value);
     }
 
     /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>

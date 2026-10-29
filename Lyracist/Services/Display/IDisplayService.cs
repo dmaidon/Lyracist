@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:31:00 -> Add IsPreShowModeActive and TogglePreShowMode to IDisplayService
+// Edited on Oct 29, 2026 @ 05:36:00 -> Add SetHolidayTheme to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -55,6 +55,7 @@ public interface IDisplayService
     void SetRotationViewMode(string mode);
     void SetAutoRotateProjectionViews(bool enabled);
     void SetReducedProjectionEffects(bool enabled);
+    void SetHolidayTheme(string? choice);
     void SetAutoRotateDurationSeconds(int seconds);
     void SetProjectionRotationSchedule(System.Collections.Generic.List<ProjectionRotationEntry> schedule);
     void SetCrawlBannerText(string text);

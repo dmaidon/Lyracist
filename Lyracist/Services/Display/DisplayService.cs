@@ -1,4 +1,5 @@
-// Edited on Oct 26, 2026 @ 22:55:00 -> Display all active special event banners as overlays on the rotation screen
+// Edited on Oct 29, 2026 @ 05:36:00 -> Wire SetHolidayTheme and 15-minute Auto show-date timer in DisplayService
+using KSRotation.Models;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -26,6 +27,7 @@ public class DisplayService : IDisplayService
     private readonly DisplayPreferences _preferences;
     private bool _rotationHadSingers;
     private System.Windows.Threading.DispatcherTimer? _projectionRotationTimer;
+    private System.Windows.Threading.DispatcherTimer? _holidayAutoTimer;
 
     public void SetTriviaGameEngine(TriviaGameEngine? engine) => _triviaEngine = engine;
     public TriviaGameEngine? GetTriviaGameEngine() => _triviaEngine;
@@ -203,11 +205,19 @@ public class DisplayService : IDisplayService
             }
         }
         _rotationWindow!.Show();
+        _rotationWindow.SetHolidayTheme(HolidayThemes.Resolve(_preferences.HolidayTheme, DateTime.Now));
+        UpdateAutoHolidayTimer();
         UpdateRotationLastSongBanner();
     }
 
     private void HideRotationWindowInternal()
     {
+        if (_holidayAutoTimer != null)
+        {
+            _holidayAutoTimer.Stop();
+            _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+            _holidayAutoTimer = null;
+        }
         if (_rotationWindow != null && _rotationWindow.IsLoaded)
         {
             _rotationWindow.Hide();
@@ -592,6 +602,51 @@ public class DisplayService : IDisplayService
         vm?.ReducedEffects = enabled;
     }
 
+    public void SetHolidayTheme(string? choice)
+    {
+        _preferences.HolidayTheme = string.IsNullOrWhiteSpace(choice) ? HolidayThemes.None : choice;
+        DisplayPreferencesStore.Save(_preferences);
+
+        _rotationWindow?.SetHolidayTheme(HolidayThemes.Resolve(_preferences.HolidayTheme, DateTime.Now));
+        UpdateAutoHolidayTimer();
+    }
+
+    private void UpdateAutoHolidayTimer()
+    {
+        bool needTimer = _rotationWindow is { IsVisible: true } &&
+                         string.Equals(_preferences.HolidayTheme, HolidayThemes.Auto, StringComparison.OrdinalIgnoreCase);
+        if (!needTimer)
+        {
+            if (_holidayAutoTimer != null)
+            {
+                _holidayAutoTimer.Stop();
+                _holidayAutoTimer.Tick -= OnHolidayAutoTimerTick;
+                _holidayAutoTimer = null;
+            }
+            return;
+        }
+
+        if (_holidayAutoTimer == null)
+        {
+            _holidayAutoTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromMinutes(15)
+            };
+            _holidayAutoTimer.Tick += OnHolidayAutoTimerTick;
+        }
+        _holidayAutoTimer.Start();
+    }
+
+    private void OnHolidayAutoTimerTick(object? sender, EventArgs e)
+    {
+        if (_rotationWindow == null || !string.Equals(_preferences.HolidayTheme, HolidayThemes.Auto, StringComparison.OrdinalIgnoreCase))
+        {
+            UpdateAutoHolidayTimer();
+            return;
+        }
+        _rotationWindow.SetHolidayTheme(HolidayThemes.Resolve(_preferences.HolidayTheme, DateTime.Now));
+    }
+
     public void SetAutoRotateDurationSeconds(int seconds)
     {
         _preferences.AutoRotateDurationSeconds = seconds < 5 ? 5 : seconds;
@@ -749,6 +804,8 @@ public class DisplayService : IDisplayService
         window.WindowStyle = WindowStyle.None;
         window.ResizeMode = ResizeMode.NoResize;
         window.Show();
+        window.SetHolidayTheme(HolidayThemes.Resolve(_preferences.HolidayTheme, DateTime.Now));
+        UpdateAutoHolidayTimer();
     }
 
     private void RestoreLocalMonitorWindow()

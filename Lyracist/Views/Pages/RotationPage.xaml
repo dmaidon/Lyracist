@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 12:22:00 -> Add Scaryoke challenge category badge to rotation queue rows -->
+<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code RotationPage TabItem headers for dark venues -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -595,7 +595,7 @@
                     <TabControl Background="Transparent" BorderThickness="0">
                         <!-- Edited on Aug 15, 2026 @ 10:32:00 -> Decrease spacing between performed song boxes in Column 2 -->
                         <!-- Tab 1: 5-Color Rotating Song List Cards -->
-                        <TabItem Header="5-Color List">
+                        <TabItem Header="5-Color List" Background="#CC1D4ED8" BorderBrush="#FF60A5FA">
                             <ListBox ItemsSource="{Binding SessionPerformedSongs}" Background="Transparent" BorderThickness="0" Margin="0,4,0,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
@@ -650,7 +650,7 @@
                         </TabItem>
 
                         <!-- Tab 2: Raw Session Textbox -->
-                        <TabItem Header="Session Textbox">
+                        <TabItem Header="Session Textbox" Background="#CC0F766E" BorderBrush="#FF2DD4BF">
                             <ui:TextBox Text="{Binding SessionPerformedSongsText, Mode=OneWay}"
                                         IsReadOnly="True"
                                         AcceptsReturn="True"
