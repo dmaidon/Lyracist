@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:52:00 -> Fix TV display VM leak, rebind engine on reset, debounce settings save, and update roster in-place
+// Edited on Oct 30, 2026 @ 09:30:00 -> Guard UpdateTriviaCategoryPreview during active game, debounce all Trivia settings changes, restart web server on port change, and add ShutdownTrivia
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,6 +118,8 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial int TriviaConnectedPlayerCount { get; set; }
 
+        public int TriviaMaxDistributionCount => Math.Max(1, TriviaPlayers.Count);
+
         public int[] TriviaQuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
 
         // Separate Trivia Settings Properties (Venue and Host pulled directly from active app settings)
@@ -132,7 +134,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.InstructionBannerText = value;
             if (_triviaEngine != null) _triviaEngine.Settings.InstructionBannerText = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
 #if !MAUI
             _triviaDisplayVm?.UpdateInstructionBannerTemplate(value);
 #endif
@@ -145,7 +147,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.QuestionsPerGame = value;
             if (_triviaEngine != null) _triviaEngine.Settings.QuestionsPerGame = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
 #if !MAUI
             UpdateTriviaCategoryPreview();
 #endif
@@ -159,7 +161,7 @@ namespace KSRotation.ViewModels
             TriviaSettings.DefaultQuestionSeconds = value;
             if (_triviaEngine != null) _triviaEngine.Settings.DefaultQuestionSeconds = value;
             OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -169,7 +171,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WarningCountdownSeconds = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WarningCountdownSeconds = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -180,7 +182,7 @@ namespace KSRotation.ViewModels
             TriviaSettings.AnswerEliminationIntervalSeconds = value;
             if (_triviaEngine != null) _triviaEngine.Settings.AnswerEliminationIntervalSeconds = value;
             OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -191,7 +193,7 @@ namespace KSRotation.ViewModels
             TriviaSettings.PostRevealDelaySeconds = value;
             if (_triviaEngine != null) _triviaEngine.Settings.PostRevealDelaySeconds = value;
             OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         /// <summary>
@@ -209,7 +211,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.BasePointsPerQuestion = value;
             if (_triviaEngine != null) _triviaEngine.Settings.BasePointsPerQuestion = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -219,7 +221,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WrongAnswerDeductionPoints = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WrongAnswerDeductionPoints = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -229,7 +231,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.TieredScoringEnabled = value;
             if (_triviaEngine != null) _triviaEngine.Settings.TieredScoringEnabled = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -239,7 +241,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.Points4OptionsPercent = value;
             if (_triviaEngine != null) _triviaEngine.Settings.Points4OptionsPercent = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -249,7 +251,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.Points3OptionsPercent = value;
             if (_triviaEngine != null) _triviaEngine.Settings.Points3OptionsPercent = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -259,7 +261,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.Points2OptionsPercent = value;
             if (_triviaEngine != null) _triviaEngine.Settings.Points2OptionsPercent = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -269,7 +271,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.SpeedBonusEnabled = value;
             if (_triviaEngine != null) _triviaEngine.Settings.SpeedBonusEnabled = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -279,7 +281,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.MaxSpeedBonus = value;
             if (_triviaEngine != null) _triviaEngine.Settings.MaxSpeedBonus = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -289,7 +291,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.StreakBonusMultiplier = value ? TriviaStreakMultiplier : 0;
             if (_triviaEngine != null) _triviaEngine.Settings.StreakBonusMultiplier = TriviaSettings.StreakBonusMultiplier;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -301,7 +303,7 @@ namespace KSRotation.ViewModels
             {
                 TriviaSettings.StreakBonusMultiplier = value;
                 if (_triviaEngine != null) _triviaEngine.Settings.StreakBonusMultiplier = value;
-                TriviaStorageHelper.SaveSettings(TriviaSettings);
+                DebouncedSaveTriviaSettings();
             }
         }
 
@@ -312,7 +314,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.AutoAdvanceQuestions = value;
             if (_triviaEngine != null) _triviaEngine.Settings.AutoAdvanceQuestions = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -322,7 +324,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.AutoStartNextGameEnabled = value;
             if (_triviaEngine != null) _triviaEngine.Settings.AutoStartNextGameEnabled = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -332,7 +334,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.NextGameDelayMinutes = value;
             if (_triviaEngine != null) _triviaEngine.Settings.NextGameDelayMinutes = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -342,7 +344,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.PreGameCountdownMinutes = value;
             if (_triviaEngine != null) _triviaEngine.Settings.PreGameCountdownMinutes = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -364,7 +366,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.AutoStartAfterCountdown = value;
             if (_triviaEngine != null) _triviaEngine.Settings.AutoStartAfterCountdown = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -374,7 +376,19 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.Port = value;
             if (_triviaEngine != null) _triviaEngine.Settings.Port = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            if (_triviaWebServer != null && value >= 1024 && value <= 65535 && _triviaWebServer.Port != value)
+            {
+                _triviaWebServer.Dispose();
+                StartTriviaWebServer();
+#if !MAUI
+                if (_triviaDisplayVm != null)
+                {
+                    _triviaDisplayVm.ConnectUrl = TriviaPatronUrl;
+                    _triviaDisplayVm.QrCodeImage = TriviaDisplayViewModel.GenerateQrBitmap(TriviaPatronUrl);
+                }
+#endif
+            }
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -384,6 +398,9 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WifiSsid = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WifiSsid = value;
+#if !MAUI
+            _triviaDisplayVm?.UpdateWifiCredentials(TriviaWifiSsid, TriviaWifiPassword);
+#endif
             DebouncedSaveTriviaSettings();
         }
 
@@ -394,6 +411,9 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WifiPassword = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WifiPassword = value;
+#if !MAUI
+            _triviaDisplayVm?.UpdateWifiCredentials(TriviaWifiSsid, TriviaWifiPassword);
+#endif
             DebouncedSaveTriviaSettings();
             if (!string.IsNullOrWhiteSpace(TriviaWifiSsid) && !string.IsNullOrWhiteSpace(value))
             {
@@ -495,6 +515,7 @@ namespace KSRotation.ViewModels
                         bool isCorrect = (i == q.CorrectAnswerIndex);
                         TriviaAnswerDistribution.Add(new AnswerDistributionItem(labels[i], text, count, isCorrect));
                     }
+                    OnPropertyChanged(nameof(TriviaMaxDistributionCount));
                 });
             };
 
@@ -609,6 +630,8 @@ namespace KSRotation.ViewModels
 #if !MAUI
         private void UpdateTriviaCategoryPreview()
         {
+            if (IsTriviaGameRunning) return;
+
             var checkedPacks = GetCheckedTriviaPacks();
             if (checkedPacks.Count == 0) return;
 
@@ -801,7 +824,7 @@ namespace KSRotation.ViewModels
                 }
 
                 PushTriviaPropertiesIntoSettings();
-                TriviaStorageHelper.SaveSettings(TriviaSettings);
+                DebouncedSaveTriviaSettings();
                 _triviaEngine.Settings = TriviaSettings;
 
                 _triviaEngine.StartGame(rounds, rounds[0].Title, isAutoRestart: _isTriviaIntermissionAutoRestart);
@@ -1153,6 +1176,22 @@ namespace KSRotation.ViewModels
                 }
             }
             TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
+            OnPropertyChanged(nameof(TriviaMaxDistributionCount));
+        }
+
+        public void ShutdownTrivia()
+        {
+            try { _triviaPreGameTimer.Stop(); } catch { }
+            try { _triviaSettingsStatusTimer?.Stop(); } catch { }
+            bool savePending = _saveTriviaSettingsDebounceTimer.Enabled;
+            try { _saveTriviaSettingsDebounceTimer.Dispose(); } catch { }
+            if (savePending) TriviaStorageHelper.SaveSettings(TriviaSettings);
+            CloseTriviaDisplay();
+#if !MAUI
+            _triviaDisplayVm?.Dispose();
+#endif
+            _triviaWebServer?.Dispose();
+            _triviaEngine?.Dispose();
         }
 
         [RelayCommand]
@@ -1191,6 +1230,7 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         public void SaveTriviaSettings()
         {
+            _saveTriviaSettingsDebounceTimer.Stop();
             PushTriviaPropertiesIntoSettings();
             TriviaStorageHelper.SaveSettings(TriviaSettings);
 
@@ -1210,6 +1250,7 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         public void ResetTriviaSettings()
         {
+            _saveTriviaSettingsDebounceTimer.Stop();
             TriviaSettings = new TriviaSettings();
             LoadTriviaSettingsIntoProperties();
             TriviaStorageHelper.SaveSettings(TriviaSettings);

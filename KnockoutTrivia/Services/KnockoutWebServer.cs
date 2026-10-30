@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:42:00 -> Fix answer state leak, enforce strict session tokens, and cap player name length
+// Edited on Oct 30, 2026 @ 09:20:00 -> Use SerializeToUtf8Bytes, guard IsConnected mutations, and support manual adjudication status
 using System;
 using System.IO;
 using System.Linq;
@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows;
 using KnockoutTrivia.Models;
 using Lyracist.Shared;
 
@@ -318,7 +319,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                         strikes = player.StrikeCount,
                         score = player.Score
                     };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp, JsonOptions)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(resp, JsonOptions));
                 }
                 else
                 {
@@ -349,7 +350,7 @@ public class KnockoutWebServer : IKnockoutWebServer
 
                     bool accepted = _gameStateService.SubmitPlayerAnswer(subReq.PlayerId, subReq.SelectedOptionIndex, (int)subReq.ResponseTimeMs, subReq.SessionToken);
                     var resp = new { success = accepted };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp, JsonOptions)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(resp, JsonOptions));
                 }
                 else
                 {
@@ -389,13 +390,25 @@ public class KnockoutWebServer : IKnockoutWebServer
                 }
                 else
                 {
-                    player.IsConnected = true;
                     player.LastSeenAt = DateTime.Now;
+                    if (!player.IsConnected)
+                    {
+                        var reconnectedPlayer = player;
+                        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+                        {
+                            _ = Application.Current.Dispatcher.InvokeAsync(() => reconnectedPlayer.IsConnected = true);
+                        }
+                        else
+                        {
+                            reconnectedPlayer.IsConnected = true;
+                        }
+                    }
                 }
             }
 
             var q = _gameStateService.CurrentQuestion;
-            bool isCorrect = _gameStateService.IsAnswerRevealed && player != null && q != null && player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == q.CorrectAnswerIndex;
+            bool isCorrect = _gameStateService.IsAnswerRevealed && player != null &&
+                ((q != null && player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == q.CorrectAnswerIndex) || player.LastPointsEarned > 0);
 
             var statePayload = new
             {
@@ -405,7 +418,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                 secondsRemaining = _gameStateService.SecondsRemaining,
                 totalSeconds = _gameStateService.TotalCountdownSeconds,
                 questionIndex = _gameStateService.CurrentQuestionIndex,
-                questionNumber = _gameStateService.CurrentQuestionIndex + 1,
+                questionNumber = _gameStateService.CurrentQuestionNumber,
                 totalQuestions = _gameStateService.TotalQuestions,
                 venueName = _gameStateService.Settings.VenueName,
                 hostName = _gameStateService.Settings.HostName,
@@ -451,7 +464,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     })
             };
 
-            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload, JsonOptions)));
+            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(statePayload, JsonOptions));
             return;
         }
 

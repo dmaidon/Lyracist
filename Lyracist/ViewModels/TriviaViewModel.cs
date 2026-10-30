@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Update _hostName fallback to Guest DJ
+// Edited on Oct 30, 2026 @ 09:27:30 -> Guard UpdateSelectedPacksPreview during active game, sync monitor/port in ApplySettings, marshal MonitorsChanged, and guard CloseTriviaDisplay thread access
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,7 +30,10 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private TriviaDisplayViewModel? _displayVm;
     private readonly DispatcherTimer _preGameTimer = new();
     private readonly System.Timers.Timer _saveSettingsDebounceTimer = new(500) { AutoReset = false };
+    private readonly EventHandler _monitorsChangedHandler;
     private bool _isIntermissionAutoRestart;
+
+    public int MaxDistributionCount => Math.Max(1, Players.Count);
 
     [ObservableProperty]
     private TriviaSettings _settings;
@@ -218,6 +221,8 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         WireEngineEvents();
         LoadPacks();
         RefreshMonitors();
+        _monitorsChangedHandler = (_, _) => Application.Current?.Dispatcher.BeginInvoke(RefreshMonitors);
+        MonitorEnumerator.MonitorsChanged += _monitorsChangedHandler;
         StartWebServer();
     }
 
@@ -324,6 +329,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
                     bool isCorrect = (i == q.CorrectAnswerIndex);
                     AnswerDistribution.Add(new AnswerDistributionItem(labels[i], text, count, isCorrect));
                 }
+                OnPropertyChanged(nameof(MaxDistributionCount));
             });
         };
 
@@ -392,6 +398,8 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     private void UpdateSelectedPacksPreview()
     {
+        if (IsGameRunning) return;
+
         var checkedPacks = GetCheckedPacks();
         if (checkedPacks.Count == 0) return;
 
@@ -412,15 +420,35 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     public void ApplySettings(TriviaSettings newSettings)
     {
+        int oldPort = _webServer?.Port ?? Settings.Port;
         Settings = newSettings;
         _engine.Settings = newSettings;
         AutoAdvanceQuestions = newSettings.AutoAdvanceQuestions;
         QuestionsPerGame = newSettings.QuestionsPerGame > 0 ? newSettings.QuestionsPerGame : 10;
         PreGameCountdownMinutes = newSettings.PreGameCountdownMinutes > 0 ? newSettings.PreGameCountdownMinutes : 5;
         AutoStartAfterCountdown = newSettings.AutoStartAfterCountdown;
+        OnPropertyChanged(nameof(AutoRunTimingSummary));
+
+        if (!string.IsNullOrWhiteSpace(newSettings.SelectedMonitorDevice))
+        {
+            var match = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, newSettings.SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
+            if (match != null && SelectedMonitor != match)
+            {
+                SelectedMonitor = match;
+            }
+            PositionDisplayWindow(newSettings.SelectedMonitorDevice);
+        }
+
+        if (newSettings.Port >= 1024 && newSettings.Port <= 65535 && newSettings.Port != oldPort)
+        {
+            _webServer?.Dispose();
+            StartWebServer();
+        }
 
         if (_displayVm != null)
         {
+            _displayVm.ConnectUrl = PatronUrl;
+            _displayVm.QrCodeImage = QrCodeImage;
             _displayVm.UpdateInstructionBannerTemplate(newSettings.InstructionBannerText);
             _displayVm.UpdateWifiCredentials(newSettings.WifiSsid, newSettings.WifiPassword);
         }
@@ -677,9 +705,12 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     public void CloseTriviaDisplay()
     {
-        if (_displayWindow != null && _displayWindow.IsLoaded)
+        if (_displayWindow != null)
         {
-            _displayWindow.Close();
+            if (Application.Current?.Dispatcher.CheckAccess() == true && _displayWindow.IsLoaded)
+            {
+                _displayWindow.Close();
+            }
             _displayWindow = null;
             _displayVm = null;
             IsDisplayOpen = false;
@@ -904,6 +935,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             }
         }
         ConnectedPlayerCount = Players.Count(p => p.IsConnected);
+        OnPropertyChanged(nameof(MaxDistributionCount));
     }
 
     [RelayCommand]
@@ -914,6 +946,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     public void Dispose()
     {
+        MonitorEnumerator.MonitorsChanged -= _monitorsChangedHandler;
         _preGameTimer.Stop();
         // Flush a settings change still waiting out its debounce so closing right after an edit keeps it.
         bool savePending = _saveSettingsDebounceTimer.Enabled;

@@ -1,8 +1,14 @@
-<!-- Edited on Oct 30, 2026 @ 07:27:30 -> Update KSRotation CHANGELOG with distinct 12-color Scaryoke palette, manual category assignment, compact dj.html singer listings, and MAUI rotation screen transmission -->
+<!-- Edited on Oct 30, 2026 @ 09:35:00 -> Update KSRotation CHANGELOG with Trivia host tab enhancements, debounced settings saves, port change restart, and ShutdownTrivia -->
 
 # Changelog
 
 ## 2026-10-30
+
+- **Trivia Integration Bug Fixes, Slowdown Optimizations & UX Enhancements (`MainViewModel.Trivia.cs`, `MainViewModel.cs`, `MainWindow.xaml`, `Lyracist.Trivia.Core`, `Shared/TriviaDisplayViewModel.cs`)**:
+  - Guarded `UpdateTriviaCategoryPreview` while `IsTriviaGameRunning` is true so checking/unchecking category packs for the next game does not overwrite the live TV category header.
+  - Added pre-game countdown quick controls (`+1m`, `+5m`, `Reset`, `⏯`), dynamic `ProgressBar.Maximum` scaling (`TriviaMaxDistributionCount`), and `✓ CORRECT` badges on the 4 host option cards in `MainWindow.xaml`.
+  - Debounced all Trivia settings property changes through `_saveTriviaSettingsDebounceTimer` instead of writing synchronously to disk on every keystroke, live-restarted `_triviaWebServer` when `TriviaPort` changes, updated the TV display Wi-Fi QR live when `TriviaWifiSsid` / `TriviaWifiPassword` change, and added `ShutdownTrivia()` called from `MainViewModel.Shutdown()`.
+  - Fixed core Trivia engine eliminated-option submission validation, live elimination countdown snapshot, zero-point void rollback, `/api/trivia/state` 1-second poll overhead, and `TriviaDisplayViewModel.SyncWithEngine()` thread safety.
 
 - **Distinct 12-Color Scaryoke Category Palette (`MainViewModel.Scaryoke.cs`, `MainViewModel.cs`, `ScaryokeWheelViewModel.cs`, `dj.html`)**:
   - Replaced the repeating 4-color-family Scaryoke palette with 12 distinct, high-contrast colors (`#7C3AED` Royal Purple, `#FF6D00` Blaze Orange, `#0284C7` Sky Blue, `#DC2626` Crimson Red, `#0D9488` Emerald Teal, `#D97706` Golden Amber, `#DB2777` Hot Pink, `#2563EB` Cobalt Royal Blue, `#65A30D` Acid Lime Green, `#C026D3` Fuchsia Magenta, `#B45309` Copper Bronze, `#4338CA` Deep Indigo) and collision-free automatic color assignment (`PickDistinctPaletteColor`) so no two categories on the wheel share the same color.

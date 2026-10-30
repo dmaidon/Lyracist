@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 08:50:00 -> Performance: non-blocking Google Fonts preload, reset currentQuestionId on Lobby/Complete -->
+<!-- Edited on Oct 30, 2026 @ 09:16:00 -> Keep buzzer buttons disabled while paused and populate question/options/timer during EliminatingAnswers -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -744,7 +744,7 @@
                         errorBanner.style.display = 'block';
                         hasSubmitted = false;
                         document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
-                            btn.disabled = false;
+                            btn.disabled = btn.classList.contains('eliminated');
                             if (idx === optionIndex) btn.classList.remove('selected');
                         });
                         return;
@@ -776,7 +776,7 @@
             hasSubmitted = false;
             errorBanner.style.display = 'block';
             document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
-                btn.disabled = false;
+                btn.disabled = btn.classList.contains('eliminated');
                 if (idx === optionIndex) btn.classList.remove('selected');
             });
         }
@@ -847,7 +847,7 @@
                 document.getElementById('lobby-score').textContent = data.playerScore || 0;
                 document.getElementById('lobby-streak').textContent = `🔥 ${data.playerStreak || 0}`;
                 hasSubmitted = false;
-            } else if (state === 'QuestionActive') {
+            } else if (state === 'QuestionActive' || state === 'EliminatingAnswers') {
                 if (currentQuestionId !== data.questionId) {
                     // New question started
                     currentQuestionId = data.questionId;
@@ -857,7 +857,7 @@
 
                     document.querySelectorAll('.btn-buzzer').forEach(btn => {
                         btn.classList.remove('selected', 'eliminated');
-                        btn.disabled = false;
+                        btn.disabled = !!data.isPaused;
                     });
 
                     document.getElementById('question-text').textContent = data.prompt || 'Question in progress...';
@@ -895,7 +895,7 @@
                         } else {
                             btn.classList.remove('eliminated');
                             if (!hasSubmitted) {
-                                btn.disabled = false;
+                                btn.disabled = !!data.isPaused;
                             }
                         }
                     }
@@ -913,7 +913,7 @@
                 } else {
                     bar.classList.remove('warning');
                 }
-            } else if (state === 'EliminatingAnswers') {
+            } else if (state === 'EliminatingAnswers_Unused') {
                 showScreen('screen-question');
 
                 // The engine (TriviaGameEngine.SubmitAnswer) explicitly keeps accepting answers

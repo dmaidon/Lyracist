@@ -1,4 +1,4 @@
-// Created on Oct 7, 2026 @ 15:00:00 -> Shared directory-removal logic used by both Lyracist and LyracistDbEditor
+// Edited on Oct 30, 2026 @ 10:41:00 -> Use RemoveSongsFromIndexBatch for fast batched FTS index removal
 using Microsoft.EntityFrameworkCore;
 
 namespace Lyracist.Data.Services
@@ -65,10 +65,7 @@ namespace Lyracist.Data.Services
             var searchService = new SearchService(_context);
             _context.Songs.RemoveRange(songs);
             await _context.SaveChangesAsync();
-            foreach (var song in songs)
-            {
-                await searchService.RemoveSongFromIndex(song.SongId);
-            }
+            await searchService.RemoveSongsFromIndexBatch(songs.Select(s => s.SongId));
             return songs.Count;
         }
     }

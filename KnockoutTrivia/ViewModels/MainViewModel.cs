@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:46:00 -> Added SimulatorViewModel navigation for in-app DJ bot simulation and testing
+// Edited on Oct 30, 2026 @ 09:20:00 -> Wire WheelVM.ContinueRequested, GameWon banner, SettingsUpdated, and tab active states
 using System;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +17,16 @@ public partial class MainViewModel : ViewModelBase
     private AudienceWindow? _audienceWindow;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConnectTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsGameTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsScoreboardTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsQuestionTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsWheelTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsBannersTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsSimulatorTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsSettingsTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsHelpTabActive))]
+    [NotifyPropertyChangedFor(nameof(IsAboutTabActive))]
     private object _currentView;
 
     [ObservableProperty]
@@ -39,6 +49,17 @@ public partial class MainViewModel : ViewModelBase
     public HelpViewModel HelpVM { get; }
     public AboutViewModel AboutVM { get; }
     public AudienceViewModel AudienceVM { get; }
+
+    public bool IsConnectTabActive => CurrentView == ConnectVM;
+    public bool IsGameTabActive => CurrentView == GameVM;
+    public bool IsScoreboardTabActive => CurrentView == ScoreboardVM;
+    public bool IsQuestionTabActive => CurrentView == QuestionVM;
+    public bool IsWheelTabActive => CurrentView == WheelVM;
+    public bool IsBannersTabActive => CurrentView == BannerVM;
+    public bool IsSimulatorTabActive => CurrentView == SimulatorVM;
+    public bool IsSettingsTabActive => CurrentView == SettingsVM;
+    public bool IsHelpTabActive => CurrentView == HelpVM;
+    public bool IsAboutTabActive => CurrentView == AboutVM;
 
     public MainViewModel(
         IGameStateService gameStateService,
@@ -102,7 +123,27 @@ public partial class MainViewModel : ViewModelBase
             StatusNotification = $"⚡ Super Streak triggered for {player.Name}!";
         };
 
-// Edited on Aug 28, 2026 @ 11:15:00 -> Added DeviceName routing and DPI-aware monitor positioning
+        WheelVM.ContinueRequested += (s, e) =>
+        {
+            _gameStateService.ResumeFromSuperStreak();
+            NavigateToGame();
+            StatusNotification = "Returned to game after Super Streak Wheel.";
+        };
+
+        _gameStateService.GameWon += (s, winner) =>
+        {
+            BannerVM.ShowWinner();
+            AudienceVM.UpdateView(BannerVM);
+            StatusNotification = winner != null
+                ? $"🏆 GAME OVER! {winner.Name} wins with {winner.Score} points!"
+                : "🏁 GAME OVER! Mutual Knockout — no surviving players.";
+        };
+
+        SettingsVM.SettingsUpdated += (s, e) =>
+        {
+            ConnectVM.InitializeNetwork();
+        };
+
         // Wire settings display events
         SettingsVM.OpenAudienceDisplayRequested += (s, args) => OpenAudienceDisplay(args.Index, args.Device);
         SettingsVM.CloseAudienceDisplayRequested += (s, e) => CloseAudienceDisplay();

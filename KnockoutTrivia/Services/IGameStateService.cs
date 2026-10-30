@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:40:00 -> Fix items 2-5, 8: disconnect detection, double-reveal guard, phase guards, mutual knockout winner check, per-game question cap
+// Edited on Oct 30, 2026 @ 09:20:00 -> Add UpdateSettings, CurrentQuestionNumber, evaluation guards, timer fix, and winner check
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,6 +27,7 @@ public interface IGameStateService
     List<KnockoutPlayer> GetPlayersSnapshot();
     KnockoutQuestion? CurrentQuestion { get; }
     int CurrentQuestionIndex { get; }
+    int CurrentQuestionNumber { get; }
     int TotalQuestions { get; }
     bool IsAnswerRevealed { get; }
     bool IsGameActive { get; }
@@ -47,6 +48,7 @@ public interface IGameStateService
     event EventHandler? AnswersEvaluated;
 
     void InitializeGame(KnockoutSettings settings);
+    void UpdateSettings(KnockoutSettings settings);
     Task LoadGameQuestionsAsync(string? packOrDbPath = null);
     Task LoadQuestionsFromSourcesAsync(IEnumerable<string> sourcePaths);
     void ShuffleQuestions();
@@ -64,6 +66,8 @@ public interface IGameStateService
     void RevealAnswer();
     void EvaluateSubmittedAnswers();
     void RecordPlayerAnswer(string playerId, bool isCorrect);
+    void AddPlayerStrike(KnockoutPlayer player);
+    void ResumeFromSuperStreak();
     void ResetGame();
 }
 
@@ -109,7 +113,14 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             if (p.IsConnected && p.LastSeenAt < cutoff)
             {
-                p.IsConnected = false;
+                var target = p;
+                RunOnUI(() =>
+                {
+                    if (target.IsConnected && target.LastSeenAt < cutoff)
+                    {
+                        target.IsConnected = false;
+                    }
+                });
             }
         }
         return snapshot;
@@ -132,8 +143,16 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     public int CurrentQuestionIndex
     {
         get => _currentQuestionIndex;
-        private set => SetProperty(ref _currentQuestionIndex, value);
+        private set
+        {
+            if (SetProperty(ref _currentQuestionIndex, value))
+            {
+                OnPropertyChanged(nameof(CurrentQuestionNumber));
+            }
+        }
     }
+
+    public int CurrentQuestionNumber => _currentQuestionIndex + 1;
 
     public int TotalQuestions => Settings.UnlimitedQuestions ? _questions.Count : Math.Min(_questions.Count, Settings.NumberOfQuestionsPerGame > 0 ? Settings.NumberOfQuestionsPerGame : _questions.Count);
 
@@ -205,6 +224,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
         _streakService.SuperStreakReached += (s, p) =>
         {
+            StopTimer();
             Phase = GameStatePhase.SuperStreak;
             SuperStreakTriggered?.Invoke(this, p);
         };
@@ -214,6 +234,13 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     {
         Settings = settings;
         ResetGame();
+    }
+
+    public void UpdateSettings(KnockoutSettings settings)
+    {
+        Settings = settings;
+        OnPropertyChanged(nameof(Settings));
+        OnPropertyChanged(nameof(TotalQuestions));
     }
 
     public async Task LoadGameQuestionsAsync(string? packOrDbPath = null)
@@ -233,8 +260,10 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             CurrentQuestionIndex = 0;
             CurrentQuestion = _questions[0];
+            ResetQuestionPlayerStates();
             QuestionChanged?.Invoke(this, CurrentQuestion);
         }
+        OnPropertyChanged(nameof(TotalQuestions));
     }
 
     public async Task LoadQuestionsFromSourcesAsync(IEnumerable<string> sourcePaths)
@@ -247,8 +276,25 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             CurrentQuestionIndex = 0;
             CurrentQuestion = _questions[0];
+            ResetQuestionPlayerStates();
             QuestionChanged?.Invoke(this, CurrentQuestion);
         }
+        OnPropertyChanged(nameof(TotalQuestions));
+    }
+
+    private void ResetQuestionPlayerStates()
+    {
+        RunOnUI(() =>
+        {
+            foreach (var p in Players)
+            {
+                p.HasAnsweredCurrentQuestion = false;
+                p.HasBeenEvaluatedForCurrentQuestion = false;
+                p.LastAnswerIndex = -1;
+                p.WasShieldProtected = false;
+                p.LastPointsEarned = 0;
+            }
+        });
     }
 
     public void ShuffleQuestions()
@@ -378,6 +424,9 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             int active = ActivePlayerCount;
             if (active > 0 && AnsweredCount >= active && Settings.GameMode == GameAdvanceMode.Automatic)
             {
+                int targetIndex = CurrentQuestionIndex;
+                string? targetQuestionId = CurrentQuestion?.Id;
+
                 // Give a short 1s grace before auto-revealing on UI thread
                 Task.Delay(1000).ContinueWith(_ =>
                 {
@@ -385,7 +434,10 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                     {
                         RunOnUI(() =>
                         {
-                            if (Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed)
+                            if (Phase == GameStatePhase.QuestionActive &&
+                                !IsAnswerRevealed &&
+                                CurrentQuestionIndex == targetIndex &&
+                                CurrentQuestion?.Id == targetQuestionId)
                             {
                                 RevealAnswer();
                             }
@@ -422,19 +474,10 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     {
         StopTimer();
 
-        int seconds = customSeconds ?? CurrentQuestion?.TimeLimitSeconds ?? Settings.QuestionTimerSeconds;
+        int seconds = customSeconds ?? (Settings.QuestionTimerSeconds > 0 ? Settings.QuestionTimerSeconds : (CurrentQuestion?.TimeLimitSeconds ?? 15));
         if (seconds <= 0) seconds = 15;
 
-        RunOnUI(() =>
-        {
-            foreach (var p in Players)
-            {
-                p.HasAnsweredCurrentQuestion = false;
-                p.LastAnswerIndex = -1;
-                p.WasShieldProtected = false;
-                p.LastPointsEarned = 0;
-            }
-        });
+        ResetQuestionPlayerStates();
 
         TotalCountdownSeconds = seconds;
         SecondsRemaining = seconds;
@@ -559,9 +602,10 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             foreach (var player in Players)
             {
-                // A phone that answered and then went quiet (screen lock) still gets that answer scored.
-                if (player.IsEliminated || (!player.IsConnected && !player.HasAnsweredCurrentQuestion)) continue;
+                // Skip eliminated players, already manually evaluated players, or disconnected players who haven't answered
+                if (player.IsEliminated || player.HasBeenEvaluatedForCurrentQuestion || (!player.IsConnected && !player.HasAnsweredCurrentQuestion)) continue;
 
+                player.HasBeenEvaluatedForCurrentQuestion = true;
                 bool isCorrect = player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == correctIndex;
 
                 if (isCorrect)
@@ -604,6 +648,10 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
         RunOnUI(() =>
         {
+            player.HasBeenEvaluatedForCurrentQuestion = true;
+            player.HasAnsweredCurrentQuestion = true;
+            player.LastAnswerIndex = isCorrect ? (CurrentQuestion?.CorrectAnswerIndex ?? 0) : -1;
+
             if (isCorrect)
             {
                 player.Score += Settings.PointsPerCorrectAnswer;
@@ -630,9 +678,51 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 }
                 _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens, Settings.SuperStreakEnabled);
             }
+
+            OnPropertyChanged(nameof(AnsweredCount));
         });
 
         CheckGameWinner();
+    }
+
+    public void AddPlayerStrike(KnockoutPlayer player)
+    {
+        if (player == null || player.StrikeCount >= 3) return;
+
+        RunOnUI(() =>
+        {
+            player.StrikeCount++;
+            if (player.StrikeCount >= 3)
+            {
+                PlayerEliminated?.Invoke(this, player);
+            }
+        });
+
+        CheckGameWinner();
+    }
+
+    public void ResumeFromSuperStreak()
+    {
+        if (Phase != GameStatePhase.SuperStreak) return;
+
+        if (IsAnswerRevealed)
+        {
+            Phase = GameStatePhase.AnswerRevealed;
+            if (Settings.GameMode == GameAdvanceMode.Automatic)
+            {
+                NextQuestion();
+            }
+        }
+        else
+        {
+            Phase = GameStatePhase.QuestionActive;
+            if (SecondsRemaining > 0)
+            {
+                IsTimerRunning = true;
+                _countdownTimer?.Dispose();
+                _countdownTimer = new System.Threading.Timer(OnTimerTick, null, 1000, 1000);
+            }
+        }
     }
 
     private void CheckGameWinner()
@@ -649,6 +739,15 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             Phase = GameStatePhase.GameOver;
             IsGameActive = false;
             GameWon?.Invoke(this, null);
+        }
+        else if (Phase == GameStatePhase.GameOver && activePlayers.Count > 0)
+        {
+            IsGameActive = false;
+            var winner = activePlayers
+                .OrderByDescending(p => p.Score)
+                .ThenBy(p => p.StrikeCount)
+                .First();
+            GameWon?.Invoke(this, winner);
         }
     }
 
@@ -673,6 +772,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 p.Tokens = 1;
                 p.StreakCount = 0;
                 p.HasAnsweredCurrentQuestion = false;
+                p.HasBeenEvaluatedForCurrentQuestion = false;
                 p.LastAnswerIndex = -1;
                 p.LastPointsEarned = 0;
                 p.WasShieldProtected = false;

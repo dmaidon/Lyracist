@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:49:00 -> Plug answer leak during question countdown by gating isCorrect and pointsEarned on isRevealed
+// Edited on Oct 30, 2026 @ 09:15:30 -> Compute GetGameResult only on GameComplete and use SerializeToUtf8Bytes to reduce per-poll allocations
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -309,7 +309,7 @@ public class TriviaWebServer : IDisposable
 
                     var player = _engine.RegisterPlayer(trimmedName, joinReq.TeamName?.Trim() ?? "");
                     var resp = new { success = true, playerId = player.PlayerId, name = player.Name };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(resp));
                 }
                 else
                 {
@@ -369,7 +369,7 @@ public class TriviaWebServer : IDisposable
 
                     bool accepted = _engine.SubmitAnswer(trimmedName, subReq.SelectedOptionIndex, subReq.ResponseTimeMs, subReq.QuestionId);
                     var resp = new { success = accepted };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(resp));
                 }
                 else
                 {
@@ -426,7 +426,7 @@ public class TriviaWebServer : IDisposable
             var q = snap.Question;
             bool isRevealed = snap.State == TriviaGameState.RevealAnswer || snap.State == TriviaGameState.RoundLeaderboard || snap.State == TriviaGameState.GameComplete;
             bool isCorrect = isRevealed && player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
-            var gameResult = _engine.GetGameResult(allPlayers);
+            var gameResult = snap.State == TriviaGameState.GameComplete ? _engine.GetGameResult(allPlayers) : null;
 
             int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - snap.EliminatedIndices.Length);
             int currentPercent = _engine.GetTierPercent(visibleCount);
@@ -458,12 +458,12 @@ public class TriviaWebServer : IDisposable
                 playerScore = player?.TotalScore ?? 0,
                 playerStreak = player?.CurrentStreak ?? 0,
                 hasAnswered = player?.HasAnsweredCurrentQuestion ?? false,
-                hasTeamWinner = gameResult.HasTeamWinner,
-                winnerTitle = gameResult.WinnerTitle,
-                winningName = gameResult.WinningName,
-                winningScore = gameResult.WinningScore,
-                winningTeamMembers = gameResult.WinningTeamMembers,
-                winningTeamMembersRoster = gameResult.WinningTeamMembersRoster,
+                hasTeamWinner = gameResult?.HasTeamWinner ?? false,
+                winnerTitle = gameResult?.WinnerTitle ?? "",
+                winningName = gameResult?.WinningName ?? "",
+                winningScore = gameResult?.WinningScore ?? 0,
+                winningTeamMembers = gameResult?.WinningTeamMembers ?? [],
+                winningTeamMembersRoster = gameResult?.WinningTeamMembersRoster ?? "",
                 intermissionSecondsRemaining = snap.IntermissionSecondsRemaining,
                 isIntermissionActive = snap.IsInIntermission,
                 leaderboard = allPlayers.Take(10).Select((p, idx) => new
@@ -475,7 +475,7 @@ public class TriviaWebServer : IDisposable
                 })
             };
 
-            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload)));
+            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(statePayload));
             return;
         }
 

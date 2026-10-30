@@ -1,4 +1,4 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Use MonitorEnumerator and subscribe to MonitorsChanged to auto-refresh available displays
+// Edited on Oct 30, 2026 @ 09:26:00 -> Use TriviaStorageHelper settings persistence, restart TriviaWebServer on port change, and marshal/unsubscribe MonitorsChanged
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,8 +24,9 @@ namespace Lyracist.Trivia.ViewModels;
 public partial class MainViewModel : ObservableObject, IDisposable
 {
     private readonly TriviaGameEngine _engine;
-    private readonly TriviaWebServer _webServer;
+    private TriviaWebServer _webServer;
     private readonly TriviaDatabaseService _dbService;
+    private readonly EventHandler _monitorsChangedHandler;
 
     [ObservableProperty]
     private TriviaSettings _settings;
@@ -278,6 +279,25 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         Settings.Port = value;
         if (_engine != null) _engine.Settings.Port = value;
+        if (_webServer != null && value >= 1024 && value <= 65535 && _webServer.Port != value)
+        {
+            try
+            {
+                _webServer.Dispose();
+                _webServer = new TriviaWebServer(_engine!, value);
+                _webServer.Start();
+            }
+            catch (Exception)
+            {
+                // Ignore port bind failure during typing
+            }
+        }
+        DetermineConnectUrl();
+        if (_activeDisplayVm != null)
+        {
+            _activeDisplayVm.ConnectUrl = ConnectUrl;
+            _activeDisplayVm.QrCodeImage = QrCodeImage;
+        }
         SaveSettings();
     }
 
@@ -456,23 +476,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public MainViewModel()
     {
-        string settingsPath = TriviaStorageHelper.GetSettingsPath();
-
-        TriviaSettings? loadedSettings = null;
-        if (File.Exists(settingsPath))
-        {
-            try
-            {
-                string json = File.ReadAllText(settingsPath);
-                loadedSettings = JsonSerializer.Deserialize<TriviaSettings>(json);
-            }
-            catch (Exception)
-            {
-                // Fall back to default settings on read error
-            }
-        }
-
-        _settings = loadedSettings ?? new TriviaSettings();
+        _settings = TriviaStorageHelper.LoadSettings();
         _venueName = _settings.VenueName;
         _hostName = _settings.HostName;
         _instructionBannerText = string.IsNullOrWhiteSpace(_settings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : _settings.InstructionBannerText;
@@ -532,7 +536,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _webServer.Start();
         DetermineConnectUrl();
         RefreshMonitors();
-        MonitorEnumerator.MonitorsChanged += (_, _) => RefreshMonitors();
+        _monitorsChangedHandler = (_, _) => Application.Current?.Dispatcher.BeginInvoke(RefreshMonitors);
+        MonitorEnumerator.MonitorsChanged += _monitorsChangedHandler;
         LoadQuestionPacks();
         LoadAnnouncements();
         InitializeHelpTopics();
@@ -647,16 +652,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         lock (_settingsFileLock)
         {
-            try
-            {
-                string path = TriviaStorageHelper.GetSettingsPath();
-                string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(path, json);
-            }
-            catch (Exception)
-            {
-                // Settings persistence error ignored
-            }
+            TriviaStorageHelper.SaveSettings(Settings);
         }
     }
 
@@ -1389,6 +1385,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        MonitorEnumerator.MonitorsChanged -= _monitorsChangedHandler;
         try { _preGameTimer.Stop(); } catch (Exception) { /* Ignored */ }
         try { _preGameTimer.Dispose(); } catch (Exception) { /* Ignored */ }
         try { _saveSettingsDebounceTimer.Stop(); } catch (Exception) { /* Ignored */ }

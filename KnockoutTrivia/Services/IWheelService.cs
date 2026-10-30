@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 14:35:55 -> IWheelService and WheelService for Super Streak target wheel generation and spinning
+// Edited on Oct 30, 2026 @ 09:20:00 -> Freeze SolidColorBrush instances in WheelService
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +23,15 @@ public class WheelService : IWheelService
         "#0891B2", "#4F46E5", "#DC2626", "#16A34A", "#9333EA"
     ];
 
+    private static readonly Brush BonusBrush = CreateFrozenBrush(Color.FromRgb(234, 179, 8));
+
+    private static Brush CreateFrozenBrush(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
+
     public List<WheelSegment> BuildWheelSegments(IEnumerable<KnockoutPlayer> allPlayers, KnockoutPlayer superStreakPlayer)
     {
         // Get all players with at least 1 token, excluding the super streak player
@@ -42,7 +51,7 @@ public class WheelService : IWheelService
                 PlayerName = "BONUS REWARD (+50 Pts)",
                 TokenCount = 0,
                 StrikeColorHex = "#EAB308",
-                SegmentBrush = new SolidColorBrush(Color.FromRgb(234, 179, 8)),
+                SegmentBrush = BonusBrush,
                 StartAngle = 0,
                 SweepAngle = 360
             });
@@ -63,7 +72,7 @@ public class WheelService : IWheelService
                 PlayerName = p.Name,
                 TokenCount = p.Tokens,
                 StrikeColorHex = p.StrikeColorHex,
-                SegmentBrush = new SolidColorBrush(col),
+                SegmentBrush = CreateFrozenBrush(col),
                 StartAngle = i * sweep,
                 SweepAngle = sweep
             });

@@ -1,4 +1,4 @@
-// Edited on Oct 8, 2026 @ 13:18:00 -> Dynamic SongPathResolver integration for MapToKaraokeSong
+// Edited on Oct 30, 2026 @ 12:06:00 -> Add automatic EnsureSchemaAndRepair retry on library search and query failures
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -139,6 +139,7 @@ public class LibraryService : ILibraryService
 
             // The scan itself is fast (no metadata probing) — songs are already inserted and
             // usable at this point, so let the UI drop out of "Scanning…" now.
+            SongPathResolver.ClearCache();
             LibraryUpdated?.Invoke(this, EventArgs.Empty);
 
             // Fill in duration/genre afterward as a separate, low-priority background pass so a
@@ -226,8 +227,24 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library", ex);
-            return [];
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library; attempting automatic database repair", ex);
+            try
+            {
+                LyracistDbContext.EnsureSchemaAndRepair();
+                using var retryContext = new LyracistDbContext();
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    return retryContext.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToList().Select(MapToKaraokeSong);
+                }
+
+                var retrySearch = new SearchService(retryContext);
+                return retrySearch.SearchSync(query, isKaraoke: !isMusic).Select(MapToKaraokeSong);
+            }
+            catch (Exception retryEx)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Library search retry after repair failed", retryEx);
+                return [];
+            }
         }
     }
 
@@ -249,8 +266,26 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library", ex);
-            return [];
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library async; attempting automatic database repair", ex);
+            try
+            {
+                LyracistDbContext.EnsureSchemaAndRepair();
+                using var retryContext = new LyracistDbContext();
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    var all = await retryContext.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToListAsync();
+                    return all.Select(MapToKaraokeSong);
+                }
+
+                var retrySearch = new SearchService(retryContext);
+                var results = await retrySearch.Search(query, isKaraoke: !isMusic);
+                return results.Select(MapToKaraokeSong);
+            }
+            catch (Exception retryEx)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Library async search retry after repair failed", retryEx);
+                return [];
+            }
         }
     }
 
@@ -288,7 +323,7 @@ public class LibraryService : ILibraryService
 
     private KaraokeSong MapToKaraokeSong(Song song)
     {
-        string resolvedPath = SongPathResolver.ResolveSongPath(song.FilePath);
+        string resolvedPath = SongPathResolver.ResolveCachedOrOriginal(song.FilePath);
         string? cdgPath = null;
         if (song.IsKaraoke)
         {

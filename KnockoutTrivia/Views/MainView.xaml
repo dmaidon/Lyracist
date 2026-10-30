@@ -1,4 +1,4 @@
-<!-- Edited on Aug 27, 2026 @ 15:20:25 -> Added Shuffle Deck button to Host Live Question Console -->
+<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Bind Q # badge to CurrentQuestionNumber and add Pause/Resume Timer control -->
 <UserControl x:Class="KnockoutTrivia.Views.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,7 +34,6 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-<!-- Edited on Aug 28, 2026 @ 09:30:00 -> Added real-time countdown timer and mobile responses counter to Live Question Console -->
                 <Grid Grid.Row="0" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -55,7 +54,7 @@
                         </Border>
                         <!-- Question # Badge -->
                         <Border Background="#261E38" CornerRadius="6" Padding="10,4">
-                            <TextBlock Text="{Binding GameState.CurrentQuestionIndex, StringFormat='Q #{0}'}" FontWeight="Bold" Foreground="#F59E0B" />
+                            <TextBlock Text="{Binding GameState.CurrentQuestionNumber, StringFormat='Q #{0}'}" FontWeight="Bold" Foreground="#F59E0B" />
                         </Border>
                     </StackPanel>
                 </Grid>
@@ -98,11 +97,11 @@
                 </Border>
 
                 <!-- Controls -->
-                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                <WrapPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
                     <ui:Button Content="Reveal Answer"
                                Height="40"
-                               Width="140"
-                               Margin="0,0,10,0"
+                               Width="130"
+                               Margin="0,0,8,6"
                                Appearance="Primary"
                                Background="#10B981"
                                Foreground="White"
@@ -111,40 +110,59 @@
 
                     <ui:Button Content="Next Question ▶"
                                Height="40"
-                               Width="140"
-                               Margin="0,0,10,0"
+                               Width="135"
+                               Margin="0,0,8,6"
                                Appearance="Primary"
                                Background="#3B82F6"
                                Foreground="White"
                                Command="{Binding NextQuestionCommand}"
                                Cursor="Hand" />
 
+                    <ui:Button Height="40"
+                               Width="95"
+                               Margin="0,0,8,6"
+                               Appearance="Secondary"
+                               Command="{Binding ToggleTimerPauseCommand}"
+                               Cursor="Hand">
+                        <ui:Button.Style>
+                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Setter Property="Content" Value="▶ Resume" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GameState.IsTimerRunning}" Value="True">
+                                        <Setter Property="Content" Value="⏸ Pause" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+
                     <ui:Button Content="🔀 Shuffle"
                                Height="40"
-                               Width="100"
-                               Margin="0,0,10,0"
+                               Width="95"
+                               Margin="0,0,8,6"
                                Appearance="Secondary"
                                Command="{Binding ShuffleQuestionsCommand}"
                                Cursor="Hand" />
 
                     <ui:Button Content="Reset Game"
                                Height="40"
-                               Width="105"
-                               Margin="0,0,10,0"
+                               Width="100"
+                               Margin="0,0,8,6"
                                Appearance="Secondary"
                                Command="{Binding ResetGameCommand}"
                                Cursor="Hand" />
 
                     <ui:Button Content="🆕 New Event"
                                Height="40"
-                               Width="115"
+                               Width="110"
+                               Margin="0,0,0,6"
                                Appearance="Secondary"
                                Background="#EF4444"
                                Foreground="White"
                                Command="{Binding ClearAllPlayersCommand}"
                                ToolTip="Clears every connected/past player - use when starting a brand new event, not between rounds of the same show."
                                Cursor="Hand" />
-                </StackPanel>
+                </WrapPanel>
             </Grid>
         </Border>
 

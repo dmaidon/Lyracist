@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Update DjTitleText to default to Guest DJ
+// Edited on Oct 30, 2026 @ 10:44:00 -> Marshal OnLibraryUpdated and RefreshFilteredList to UI Dispatcher and refresh empty list on navigation
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

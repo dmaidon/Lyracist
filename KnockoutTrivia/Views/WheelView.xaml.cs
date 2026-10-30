@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 14:37:40 -> WheelView code-behind with dynamic pie wedge geometry rendering
+// Edited on Oct 30, 2026 @ 09:20:00 -> Use cached frozen WedgeStrokeBrush in WheelView
 using System;
 using System.Collections.Specialized;
 using System.Windows;
@@ -12,6 +12,15 @@ namespace KnockoutTrivia.Views;
 
 public partial class WheelView : UserControl
 {
+    private static readonly Brush WedgeStrokeBrush = CreateWedgeStrokeBrush();
+
+    private static Brush CreateWedgeStrokeBrush()
+    {
+        var brush = new SolidColorBrush(Color.FromArgb(120, 255, 255, 255));
+        brush.Freeze();
+        return brush;
+    }
+
     public WheelView()
     {
         InitializeComponent();
@@ -122,7 +131,7 @@ public partial class WheelView : UserControl
         return new Path
         {
             Fill = fill,
-            Stroke = new SolidColorBrush(Color.FromArgb(120, 255, 255, 255)),
+            Stroke = WedgeStrokeBrush,
             StrokeThickness = 1.5,
             Data = geometry
         };

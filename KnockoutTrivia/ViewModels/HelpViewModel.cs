@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:50:00 -> Added Topic 10 for Bot Simulator and Load Testing Diagnostics to HelpViewModel
+// Edited on Oct 30, 2026 @ 14:36:00 -> Update KnockoutTrivia HelpViewModel with Super Streak Wheel continuation and standard Lyracist Trivia pack loading
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KnockoutTrivia.Models;
@@ -55,7 +55,7 @@ public partial class HelpViewModel : ViewModelBase
                 Icon = "Flash24",
                 AccentColor = "#8B5CF6",
                 DescriptionHeader = "Scaryoke-Style Super Streak Rotary Target Wheel",
-                DescriptionContent = "• Super Streak Milestone: Reaching 20 consecutive correct answers unlocks the Super Streak challenge!\n\n• Wheel Generation: The game pauses regular question flow and opens the Rotary Wheel populated with wedges for all opponents who currently hold shield tokens (excluding the Super Streak player).\n\n• Spin & Target Strike: The DJ spins the wheel. When it slows and lands on a player's wedge, that target opponent is stripped of 1 shield token (stealing/destroying their defense).\n\n• Fallback Reward: If no opponents hold shield tokens when Super Streak is unlocked, the wheel awards +50 Bonus Points directly to the Super Streak player."
+                DescriptionContent = "• Super Streak Milestone: Reaching 20 consecutive correct answers unlocks the Super Streak challenge!\n\n• Wheel Generation: The game pauses regular question flow and opens the Rotary Wheel populated with wedges for all opponents who currently hold shield tokens (excluding the Super Streak player).\n\n• Spin, Target Strike & Continue: The DJ spins the wheel. When it slows and lands on a player's wedge, that target opponent is stripped of 1 shield token (stealing/destroying their defense). Click '▶ CONTINUE GAME' on the Wheel view to return to the question board and advance to the next question.\n\n• Fallback Reward: If no opponents hold shield tokens when Super Streak is unlocked, the wheel awards +50 Bonus Points directly to the Super Streak player."
             },
             new()
             {
@@ -79,7 +79,7 @@ public partial class HelpViewModel : ViewModelBase
                 Icon = "Settings24",
                 AccentColor = "#10B981",
                 DescriptionHeader = "3-Column Settings Panel & Database Management",
-                DescriptionContent = "• 3-Column Layout: Organizes scoring, shields/streaks, and database sources side-by-side to eliminate unnecessary scrolling.\n\n• Database & Pack Selection ListBox: The DJ can check/uncheck active SQLite trivia databases (from KoTrivia/Data) and themed JSON packs (from KoTrivia/Packs) to mix categories (e.g. 80s Rock + Pop Culture + General Knowledge).\n\n• Display & Monitor Assignment: Choose which monitor displays the DJ Host Console and which monitor projects the big screen audience views.\n\n• Audio/Visual FX: Toggle sound effects (countdown beeps, strike chimes, wheel ticks) and smooth color transition animations."
+                DescriptionContent = "• 3-Column Layout: Organizes scoring, shields/streaks, and database sources side-by-side to eliminate unnecessary scrolling.\n\n• Database & Pack Selection ListBox: The DJ can check/uncheck active SQLite trivia databases (from KoTrivia/Data) and themed JSON packs (from KoTrivia/Packs or standard Lyracist Trivia Packs/*.json via '📂 Load Pack') to mix categories (e.g. 80s Rock + Pop Culture + General Knowledge).\n\n• Display & Monitor Assignment: Choose which monitor displays the DJ Host Console and which monitor projects the big screen audience views.\n\n• Audio/Visual FX: Toggle sound effects (countdown beeps, strike chimes, wheel ticks) and smooth color transition animations."
             },
             new()
             {

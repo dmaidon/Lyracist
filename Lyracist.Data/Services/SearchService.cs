@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 12:13:00 -> Add IsKaraoke filter support to FTS search queries
+// Edited on Oct 30, 2026 @ 12:01:00 -> Add live FTS5 MATCH probe, corrupt FTS5 shadow-table recovery, and automatic self-healing on search fallback
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -35,12 +35,12 @@ namespace Lyracist.Data.Services
             }
 
             var conn = new SqliteConnection(LyracistDbContext.GetConnectionString());
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
 
             await using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
-                await cmd.ExecuteNonQueryAsync();
+                await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
 
             lock (_connectionLock)
@@ -55,6 +55,25 @@ namespace Lyracist.Data.Services
                 _sharedConnection?.Dispose();
                 _sharedConnection = conn;
                 return _sharedConnection;
+            }
+        }
+
+        public static void ResetSharedConnection()
+        {
+            lock (_connectionLock)
+            {
+                try
+                {
+                    _sharedConnection?.Close();
+                    _sharedConnection?.Dispose();
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    _sharedConnection = null;
+                }
             }
         }
 
@@ -98,18 +117,21 @@ namespace Lyracist.Data.Services
 
         public async Task IndexSong(Song song)
         {
+            EnsureFtsTableExists();
+
             var normalizedTitle = Normalize(song.Title);
             var normalizedArtist = Normalize(song.Artist);
 
-            // Execute an INSERT OR REPLACE raw SQL statement on the SongSearch virtual table
+            // Bind rowid = SongId so FTS5 replaces in-place instead of appending duplicates and
+            // DELETE WHERE rowid = @SongId uses the B-tree primary key instead of a full-table scan.
             await _context.Database.ExecuteSqlRawAsync(
-                "INSERT OR REPLACE INTO SongSearch (SongId, Title, Artist, NormalizedTitle, NormalizedArtist) VALUES ({0}, {1}, {2}, {3}, {4})",
+                "INSERT OR REPLACE INTO SongSearch (rowid, SongId, Title, Artist, NormalizedTitle, NormalizedArtist) VALUES ({0}, {0}, {1}, {2}, {3}, {4})",
                 song.SongId,
                 song.Title ?? string.Empty,
                 song.Artist ?? string.Empty,
                 normalizedTitle,
                 normalizedArtist
-            );
+            ).ConfigureAwait(false);
         }
 
         // ==========================================
@@ -118,13 +140,18 @@ namespace Lyracist.Data.Services
 
         public void EnsureFtsTableExists()
         {
+            EnsureFtsIndexSynchronized(forceCheck: false);
+        }
+
+        public void EnsureFtsIndexSynchronized(bool forceCheck = true)
+        {
             // Held for the whole check-then-act sequence below, not just the flag read: releasing it
             // between the check and the DROP/CREATE let two threads both pass the check and race each
             // other (one dropping the table while the other queried it). See ScanningService callers
             // and Search()/SearchSync(), all of which can call this concurrently on a cold start.
             lock (_verificationLock)
             {
-                if (_ftsTableVerified) return;
+                if (!forceCheck && _ftsTableVerified) return;
 
                 try
                 {
@@ -137,6 +164,8 @@ namespace Lyracist.Data.Services
 
                     try
                     {
+                        LyracistDbContext.EnsureSchemaColumnsAndTables(connection);
+
                         string sqlSchema = "";
                         using (var cmd = connection.CreateCommand())
                         {
@@ -148,25 +177,177 @@ namespace Lyracist.Data.Services
                             }
                         }
 
-                        if (string.IsNullOrEmpty(sqlSchema) || !sqlSchema.Contains("fts5", StringComparison.OrdinalIgnoreCase))
-                        {
-                            using (var transaction = connection.BeginTransaction())
-                            {
-                                using (var cmd = connection.CreateCommand())
-                                {
-                                    cmd.Transaction = transaction;
-                                    cmd.CommandText = "DROP TABLE IF EXISTS SongSearch;";
-                                    cmd.ExecuteNonQuery();
+                        bool needsRebuild = string.IsNullOrEmpty(sqlSchema) || !sqlSchema.Contains("fts5", StringComparison.OrdinalIgnoreCase);
+                        long songCount = 0;
 
-                                    cmd.CommandText = "CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);";
-                                    cmd.ExecuteNonQuery();
+                        if (!needsRebuild)
+                        {
+                            try
+                            {
+                                using var countCmd = connection.CreateCommand();
+                                countCmd.CommandText = @"
+                                    SELECT 
+                                        (SELECT COUNT(*) FROM Songs),
+                                        (SELECT COUNT(*) FROM SongSearch),
+                                        EXISTS(SELECT 1 FROM SongSearch WHERE rowid != CAST(SongId AS INTEGER) LIMIT 1),
+                                        EXISTS(SELECT 1 FROM Songs s WHERE NOT EXISTS (SELECT 1 FROM SongSearch f WHERE f.rowid = s.SongId) LIMIT 1),
+                                        EXISTS(SELECT 1 FROM SongSearch WHERE (Title != '' AND NormalizedTitle = '') OR (Artist != '' AND NormalizedArtist = '') LIMIT 1);";
+                                using var reader = countCmd.ExecuteReader();
+                                if (reader.Read())
+                                {
+                                    songCount = reader.GetInt64(0);
+                                    long ftsCount = reader.GetInt64(1);
+                                    bool hasMismatchedRowId = reader.GetInt64(2) != 0;
+                                    bool hasMissingSongId = reader.GetInt64(3) != 0;
+                                    bool hasUnnormalizedRows = reader.GetInt64(4) != 0;
+                                    if (songCount != ftsCount || hasMismatchedRowId || hasMissingSongId || hasUnnormalizedRows)
+                                    {
+                                        needsRebuild = true;
+                                    }
                                 }
-                                transaction.Commit();
+                            }
+                            catch
+                            {
+                                needsRebuild = true;
+                            }
+                        }
+
+                        // Live FTS5 MATCH probe: verifies that the underlying FTS5 shadow tables
+                        // (SongSearch_data, SongSearch_idx, etc.) are intact and actually return matches.
+                        if (!needsRebuild && songCount > 0)
+                        {
+                            try
+                            {
+                                string? sampleToken = null;
+                                using (var sampleCmd = connection.CreateCommand())
+                                {
+                                    sampleCmd.CommandText = "SELECT Title, Artist FROM Songs WHERE (Title IS NOT NULL AND Title != '') OR (Artist IS NOT NULL AND Artist != '') LIMIT 10;";
+                                    using var sampleReader = sampleCmd.ExecuteReader();
+                                    while (sampleReader.Read())
+                                    {
+                                        string t = sampleReader.IsDBNull(0) ? "" : sampleReader.GetString(0);
+                                        string a = sampleReader.IsDBNull(1) ? "" : sampleReader.GetString(1);
+                                        string candidate = Normalize(!string.IsNullOrWhiteSpace(t) ? t : a);
+                                        if (!string.IsNullOrWhiteSpace(candidate))
+                                        {
+                                            sampleToken = candidate.Split([' '], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                                            if (!string.IsNullOrWhiteSpace(sampleToken))
+                                            {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(sampleToken))
+                                {
+                                    using var probeCmd = connection.CreateCommand();
+                                    probeCmd.CommandText = "SELECT SongId FROM SongSearch WHERE SongSearch MATCH @probe LIMIT 1;";
+                                    var p = probeCmd.CreateParameter();
+                                    p.ParameterName = "@probe";
+                                    p.Value = $"\"{sampleToken}\"*";
+                                    probeCmd.Parameters.Add(p);
+                                    var probeResult = probeCmd.ExecuteScalar();
+                                    if (probeResult == null || probeResult == DBNull.Value)
+                                    {
+                                        needsRebuild = true;
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                                needsRebuild = true;
+                            }
+                        }
+
+                        if (needsRebuild)
+                        {
+                            ResetSharedConnection();
+
+                            try
+                            {
+                                using var dropCmd = connection.CreateCommand();
+                                dropCmd.CommandText = "DROP TABLE IF EXISTS SongSearch;";
+                                dropCmd.ExecuteNonQuery();
+                            }
+                            catch
+                            {
+                                // Corrupt FTS5 virtual table or shadow tables can prevent DROP TABLE SongSearch;
+                                // drop shadow tables and purge SongSearch% from sqlite_master directly.
+                                using var forceDropCmd = connection.CreateCommand();
+                                forceDropCmd.CommandText = @"
+                                    DROP TABLE IF EXISTS SongSearch_data;
+                                    DROP TABLE IF EXISTS SongSearch_idx;
+                                    DROP TABLE IF EXISTS SongSearch_content;
+                                    DROP TABLE IF EXISTS SongSearch_docsize;
+                                    DROP TABLE IF EXISTS SongSearch_config;
+                                    PRAGMA writable_schema = ON;
+                                    DELETE FROM sqlite_master WHERE name LIKE 'SongSearch%' OR tbl_name LIKE 'SongSearch%';
+                                    PRAGMA writable_schema = OFF;
+                                    PRAGMA integrity_check(1);
+                                ";
+                                forceDropCmd.ExecuteNonQuery();
                             }
 
-                            // Reindex all songs
-                            var songs = _context.Songs.AsNoTracking().ToList();
-                            IndexSongsBatch(songs).GetAwaiter().GetResult();
+                            using var transaction = connection.BeginTransaction();
+                            using (var cmd = connection.CreateCommand())
+                            {
+                                cmd.Transaction = transaction;
+                                cmd.CommandText = "CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);";
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            using (var readCmd = connection.CreateCommand())
+                            using (var insertCmd = connection.CreateCommand())
+                            {
+                                readCmd.Transaction = transaction;
+                                readCmd.CommandText = "SELECT SongId, Title, Artist FROM Songs;";
+
+                                insertCmd.Transaction = transaction;
+                                insertCmd.CommandText = @"
+                                    INSERT INTO SongSearch (rowid, SongId, Title, Artist, NormalizedTitle, NormalizedArtist)
+                                    VALUES (@SongId, @SongId, @Title, @Artist, @NormalizedTitle, @NormalizedArtist);";
+
+                                var songIdParam = insertCmd.CreateParameter();
+                                songIdParam.ParameterName = "@SongId";
+                                insertCmd.Parameters.Add(songIdParam);
+
+                                var titleParam = insertCmd.CreateParameter();
+                                titleParam.ParameterName = "@Title";
+                                insertCmd.Parameters.Add(titleParam);
+
+                                var artistParam = insertCmd.CreateParameter();
+                                artistParam.ParameterName = "@Artist";
+                                insertCmd.Parameters.Add(artistParam);
+
+                                var normTitleParam = insertCmd.CreateParameter();
+                                normTitleParam.ParameterName = "@NormalizedTitle";
+                                insertCmd.Parameters.Add(normTitleParam);
+
+                                var normArtistParam = insertCmd.CreateParameter();
+                                normArtistParam.ParameterName = "@NormalizedArtist";
+                                insertCmd.Parameters.Add(normArtistParam);
+
+                                insertCmd.Prepare();
+
+                                using var reader = readCmd.ExecuteReader();
+                                while (reader.Read())
+                                {
+                                    int id = reader.GetInt32(0);
+                                    string title = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                                    string artist = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+
+                                    songIdParam.Value = id;
+                                    titleParam.Value = title;
+                                    artistParam.Value = artist;
+                                    normTitleParam.Value = Normalize(title);
+                                    normArtistParam.Value = Normalize(artist);
+
+                                    insertCmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            transaction.Commit();
                         }
 
                         _ftsTableVerified = true;
@@ -201,10 +382,10 @@ namespace Lyracist.Data.Services
                 return [];
             }
 
-            await _querySemaphore.WaitAsync();
+            await _querySemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                var connection = await GetSharedConnectionAsync();
+                var connection = await GetSharedConnectionAsync().ConfigureAwait(false);
 
                 // Query matching songs and join with their respective audio settings, clamping to 150 items max
                 const string sql = @"
@@ -217,7 +398,7 @@ namespace Lyracist.Data.Services
                     AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
                     LIMIT 150";
 
-                var results = await connection.QueryAsync<Song, SongAudioSettings, Song>(
+                var results = (await connection.QueryAsync<Song, SongAudioSettings, Song>(
                     sql,
                     (song, audioSettings) =>
                     {
@@ -226,36 +407,118 @@ namespace Lyracist.Data.Services
                     },
                     new { ftsQuery, isKaraoke },
                     splitOn: "SongAudioSettingsId"
-                );
+                ).ConfigureAwait(false)).ToList();
 
-                return [.. results];
+                if (results.Count > 0)
+                {
+                    return results;
+                }
+
+                var fallbackResults = await SearchFallbackLikeAsync(connection, query, isKaraoke).ConfigureAwait(false);
+                if (fallbackResults.Count > 0)
+                {
+                    // If the LIKE fallback found a Title/Artist prefix match that FTS5 missed,
+                    // trigger a background FTS5 verification/rebuild so subsequent searches are fast.
+                    _ = Task.Run(() =>
+                    {
+                        try
+                        {
+                            using var repairDb = new LyracistDbContext();
+                            new SearchService(repairDb).EnsureFtsIndexSynchronized(forceCheck: true);
+                        }
+                        catch
+                        {
+                        }
+                    });
+                }
+
+                return fallbackResults;
             }
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "Dapper search execution failed", ex);
-                // Fallback to standard EF Core query (clamped) in case of connection exceptions
-                if (isKaraoke.HasValue)
+                try
                 {
-                    bool kVal = isKaraoke.Value;
-                    return await _context.Songs
-                        .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0}) AND IsKaraoke = {1}", ftsQuery, kVal)
-                        .AsNoTracking()
-                        .Include(s => s.AudioSettings)
-                        .Take(150)
-                        .ToListAsync();
+                    ResetSharedConnection();
+                    EnsureFtsIndexSynchronized(forceCheck: true);
+                    await using var fallbackConn = new SqliteConnection(LyracistDbContext.GetConnectionString());
+                    await fallbackConn.OpenAsync().ConfigureAwait(false);
+                    return await SearchFallbackLikeAsync(fallbackConn, query, isKaraoke).ConfigureAwait(false);
                 }
-
-                return await _context.Songs
-                    .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
-                    .AsNoTracking()
-                    .Include(s => s.AudioSettings)
-                    .Take(150)
-                    .ToListAsync();
+                catch (Exception fallbackEx)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Fallback LIKE search execution failed", fallbackEx);
+                    return [];
+                }
             }
             finally
             {
                 _querySemaphore.Release();
             }
+        }
+
+        private (string Sql, DynamicParameters Params) BuildLikeFallbackQuery(string query, bool? isKaraoke)
+        {
+            string normalized = Normalize(query);
+            var words = string.IsNullOrWhiteSpace(normalized)
+                ? query.Split([' '], StringSplitOptions.RemoveEmptyEntries)
+                : normalized.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("isKaraoke", isKaraoke);
+
+            var whereClauses = new List<string>();
+            for (int i = 0; i < words.Length; i++)
+            {
+                string paramName = $"w{i}";
+                parameters.Add(paramName, $"%{words[i]}%");
+                whereClauses.Add($"(s.Title LIKE @{paramName} OR s.Artist LIKE @{paramName} OR s.FilePath LIKE @{paramName})");
+            }
+
+            string wordFilter = whereClauses.Count > 0 ? string.Join(" AND ", whereClauses) : "1=1";
+            string sql = $@"
+                SELECT s.*, a.*
+                FROM Songs s
+                LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                WHERE {wordFilter}
+                AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                LIMIT 150";
+
+            return (sql, parameters);
+        }
+
+        private async Task<List<Song>> SearchFallbackLikeAsync(SqliteConnection connection, string query, bool? isKaraoke)
+        {
+            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke);
+            var results = await connection.QueryAsync<Song, SongAudioSettings, Song>(
+                sql,
+                (song, audioSettings) =>
+                {
+                    song.AudioSettings = audioSettings;
+                    return song;
+                },
+                parameters,
+                splitOn: "SongAudioSettingsId"
+            ).ConfigureAwait(false);
+
+            return [.. results];
+        }
+
+        private List<Song> SearchFallbackLikeSync(SqliteConnection connection, string query, bool? isKaraoke)
+        {
+            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke);
+            var results = connection.Query<Song, SongAudioSettings, Song>(
+                sql,
+                (song, audioSettings) =>
+                {
+                    song.AudioSettings = audioSettings;
+                    return song;
+                },
+                parameters,
+                splitOn: "SongAudioSettingsId"
+            );
+
+            return [.. results];
         }
 
         // Helper to transform user search query into a safe FTS5 MATCH expression
@@ -275,9 +538,9 @@ namespace Lyracist.Data.Services
             // Remove special characters that have syntax meaning in SQLite FTS5 (e.g. *, :, AND, OR)
             string cleaned = Regex.Replace(normalizedQuery, @"[^\w\s]", " ");
 
-            // Split into words and append '*' to each word for prefix matching
+            // Split into words and wrap each word in double quotes before '*' for safe prefix matching
             var words = cleaned.Split([' '], StringSplitOptions.RemoveEmptyEntries)
-                               .Select(word => $"{word}*")
+                               .Select(word => $"\"{word}\"*")
                                .ToList();
 
             if (words.Count == 0)
@@ -289,24 +552,29 @@ namespace Lyracist.Data.Services
 
         public async Task RemoveSongFromIndex(int songId)
         {
+            EnsureFtsTableExists();
+
             await _context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM SongSearch WHERE SongId = {0}",
+                "DELETE FROM SongSearch WHERE rowid = {0}",
                 songId
-            );
+            ).ConfigureAwait(false);
         }
 
-        public async Task IndexSongsBatch(IEnumerable<Song> songs)
+        public async Task RemoveSongsFromIndexBatch(IEnumerable<int> songIds)
         {
-            var songList = songs.ToList();
-            if (songList.Count == 0) return;
+            var idList = songIds.ToList();
+            if (idList.Count == 0) return;
+
+            EnsureFtsTableExists();
 
             var connection = _context.Database.GetDbConnection();
             bool wasOpen = connection.State == System.Data.ConnectionState.Open;
             if (!wasOpen)
             {
-                await connection.OpenAsync();
+                await connection.OpenAsync().ConfigureAwait(false);
             }
 
+            System.Data.Common.DbTransaction? localTransaction = null;
             try
             {
                 await using var command = connection.CreateCommand();
@@ -315,11 +583,75 @@ namespace Lyracist.Data.Services
                 {
                     command.Transaction = currentTransaction;
                 }
+                else
+                {
+                    localTransaction = await connection.BeginTransactionAsync().ConfigureAwait(false);
+                    command.Transaction = localTransaction;
+                }
+
+                command.CommandText = "DELETE FROM SongSearch WHERE rowid = @SongId";
+                var songIdParam = command.CreateParameter();
+                songIdParam.ParameterName = "@SongId";
+                command.Parameters.Add(songIdParam);
+                await command.PrepareAsync().ConfigureAwait(false);
+
+                foreach (int songId in idList)
+                {
+                    songIdParam.Value = songId;
+                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                }
+
+                if (localTransaction != null)
+                {
+                    await localTransaction.CommitAsync().ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                if (localTransaction != null)
+                {
+                    await localTransaction.DisposeAsync().ConfigureAwait(false);
+                }
+                if (!wasOpen)
+                {
+                    await connection.CloseAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        public async Task IndexSongsBatch(IEnumerable<Song> songs)
+        {
+            var songList = songs.ToList();
+            if (songList.Count == 0) return;
+
+            EnsureFtsTableExists();
+
+            var connection = _context.Database.GetDbConnection();
+            bool wasOpen = connection.State == System.Data.ConnectionState.Open;
+            if (!wasOpen)
+            {
+                await connection.OpenAsync().ConfigureAwait(false);
+            }
+
+            System.Data.Common.DbTransaction? localTransaction = null;
+            try
+            {
+                await using var command = connection.CreateCommand();
+                var currentTransaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+                if (currentTransaction != null)
+                {
+                    command.Transaction = currentTransaction;
+                }
+                else
+                {
+                    localTransaction = await connection.BeginTransactionAsync().ConfigureAwait(false);
+                    command.Transaction = localTransaction;
+                }
 
                 command.CommandText = @"
                     INSERT OR REPLACE INTO SongSearch 
-                    (SongId, Title, Artist, NormalizedTitle, NormalizedArtist) 
-                    VALUES (@SongId, @Title, @Artist, @NormalizedTitle, @NormalizedArtist)";
+                    (rowid, SongId, Title, Artist, NormalizedTitle, NormalizedArtist) 
+                    VALUES (@SongId, @SongId, @Title, @Artist, @NormalizedTitle, @NormalizedArtist)";
 
                 var songIdParam = command.CreateParameter();
                 songIdParam.ParameterName = "@SongId";
@@ -341,7 +673,7 @@ namespace Lyracist.Data.Services
                 normArtistParam.ParameterName = "@NormalizedArtist";
                 command.Parameters.Add(normArtistParam);
 
-                await command.PrepareAsync();
+                await command.PrepareAsync().ConfigureAwait(false);
 
                 foreach (var song in songList)
                 {
@@ -351,14 +683,23 @@ namespace Lyracist.Data.Services
                     normTitleParam.Value = Normalize(song.Title ?? string.Empty);
                     normArtistParam.Value = Normalize(song.Artist ?? string.Empty);
 
-                    await command.ExecuteNonQueryAsync();
+                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                }
+
+                if (localTransaction != null)
+                {
+                    await localTransaction.CommitAsync().ConfigureAwait(false);
                 }
             }
             finally
             {
+                if (localTransaction != null)
+                {
+                    await localTransaction.DisposeAsync().ConfigureAwait(false);
+                }
                 if (!wasOpen)
                 {
-                    await connection.CloseAsync();
+                    await connection.CloseAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -408,30 +749,47 @@ namespace Lyracist.Data.Services
                     },
                     new { ftsQuery, isKaraoke },
                     splitOn: "SongAudioSettingsId"
-                );
+                ).ToList();
 
-                return [.. results];
+                if (results.Count > 0)
+                {
+                    return results;
+                }
+
+                var fallbackResults = SearchFallbackLikeSync(connection, query, isKaraoke);
+                if (fallbackResults.Count > 0)
+                {
+                    _ = Task.Run(() =>
+                    {
+                        try
+                        {
+                            using var repairDb = new LyracistDbContext();
+                            new SearchService(repairDb).EnsureFtsIndexSynchronized(forceCheck: true);
+                        }
+                        catch
+                        {
+                        }
+                    });
+                }
+
+                return fallbackResults;
             }
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "Dapper sync search execution failed", ex);
-                if (isKaraoke.HasValue)
+                try
                 {
-                    bool kVal = isKaraoke.Value;
-                    return _context.Songs
-                        .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0}) AND IsKaraoke = {1}", ftsQuery, kVal)
-                        .AsNoTracking()
-                        .Include(s => s.AudioSettings)
-                        .Take(150)
-                        .ToList();
+                    ResetSharedConnection();
+                    EnsureFtsIndexSynchronized(forceCheck: true);
+                    using var fallbackConn = new SqliteConnection(LyracistDbContext.GetConnectionString());
+                    fallbackConn.Open();
+                    return SearchFallbackLikeSync(fallbackConn, query, isKaraoke);
                 }
-
-                return _context.Songs
-                    .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
-                    .AsNoTracking()
-                    .Include(s => s.AudioSettings)
-                    .Take(150)
-                    .ToList();
+                catch (Exception fallbackEx)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Fallback sync LIKE search execution failed", fallbackEx);
+                    return [];
+                }
             }
         }
     }

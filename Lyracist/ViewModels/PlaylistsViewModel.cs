@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:40:10 -> Remove PartyTyme from SearchOccasionItem
+// Edited on Oct 30, 2026 @ 10:44:00 -> Subscribe to LibraryUpdated so background music songs refresh after library scans
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -130,6 +130,7 @@ public partial class PlaylistsViewModel : BaseViewModel
         _libraryService = libraryService;
         _occasions = occasions;
 
+        _libraryService.LibraryUpdated += (_, _) => RefreshAll();
         RefreshAll();
         RefreshOccasionCategories();
 

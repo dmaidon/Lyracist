@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:44:00 -> Bind TotalQuestions to game cap instead of full pack count
+// Edited on Oct 30, 2026 @ 09:20:00 -> Marshal OnQuestionChanged via Dispatcher and sync TotalQuestions on property change
 using System.Collections.ObjectModel;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -53,6 +53,10 @@ public partial class QuestionViewModel : ViewModelBase
                 {
                     IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
                 }
+                else if (e.PropertyName == nameof(IGameStateService.TotalQuestions))
+                {
+                    TotalQuestions = _gameStateService.TotalQuestions;
+                }
             };
         }
 
@@ -78,7 +82,14 @@ public partial class QuestionViewModel : ViewModelBase
 
     private void OnQuestionChanged(object? sender, KnockoutQuestion? q)
     {
-        UpdateFromQuestion(q);
+        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+        {
+            Application.Current.Dispatcher.Invoke(() => UpdateFromQuestion(q));
+        }
+        else
+        {
+            UpdateFromQuestion(q);
+        }
     }
 
     private void UpdateFromQuestion(KnockoutQuestion? q)

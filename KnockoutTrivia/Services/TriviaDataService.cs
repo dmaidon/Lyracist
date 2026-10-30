@@ -1,9 +1,10 @@
-// Edited on Oct 1, 2026 @ 08:47:00 -> Add robust question validation, DB null safety, and cached pack counts
+// Edited on Oct 30, 2026 @ 09:20:00 -> Support TriviaQuestionPack wrapper and raw JSON arrays with cached JsonSerializerOptions
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using KnockoutTrivia.Models;
@@ -11,10 +12,24 @@ using Lyracist.Shared;
 
 namespace KnockoutTrivia.Services;
 
+public class TriviaQuestionPack
+{
+    public string PackId { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public List<KnockoutQuestion> Questions { get; set; } = [];
+}
+
 public class TriviaDataService : ITriviaDataService
 {
     private static readonly string BaseDataDir = Globals.DataDir;
     private static readonly string BasePacksDir = Globals.PacksDir;
+    private static readonly JsonSerializerOptions PackJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     public TriviaDataService()
     {
@@ -227,10 +242,36 @@ public class TriviaDataService : ITriviaDataService
         try
         {
             string json = await File.ReadAllTextAsync(packFilePath);
-            var parsed = JsonSerializer.Deserialize<List<KnockoutQuestion>>(json, new JsonSerializerOptions
+            ReadOnlySpan<char> trimmed = json.AsSpan().TrimStart();
+            if (trimmed.IsEmpty) return [];
+
+            List<KnockoutQuestion>? parsed = null;
+
+            if (trimmed[0] == '{')
             {
-                PropertyNameCaseInsensitive = true
-            });
+                var pack = JsonSerializer.Deserialize<TriviaQuestionPack>(json, PackJsonOptions);
+                if (pack?.Questions != null)
+                {
+                    string fallbackCategory = !string.IsNullOrWhiteSpace(pack.Category)
+                        ? pack.Category
+                        : pack.Title;
+
+                    foreach (var q in pack.Questions)
+                    {
+                        if ((string.IsNullOrWhiteSpace(q.Category) || q.Category == "General") &&
+                            !string.IsNullOrWhiteSpace(fallbackCategory))
+                        {
+                            q.Category = fallbackCategory;
+                        }
+                    }
+
+                    parsed = pack.Questions;
+                }
+            }
+            else if (trimmed[0] == '[')
+            {
+                parsed = JsonSerializer.Deserialize<List<KnockoutQuestion>>(json, PackJsonOptions);
+            }
 
             if (parsed != null)
             {

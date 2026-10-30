@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:21:30 -> Enforce single-instance application execution using SingleInstanceHelper
+// Edited on Oct 30, 2026 @ 09:20:00 -> Pass webServer to SettingsViewModel and dispose SimulatorService/SettingsViewModel on exit
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +12,8 @@ public partial class App : Application
 {
     private GameStateService? _gameStateService;
     private KnockoutWebServer? _webServer;
+    private SimulatorService? _simulatorService;
+    private SettingsViewModel? _settingsVM;
 
     public App()
     {
@@ -44,6 +46,7 @@ public partial class App : Application
             var wheelService = new WheelService();
             var bannerService = new BannerService();
             var simulatorService = new SimulatorService(gameStateService);
+            _simulatorService = simulatorService;
             var displayService = new DisplayService();
             var configService = new ConfigService();
 
@@ -73,7 +76,8 @@ public partial class App : Application
             var wheelVM = new WheelViewModel(wheelService, gameStateService, tokenService);
             var bannerVM = new BannerViewModel(bannerService, gameStateService);
             var simulatorVM = new SimulatorViewModel(simulatorService, gameStateService);
-            var settingsVM = new SettingsViewModel(configService, displayService, triviaDataService, gameStateService);
+            var settingsVM = new SettingsViewModel(configService, displayService, triviaDataService, gameStateService, webServer);
+            _settingsVM = settingsVM;
             var helpVM = new HelpViewModel();
             var aboutVM = new AboutViewModel();
             var audienceVM = new AudienceViewModel();
@@ -112,6 +116,8 @@ public partial class App : Application
     {
         SingleInstanceHelper.Cleanup();
         base.OnExit(e);
+        _settingsVM?.Dispose();
+        _simulatorService?.Dispose();
         _webServer?.Dispose();
         _gameStateService?.Dispose();
         Environment.Exit(0);

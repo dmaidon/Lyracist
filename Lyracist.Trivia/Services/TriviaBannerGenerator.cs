@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1118 const variables and RCS1123 parentheses
+// Edited on Oct 30, 2026 @ 09:20:00 -> Add GenerateBannerForPack for custom and single-pack banner generation in TriviaDbCreator
 using System;
 using System.Globalization;
 using System.IO;
@@ -203,6 +203,42 @@ public static class TriviaBannerGenerator
             if (!force && File.Exists(outPath)) continue;
             GenerateBanner(def, outPath);
         }
+    }
+
+    public static void GenerateBannerForPack(string outputDir, string fileName, string title, string subtitle)
+    {
+        if (!Directory.Exists(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
+        string safeFileName = string.IsNullOrWhiteSpace(fileName) ? "custom_trivia.png" : fileName;
+        if (!safeFileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+        {
+            safeFileName += ".png";
+        }
+
+        var existing = Array.Find(AllBanners, b => string.Equals(b.FileName, safeFileName, StringComparison.OrdinalIgnoreCase));
+        string resolvedTitle = string.IsNullOrWhiteSpace(title)
+            ? (existing?.Title ?? "CUSTOM TRIVIA")
+            : title.Trim().ToUpperInvariant();
+        string resolvedSubtitle = string.IsNullOrWhiteSpace(subtitle)
+            ? (existing?.Subtitle ?? "Custom Category Database • Lyracist Live Venue Trivia")
+            : subtitle.Trim();
+
+        BannerDefinition def = existing != null
+            ? existing with { Title = resolvedTitle, Subtitle = resolvedSubtitle }
+            : new BannerDefinition(
+                safeFileName,
+                resolvedTitle,
+                resolvedSubtitle,
+                "🎯",
+                MediaColor.FromRgb(0x1E, 0x1B, 0x4B),
+                MediaColor.FromRgb(0x0F, 0x17, 0x2A),
+                MediaColor.FromRgb(0x8B, 0x5C, 0xF6),
+                MediaColor.FromRgb(0x38, 0xBD, 0xF8));
+
+        GenerateBanner(def, Path.Combine(outputDir, safeFileName));
     }
 
     public static void GenerateBanner(BannerDefinition def, string destinationPath)

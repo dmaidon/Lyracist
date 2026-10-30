@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 07:01:30 -> Update MauiScaryokePalette to 12 distinct colors so every category gets a unique color
+// Edited on Oct 30, 2026 @ 09:30:30 -> Call ShutdownTrivia during MainViewModel.Shutdown to cleanly stop Trivia web server and timers
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -4114,6 +4114,7 @@ namespace KSRotation.ViewModels
             RunShutdownStep("DjBannerWindowService.Shutdown", _djBannerWindowService.Shutdown);
             RunShutdownStep(nameof(StopScaryoke), StopScaryoke);
 #endif
+            RunShutdownStep(nameof(ShutdownTrivia), ShutdownTrivia);
         }
 
         private static void RunShutdownStep(string name, Action step)

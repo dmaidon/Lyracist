@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 13:00:00 -> Update user manuals for multi-singer sequential spin targeting with post-spin reveals
+// Edited on Oct 30, 2026 @ 12:12:00 -> Update user manuals for automatic database and FTS5 search self-repair engine
 using System;
 using System.IO;
 using Xunit;
@@ -6727,6 +6727,138 @@ Section: Entertainment & Gamification / Scaryoke Multi-Singer & Entire Rotation 
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " MultiSingerSequentialSpin";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForAutomaticDatabaseSelfRepair()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"Lyracist & LyracistDbEditor: Automatic Database & FTS5 Search Self-Repair - (October 2026)
+
+Section: Music & Karaoke Library / Search, Drive Scanning & Automatic Database Self-Repair
+
+1. Automatic Database & Search Index Self-Repair (Zero Manual Deletion Required):
+   - Both Lyracist and LyracistDbEditor automatically inspect and repair 'lyracist.db' on startup, before drive rescans, and during searches, eliminating the need to manually delete the database file on a show computer.
+   - Automatic Schema & Migration Upgrade: Releases abandoned migration locks ('__EFMigrationsLock'), clears stale or corrupt SQLite WAL/SHM sidecar files, adds any missing columns across legacy databases ('AllowRecording', 'NeedsRepair', 'MixInMs', 'MixOutMs', 'Key', 'Tempo', etc.), deduplicates song entries, and repairs broken indexes without losing existing songs, singers, rotation entries, or history.
+   - Live FTS5 Search Health Probe & Shadow-Table Recovery: Verifies 'SongSearch' row counts, rowid alignment, and live 'MATCH' query execution. If the FTS5 virtual table or its shadow tables ('SongSearch_data', 'SongSearch_idx', etc.) are out of sync or corrupted, the search index is automatically rebuilt in a single fast transaction.
+   - Instant Fallback Search: If an FTS5 search encounters an unindexed state, Lyracist immediately falls back to direct title/artist/filepath matching so search results appear right away while the FTS5 index self-heals in the background.";
+
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Automatic Database & FTS5 Search Self-Repair"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Lyracist & LyracistDbEditor: Automatic Database & FTS5 Search Self-Repair")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("Lyracist & LyracistDbEditor:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("AutoDatabaseSelfRepair"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Automatic Database & FTS5 Search Self-Repair", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " AutoDatabaseSelfRepair";
                                 doc.Save(pdfPath);
                             }
                         }

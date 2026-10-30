@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:10:00 -> Register IPerformanceRecorderService and PerformanceRecorderService
+// Edited on Oct 30, 2026 @ 12:04:00 -> Use EnsureSchemaAndRepair on startup so legacy or partially migrated databases self-heal automatically
 using System;
 using System.Linq;
 using System.Windows;
@@ -36,12 +36,29 @@ public partial class App : System.Windows.Application
     {
         try
         {
+            CloseKeepAliveConnection();
             _keepAliveConnection = new Microsoft.Data.Sqlite.SqliteConnection(Lyracist.Data.LyracistDbContext.GetConnectionString());
             _keepAliveConnection.Open();
         }
         catch (Exception ex)
         {
             AppLogger.LogError(ex, "Failed to initialize SQLite keep-alive connection");
+        }
+    }
+
+    public static void CloseKeepAliveConnection()
+    {
+        try
+        {
+            _keepAliveConnection?.Close();
+            _keepAliveConnection?.Dispose();
+        }
+        catch
+        {
+        }
+        finally
+        {
+            _keepAliveConnection = null;
         }
     }
 
@@ -54,17 +71,9 @@ public partial class App : System.Windows.Application
     /// </summary>
     private static void ApplyPostMigrationSetup(Lyracist.Data.LyracistDbContext db)
     {
-        db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
-
-        // Clean up migration lock so subsequent connections start clean
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"__EFMigrationsLock\";");
-
-        // Deduplicate Songs on FilePath before making index unique
-        db.Database.ExecuteSqlRaw("DELETE FROM Songs WHERE SongId NOT IN (SELECT MIN(SongId) FROM Songs GROUP BY FilePath);");
-        db.Database.ExecuteSqlRaw("DROP INDEX IF EXISTS IX_Songs_FilePath;");
-        db.Database.ExecuteSqlRaw("CREATE UNIQUE INDEX IF NOT EXISTS IX_Songs_FilePath ON Songs (FilePath);");
-
+        Lyracist.Data.LyracistDbContext.EnsureSchemaColumnsAndTables(db.Database.GetDbConnection());
         Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+        new Lyracist.Data.Services.SearchService(db).EnsureFtsIndexSynchronized(forceCheck: true);
     }
 
     private static void CleanUpOrphanedPlaybackTempDirs()
@@ -274,37 +283,18 @@ public partial class App : System.Windows.Application
 
         await Host!.StartAsync();
 
-        // Apply any pending EF Core migrations so a fresh install gets a
-        // fully-formed schema instead of an empty 0-byte SQLite file.
+        // Apply any pending EF Core migrations and self-repair any missing schema columns or
+        // out-of-sync FTS5 search indexes so even legacy or interrupted databases work immediately.
         try
         {
-            // Clear any abandoned __EFMigrationsLock table left from an interrupted session/crash
-            Lyracist.Data.LyracistDbContext.ClearAbandonedMigrationLocks();
-
+            Lyracist.Data.LyracistDbContext.EnsureSchemaAndRepair();
             using var db = new Lyracist.Data.LyracistDbContext();
-            db.Database.Migrate();
             ApplyPostMigrationSetup(db);
-
-            // Keep database connection alive to optimize SQLite caching and concurrency
             KeepDatabaseAlive();
         }
         catch (Exception ex)
         {
-            AppLogger.LogError(ex, "Database migration");
-
-            // Self-healing recovery: if an abandoned migration lock caused an Error 11, retry once
-            try
-            {
-                Lyracist.Data.LyracistDbContext.ClearAbandonedMigrationLocks();
-                using var dbRetry = new Lyracist.Data.LyracistDbContext();
-                dbRetry.Database.Migrate();
-                ApplyPostMigrationSetup(dbRetry);
-                KeepDatabaseAlive();
-            }
-            catch (Exception retryEx)
-            {
-                AppLogger.LogError(retryEx, "Database migration recovery retry");
-            }
+            AppLogger.LogError(ex, "Database migration and self-repair");
         }
 
         // Resolve and show the SplashWindow only if the setting is enabled
@@ -388,6 +378,11 @@ public partial class App : System.Windows.Application
         foreach (var djBannerWindow in Windows.OfType<DjBannerWindow>())
         {
             djBannerWindow.IsShuttingDown = true;
+        }
+
+        foreach (var triviaWindow in Windows.OfType<TriviaDisplayWindow>().ToList())
+        {
+            try { triviaWindow.Close(); } catch { }
         }
 
         if (Host != null)

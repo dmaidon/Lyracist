@@ -1,4 +1,4 @@
-// Created on Oct 8, 2026 @ 13:14:00 -> Dynamic song path resolver for missing drives and relative music folders
+// Edited on Oct 30, 2026 @ 10:43:00 -> Add root/negative lookup caching and zero-I/O ResolveCachedOrOriginal for fast list mapping
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,6 +15,39 @@ namespace Lyracist.Core.Helpers;
 public static class SongPathResolver
 {
     private static readonly ConcurrentDictionary<string, string> _cache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, long> _missingCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly object _rootsLock = new();
+    private static List<string> _cachedRoots = [];
+    private static long _rootsCacheTicks;
+    private const long RootsCacheTtlMs = 5_000;
+    private const long MissingCacheTtlMs = 15_000;
+
+    /// <summary>
+    /// Returns a previously resolved path from the in-memory cache if available, or the original path
+    /// without performing synchronous disk I/O. Ideal for bulk list/search mapping.
+    /// </summary>
+    public static string ResolveCachedOrOriginal(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        return _cache.TryGetValue(path, out var cached) ? cached : path;
+    }
+
+    /// <summary>
+    /// Clears cached path resolutions (e.g. after a library rescan).
+    /// </summary>
+    public static void ClearCache()
+    {
+        _cache.Clear();
+        _missingCache.Clear();
+        lock (_rootsLock)
+        {
+            _rootsCacheTicks = 0;
+        }
+    }
 
     /// <summary>
     /// Attempts to resolve a file path to an existing file on any connected drive or library directory.
@@ -37,12 +70,20 @@ public static class SongPathResolver
             return cached;
         }
 
+        long now = Environment.TickCount64;
+        if (_missingCache.TryGetValue(path, out long failedAt) && (now - failedAt) < MissingCacheTtlMs)
+        {
+            return path;
+        }
+
         if (TryResolveInternal(path, out var resolved))
         {
             _cache[path] = resolved;
+            _missingCache.TryRemove(path, out _);
             return resolved;
         }
 
+        _missingCache[path] = now;
         return path;
     }
 
@@ -101,37 +142,8 @@ public static class SongPathResolver
             relativeVariations.Add(Path.Combine("Karaoke", relativePath));
         }
 
-        // Collect search root candidates
-        var roots = new List<string>();
-
-        // 1. Ready system drives
-        try
-        {
-            foreach (var drive in DriveInfo.GetDrives())
-            {
-                if (drive.IsReady)
-                {
-                    roots.Add(drive.RootDirectory.FullName);
-                }
-            }
-        }
-        catch { }
-
-        // 2. Configured library directories from AppSettings
-        try
-        {
-            if (AppSettings.LibraryDirectories != null)
-            {
-                foreach (var dir in AppSettings.LibraryDirectories)
-                {
-                    if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir) && !roots.Contains(dir, StringComparer.OrdinalIgnoreCase))
-                    {
-                        roots.Add(dir);
-                    }
-                }
-            }
-        }
-        catch { }
+        // Collect search root candidates (cached briefly to avoid repeated DriveInfo enumeration)
+        var roots = GetSearchRoots();
 
         // Probe each root with all relative variations
         foreach (var root in roots)
@@ -176,5 +188,56 @@ public static class SongPathResolver
         }
 
         return false;
+    }
+
+    private static List<string> GetSearchRoots()
+    {
+        long now = Environment.TickCount64;
+        lock (_rootsLock)
+        {
+            if (_cachedRoots.Count > 0 && (now - _rootsCacheTicks) < RootsCacheTtlMs)
+            {
+                return _cachedRoots;
+            }
+        }
+
+        var roots = new List<string>();
+
+        // 1. Ready system drives
+        try
+        {
+            foreach (var drive in DriveInfo.GetDrives())
+            {
+                if (drive.IsReady)
+                {
+                    roots.Add(drive.RootDirectory.FullName);
+                }
+            }
+        }
+        catch { }
+
+        // 2. Configured library directories from AppSettings
+        try
+        {
+            if (AppSettings.LibraryDirectories != null)
+            {
+                foreach (var dir in AppSettings.LibraryDirectories)
+                {
+                    if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir) && !roots.Contains(dir, StringComparer.OrdinalIgnoreCase))
+                    {
+                        roots.Add(dir);
+                    }
+                }
+            }
+        }
+        catch { }
+
+        lock (_rootsLock)
+        {
+            _cachedRoots = roots;
+            _rootsCacheTicks = now;
+        }
+
+        return roots;
     }
 }

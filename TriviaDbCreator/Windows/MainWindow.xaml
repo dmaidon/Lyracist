@@ -1,4 +1,4 @@
-<!-- Edited on Aug 19, 2026 @ 15:28:00 -> Added Help and About tabs with rich interactive topic viewer -->
+<!-- Edited on Oct 30, 2026 @ 09:24:00 -> Bind question editor RadioButtons to IsCorrectA/B/C/D and fix DistributionWarning visibility trigger -->
 <Window x:Class="TriviaDbCreator.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -408,10 +408,7 @@
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DistributionWarning}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DistributionWarning, Converter={x:Null}}" Value="False">
+                                                        <DataTrigger Binding="{Binding HasDistributionWarning}" Value="True">
                                                             <Setter Property="Visibility" Value="Visible" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -491,18 +488,7 @@
                                             <TextBlock Text="▲" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <TextBox Grid.Column="1" Text="{Binding EditorOptionA, UpdateSourceTrigger=PropertyChanged}" Background="#0F172A" Foreground="#FFFFFF" BorderThickness="0" Padding="6,4" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" IsChecked="{Binding EditorCorrectIndex, Converter={x:Null}, ConverterParameter=0}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer">
-                                            <RadioButton.Style>
-                                                <Style TargetType="RadioButton">
-                                                    <Setter Property="IsChecked" Value="False" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EditorCorrectIndex}" Value="0">
-                                                            <Setter Property="IsChecked" Value="True" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                        </RadioButton>
+                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" IsChecked="{Binding IsCorrectA, Mode=TwoWay}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer" />
                                     </Grid>
                                 </Border>
 
@@ -518,18 +504,7 @@
                                             <TextBlock Text="◆" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <TextBox Grid.Column="1" Text="{Binding EditorOptionB, UpdateSourceTrigger=PropertyChanged}" Background="#0F172A" Foreground="#FFFFFF" BorderThickness="0" Padding="6,4" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer">
-                                            <RadioButton.Style>
-                                                <Style TargetType="RadioButton">
-                                                    <Setter Property="IsChecked" Value="False" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EditorCorrectIndex}" Value="1">
-                                                            <Setter Property="IsChecked" Value="True" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                        </RadioButton>
+                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" IsChecked="{Binding IsCorrectB, Mode=TwoWay}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer" />
                                     </Grid>
                                 </Border>
 
@@ -545,18 +520,7 @@
                                             <TextBlock Text="●" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <TextBox Grid.Column="1" Text="{Binding EditorOptionC, UpdateSourceTrigger=PropertyChanged}" Background="#0F172A" Foreground="#FFFFFF" BorderThickness="0" Padding="6,4" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer">
-                                            <RadioButton.Style>
-                                                <Style TargetType="RadioButton">
-                                                    <Setter Property="IsChecked" Value="False" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EditorCorrectIndex}" Value="2">
-                                                            <Setter Property="IsChecked" Value="True" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                        </RadioButton>
+                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" IsChecked="{Binding IsCorrectC, Mode=TwoWay}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer" />
                                     </Grid>
                                 </Border>
 
@@ -572,18 +536,7 @@
                                             <TextBlock Text="■" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <TextBox Grid.Column="1" Text="{Binding EditorOptionD, UpdateSourceTrigger=PropertyChanged}" Background="#0F172A" Foreground="#FFFFFF" BorderThickness="0" Padding="6,4" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer">
-                                            <RadioButton.Style>
-                                                <Style TargetType="RadioButton">
-                                                    <Setter Property="IsChecked" Value="False" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EditorCorrectIndex}" Value="3">
-                                                            <Setter Property="IsChecked" Value="True" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                        </RadioButton>
+                                        <RadioButton Grid.Column="2" GroupName="CorrectAnswerGroup" IsChecked="{Binding IsCorrectD, Mode=TwoWay}" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="Set as Correct Answer" />
                                     </Grid>
                                 </Border>
 

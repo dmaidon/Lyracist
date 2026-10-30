@@ -1,6 +1,9 @@
-// Edited on Oct 1, 2026 @ 08:41:00 -> Fix thread safety in UpdatePlayerCount by dispatching to UI thread and reading thread-safe snapshot
+// Edited on Oct 30, 2026 @ 09:20:00 -> Unsubscribe OnPlayerPropertyChanged when players are removed or cleared
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -17,6 +20,7 @@ public partial class ConnectViewModel : ViewModelBase
 {
     private readonly IGameStateService _gameStateService;
     private readonly IKnockoutWebServer _webServer;
+    private readonly HashSet<KnockoutPlayer> _subscribedPlayers = [];
 
     [ObservableProperty]
     private string _wifiSsid = string.Empty;
@@ -59,30 +63,73 @@ public partial class ConnectViewModel : ViewModelBase
 
         foreach (var player in _gameStateService.Players)
         {
-            player.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(KnockoutPlayer.IsConnected))
-                    UpdatePlayerCount();
-            };
+            SubscribePlayer(player);
         }
 
-        _gameStateService.Players.CollectionChanged += (s, e) =>
+        _gameStateService.Players.CollectionChanged += OnPlayersCollectionChanged;
+
+        InitializeNetwork();
+    }
+
+    private void SubscribePlayer(KnockoutPlayer player)
+    {
+        if (_subscribedPlayers.Add(player))
         {
+            player.PropertyChanged += OnPlayerPropertyChanged;
+        }
+    }
+
+    private void UnsubscribePlayer(KnockoutPlayer player)
+    {
+        if (_subscribedPlayers.Remove(player))
+        {
+            player.PropertyChanged -= OnPlayerPropertyChanged;
+        }
+    }
+
+    private void OnPlayersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            foreach (var p in _subscribedPlayers.ToList())
+            {
+                p.PropertyChanged -= OnPlayerPropertyChanged;
+            }
+            _subscribedPlayers.Clear();
+
+            foreach (var p in _gameStateService.Players)
+            {
+                SubscribePlayer(p);
+            }
+        }
+        else
+        {
+            if (e.OldItems != null)
+            {
+                foreach (KnockoutPlayer p in e.OldItems)
+                {
+                    UnsubscribePlayer(p);
+                }
+            }
+
             if (e.NewItems != null)
             {
                 foreach (KnockoutPlayer p in e.NewItems)
                 {
-                    p.PropertyChanged += (ps, pe) =>
-                    {
-                        if (pe.PropertyName == nameof(KnockoutPlayer.IsConnected))
-                            UpdatePlayerCount();
-                    };
+                    SubscribePlayer(p);
                 }
             }
-            UpdatePlayerCount();
-        };
+        }
 
-        InitializeNetwork();
+        UpdatePlayerCount();
+    }
+
+    private void OnPlayerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(KnockoutPlayer.IsConnected))
+        {
+            UpdatePlayerCount();
+        }
     }
 
     public void InitializeNetwork()

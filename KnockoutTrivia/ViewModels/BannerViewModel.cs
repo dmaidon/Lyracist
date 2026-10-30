@@ -1,5 +1,6 @@
-// Created on Aug 27, 2026 @ 14:36:45 -> BannerViewModel for dynamic and static 16:9 bar presentations
+// Edited on Oct 30, 2026 @ 09:20:00 -> Select top surviving scorer in ShowWinner and top streaker in ShowSuperStreak
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
@@ -44,19 +45,22 @@ public partial class BannerViewModel : ViewModelBase
     [RelayCommand]
     public void ShowWinner()
     {
-        var sampleWinner = _gameStateService.Players.Count > 0 
-            ? _gameStateService.Players[0] 
-            : new KnockoutPlayer { Name = "Champion", Score = 150 };
-        CurrentBanner = _bannerService.CreateWinnerBanner(sampleWinner);
+        var winner = _gameStateService.Players
+            .OrderByDescending(p => !p.IsEliminated)
+            .ThenByDescending(p => p.Score)
+            .ThenBy(p => p.StrikeCount)
+            .FirstOrDefault() ?? new KnockoutPlayer { Name = "Champion", Score = 150 };
+        CurrentBanner = _bannerService.CreateWinnerBanner(winner);
     }
 
     [RelayCommand]
     public void ShowSuperStreak()
     {
-        var samplePlayer = _gameStateService.Players.Count > 0 
-            ? _gameStateService.Players[0] 
-            : new KnockoutPlayer { Name = "Trivia Master" };
-        CurrentBanner = _bannerService.CreateSuperStreakBanner(samplePlayer);
+        var streaker = _gameStateService.Players
+            .OrderByDescending(p => p.StreakCount)
+            .ThenByDescending(p => p.Score)
+            .FirstOrDefault() ?? new KnockoutPlayer { Name = "Trivia Master" };
+        CurrentBanner = _bannerService.CreateSuperStreakBanner(streaker);
     }
 
     [RelayCommand]

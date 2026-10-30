@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:49:00 -> Implement IDisposable and RebindEngine to eliminate event subscriber leak on TV window close/reopen
+// Edited on Oct 30, 2026 @ 09:17:30 -> Use atomic EngineSnapshot in SyncWithEngine to prevent thread-safety race on EliminatedAnswerIndices
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -424,13 +424,14 @@ public partial class TriviaDisplayViewModel : ObservableObject, IDisposable
                 OptionC = currentQ.Options.Count > 2 ? currentQ.Options[2] : "";
                 OptionD = currentQ.Options.Count > 3 ? currentQ.Options[3] : "";
 
-                OptionAOpacity = _engine.EliminatedAnswerIndices.Contains(0) ? 0.12 : 1.0;
-                OptionBOpacity = _engine.EliminatedAnswerIndices.Contains(1) ? 0.12 : 1.0;
-                OptionCOpacity = _engine.EliminatedAnswerIndices.Contains(2) ? 0.12 : 1.0;
-                OptionDOpacity = _engine.EliminatedAnswerIndices.Contains(3) ? 0.12 : 1.0;
+                var snap = _engine.GetSnapshot();
+                OptionAOpacity = snap.EliminatedIndices.Contains(0) ? 0.12 : 1.0;
+                OptionBOpacity = snap.EliminatedIndices.Contains(1) ? 0.12 : 1.0;
+                OptionCOpacity = snap.EliminatedIndices.Contains(2) ? 0.12 : 1.0;
+                OptionDOpacity = snap.EliminatedIndices.Contains(3) ? 0.12 : 1.0;
 
-                RemainingSeconds = _engine.RemainingSeconds;
-                TotalCountdownSeconds = _engine.TotalCountdownSeconds;
+                RemainingSeconds = snap.RemainingSeconds;
+                TotalCountdownSeconds = snap.TotalCountdownSeconds;
                 CountdownProgress = TotalCountdownSeconds > 0 ? Math.Clamp((double)RemainingSeconds / TotalCountdownSeconds, 0.0, 1.0) : 0;
                 IsWarningActive = _engine.IsInWarningCountdown;
 

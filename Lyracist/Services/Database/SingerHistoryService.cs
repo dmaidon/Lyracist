@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:35:00 -> Add MergeHistory and DeleteHistoryEntry support
+// Edited on Oct 30, 2026 @ 12:04:00 -> Use unified LyracistDbContext connection string without Cache=Shared to prevent WAL/schema conflicts
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,8 +23,7 @@ namespace Lyracist.Services.Database
     {
         private static string GetConnectionString()
         {
-            string dbPath = Path.Combine(Lyracist.Shared.Globals.DataDir, "lyracist.db");
-            return $"Data Source={dbPath};Cache=Shared";
+            return Lyracist.Data.LyracistDbContext.GetConnectionString();
         }
 
         public static void EnsureTableCreated()

@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:43:00 -> Prevent re-spinning wheel and apply SuperStreakTokensRemovedPerHit setting
+// Edited on Oct 30, 2026 @ 09:20:00 -> Reset CanSpin/HasSpun on RefreshSegments and add ContinueGameCommand flow
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -41,6 +41,8 @@ public partial class WheelViewModel : ViewModelBase
 
     public ObservableCollection<WheelSegment> Segments { get; } = [];
 
+    public event EventHandler? ContinueRequested;
+
     public WheelViewModel(
         IWheelService wheelService,
         IGameStateService gameStateService,
@@ -57,8 +59,6 @@ public partial class WheelViewModel : ViewModelBase
     {
         SuperStreakPlayer = player;
         StatusHeader = $"⚡ {player.Name.ToUpperInvariant()} HIT SUPER STREAK! ⚡";
-        HasSpun = false;
-        CanSpin = true;
         RefreshSegments();
     }
 
@@ -74,6 +74,8 @@ public partial class WheelViewModel : ViewModelBase
             Segments.Add(seg);
         }
 
+        HasSpun = false;
+        CanSpin = Segments.Count > 0;
         ResultText = Segments.Count > 0 ? "SPIN THE WHEEL TO TARGET AN OPPONENT!" : "NO OPPONENT TOKENS AVAILABLE";
     }
 
@@ -83,7 +85,6 @@ public partial class WheelViewModel : ViewModelBase
         if (IsSpinning || HasSpun || Segments.Count == 0) return;
 
         IsSpinning = true;
-        HasSpun = true;
         CanSpin = false;
         ResultText = "SPINNING...";
 
@@ -110,6 +111,7 @@ public partial class WheelViewModel : ViewModelBase
 
         WheelAngle = finalAngle % 360;
         IsSpinning = false;
+        HasSpun = true;
 
         if (target?.Player != null)
         {
@@ -133,5 +135,21 @@ public partial class WheelViewModel : ViewModelBase
                 SuperStreakPlayer.Score += 50;
             }
         }
+
+        if (_gameStateService.Settings.GameMode == GameAdvanceMode.Automatic)
+        {
+            int delayMs = Math.Max(2, _gameStateService.Settings.AutoAdvanceDelaySeconds) * 1000;
+            await Task.Delay(delayMs);
+            if (HasSpun && _gameStateService.Phase == GameStatePhase.SuperStreak)
+            {
+                ContinueGame();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ContinueGame()
+    {
+        ContinueRequested?.Invoke(this, EventArgs.Empty);
     }
 }

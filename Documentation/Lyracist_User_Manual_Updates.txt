@@ -1,4 +1,35 @@
-// Edited on Oct 30, 2026 @ 07:07:00 -> Document distinct 12-color Scaryoke category palette across KSRotation, KSRotation.Maui, Lyracist, ScaryokeWheel, and DJ portal
+// Edited on Oct 30, 2026 @ 12:12:00 -> Document automatic database & FTS5 search self-repair engine and music/karaoke search resilience
+
+Lyracist & LyracistDbEditor: Automatic Database & FTS5 Search Self-Repair, Tab Layout & High-Speed Drive Rescanning - (October 2026)
+
+Section: Music & Karaoke Library / Search, Drive Scanning & Automatic Database Self-Repair
+
+0. Automatic Database & Search Index Self-Repair (Zero Manual Deletion Required):
+   - Both Lyracist and LyracistDbEditor automatically inspect and repair 'lyracist.db' on startup, before drive rescans, and during searches—eliminating the need to ever manually delete the database file on a show computer.
+   - Automatic Schema & Migration Upgrade: Automatically releases abandoned migration locks ('__EFMigrationsLock'), clears stale or corrupt SQLite WAL/SHM files, adds any missing columns across legacy databases ('AllowRecording', 'NeedsRepair', 'MixInMs', 'MixOutMs', 'Key', 'Tempo', etc.), deduplicates song entries, and repairs broken indexes without losing existing songs, singers, rotation entries, or history.
+   - Live FTS5 Search Health Probe & Shadow-Table Recovery: Verifies 'SongSearch' row counts, rowid alignment, and live 'MATCH' query execution. If the FTS5 virtual table or its shadow tables ('SongSearch_data', 'SongSearch_idx', etc.) are out of sync or corrupted, the search index is automatically rebuilt in a single fast transaction.
+   - Instant Fallback Search: If an FTS5 search encounters an unindexed state, Lyracist immediately falls back to direct title/artist/filepath matching so search results (e.g., searching 'elvis') appear right away while the FTS5 index self-heals in the background.
+
+0A. Instant Music & Karaoke Search and Drive Rescanning:
+   - Searching across the 'Karaoke Library' and 'Music Library' tabs supports full-text prefix matching across titles and artists (including titles containing words like 'And', 'Or', and 'Not') and renders full-width Song, Artist, Duration, and Genre columns.
+   - Rescanning external USB drives ('Rescan All' or '+ Add Folder' in Settings -> Library & Ratings) reports live file discovery progress ('Discovering (N files)...'), removes moved or deleted entries in a single batch transaction, and automatically verifies and synchronizes the full-text search index ('SongSearch') upon completion so newly scanned or updated drives are immediately searchable in both Lyracist and LyracistDbEditor.
+
+Lyracist, KSRotation, LyracistTrivia, TriviaDbCreator & KnockoutTrivia: Trivia Suite Enhancements & Host Controls - (October 2026)
+
+Section: Entertainment & Gamification / Trivia Host Console, Database Creator & Knockout Trivia
+
+0. Trivia Host Console Enhancements (Lyracist & KSRotation):
+   - Pre-Game Lobby Timer Quick Controls: Beneath '🎯 Launch Pre-Game Countdown' on the Trivia host console in both Lyracist and KSRotation, the '⏱ Pre-Game Lobby Timer' bar displays the live countdown and provides 1-click buttons for '+1m', '+5m', 'Reset' (5 minutes), and '⏯' (Pause / Resume).
+   - Host Correct Answer Badges: When an answer is revealed ('🔓 Lock & Reveal Answer' or '⚡ Instant Reveal'), the matching Option card (A, B, C, or D) on the host console displays a green '✓ CORRECT' badge, and the '📊 Live Patron Response Visualizer' scales its progress bars dynamically to the active player count.
+   - Live Port & Monitor Updates: Changing the Trivia server port or target display monitor in Trivia Settings immediately restarts the Trivia mobile web server, refreshes the patron join QR code, and repositions the TV display window without requiring an application restart.
+
+0A. Trivia Database Creator & Banner Studio ('TriviaDbCreator.exe'):
+   - Question Editor Correct Answer Selection: Click the radio button next to Option A (▲), Option B (◆), Option C (●), or Option D (■) to set the correct answer for any new or existing question.
+   - 16:9 Category Banner Studio: Clicking '🎨 Generate Banner' renders and saves a 1920x1080 announcement banner for the selected pack (including custom user-authored packs and updated pack titles/descriptions).
+
+0B. Knockout Trivia Standalone Game Show ('KnockoutTrivia.exe'):
+   - Question Pack Loading: '📂 Load Pack' supports both standard Lyracist Trivia pack files ('Packs/*.json') and custom Knockout question arrays.
+   - Super Streak Wheel Continuation: After spinning the Super Streak Wheel, click '▶ CONTINUE GAME' on the Wheel view to return to the question board and advance to the next question.
 
 KSRotation, KSRotation.Maui, Lyracist & ScaryokeWheel: Distinct 12-Color Scaryoke Category Palette, Manual Category Assignment & Compact DJ Portal Singer Listings - (October 2026)
 

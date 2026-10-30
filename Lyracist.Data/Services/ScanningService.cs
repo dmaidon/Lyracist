@@ -1,4 +1,4 @@
-// Edited on Oct 11, 2026 @ 13:30:00 -> Integrate standalone noartist.db store for persistence across database resets
+// Edited on Oct 30, 2026 @ 12:05:00 -> Ensure schema columns and tables before querying Songs during directory scans
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -267,9 +267,13 @@ namespace Lyracist.Data.Services
 
                 try
                 {
-                    var files = SafeEnumerateFiles(path);
+                    var files = SafeEnumerateFiles(path, progress, candidateFiles.Count, cancellationToken);
                     scannedPaths.Add(path);
                     candidateFiles.AddRange(files);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -280,7 +284,10 @@ namespace Lyracist.Data.Services
             int totalFiles = candidateFiles.Count;
             if (totalFiles == 0) return;
 
+            var candidateFilesSet = new HashSet<string>(candidateFiles, StringComparer.OrdinalIgnoreCase);
+            LyracistDbContext.EnsureSchemaColumnsAndTables(_context.Database.GetDbConnection());
             var searchService = new SearchService(_context);
+            searchService.EnsureFtsTableExists();
             int processed = 0;
 
             // Query existing song paths for fast local duplicate checks
@@ -295,18 +302,21 @@ namespace Lyracist.Data.Services
             var noArtistMap = await NoArtistStore.GetAllAsync(cancellationToken);
 
             // Clean up dead records for files that no longer exist under the scanned directory paths.
+            // Check candidateFilesSet in O(1) memory first to avoid 100k+ redundant File.Exists calls on USB drives.
             var songsToRemove = existingSongsMap.Values
-                .Where(s => scannedPaths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
+                .Where(s => scannedPaths.Any(p => IsPathUnderDirectory(s.FilePath, p))
+                    && !candidateFilesSet.Contains(s.FilePath)
+                    && !File.Exists(s.FilePath))
                 .ToList();
 
             if (songsToRemove.Count > 0)
             {
                 _context.Songs.RemoveRange(songsToRemove);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
                 await NoArtistStore.RemoveBatchAsync(songsToRemove.Select(s => s.FilePath), cancellationToken);
+                await searchService.RemoveSongsFromIndexBatch(songsToRemove.Select(s => s.SongId));
                 foreach (var s in songsToRemove)
                 {
-                    await searchService.RemoveSongFromIndex(s.SongId);
                     existingSongsMap.Remove(s.FilePath);
                 }
             }
@@ -324,10 +334,10 @@ namespace Lyracist.Data.Services
             if (duplicateCdgSongs.Count > 0)
             {
                 _context.Songs.RemoveRange(duplicateCdgSongs);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
+                await searchService.RemoveSongsFromIndexBatch(duplicateCdgSongs.Select(s => s.SongId));
                 foreach (var s in duplicateCdgSongs)
                 {
-                    await searchService.RemoveSongFromIndex(s.SongId);
                     existingSongsMap.Remove(s.FilePath);
                 }
             }
@@ -519,6 +529,9 @@ namespace Lyracist.Data.Services
                     });
                 }
             }
+
+            // Ensure FTS5 search index is completely synchronized and deduplicated after scanning
+            searchService.EnsureFtsIndexSynchronized(forceCheck: true);
         }
 
         // ==========================================
@@ -617,6 +630,8 @@ namespace Lyracist.Data.Services
             {
                 Lyracist.Shared.Globals.LogInfo("Lyracist", $"Metadata scan complete. {unknownArtistCount:N0} track(s) remain with 'Unknown Artist' (flagged as Needs Repair in LyracistDbEditor).");
             }
+
+            searchService.EnsureFtsIndexSynchronized(forceCheck: true);
         }
 
         private static async Task ProbeSongMetadataAsync(Song song)
@@ -770,7 +785,11 @@ namespace Lyracist.Data.Services
             return LibraryMaintenanceService.IsPathUnderDirectory(filePath, directoryPath);
         }
 
-        private static List<string> SafeEnumerateFiles(string path)
+        private static List<string> SafeEnumerateFiles(
+            string path,
+            IProgress<ScanProgress>? progress = null,
+            int priorFilesCount = 0,
+            CancellationToken cancellationToken = default)
         {
             var files = new List<string>();
             var dirs = new Queue<string>();
@@ -778,6 +797,7 @@ namespace Lyracist.Data.Services
 
             while (dirs.Count > 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 string currentDir = dirs.Dequeue();
                 try
                 {
@@ -793,6 +813,16 @@ namespace Lyracist.Data.Services
                         if (ext == ".mp3" || ext == ".mp4" || ext == ".zip" || ext == ".m4a" || ext == ".flac" || ext == ".wav" || ext == ".wma" || ext == ".aac" || ext == ".ogg")
                         {
                             files.Add(f);
+                            int totalDiscovered = priorFilesCount + files.Count;
+                            if (progress != null && totalDiscovered % 500 == 0)
+                            {
+                                progress.Report(new ScanProgress
+                                {
+                                    TotalFilesFound = totalDiscovered,
+                                    FilesProcessed = 0,
+                                    CurrentFile = $"Discovering ({totalDiscovered:N0} files)..."
+                                });
+                            }
                         }
                     }
 

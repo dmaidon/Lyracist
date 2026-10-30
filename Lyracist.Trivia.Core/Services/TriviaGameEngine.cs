@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:48:00 -> Fix #11 answered state on revisit, #12 timer standby resume drift, #37 tick guard, #45 tie breakers and player pruning
+// Edited on Oct 30, 2026 @ 09:15:00 -> Reject eliminated answer submissions, expose elimination countdown in snapshot, refresh leaderboard on answer, and fix VoidCurrentQuestion & RegisterPlayer team update
 using Lyracist.Trivia.Core.Models;
 using System.Collections.Concurrent;
 using System.Timers;
@@ -215,12 +215,17 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
+            int remSecs = State == TriviaGameState.EliminatingAnswers ? _eliminationCountdownSeconds : RemainingSeconds;
+            int totSecs = State == TriviaGameState.EliminatingAnswers
+                ? (Settings.AnswerEliminationIntervalSeconds > 0 ? Settings.AnswerEliminationIntervalSeconds : 5)
+                : TotalCountdownSeconds;
+
             return new EngineSnapshot(
                 State,
                 CurrentSession.CurrentQuestion,
                 [.. EliminatedAnswerIndices],
-                RemainingSeconds,
-                TotalCountdownSeconds,
+                remSecs,
+                totSecs,
                 IsPaused,
                 PauseReason,
                 IntermissionSecondsRemaining,
@@ -246,6 +251,10 @@ public class TriviaGameEngine : IDisposable
             LastSeenAt = DateTime.UtcNow
         });
 
+        if (!string.IsNullOrWhiteSpace(cleanTeam) || State == TriviaGameState.Lobby)
+        {
+            player.TeamName = cleanTeam;
+        }
         player.IsConnected = true;
         player.LastSeenAt = DateTime.UtcNow;
         LeaderboardUpdated?.Invoke(this, GetPlayers());
@@ -379,6 +388,11 @@ public class TriviaGameEngine : IDisposable
                 return false;
             }
 
+            if (optionIndex < 0 || optionIndex >= q.Options.Count || EliminatedAnswerIndices.Contains(optionIndex))
+            {
+                return false;
+            }
+
             // Only players who joined (and weren't kicked) can answer. This used to quietly
             // register any unknown name, which let a kicked player straight back in and let a
             // scripted client add unlimited leaderboard entries, bypassing the join rate limit.
@@ -429,11 +443,16 @@ public class TriviaGameEngine : IDisposable
                 if (State == TriviaGameState.QuestionActive)
                 {
                     StartAnswerElimination();
+                    LeaderboardUpdated?.Invoke(this, GetPlayers());
                 }
                 else
                 {
                     CompleteRevealAnswer();
                 }
+            }
+            else
+            {
+                LeaderboardUpdated?.Invoke(this, GetPlayers());
             }
 
             return true;
@@ -739,6 +758,7 @@ public class TriviaGameEngine : IDisposable
             if (q == null) return;
 
             _tickTimer.Stop();
+            _questionAnswers.TryGetValue(AnswerKey(q), out var savedAnswers);
             _questionAnswers.Remove(AnswerKey(q));
 
             // Reverse score adjustments and stats for players who answered this question
@@ -746,9 +766,12 @@ public class TriviaGameEngine : IDisposable
             {
                 if (p.HasAnsweredCurrentQuestion)
                 {
+                    bool wasCorrect = (savedAnswers != null && savedAnswers.TryGetValue(p.Name, out var ans))
+                        ? ans.IsCorrect
+                        : p.LastPointsEarned > 0;
                     p.TotalScore -= p.LastPointsEarned;
                     p.TotalAnswered = Math.Max(0, p.TotalAnswered - 1);
-                    if (p.LastPointsEarned > 0)
+                    if (wasCorrect)
                     {
                         p.TotalCorrect = Math.Max(0, p.TotalCorrect - 1);
                     }

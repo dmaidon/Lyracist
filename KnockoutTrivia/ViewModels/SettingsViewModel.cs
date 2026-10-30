@@ -1,9 +1,10 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Subscribe to MonitorEnumerator.MonitorsChanged to auto-refresh available monitors
+// Edited on Oct 30, 2026 @ 09:20:00 -> Sync live settings to GameStateService, restart web server on port change, and marshal/dispose MonitorsChanged
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
@@ -12,12 +13,15 @@ using Lyracist.Shared;
 
 namespace KnockoutTrivia.ViewModels;
 
-public partial class SettingsViewModel : ViewModelBase
+public partial class SettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly IConfigService _configService;
     private readonly IDisplayService _displayService;
     private readonly ITriviaDataService _triviaDataService;
     private readonly IGameStateService _gameStateService;
+    private readonly IKnockoutWebServer? _webServer;
+    private int _previousWebServerPort;
+    private bool _disposed;
 
     [ObservableProperty]
     private KnockoutSettings _settings;
@@ -43,19 +47,23 @@ public partial class SettingsViewModel : ViewModelBase
     public event EventHandler<(int Index, string? Device)>? OpenAudienceDisplayRequested;
     public event EventHandler? CloseAudienceDisplayRequested;
     public event EventHandler<(int Index, string? Device)>? MoveHostWindowRequested;
+    public event EventHandler? SettingsUpdated;
 
     public SettingsViewModel(
         IConfigService configService,
         IDisplayService displayService,
         ITriviaDataService triviaDataService,
-        IGameStateService gameStateService)
+        IGameStateService gameStateService,
+        IKnockoutWebServer? webServer = null)
     {
         _configService = configService;
         _displayService = displayService;
         _triviaDataService = triviaDataService;
         _gameStateService = gameStateService;
+        _webServer = webServer;
 
-        _settings = _configService.LoadSettings();
+        _settings = _gameStateService.Settings ?? _configService.LoadSettings();
+        _previousWebServerPort = _settings.WebServerPort;
 
         // Auto-detect Wi-Fi if not configured
         if (string.IsNullOrWhiteSpace(_settings.WifiSsid))
@@ -69,8 +77,20 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         RefreshMonitors();
-        MonitorEnumerator.MonitorsChanged += (s, e) => RefreshMonitors();
+        MonitorEnumerator.MonitorsChanged += OnMonitorsChanged;
         _ = LoadSourcesAsync();
+    }
+
+    private void OnMonitorsChanged(object? sender, EventArgs e)
+    {
+        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+        {
+            _ = Application.Current.Dispatcher.InvokeAsync(RefreshMonitors);
+        }
+        else
+        {
+            RefreshMonitors();
+        }
     }
 
     [RelayCommand]
@@ -215,6 +235,16 @@ public partial class SettingsViewModel : ViewModelBase
         bool sourcesChanged = !previousSources.SetEquals(newSources);
 
         Settings.SelectedSourcePaths = newSources;
+        _gameStateService.UpdateSettings(Settings);
+
+        if (_webServer != null && Settings.WebServerPort > 0 && Settings.WebServerPort != _previousWebServerPort)
+        {
+            _webServer.Start(Settings.WebServerPort);
+            _previousWebServerPort = Settings.WebServerPort;
+        }
+
+        SettingsUpdated?.Invoke(this, EventArgs.Empty);
+
         bool saved = _configService.SaveSettings(Settings);
 
         if (sourcesChanged)
@@ -234,10 +264,18 @@ public partial class SettingsViewModel : ViewModelBase
     public async Task ResetDefaultsAsync()
     {
         Settings = new KnockoutSettings();
+        _gameStateService.UpdateSettings(Settings);
         SelectAllSources();
         RefreshMonitors();
         await SaveSettingsAsync();
         StatusMessage = "Restored default settings, monitors, and all databases.";
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        MonitorEnumerator.MonitorsChanged -= OnMonitorsChanged;
     }
 }
 

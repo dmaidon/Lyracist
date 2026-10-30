@@ -1,4 +1,4 @@
-<!-- Edited on Sep 5, 2026 @ 09:15:00 -> Add full manual/automatic Live Question Controls (Prev, Next, Jump to ComboBox, Timer Bump, Option Fade, Reveal, Void) -->
+<!-- Edited on Oct 30, 2026 @ 09:28:30 -> Add pre-game countdown quick controls, dynamic distribution progress maximum, and correct answer badges on host option cards -->
 <Page x:Class="Lyracist.Views.Pages.TriviaPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -151,6 +151,32 @@
                                    Appearance="Primary" Background="#6366F1" Foreground="White" Style="{StaticResource StandardActionBtn}"
                                    ToolTip="Opens big screen with category banner, countdown timer, and scan-to-join instructions." />
 
+                        <!-- Pre-Game Countdown Quick Controls -->
+                        <Border Background="#1E293B" CornerRadius="8" Padding="8,6" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="⏱ Pre-Game Lobby Timer:" FontSize="10" FontWeight="SemiBold" Foreground="#94A3B8" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding PreGameCountdownText}" FontSize="12" FontWeight="ExtraBold" Foreground="#38BDF8" VerticalAlignment="Center" />
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:Button Grid.Column="0" Content="+1m" Command="{Binding Add1MinuteCommand}" Appearance="Secondary" Height="26" Margin="0,0,2,0" FontSize="10" ToolTip="Add 1 minute to pre-game countdown" />
+                                    <ui:Button Grid.Column="1" Content="+5m" Command="{Binding Add5MinutesCommand}" Appearance="Secondary" Height="26" Margin="2,0,2,0" FontSize="10" ToolTip="Add 5 minutes to pre-game countdown" />
+                                    <ui:Button Grid.Column="2" Content="Reset" Command="{Binding Reset5MinutesCommand}" Appearance="Secondary" Height="26" Margin="2,0,2,0" FontSize="10" ToolTip="Reset pre-game countdown to 5 minutes" />
+                                    <ui:Button Grid.Column="3" Content="⏯" Command="{Binding TogglePreGameTimerCommand}" Appearance="Secondary" Height="26" Margin="2,0,0,0" FontSize="10" ToolTip="Pause or resume pre-game countdown" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
                         <ui:Button Content="▶ Start Game Now (Skip Countdown)" Command="{Binding StartGameCommand}"
                                    Appearance="Primary" Background="#10B981" Foreground="White" Style="{StaticResource StandardActionBtn}" Margin="0,0,0,12" />
 
@@ -263,7 +289,7 @@
                                             <ColumnDefinition Width="55" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Label}" FontWeight="Bold" FontSize="12" Foreground="#38BDF8" VerticalAlignment="Center" />
-                                        <ProgressBar Grid.Column="1" Value="{Binding Count}" Maximum="25" Height="10" Foreground="#8B5CF6" Background="#334155" Margin="6,0" VerticalAlignment="Center" />
+                                        <ProgressBar Grid.Column="1" Value="{Binding Count}" Maximum="{Binding DataContext.MaxDistributionCount, RelativeSource={RelativeSource AncestorType=Page}}" Height="10" Foreground="#8B5CF6" Background="#334155" Margin="6,0" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="2" Text="{Binding Count, StringFormat='{}{0} votes'}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" VerticalAlignment="Center" />
                                     </Grid>
                                 </DataTemplate>
@@ -286,7 +312,22 @@
                     <!-- Option A -->
                     <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource AnswerBoxStyle}">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="▲ OPTION A" FontWeight="Black" Foreground="#EF4444" FontSize="11" Margin="0,0,0,4" />
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="▲ OPTION A" FontWeight="Black" Foreground="#EF4444" FontSize="11" />
+                                <Border Background="#10B981" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CorrectAnswerIndex}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="✓ CORRECT" FontSize="9" FontWeight="Black" Foreground="White" />
+                                </Border>
+                            </Grid>
                             <TextBlock Text="{Binding OptionA}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
@@ -294,7 +335,22 @@
                     <!-- Option B -->
                     <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource AnswerBoxStyle}">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="◆ OPTION B" FontWeight="Black" Foreground="#3B82F6" FontSize="11" Margin="0,0,0,4" />
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="◆ OPTION B" FontWeight="Black" Foreground="#3B82F6" FontSize="11" />
+                                <Border Background="#10B981" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CorrectAnswerIndex}" Value="1">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="✓ CORRECT" FontSize="9" FontWeight="Black" Foreground="White" />
+                                </Border>
+                            </Grid>
                             <TextBlock Text="{Binding OptionB}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
@@ -302,7 +358,22 @@
                     <!-- Option C -->
                     <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource AnswerBoxStyle}">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="● OPTION C" FontWeight="Black" Foreground="#F59E0B" FontSize="11" Margin="0,0,0,4" />
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="● OPTION C" FontWeight="Black" Foreground="#F59E0B" FontSize="11" />
+                                <Border Background="#10B981" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CorrectAnswerIndex}" Value="2">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="✓ CORRECT" FontSize="9" FontWeight="Black" Foreground="White" />
+                                </Border>
+                            </Grid>
                             <TextBlock Text="{Binding OptionC}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
@@ -310,7 +381,22 @@
                     <!-- Option D -->
                     <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource AnswerBoxStyle}">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="■ OPTION D" FontWeight="Black" Foreground="#10B981" FontSize="11" Margin="0,0,0,4" />
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="■ OPTION D" FontWeight="Black" Foreground="#10B981" FontSize="11" />
+                                <Border Background="#10B981" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CorrectAnswerIndex}" Value="3">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="✓ CORRECT" FontSize="9" FontWeight="Black" Foreground="White" />
+                                </Border>
+                            </Grid>
                             <TextBlock Text="{Binding OptionD}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>

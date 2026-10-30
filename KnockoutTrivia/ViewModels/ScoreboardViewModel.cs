@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:38:00 -> Remove fake player seeding on launch to eliminate ghost players
+// Edited on Oct 30, 2026 @ 09:20:00 -> Pass Settings.MaxTokens to AwardToken and check elimination/winner on AddStrike
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -50,7 +50,7 @@ public partial class ScoreboardViewModel : ViewModelBase
     {
         if (player != null)
         {
-            _tokenService.AwardToken(player);
+            _tokenService.AwardToken(player, _gameStateService.Settings.MaxTokens);
         }
     }
 
@@ -68,7 +68,7 @@ public partial class ScoreboardViewModel : ViewModelBase
     {
         if (player != null && player.StrikeCount < 3)
         {
-            player.StrikeCount++;
+            _gameStateService.AddPlayerStrike(player);
         }
     }
 

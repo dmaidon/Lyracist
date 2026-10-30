@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Update GameMasterName fallback to Guest DJ
+// Edited on Oct 30, 2026 @ 09:28:00 -> Debounce disk writes on property changes, apply SelectedMonitor changes live, and subscribe to MonitorsChanged
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,10 +12,21 @@ using Lyracist.Trivia.Core.Services;
 
 namespace Lyracist.ViewModels;
 
-public partial class TriviaSettingsViewModel : BaseViewModel
+public partial class TriviaSettingsViewModel : BaseViewModel, IDisposable
 {
     private readonly TriviaViewModel _triviaViewModel;
+    private readonly System.Timers.Timer _saveDebounceTimer = new(500) { AutoReset = false };
+    private readonly EventHandler _monitorsChangedHandler;
     private DispatcherTimer? _statusTimer;
+    private bool _isLoading;
+
+    private void DebounceSaveAndApply()
+    {
+        if (_isLoading) return;
+        _saveDebounceTimer.Stop();
+        _saveDebounceTimer.Start();
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private TriviaSettings _settings;
@@ -30,8 +41,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnInstructionBannerTextChanged(string value)
     {
         Settings.InstructionBannerText = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -40,8 +50,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnDefaultQuestionSecondsChanged(int value)
     {
         Settings.DefaultQuestionSeconds = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -50,8 +59,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnWarningCountdownSecondsChanged(int value)
     {
         Settings.WarningCountdownSeconds = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -60,8 +68,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnAnswerEliminationIntervalSecondsChanged(int value)
     {
         Settings.AnswerEliminationIntervalSeconds = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -70,8 +77,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnPostRevealDelaySecondsChanged(int value)
     {
         Settings.PostRevealDelaySeconds = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -80,8 +86,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnBaseQuestionPointsChanged(int value)
     {
         Settings.BasePointsPerQuestion = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -90,8 +95,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnWrongAnswerDeductionPointsChanged(int value)
     {
         Settings.WrongAnswerDeductionPoints = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -100,8 +104,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnTieredScoringEnabledChanged(bool value)
     {
         Settings.TieredScoringEnabled = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -110,8 +113,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnPoints4OptionsPercentChanged(int value)
     {
         Settings.Points4OptionsPercent = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -120,8 +122,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnPoints3OptionsPercentChanged(int value)
     {
         Settings.Points3OptionsPercent = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -130,8 +131,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnPoints2OptionsPercentChanged(int value)
     {
         Settings.Points2OptionsPercent = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -140,8 +140,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnSpeedBonusEnabledChanged(bool value)
     {
         Settings.SpeedBonusEnabled = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -150,8 +149,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnMaxSpeedBonusPointsChanged(int value)
     {
         Settings.MaxSpeedBonus = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -160,8 +158,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnStreakBonusEnabledChanged(bool value)
     {
         Settings.StreakBonusMultiplier = value ? StreakMultiplier : 0;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -172,8 +169,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
         if (StreakBonusEnabled)
         {
             Settings.StreakBonusMultiplier = value;
-            TriviaStorageHelper.SaveSettings(Settings);
-            _triviaViewModel.ApplySettings(Settings);
+            DebounceSaveAndApply();
         }
     }
 
@@ -183,8 +179,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnAutoAdvanceQuestionsChanged(bool value)
     {
         Settings.AutoAdvanceQuestions = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -193,8 +188,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnAutoStartNextGameEnabledChanged(bool value)
     {
         Settings.AutoStartNextGameEnabled = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -203,8 +197,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnNextGameDelayMinutesChanged(int value)
     {
         Settings.NextGameDelayMinutes = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -213,8 +206,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnPreGameCountdownMinutesChanged(int value)
     {
         Settings.PreGameCountdownMinutes = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -223,8 +215,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnAutoStartAfterCountdownChanged(bool value)
     {
         Settings.AutoStartAfterCountdown = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -233,8 +224,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnSoundEffectsEnabledChanged(bool value)
     {
         Settings.SoundEffectsEnabled = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -243,8 +233,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnServerPortChanged(int value)
     {
         Settings.Port = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -253,8 +242,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnWifiSsidChanged(string value)
     {
         Settings.WifiSsid = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
     }
 
     [ObservableProperty]
@@ -263,8 +251,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     partial void OnWifiPasswordChanged(string value)
     {
         Settings.WifiPassword = value;
-        TriviaStorageHelper.SaveSettings(Settings);
-        _triviaViewModel.ApplySettings(Settings);
+        DebounceSaveAndApply();
         if (!string.IsNullOrWhiteSpace(WifiSsid) && !string.IsNullOrWhiteSpace(value))
         {
             WifiPasswordStore.SetPasswordForSsid(WifiSsid, value);
@@ -273,6 +260,15 @@ public partial class TriviaSettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private MonitorInfo? _selectedMonitor;
+
+    partial void OnSelectedMonitorChanged(MonitorInfo? value)
+    {
+        if (value != null && !_isLoading)
+        {
+            Settings.SelectedMonitorDevice = value.DeviceName;
+            DebounceSaveAndApply();
+        }
+    }
 
     [ObservableProperty]
     private string _statusMessage = "";
@@ -286,8 +282,19 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     {
         _triviaViewModel = triviaViewModel;
         _settings = TriviaStorageHelper.LoadSettings();
-        LoadFromSettings();
-        RefreshMonitors();
+        _saveDebounceTimer.Elapsed += (_, _) => TriviaStorageHelper.SaveSettings(Settings);
+        _isLoading = true;
+        try
+        {
+            LoadFromSettings();
+            RefreshMonitors();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+        _monitorsChangedHandler = (_, _) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(RefreshMonitors);
+        MonitorEnumerator.MonitorsChanged += _monitorsChangedHandler;
     }
 
     public void RefreshMonitors()
@@ -399,6 +406,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     [RelayCommand]
     private void SaveSettings()
     {
+        _saveDebounceTimer.Stop();
         PushToSettings();
         TriviaStorageHelper.SaveSettings(Settings);
 
@@ -414,11 +422,29 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     [RelayCommand]
     private void ResetDefaults()
     {
-        Settings = new TriviaSettings();
-        LoadFromSettings();
+        _saveDebounceTimer.Stop();
+        _isLoading = true;
+        try
+        {
+            Settings = new TriviaSettings();
+            LoadFromSettings();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
         TriviaStorageHelper.SaveSettings(Settings);
         _triviaViewModel.ApplySettings(Settings);
         ShowStatus("Trivia settings reset to defaults.");
+    }
+
+    public void Dispose()
+    {
+        MonitorEnumerator.MonitorsChanged -= _monitorsChangedHandler;
+        bool pending = _saveDebounceTimer.Enabled;
+        _saveDebounceTimer.Dispose();
+        if (pending) TriviaStorageHelper.SaveSettings(Settings);
+        GC.SuppressFinalize(this);
     }
 
     private void ShowStatus(string message)

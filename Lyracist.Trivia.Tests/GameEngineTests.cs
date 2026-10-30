@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:10:00 -> Add unit tests for #3 leaderboard auto-advance, #4 games played reset, #5 question ID validation, and #6 un-elimination on reset timer
+// Edited on Oct 30, 2026 @ 09:32:30 -> Add unit tests for eliminated option rejection, elimination countdown snapshot, zero-point void rollback, and team name updates
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -1039,6 +1039,82 @@ public class GameEngineTests
         bool acceptedValid = engine.SubmitAnswer("Alice", 1, 2000, questionId: "Q1");
         Assert.True(acceptedValid);
         Assert.True(alice.HasAnsweredCurrentQuestion);
+    }
+
+    [Fact]
+    public void SubmitAnswer_RejectsEliminatedAndOutOfRangeOptions_AndFiresLeaderboardUpdated()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.False(engine.SubmitAnswer("Alice", -1));
+        Assert.False(engine.SubmitAnswer("Alice", 4));
+        Assert.False(alice.HasAnsweredCurrentQuestion);
+
+        engine.StartAnswerElimination();
+        int eliminatedIdx = engine.EliminatedAnswerIndices[0];
+        Assert.False(engine.SubmitAnswer("Alice", eliminatedIdx));
+        Assert.False(alice.HasAnsweredCurrentQuestion);
+
+        int leaderboardNotifications = 0;
+        engine.LeaderboardUpdated += (_, _) => leaderboardNotifications++;
+
+        Assert.True(engine.SubmitAnswer("Alice", 1));
+        Assert.True(alice.HasAnsweredCurrentQuestion);
+        Assert.Equal(1, leaderboardNotifications);
+    }
+
+    [Fact]
+    public void GetSnapshot_ExposesEliminationCountdown_WhenEliminatingAnswers()
+    {
+        var settings = new TriviaSettings { AnswerEliminationIntervalSeconds = 6 };
+        using var engine = new TriviaGameEngine(settings);
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+        engine.StartAnswerElimination();
+
+        var snap = engine.GetSnapshot();
+        Assert.Equal(TriviaGameState.EliminatingAnswers, snap.State);
+        Assert.Equal(6, snap.RemainingSeconds);
+        Assert.Equal(6, snap.TotalCountdownSeconds);
+    }
+
+    [Fact]
+    public void VoidCurrentQuestion_RollsBackTotalCorrect_EvenWhenPointsAreZero()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 0,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0
+        };
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.True(engine.SubmitAnswer("Alice", 1));
+        Assert.Equal(0, alice.LastPointsEarned);
+        Assert.Equal(1, alice.TotalCorrect);
+
+        engine.VoidCurrentQuestion();
+        Assert.Equal(0, alice.TotalCorrect);
+    }
+
+    [Fact]
+    public void RegisterPlayer_UpdatesTeamName_WhenRejoiningWithNewTeam()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice", "Alpha");
+        Assert.Equal("Alpha", alice.TeamName);
+
+        var rejoined = engine.RegisterPlayer("Alice", "Bravo");
+        Assert.Same(alice, rejoined);
+        Assert.Equal("Bravo", alice.TeamName);
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 08:54:00 -> Fix pack rename orphan files, delete questions from SQLite on delete, safe question ID generation, and import overwrite prompt
+// Edited on Oct 30, 2026 @ 09:23:00 -> Fix correct-answer radio bindings, distribution warning visibility, custom pack banner generation, pack filename normalization, and help text
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -83,7 +83,35 @@ public partial class MainViewModel : ObservableObject
     private string _editorOptionD = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCorrectA))]
+    [NotifyPropertyChangedFor(nameof(IsCorrectB))]
+    [NotifyPropertyChangedFor(nameof(IsCorrectC))]
+    [NotifyPropertyChangedFor(nameof(IsCorrectD))]
     private int _editorCorrectIndex;
+
+    public bool IsCorrectA
+    {
+        get => EditorCorrectIndex == 0;
+        set { if (value) EditorCorrectIndex = 0; }
+    }
+
+    public bool IsCorrectB
+    {
+        get => EditorCorrectIndex == 1;
+        set { if (value) EditorCorrectIndex = 1; }
+    }
+
+    public bool IsCorrectC
+    {
+        get => EditorCorrectIndex == 2;
+        set { if (value) EditorCorrectIndex = 2; }
+    }
+
+    public bool IsCorrectD
+    {
+        get => EditorCorrectIndex == 3;
+        set { if (value) EditorCorrectIndex = 3; }
+    }
 
     [ObservableProperty]
     private string _editorDifficulty = "Easy";
@@ -107,7 +135,10 @@ public partial class MainViewModel : ObservableObject
     private string _distributionText = "A: 0 | B: 0 | C: 0 | D: 0";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasDistributionWarning))]
     private string? _distributionWarning;
+
+    public bool HasDistributionWarning => !string.IsNullOrEmpty(DistributionWarning);
 
     public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
 
@@ -644,7 +675,7 @@ public partial class MainViewModel : ObservableObject
                 try
                 {
                     // Call existing banner generator
-                    TriviaBannerGenerator.GenerateAllBanners(bannersDir);
+                    TriviaBannerGenerator.GenerateBannerForPack(bannersDir, $"{clean}.png", PackTitle, PackDescription);
                 }
                 catch
                 {
@@ -827,7 +858,8 @@ public partial class MainViewModel : ObservableObject
 This application allows you to:
 • **Author Custom Databases**: Create new category databases and write 4-choice trivia questions with rich explanations.
 • **Edit Existing Packs**: Modify questions, update category titles/descriptions, and add new questions.
-• **1-Click Option Balancing**: Automatically shuffle multiple-choice answers so that correct answers are evenly spread across choices A, B, C, and D (~2• **16:9 Banner Studio**: Generate high-resolution category announcement banners for big-screen projection during the pre-game lobby.
+• **1-Click Option Balancing**: Automatically shuffle multiple-choice answers so that correct answers are evenly spread across choices A, B, C, and D (~25% each).
+• **16:9 Banner Studio**: Generate high-resolution category announcement banners for big-screen projection during the pre-game lobby.
 • **SQLite Database Sync**: Seamlessly sync your packs to `Data/trivia.db` so `LyracistTrivia`, `Lyracist`, and `KSRotation` can host them immediately.
 
 **Workspace Layout**:
@@ -1023,6 +1055,6 @@ All applications in the Lyracist suite share centralized folders:
     {
         string invalid = new string(Path.GetInvalidFileNameChars());
         string clean = new string(name.Where(c => !invalid.Contains(c)).ToArray());
-        return clean.Replace(' ', '_').ToLowerInvariant();
+        return clean.Replace(' ', '_').Replace('-', '_').ToLowerInvariant();
     }
 }

@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.10.29.238</AssemblyVersion>
-    <FileVersion>26.10.29.238</FileVersion>
+    <AssemblyVersion>26.10.30.241</AssemblyVersion>
+    <FileVersion>26.10.30.241</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split music library + database management settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Oct 30, 2026 @ 12:06:00 -> Release open SQLite connections and pools before ClearDatabase and RestoreDatabase to prevent WAL corruption
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -132,6 +132,10 @@ public partial class SettingsViewModel
 
         try
         {
+            App.CloseKeepAliveConnection();
+            Lyracist.Data.Services.SearchService.ResetSharedConnection();
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+
             using (var db = new Lyracist.Data.LyracistDbContext())
             {
                 db.Database.EnsureDeleted();
@@ -141,11 +145,14 @@ public partial class SettingsViewModel
                 db.Database.Migrate();
             }
 
+            Lyracist.Data.LyracistDbContext.EnsureSchemaAndRepair();
+
             // Clear lists in memory
             LibraryDirectories.Clear();
             RefreshLibraryDirectories();
             RefreshLibraryStatus();
             _rotation.ClearRotationQueue();
+            _library.NotifyLibraryUpdated();
 
             System.Windows.MessageBox.Show("Database cleared successfully.", "Database Cleared", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
@@ -223,20 +230,27 @@ public partial class SettingsViewModel
 
         try
         {
+            App.CloseKeepAliveConnection();
+            Lyracist.Data.Services.SearchService.ResetSharedConnection();
             using (var db = new Lyracist.Data.LyracistDbContext())
             {
                 db.Database.CloseConnection();
             }
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string dbPath = Path.Combine(baseDir, "Data", "lyracist.db");
-
-            System.IO.File.Copy(selectedPath, dbPath, overwrite: true);
-
+            string dbPath = Lyracist.Data.LyracistDbContext.GetDatabaseFilePath();
             string walPath = dbPath + "-wal";
             string shmPath = dbPath + "-shm";
             if (System.IO.File.Exists(walPath)) System.IO.File.Delete(walPath);
             if (System.IO.File.Exists(shmPath)) System.IO.File.Delete(shmPath);
+
+            System.IO.File.Copy(selectedPath, dbPath, overwrite: true);
+
+            if (System.IO.File.Exists(walPath)) System.IO.File.Delete(walPath);
+            if (System.IO.File.Exists(shmPath)) System.IO.File.Delete(shmPath);
+
+            // Immediately repair and migrate the restored database so any older backup works out-of-the-box
+            Lyracist.Data.LyracistDbContext.EnsureSchemaAndRepair();
 
             System.Windows.MessageBox.Show(
                 "Database restored successfully. The application will now close. Please restart Lyracist.",

@@ -9,8 +9,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.10.30.197</AssemblyVersion>
-    <FileVersion>26.10.30.197</FileVersion>
+    <AssemblyVersion>26.10.30.200</AssemblyVersion>
+    <FileVersion>26.10.30.200</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

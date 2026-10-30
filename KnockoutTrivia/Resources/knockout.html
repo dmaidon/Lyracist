@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 08:48:00 -> Add SuperStreak screen, non-blocking font preload, auto-rejoin for stale player, submit failure retry, and question tracking -->
+<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Return removed/cleared players cleanly to Join screen instead of auto-rejoining -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -836,27 +836,6 @@
             }
         }
 
-        async function tryRejoin() {
-            if (!playerName) return false;
-            try {
-                const res = await fetch('/api/knockout/join', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: playerName })
-                });
-                if (!res.ok) return false;
-                const data = await res.json();
-                if (data && data.success) {
-                    playerId = data.playerId;
-                    sessionToken = data.sessionToken;
-                    localStorage.setItem('knockout_playerId', playerId);
-                    localStorage.setItem('knockout_sessionToken', sessionToken);
-                    return true;
-                }
-            } catch (err) {}
-            return false;
-        }
-
         let isPolling = false;
         async function pollState() {
             if (!playerId || isPolling) return;
@@ -868,16 +847,19 @@
                 const state = await res.json();
 
                 if (playerId && !state.player) {
-                    // Stale playerId / host restarted / cleared
-                    const rejoined = await tryRejoin();
-                    if (!rejoined) {
-                        playerId = '';
-                        sessionToken = '';
-                        localStorage.removeItem('knockout_playerId');
-                        localStorage.removeItem('knockout_sessionToken');
-                        showScreen('screen-join');
-                        return;
+                    // Player was removed by host or roster cleared - return cleanly to Join screen
+                    playerId = '';
+                    sessionToken = '';
+                    localStorage.removeItem('knockout_playerId');
+                    localStorage.removeItem('knockout_sessionToken');
+                    localStorage.removeItem('knockout_player_id');
+                    localStorage.removeItem('knockout_session_token');
+                    document.getElementById('stats-bar').style.display = 'none';
+                    document.getElementById('player-badge').textContent = 'Join Game';
+                    if (playerName) {
+                        document.getElementById('player-name').value = playerName;
                     }
+                    showScreen('screen-join');
                     return;
                 }
 

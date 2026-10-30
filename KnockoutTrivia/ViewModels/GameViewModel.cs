@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:20:15 -> Added ShuffleQuestionsCommand for host control
+// Edited on Oct 30, 2026 @ 09:20:00 -> Add StartGameCommand, ToggleTimerPauseCommand, and start game from Lobby on NextQuestion
 using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,8 +38,33 @@ public partial class GameViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void StartGame()
+    {
+        _gameStateService.StartGame();
+    }
+
+    [RelayCommand]
+    private void ToggleTimerPause()
+    {
+        if (_gameStateService.IsTimerRunning)
+        {
+            _gameStateService.PauseTimer();
+        }
+        else
+        {
+            _gameStateService.ResumeTimer();
+        }
+    }
+
+    [RelayCommand]
     private void NextQuestion()
     {
+        if (!_gameStateService.IsGameActive && _gameStateService.Phase == GameStatePhase.Lobby)
+        {
+            _gameStateService.StartGame();
+            return;
+        }
+
         _gameStateService.NextQuestion();
     }
 
