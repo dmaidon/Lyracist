@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 11:40:00 -> Add TestSingerCount setting for test mode
+// Edited on Oct 29, 2026 @ 14:43:30 -> Add HolidayTheme setting to AppSettings for shared desktop and MAUI persistence
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -168,6 +168,9 @@ namespace KSRotation.Models
         /// <summary>Which projection views participate in the automatic rotation.
         /// Populated with one entry per known view (see MainViewModel.ProjectionViews).</summary>
         public System.Collections.Generic.List<ProjectionRotationEntry> ProjectionRotationSchedule { get; init; } = [];
+
+        /// <summary>Holiday rotation-screen choice ("None", "Auto", or a HolidayThemes key).</summary>
+        public string HolidayTheme { get; init; } = HolidayThemes.None;
     }
 }
 

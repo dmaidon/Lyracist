@@ -1,6 +1,19 @@
-<!-- Edited on Oct 29, 2026 @ 04:05:45 -> Update KSRotation CHANGELOG with Labor Day and Veterans Day holiday themes -->
+<!-- Edited on Oct 30, 2026 @ 07:27:30 -> Update KSRotation CHANGELOG with distinct 12-color Scaryoke palette, manual category assignment, compact dj.html singer listings, and MAUI rotation screen transmission -->
 
 # Changelog
+
+## 2026-10-30
+
+- **Distinct 12-Color Scaryoke Category Palette (`MainViewModel.Scaryoke.cs`, `MainViewModel.cs`, `ScaryokeWheelViewModel.cs`, `dj.html`)**:
+  - Replaced the repeating 4-color-family Scaryoke palette with 12 distinct, high-contrast colors (`#7C3AED` Royal Purple, `#FF6D00` Blaze Orange, `#0284C7` Sky Blue, `#DC2626` Crimson Red, `#0D9488` Emerald Teal, `#D97706` Golden Amber, `#DB2777` Hot Pink, `#2563EB` Cobalt Royal Blue, `#65A30D` Acid Lime Green, `#C026D3` Fuchsia Magenta, `#B45309` Copper Bronze, `#4338CA` Deep Indigo) and collision-free automatic color assignment (`PickDistinctPaletteColor`) so no two categories on the wheel share the same color.
+  - Color-coded the quick-pick category chips in `#manual-scaryoke-modal` (`Resources/dj.html`).
+- **Manual Scaryoke Category Assignment to Singers (`MainWindow.xaml/.cs`, `ScaryokeControlWindow.xaml`, `MainViewModel.Scaryoke.cs`, `MainViewModel.Requests.cs`, `Resources/dj.html`, `KSRotation.Maui`)**:
+  - Added right-click `🎃 Scaryoke: Set Category Manually...`, clickable `🎃 {Category}` singer badges, and a `Manual:` category selector (`ComboBox`) + `📌 Set Singer` / `✕` buttons in `ScaryokeControlWindow` and `ScaryokeWheelPage` (`KSRotation.Maui`).
+  - Added inline `📌 Set` buttons and `#manual-scaryoke-modal` to `dj.html` (`scaryoke-assign` and `scaryoke-clear`), an optional `🎃 Scaryoke Challenge` field to `#add-performer-modal`, and an `Assign Category Manually` bar in `#scaryoke-tablet-modal`.
+- **Compact DJ Portal Singer Listings (`Resources/dj.html`)**:
+  - Restructured `.singer-card` into a compact two-row layout so singer name, duet partner, single-line `- Song Title (Artist)` (`white-space: nowrap; text-overflow: ellipsis`), and badges appear on Row 1, and all 10 song completion checkboxes (`1`–`10`) sit on a single non-wrapping line on the left of Row 2 alongside the action buttons on the right.
+- **Enhanced Rotation Screen Transmission in `KSRotation.Maui` (`billboard.html`, `BillboardView.xaml/.cs`, `MainPage.xaml`, `ScaryokeWheelPage.xaml.cs`, `MainViewModel.cs`)**:
+  - Added all 12 themed rotation views, Holiday Rotation Screens (floating characters, glow halos, vignette, fog, and `Auto` late-night show-date resolution), Scaryoke `🎃 {Category}` challenge badges, and live Scaryoke Wheel spin projection across Chromecast/Smart TV browsers (`billboard.html`) and native HDMI/Wireless Display output (`BillboardView.xaml`).
 
 ## 2026-10-29
 

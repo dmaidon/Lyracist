@@ -1,8 +1,42 @@
-// Edited on Oct 29, 2026 @ 08:54:00 -> Document high-contrast color-coded navigation and page tabs in Lyracist
+// Edited on Oct 30, 2026 @ 07:07:00 -> Document distinct 12-color Scaryoke category palette across KSRotation, KSRotation.Maui, Lyracist, ScaryokeWheel, and DJ portal
 
-KSRotation & Lyracist: Shared Holiday Rotation Screens, Color-Coded Venue Tabs, Late-Night Show-Date Resolution & Performance Optimizations - (October 2026)
+KSRotation, KSRotation.Maui, Lyracist & ScaryokeWheel: Distinct 12-Color Scaryoke Category Palette, Manual Category Assignment & Compact DJ Portal Singer Listings - (October 2026)
 
-Section: Display & Projection / Holiday Rotation Screens & Dark Venue Tab Styling
+Section: Entertainment & Gamification / Scaryoke Category Palette, Manual Category Assignment & DJ Portal Layout
+
+0. Distinct 12-Color Scaryoke Category Palette:
+   - Every Scaryoke category on the wheel (up to all 11 categories) now receives its own distinct color from a 12-color high-contrast palette across KSRotation, KSRotation.Maui, Lyracist, ScaryokeWheel, and the Remote DJ Web Portal ('dj.html'):
+     * Royal Purple (#7C3AED), Blaze Orange (#FF6D00), Sky Blue (#0284C7), Crimson Red (#DC2626), Emerald Teal (#0D9488), Golden Amber (#D97706), Hot Pink (#DB2777), Cobalt Royal Blue (#2563EB), Acid Lime Green (#65A30D), Fuchsia Magenta (#C026D3), Copper Bronze (#B45309), and Deep Indigo (#4338CA).
+   - Collision-Free Auto Color Assignment: Automatic color assignment guarantees that no two categories on the wheel share the same color, even when some categories use custom colors.
+   - 12-Swatch Palette Picker: Both KSRotation (Scaryoke Settings tab) and Lyracist (Settings -> Scaryoke Settings -> Scaryoke Categories) provide 12 clickable color swatches under 'Choose Palette Color:' in addition to 'Set Color' and 'Auto Color'.
+
+0A. Manually Assigning or Changing a Singer's Scaryoke Category:
+   - KSRotation Desktop Console:
+     * Right-click any singer in the rotation and choose '🎃 Scaryoke: Set Category Manually...', or click directly on a singer's '🎃 {Category}' badge to change or clear their challenge.
+     * In the Scaryoke Controller window (Step 2), use the 'Manual:' dropdown to pick or type a category and click '📌 Set Singer' (or '✕' to clear) for the selected target singer without spinning the wheel.
+   - Remote DJ Web Portal ('dj.html'):
+     * Click the '📌 Set' button on any singer card (or tap their '🎃 {Category}' badge) to open the Set Scaryoke Category modal with one-tap quick-pick category chips, custom input, and a '✕ Clear' button.
+     * When adding a new performer via '+ Add Performer to Rotation', use the optional '🎃 Scaryoke Challenge' field to pre-assign a category immediately.
+     * Inside the Scaryoke Wheel Station modal, use the 'Assign Category Manually' bar to set a category for the target performer.
+   - KSRotation.Maui (Android / Windows Tablet):
+     * On the Scaryoke Wheel tab, use the 'Target Singer & Manual Challenge' card to select any singer, choose a category from the picker, and tap '📌 Set Singer' or '✕ Clear'.
+   - Lyracist Main App:
+     * Open 'Edit Singer...' on any performer in the rotation and choose or type a category in the '🎃 Scaryoke Challenge (Optional)' dropdown (or click '✕ Clear').
+     * In the Scaryoke Wheel window, use the 'Manual:' row above the Spin button to select a target singer and category and click '📌 Set Singer' or '✕'.
+
+0B. Compact Single-Line Singer Cards in DJ Portal ('dj.html'):
+   - Singer listings in the Remote DJ Web Portal now use a compact two-row card layout:
+     * Row 1 displays the performer name, duet partner, '- Song Title (Artist)' (single-line with ellipsis truncation instead of wrapping onto multiple lines), and status badges across the full card width.
+     * Row 2 places all 10 song completion checkboxes (1–10) in a single horizontal row on the left alongside the singer action buttons on the right.
+
+KSRotation, KSRotation.Maui & Lyracist: Shared Holiday Rotation Screens, Enhanced MAUI Rotation Transmission & Color-Coded Venue Tabs - (October 2026)
+
+Section: Display & Projection / Holiday Rotation Screens, MAUI TV Transmission & Dark Venue Tab Styling
+
+0. Enhanced Rotation Screen Transmission in KSRotation.Maui (Chromecast, Smart TV Browser & HDMI / Wireless Display):
+   - KSRotation.Maui transmits audience rotation screens over Chromecast ('📡 Cast to TV'), Smart TV web browsers ('billboard.html' QR code / URL), and wired USB-C-to-HDMI or wireless Miracast/Smart View secondary displays ('📺 Output To TV / HDMI').
+   - The Billboard floating control bar and Cast to TV dialog in KSRotation.Maui now include 'Rotation View' (all 12 themed views: Normal List, Star Wars Crawl, Vegas Marquee, Vinyl Turntable, Disco Ball, Synthwave Grid, Concert Festival Lineup, Casino Slot Reels, Jukebox, Stadium Jumbotron, Movie Theater 'Now Showing', and Purple Velvet Curtain) and 'Holiday Screen' (Off, Auto by date, and all 14 holiday themes) pickers.
+   - Both 'billboard.html' and native 'BillboardView' render floating holiday characters with palette glow halos, vignette tint, ground fog, Scaryoke '🎃 {Category}' challenge badges on Current Performer, Up Next, and Upcoming Queue rows, and live Scaryoke Wheel spin projection when spinning the wheel on the MAUI tablet.
 
 1. High-Contrast Color-Coded Navigation & Page Tabs (Lyracist):
    - All 14 top navigation bar tabs (Karaoke, Rotation, Lyrics, Trivia, Playlists, Sample Pad, Requests, Store, Users, Settings, Trivia Settings, Casting, Help, About) and all in-page TabControl tabs (Settings, Karaoke Library / Music Library / Streaming Links / Singer History, Rotation Performed Songs, Users Profile & Defaults, Occasion Search, and Singer Vocal Settings) now feature distinct, color-coded backgrounds and borders with bright active selection indicators so individual tabs are easy to distinguish in dark venues.

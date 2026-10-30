@@ -1,4 +1,4 @@
-<!-- Edited on Oct 27, 2026 @ 17:05:00 -> Natural Scaryoke workflow: project | select # of singers | spin in dj.html -->
+<!-- Edited on Oct 30, 2026 @ 06:16:30 -> Add manual Scaryoke category modal, add-to-wheel controls, and compact single-line singer listings in dj.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,16 +219,23 @@
             gap: 8px;
         }
 
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
         /* Performer Row Cards */
         .singer-card {
             background-color: var(--row-bg);
             border-radius: 8px;
             border: 2px solid transparent;
-            padding: 12px;
+            padding: 8px 12px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: 6px;
             transition: all 0.2s;
         }
 
@@ -256,40 +263,67 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            flex: 1;
+            width: 100%;
             min-width: 0;
         }
 
         .singer-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 6px;
+            flex-wrap: nowrap;
+            width: 100%;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .singer-name {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .singer-track-info {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            flex: 1;
         }
 
         .singer-song {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-style: italic;
             color: var(--accent-text);
+            white-space: nowrap;
         }
 
         .singer-artist {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .singer-badges {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+            margin-left: auto;
         }
 
         /* Badge styles */
         .badge {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 4px;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
             .badge.rotation-start {
@@ -307,16 +341,28 @@
                 color: #FFF;
             }
 
+        .singer-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
         /* Round Checkboxes Row */
         .rounds-container {
             display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 3px;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
         }
 
         .round-box {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
             background-color: var(--row-inactive-bg);
@@ -380,18 +426,22 @@
         /* Row Action buttons */
         .actions-container {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            margin-left: auto;
         }
 
         .btn-circle {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
             border-radius: 6px;
             border: 1px solid var(--border-color);
             background: transparent;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -463,9 +513,14 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             background: transparent;
-            padding: 6px 10px;
-            font-size: 0.75rem;
+            padding: 4px 8px;
+            font-size: 0.72rem;
             font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -591,7 +646,8 @@
             .singer-card {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 10px;
+                gap: 6px;
+                padding: 8px 10px;
             }
 
             .actions-container {
@@ -604,17 +660,23 @@
             }
 
             .singer-name {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
             }
 
             .singer-song {
-                font-size: 1.05rem;
+                font-size: 0.95rem;
+            }
+
+            .rounds-container {
+                gap: 3px;
+                flex-wrap: nowrap;
             }
 
             .round-box {
-                width: 30px;
-                height: 30px;
-                font-size: 0.85rem;
+                width: 23px;
+                height: 23px;
+                flex: 0 0 23px;
+                font-size: 0.72rem;
             }
 
             button.btn-outline {
@@ -875,6 +937,10 @@
                                     <label for="add-artist">Artist (Optional)</label>
                                     <input type="text" id="add-artist" class="form-control" placeholder="Artist Name" onfocus="this.select()">
                                 </div>
+                                <div class="form-group">
+                                    <label for="add-scaryoke">🎃 Scaryoke Challenge (Optional)</label>
+                                    <input type="text" id="add-scaryoke" list="scaryoke-categories-datalist" class="form-control" placeholder="Pick or type a category (optional)" onfocus="this.select()">
+                                </div>
                                 <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
                                     <input type="checkbox" id="add-special" style="width: 18px; height: 18px; accent-color: var(--primary);">
                                     <label for="add-special" style="margin-bottom: 0; cursor: pointer; color: var(--text-main);">⭐ Special Singer (One-Time Performance)</label>
@@ -884,6 +950,30 @@
                                     <button type="submit" class="btn-primary" style="flex: 1.5; padding: 10px; font-weight: bold;">+ Add to Queue</button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+
+                    <datalist id="scaryoke-categories-datalist"></datalist>
+
+                    <!-- Manual Scaryoke Category Modal Overlay -->
+                    <div id="manual-scaryoke-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.78); z-index: 10000; justify-content: center; align-items: center; padding: 16px;" onclick="if(event.target===this)closeManualScaryokeModal()">
+                        <div class="panel" style="max-width: 440px; width: 100%; border: 1.5px solid #FF7518; box-shadow: 0 10px 30px rgba(0,0,0,0.85);" onclick="event.stopPropagation()">
+                            <div class="panel-title" style="color: #FF7518; font-size: 1.1rem; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🎃 Set Scaryoke Category</span>
+                                <button type="button" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;" onclick="closeManualScaryokeModal()">✕</button>
+                            </div>
+                            <div id="manual-scaryoke-singer-label" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Performer: ...</div>
+                            <div style="font-size: 0.75rem; font-weight: 700; color: #C4B5FD; text-transform: uppercase; margin-bottom: 4px;">Quick Pick Category:</div>
+                            <div id="manual-scaryoke-chips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;"></div>
+                            <div class="form-group">
+                                <label for="manual-scaryoke-input">Category Name (Pick above or type)</label>
+                                <input type="text" id="manual-scaryoke-input" list="scaryoke-categories-datalist" class="form-control" placeholder="Select or type a category..." onkeydown="if(event.key==='Enter'){event.preventDefault();submitManualScaryokeModal();}">
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                                <button type="button" id="manual-scaryoke-clear-btn" class="btn-outline" style="border-color: var(--red); color: var(--red); padding: 8px 10px;" onclick="clearManualScaryokeModal()">✕ Clear</button>
+                                <button type="button" class="btn-outline" style="flex: 1; padding: 8px;" onclick="closeManualScaryokeModal()">Cancel</button>
+                                <button type="button" class="btn-primary" style="flex: 1.4; padding: 8px; background: #7C3AED; font-weight: bold;" onclick="submitManualScaryokeModal()">📌 Assign</button>
+                            </div>
                         </div>
                     </div>
 
@@ -953,6 +1043,13 @@
                                     <select id="scaryoke-singer-select" onchange="sendAction('scaryoke-assign-target', this.value)" style="background: #12081F; border: 1.5px solid #A855F7; border-radius: 8px; color: white; padding: 6px; font-size: 0.85rem;">
                                         <option value="">-- Auto (Current / Next) --</option>
                                     </select>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; width: 100%; margin-top: 4px; padding-top: 6px; border-top: 1px solid #3B1D6E;">
+                                    <label style="font-size: 0.78rem; color: #F59E0B; font-weight: bold;">Assign Category Manually:</label>
+                                    <div style="display: flex; gap: 4px; width: 100%;">
+                                        <input type="text" id="scaryoke-station-manual-input" list="scaryoke-categories-datalist" placeholder="Pick or type category..." style="flex: 1; min-width: 0; background: #12081F; border: 1.5px solid #A855F7; border-radius: 6px; color: white; padding: 5px 8px; font-size: 0.82rem;">
+                                        <button type="button" onclick="assignStationManualScaryoke()" style="background: #7C3AED; color: white; border: 1px solid #8B5CF6; border-radius: 6px; padding: 5px 10px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; cursor: pointer;" title="Manually assign this category to the target singer">📌 Set Singer</button>
+                                    </div>
                                 </div>
                                 <div id="scaryoke-skip-row" style="display: none; align-items: center; gap: 6px;">
                                     <label style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #C4B5FD; cursor: pointer; user-select: none;">
@@ -1190,9 +1287,26 @@
                 let isScaryokeAnimating = false;
                 let currentScaryokeAnimation = null;
                 let lastKnownScaryokeState = null;
+                let cachedScaryokeCategories = ["Elvis", "Rock", "Country", "Pop", "Gender Bender", "Oldies", "80s Hits", "Disco", "Hard Rock", "Disney Songs", "90s Pop"];
+                let manualScaryokeTargetSingerId = "";
+
+                function updateScaryokeCategoriesDatalist(categories) {
+                    if (Array.isArray(categories) && categories.length > 0) {
+                        cachedScaryokeCategories = categories.slice();
+                    }
+                    const dl = document.getElementById("scaryoke-categories-datalist");
+                    if (!dl) return;
+                    const all = cachedScaryokeCategories.slice();
+                    if (!all.includes("Singer's Choice")) all.push("Singer's Choice");
+                    if (!all.includes("DJ's Choice")) all.push("DJ's Choice");
+                    dl.innerHTML = all.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+                }
 
                 function updateScaryokeState(info) {
                     if (!info) return;
+                    if (info.scaryokeCategories) {
+                        updateScaryokeCategoriesDatalist(info.scaryokeCategories);
+                    }
                     const isScaryActive = !!info.isScaryokeActive;
                     const state = info.scaryokeState;
 
@@ -1671,7 +1785,7 @@
                         }
                         if (s.scaryokeCategory) {
                             const scColor = s.scaryokeColor || '#FF7518';
-                            badges += `<span class="badge" style="background-color: ${escapeHtml(scColor)}; color: white; font-weight: bold; margin-left: 4px;" title="Scaryoke Challenge">🎃 ${escapeHtml(s.scaryokeCategory)}</span>`;
+                            badges += `<span class="badge" style="background-color: ${escapeHtml(scColor)}; color: white; font-weight: bold; margin-left: 4px; cursor: pointer;" title="Scaryoke Challenge (click to change or clear)" onclick="openManualScaryokeModal('${s.id}')">🎃 ${escapeHtml(s.scaryokeCategory)}</span>`;
                         }
 
                         // Render rounds checkboxes
@@ -1690,10 +1804,8 @@
                         let detailsText = '';
                         if (s.song) {
                             const songStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
-                            detailsText = ` - <span class="singer-song" ${songStyle}>${escapeHtml(s.song)}</span>`;
-                            if (s.artist) {
-                                detailsText += ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>`;
-                            }
+                            const artistHtml = s.artist ? ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>` : '';
+                            detailsText = `<span class="singer-track-info" title="${escapeHtml(s.song)}${s.artist ? ' (' + escapeHtml(s.artist) + ')' : ''}">- <span class="singer-song" ${songStyle}>${escapeHtml(s.song)}</span>${artistHtml}</span>`;
                         }
 
                         // Render queued songs (with per-song remove control)
@@ -1739,7 +1851,8 @@
                         }
 
                         const scaryokeBtnHtml = (!s.isInactive && !s.isMusic)
-                            ? `<button class="btn-text" style="background: #6A0DAD; color: white; border: 1px solid #9333EA; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;" title="Spin Scaryoke wheel for this singer (quietly at booth)" onclick="sendAction('scaryoke-spin', '${s.id}', 'booth')">🎃 ${s.scaryokeCategory ? 'Re-Spin' : 'Spin'}</button>`
+                            ? `<button class="btn-text" style="background: #6A0DAD; color: white; border: 1px solid #9333EA; font-size: 0.72rem; padding: 3px 6px; border-radius: 4px;" title="Spin Scaryoke wheel for this singer (quietly at booth)" onclick="sendAction('scaryoke-spin', '${s.id}', 'booth')">🎃 ${s.scaryokeCategory ? 'Re-Spin' : 'Spin'}</button>
+                               <button class="btn-text" style="background: #4C1D95; color: #E9D5FF; border: 1px solid #7C3AED; font-size: 0.72rem; padding: 3px 6px; border-radius: 4px;" title="Manually set or clear Scaryoke category for this singer" onclick="openManualScaryokeModal('${s.id}')">📌 Set</button>`
                             : '';
 
                         const innerHTML = `
@@ -1747,24 +1860,26 @@
                                         <div class="singer-info">
                                             <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
                                             ${detailsText}
-                                            ${badges}
+                                            <div class="singer-badges">${badges}</div>
                                         </div>
-                                        <div class="rounds-container">
-                                            ${roundsHtml}
+                                        <div class="singer-controls-row">
+                                            <div class="rounds-container">
+                                                ${roundsHtml}
+                                            </div>
+                                            <div class="actions-container">
+                                                <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
+                                                <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
+                                                <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
+                                                <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
+                                                <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                                                ${scaryokeBtnHtml}
+                                                ${specialHtml}
+                                                ${skipHtml}
+                                                ${pauseHtml}
+                                                ${deleteHtml}
+                                            </div>
                                         </div>
                                         ${queuedSongsHtml}
-                                    </div>
-                                    <div class="actions-container">
-                                        <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
-                                        <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
-                                        <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
-                                        <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
-                                        <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
-                                        ${scaryokeBtnHtml}
-                                        ${specialHtml}
-                                        ${skipHtml}
-                                        ${pauseHtml}
-                                        ${deleteHtml}
                                     </div>
                                 `;
 
@@ -1935,8 +2050,94 @@
                     if (e.key === 'Escape') {
                         closeAddPerformerModal();
                         closeBirthdayModal();
+                        closeManualScaryokeModal();
                     }
                 });
+
+                function openManualScaryokeModal(singerId) {
+                    manualScaryokeTargetSingerId = singerId || "";
+                    const singer = (cachedRotation || []).find(s => s.id === singerId);
+                    const labelEl = document.getElementById("manual-scaryoke-singer-label");
+                    if (labelEl) {
+                        labelEl.textContent = singer ? `Performer: ${singer.name}` : "Performer: Current / Selected";
+                    }
+                    const inputEl = document.getElementById("manual-scaryoke-input");
+                    if (inputEl) {
+                        inputEl.value = (singer && singer.scaryokeCategory) ? singer.scaryokeCategory : "";
+                    }
+                    const clearBtn = document.getElementById("manual-scaryoke-clear-btn");
+                    if (clearBtn) {
+                        clearBtn.style.display = (singer && singer.scaryokeCategory) ? "inline-flex" : "none";
+                    }
+                    const chipsDiv = document.getElementById("manual-scaryoke-chips");
+                    if (chipsDiv) {
+                        const palette = [
+                            "#7C3AED", "#FF6D00", "#0284C7", "#DC2626", "#0D9488", "#D97706",
+                            "#DB2777", "#2563EB", "#65A30D", "#C026D3", "#B45309", "#4338CA"
+                        ];
+                        const all = cachedScaryokeCategories.slice();
+                        if (!all.includes("Singer's Choice")) all.push("Singer's Choice");
+                        if (!all.includes("DJ's Choice")) all.push("DJ's Choice");
+                        chipsDiv.innerHTML = all.map((c, idx) => {
+                            let bg = palette[idx % palette.length];
+                            if (c.toLowerCase() === "singer's choice") bg = "#16A34A";
+                            else if (c.toLowerCase() === "dj's choice") bg = "#111827";
+                            return `<button type="button" class="btn-outline" style="font-size: 0.75rem; font-weight: 700; padding: 4px 8px; background: ${bg}; border-color: rgba(255,255,255,0.35); color: #FFFFFF;" onclick="selectManualScaryokeChip('${escapeJs(c)}')">🎃 ${escapeHtml(c)}</button>`;
+                        }).join('');
+                    }
+                    const modal = document.getElementById("manual-scaryoke-modal");
+                    if (modal) {
+                        modal.style.display = "flex";
+                        setTimeout(() => {
+                            if (inputEl) {
+                                inputEl.focus();
+                                inputEl.select();
+                            }
+                        }, 80);
+                    }
+                }
+
+                function selectManualScaryokeChip(categoryName) {
+                    const inputEl = document.getElementById("manual-scaryoke-input");
+                    if (inputEl) {
+                        inputEl.value = categoryName;
+                    }
+                }
+
+                function closeManualScaryokeModal() {
+                    const modal = document.getElementById("manual-scaryoke-modal");
+                    if (modal) modal.style.display = "none";
+                }
+
+                async function clearManualScaryokeModal() {
+                    const targetId = manualScaryokeTargetSingerId;
+                    closeManualScaryokeModal();
+                    if (targetId) {
+                        await sendAction('scaryoke-clear', targetId);
+                    }
+                }
+
+                async function submitManualScaryokeModal() {
+                    const inputEl = document.getElementById("manual-scaryoke-input");
+                    const category = inputEl ? inputEl.value.trim() : "";
+                    const targetId = manualScaryokeTargetSingerId;
+                    closeManualScaryokeModal();
+
+                    if (!category) {
+                        if (targetId) await sendAction('scaryoke-clear', targetId);
+                        return;
+                    }
+                    await sendAction('scaryoke-assign', targetId, category);
+                }
+
+                async function assignStationManualScaryoke() {
+                    const inputEl = document.getElementById("scaryoke-station-manual-input");
+                    const selectEl = document.getElementById("scaryoke-singer-select");
+                    const category = inputEl ? inputEl.value.trim() : "";
+                    if (!category) return;
+                    const targetId = selectEl ? selectEl.value : "";
+                    await sendAction('scaryoke-assign', targetId, category);
+                }
 
                 async function addPerformer(event) {
                     event.preventDefault();
@@ -1944,6 +2145,7 @@
                     const duetPartner = document.getElementById("add-duet") ? document.getElementById("add-duet").value : "";
                     const song = document.getElementById("add-song").value;
                     const artist = document.getElementById("add-artist").value;
+                    const scaryokeCat = document.getElementById("add-scaryoke") ? document.getElementById("add-scaryoke").value.trim() : "";
                     const isSpecial = document.getElementById("add-special") ? document.getElementById("add-special").checked : false;
 
                     const pin = sessionStorage.getItem("dj_pin");
@@ -1960,7 +2162,8 @@
                                 duetPartner,
                                 song,
                                 artist,
-                                isSpecial
+                                isSpecial,
+                                extraData: scaryokeCat
                             })
                         });
 

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:55:00 -> Persist and restore SpinHistory across shutdowns and enforce consecutive duplicate prevention
+// Edited on Oct 30, 2026 @ 07:01:30 -> Update SegmentColors to 12 distinct colors so every Scaryoke category gets a unique color
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Maui.Services;
@@ -44,8 +44,8 @@ namespace KSRotation.Maui.ViewModels
     {
         private static readonly string[] SegmentColors =
         [
-            "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
-            "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
+            "#7C3AED", "#FF6D00", "#0284C7", "#DC2626", "#0D9488", "#D97706",
+            "#DB2777", "#2563EB", "#65A30D", "#C026D3", "#B45309", "#4338CA"
         ];
 
         private const string SingersChoice = "Singer's Choice";
@@ -80,6 +80,16 @@ namespace KSRotation.Maui.ViewModels
         public ObservableCollection<CategoryPreset> Presets { get; } = [];
 
         public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
+
+        public ObservableCollection<string> AssignableCategories { get; } = [];
+
+        public ObservableCollection<KSRotation.Models.SingerEntry> Singers => _rotation.Singers;
+
+        [ObservableProperty]
+        public partial KSRotation.Models.SingerEntry? SelectedTargetSinger { get; set; }
+
+        [ObservableProperty]
+        public partial string? SelectedManualCategory { get; set; }
 
         [ObservableProperty]
         public partial CategoryPreset? SelectedPreset { get; set; }
@@ -122,7 +132,67 @@ namespace KSRotation.Maui.ViewModels
                 _recent.Add(item);
             }
 
+            _rotation.MauiScaryokeCategoriesChanged += OnExternalCategoriesChanged;
+            SelectedTargetSinger = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
+
             RebuildWheelSegments();
+        }
+
+        private void OnExternalCategoriesChanged()
+        {
+            var latest = ScaryokeSettingsService.Load();
+            foreach (string category in latest.Categories)
+            {
+                if (!CustomCategories.Any(c => string.Equals(c.Name, category, StringComparison.OrdinalIgnoreCase))
+                    && CustomCategories.Count < MaxCategories)
+                {
+                    latest.Styles.TryGetValue(category, out var style);
+                    AddItem(category, style);
+                }
+            }
+            SaveAndRebuild();
+        }
+
+        [RelayCommand]
+        private void AssignManualCategory()
+        {
+            ValidationError = string.Empty;
+            string category = SelectedManualCategory?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(category))
+            {
+                ValidationError = "Select a Scaryoke category to assign.";
+                return;
+            }
+
+            var target = SelectedTargetSinger
+                ?? _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
+
+            if (target == null)
+            {
+                ValidationError = "No active singer in the rotation to assign a category to.";
+                return;
+            }
+
+            _rotation.AssignMauiScaryokeCategory(target, category);
+            ResultText = $"📌 {target.Name}: {category}";
+        }
+
+        [RelayCommand]
+        private void ClearManualCategory()
+        {
+            var target = SelectedTargetSinger
+                ?? _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
+
+            if (target == null)
+            {
+                return;
+            }
+
+            _rotation.AssignMauiScaryokeCategory(target, null);
+            ResultText = $"Cleared Scaryoke category for {target.Name}.";
         }
 
         private bool CanEdit() => !IsSpinning;
@@ -316,11 +386,32 @@ namespace KSRotation.Maui.ViewModels
         public void RebuildWheelSegments()
         {
             var list = new List<WheelSegment>();
+            var usedColors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var c in CustomCategories)
+            {
+                if (!string.IsNullOrWhiteSpace(c.Color))
+                {
+                    usedColors.Add(c.Color);
+                }
+            }
 
             for (int i = 0; i < CustomCategories.Count; i++)
             {
                 var item = CustomCategories[i];
-                string color = item.Color ?? SegmentColors[i % SegmentColors.Length];
+                string color;
+                if (!string.IsNullOrWhiteSpace(item.Color))
+                {
+                    color = item.Color;
+                }
+                else
+                {
+                    color = SegmentColors[i % SegmentColors.Length];
+                    if (usedColors.Contains(color))
+                    {
+                        color = SegmentColors.FirstOrDefault(c => !usedColors.Contains(c)) ?? color;
+                    }
+                    usedColors.Add(color);
+                }
                 item.DisplayColor = color;
                 list.Add(new WheelSegment
                 {
@@ -366,6 +457,24 @@ namespace KSRotation.Maui.ViewModels
             {
                 WheelSegments.Add(segment);
             }
+
+            AssignableCategories.Clear();
+            foreach (var item in CustomCategories)
+            {
+                AssignableCategories.Add(item.Name);
+            }
+            if (!AssignableCategories.Contains(SingersChoice))
+            {
+                AssignableCategories.Add(SingersChoice);
+            }
+            if (!AssignableCategories.Contains(DjsChoice))
+            {
+                AssignableCategories.Add(DjsChoice);
+            }
+            if (string.IsNullOrEmpty(SelectedManualCategory) && AssignableCategories.Count > 0)
+            {
+                SelectedManualCategory = AssignableCategories[0];
+            }
         }
 
         /// <summary>Builds the result message for the category the wheel landed on, naming whoever is
@@ -376,13 +485,72 @@ namespace KSRotation.Maui.ViewModels
         /// <summary>Captures the singer the spin is for and clears any previous challenge, so the category is revealed only once the wheel stops.</summary>
         public void BeginSpin()
         {
-            _spinSinger = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
+            _spinSinger = SelectedTargetSinger
+                ?? _rotation.Singers.FirstOrDefault(s => s.IsCurrent)
                 ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive);
             if (_spinSinger != null)
             {
                 _spinSinger.ScaryokeCategory = null;
                 _spinSinger.ScaryokeColor = null;
             }
+        }
+
+        public void BroadcastSpinStart(double targetAngle, double durationSeconds)
+        {
+            string singerName = _spinSinger?.Name
+                ?? _rotation.Singers.FirstOrDefault(s => s.IsCurrent)?.Name
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive)?.Name
+                ?? "Stage Open";
+
+            _rotation.SetMauiScaryokeState(new KSRotation.Models.ScaryokeStateDto
+            {
+                IsActive = true,
+                IsSpinning = true,
+                TargetAngle = targetAngle,
+                SpinDuration = durationSeconds,
+                ResultText = "Spinning...",
+                ResultDetail = $"Spinning the wheel for {singerName}...",
+                CurrentSingerName = singerName,
+                Segments = WheelSegments.Select(s => new KSRotation.Models.ScaryokeWheelSegment
+                {
+                    Name = s.Name,
+                    Color = s.Color,
+                    TextColor = s.TextColor,
+                    Weight = s.Weight,
+                    Sweep = s.Sweep
+                }).ToList()
+            });
+        }
+
+        public void BroadcastSpinResult(double finalAngle)
+        {
+            string singerName = _rotation.Singers.FirstOrDefault(s => s.IsCurrent)?.Name
+                ?? _rotation.Singers.FirstOrDefault(s => !s.IsInactive)?.Name
+                ?? "Stage Open";
+
+            _rotation.SetMauiScaryokeState(new KSRotation.Models.ScaryokeStateDto
+            {
+                IsActive = true,
+                IsSpinning = false,
+                TargetAngle = finalAngle,
+                SpinDuration = 0,
+                ResultText = ResultText,
+                ResultDetail = ResultText,
+                CurrentSingerName = singerName,
+                Segments = WheelSegments.Select(s => new KSRotation.Models.ScaryokeWheelSegment
+                {
+                    Name = s.Name,
+                    Color = s.Color,
+                    TextColor = s.TextColor,
+                    Weight = s.Weight,
+                    Sweep = s.Sweep
+                }).ToList()
+            });
+        }
+
+        public void DismissBroadcast()
+        {
+            _rotation.SetMauiScaryokeState(null);
         }
 
         public void ApplyResult(string category)

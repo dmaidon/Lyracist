@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 12:35:00 -> Set ResultText to SPINNING... while wheel is in motion
+// Edited on Oct 30, 2026 @ 07:02:00 -> Update SegmentColors to 12 distinct colors matching ScaryokeViewModel.Palette
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -25,8 +25,8 @@ public partial class ScaryokeWindow : Window
 
     private static readonly string[] SegmentColors =
     [
-        "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
-        "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
+        "#7C3AED", "#FF6D00", "#0284C7", "#DC2626", "#0D9488", "#D97706",
+        "#DB2777", "#2563EB", "#65A30D", "#C026D3", "#B45309", "#4338CA"
     ];
 
     private readonly ScaryokeViewModel _vm;

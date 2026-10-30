@@ -1,395 +1,550 @@
-<!-- Edited on Sep 22, 2026 @ 11:00:00 -> Upsize font by 2 sizes on right side upcoming queue and up next card in BillboardView.xaml -->
+<!-- Edited on Oct 29, 2026 @ 14:52:00 -> Add Holiday overlay, Scaryoke badges, themed view modes, and live Scaryoke wheel projection to BillboardView -->
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:KSRotation.ViewModels;assembly=KSRotation"
              xmlns:models="clr-namespace:KSRotation.Models;assembly=KSRotation"
              x:Class="KSRotation.Maui.Views.BillboardView"
              x:DataType="vm:MainViewModel"
+             x:Name="BillboardRoot"
              BackgroundColor="#070B14">
 
-    <Grid RowDefinitions="64,*" RowSpacing="12" Padding="16">
-        <!-- Top Header Bar -->
-        <Border Grid.Row="0"
-                StrokeShape="RoundRectangle 12"
-                BackgroundColor="#0F172A"
-                StrokeThickness="1"
-                Stroke="#1E293B"
-                Padding="16,8">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="16" VerticalOptions="Center">
-                <Label Grid.Column="0" Text="🎤" FontSize="26" VerticalOptions="Center" />
-                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0"
-                                     IsVisible="{Binding ListDjAndVenueOnBillboard}">
-                    <Label Text="{Binding VenueName}"
+    <Grid>
+        <Grid RowDefinitions="64,*" RowSpacing="12" Padding="16">
+            <!-- Top Header Bar -->
+            <Border Grid.Row="0"
+                    x:Name="HeaderBorder"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#0F172A"
+                    StrokeThickness="1"
+                    Stroke="#1E293B"
+                    Padding="16,8">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                    <Label Grid.Column="0" Text="🎤" FontSize="26" VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0"
+                                         IsVisible="{Binding ListDjAndVenueOnBillboard}">
+                        <Label Text="{Binding VenueName}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding DjName, StringFormat='Hosted by {0}'}"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#A78BFA"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <!-- Active Holiday Theme Pill -->
+                    <Border Grid.Column="2"
+                            IsVisible="{Binding HasActiveHolidayTheme}"
+                            StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#2E1065"
+                            Stroke="#8B5CF6"
+                            StrokeThickness="1"
+                            Padding="10,4"
+                            VerticalOptions="Center">
+                        <Label Text="{Binding ActiveHolidayDisplay}"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#DDD6FE" />
+                    </Border>
+
+                    <!-- Active View Mode Pill -->
+                    <Border Grid.Column="3"
+                            IsVisible="{Binding HasBillboardViewModeBadge}"
+                            StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#451A03"
+                            Stroke="#F59E0B"
+                            StrokeThickness="1"
+                            Padding="10,4"
+                            VerticalOptions="Center">
+                        <Label Text="{Binding BillboardViewModeBadge}"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#FDE68A" />
+                    </Border>
+
+                    <!-- Active Singers Count Pill -->
+                    <Border Grid.Column="4"
+                            StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#1E293B"
+                            StrokeThickness="0"
+                            Padding="12,4"
+                            VerticalOptions="Center">
+                        <Label Text="{Binding ActiveSingerCountText}"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#94A3B8" />
+                    </Border>
+
+                    <!-- Live Clock -->
+                    <Label Grid.Column="5"
+                           x:Name="LiveClockLabel"
+                           Text="--:-- --"
                            FontSize="18"
                            FontAttributes="Bold"
                            TextColor="White"
-                           LineBreakMode="TailTruncation" />
-                    <Label Text="{Binding DjName, StringFormat='Hosted by {0}'}"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           TextColor="#A78BFA"
-                           LineBreakMode="TailTruncation" />
-                </VerticalStackLayout>
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
 
-                <!-- Active Singers Count Pill -->
-                <Border Grid.Column="2"
-                        StrokeShape="RoundRectangle 16"
-                        BackgroundColor="#1E293B"
-                        StrokeThickness="0"
-                        Padding="12,4"
-                        VerticalOptions="Center">
-                    <Label Text="{Binding ActiveSingerCountText}"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           TextColor="#94A3B8" />
-                </Border>
-
-                <!-- Live Clock -->
-                <Label Grid.Column="3"
-                       x:Name="LiveClockLabel"
-                       Text="--:-- --"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       TextColor="White"
-                       VerticalOptions="Center" />
-            </Grid>
-        </Border>
-
-        <!-- Main 2-Column Content Grid -->
-        <Grid Grid.Row="1" ColumnDefinitions="1.15*,1*" ColumnSpacing="16">
-            <!-- Left Column: Stage (Now Performing, Up Next) & QR Hubs Side-by-Side -->
-            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
-                <!-- 0. LAST ROUND ANNOUNCEMENT BANNER -->
-                <Border Grid.Row="0"
-                        IsVisible="{Binding IsLastRound}"
-                        StrokeShape="RoundRectangle 12"
-                        BackgroundColor="#B45309"
-                        StrokeThickness="2"
-                        Stroke="#F59E0B"
-                        Padding="14,10">
-                    <Label Text="★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★"
-                           FontSize="13"
-                           FontAttributes="Bold"
-                           TextColor="White"
-                           HorizontalTextAlignment="Center"
-                           CharacterSpacing="1" />
-                </Border>
-
-                <!-- 1. NOW PERFORMING SPOTLIGHT -->
-                <Border Grid.Row="1"
-                        StrokeShape="RoundRectangle 14"
-                        BackgroundColor="#152238"
-                        StrokeThickness="2"
-                        Stroke="#F59E0B"
-                        Padding="16">
-                    <VerticalStackLayout Spacing="6">
-                        <HorizontalStackLayout Spacing="6">
-                            <Border HorizontalOptions="Start"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#D97706"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="🎙️ NOW PERFORMING"
-                                       FontSize="11"
-                                       FontAttributes="Bold"
-                                       TextColor="White"
-                                       CharacterSpacing="1" />
-                            </Border>
-                            <Border HorizontalOptions="Start"
-                                    IsVisible="{Binding CurrentSingerIsRotationStart}"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#DC2626"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
-                            </Border>
-                            <Border HorizontalOptions="Start"
-                                    IsVisible="{Binding CurrentSingerIsSpecial}"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#8B5CF6"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
-                            </Border>
-                        </HorizontalStackLayout>
-
-                        <!-- Singer Name -->
-                        <Label Text="{Binding CurrentSingerNameDisplay}"
-                               FontSize="24"
+            <!-- Main 2-Column Content Grid -->
+            <Grid Grid.Row="1" ColumnDefinitions="1.15*,1*" ColumnSpacing="16">
+                <!-- Left Column: Stage (Now Performing, Up Next) & QR Hubs Side-by-Side -->
+                <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+                    <!-- 0. LAST ROUND ANNOUNCEMENT BANNER -->
+                    <Border Grid.Row="0"
+                            IsVisible="{Binding IsLastRound}"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#B45309"
+                            StrokeThickness="2"
+                            Stroke="#F59E0B"
+                            Padding="14,10">
+                        <Label Text="★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★"
+                               FontSize="13"
                                FontAttributes="Bold"
                                TextColor="White"
-                               LineBreakMode="TailTruncation" />
+                               HorizontalTextAlignment="Center"
+                               CharacterSpacing="1" />
+                    </Border>
 
-                        <!-- Song & Artist -->
-                        <HorizontalStackLayout Spacing="6">
-                            <Label Text="{Binding CurrentSingerSongDisplay, StringFormat='&quot;{0}&quot;'}"
+                    <!-- 1. NOW PERFORMING SPOTLIGHT -->
+                    <Border Grid.Row="1"
+                            x:Name="NowPerformingBorder"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#152238"
+                            StrokeThickness="2"
+                            Stroke="#F59E0B"
+                            Padding="16">
+                        <VerticalStackLayout Spacing="6">
+                            <HorizontalStackLayout Spacing="6">
+                                <Border HorizontalOptions="Start"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#D97706"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="🎙️ NOW PERFORMING"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentSingerIsRotationStart}"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#DC2626"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentSingerIsSpecial}"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#8B5CF6"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentSingerHasScaryokeCategory}"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="#FF6D00"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="{Binding CurrentSingerScaryokeBadge}" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                </Border>
+                            </HorizontalStackLayout>
+
+                            <!-- Singer Name -->
+                            <Label Text="{Binding CurrentSingerNameDisplay}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   LineBreakMode="TailTruncation" />
+
+                            <!-- Song & Artist -->
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="{Binding CurrentSingerSongDisplay, StringFormat='&quot;{0}&quot;'}"
+                                       FontSize="15"
+                                       FontAttributes="Bold,Italic"
+                                       TextColor="#FBBF24"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding CurrentSingerArtistDisplay, StringFormat='by {0}'}"
+                                       FontSize="14"
+                                       TextColor="#94A3B8"
+                                       LineBreakMode="TailTruncation" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- 2. UP NEXT SPOTLIGHT -->
+                    <Border Grid.Row="2"
+                            x:Name="UpNextBorder"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#0E1A2E"
+                            StrokeThickness="1.5"
+                            Stroke="#3B82F6"
+                            Padding="12">
+                        <VerticalStackLayout Spacing="4">
+                            <HorizontalStackLayout Spacing="6">
+                                <Border HorizontalOptions="Start"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#2563EB"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="⏭️ UP NEXT"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding NextSingerIsRotationStart}"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#DC2626"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="⚓ ANCHOR" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding NextSingerIsSpecial}"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#8B5CF6"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="⭐ SPECIAL" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                </Border>
+                                <Border HorizontalOptions="Start"
+                                        IsVisible="{Binding NextSingerHasScaryokeCategory}"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="#FF6D00"
+                                        StrokeThickness="0"
+                                        Padding="8,2">
+                                    <Label Text="{Binding NextSingerScaryokeBadge}" FontSize="12" FontAttributes="Bold" TextColor="White" />
+                                </Border>
+                            </HorizontalStackLayout>
+
+                            <Label Text="{Binding NextSingerNameDisplay}"
+                                   FontSize="19"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Label Text="{Binding NextSingerSongDisplay, StringFormat='&quot;{0}&quot;'}"
                                    FontSize="15"
-                                   FontAttributes="Bold,Italic"
-                                   TextColor="#FBBF24"
+                                   FontAttributes="Italic"
+                                   TextColor="#93C5FD"
                                    LineBreakMode="TailTruncation" />
-                            <Label Text="{Binding CurrentSingerArtistDisplay, StringFormat='by {0}'}"
-                                   FontSize="14"
-                                   TextColor="#94A3B8"
-                                   LineBreakMode="TailTruncation" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- 2. UP NEXT SPOTLIGHT -->
-                <Border Grid.Row="2"
-                        StrokeShape="RoundRectangle 12"
-                        BackgroundColor="#0E1A2E"
-                        StrokeThickness="1.5"
-                        Stroke="#3B82F6"
-                        Padding="12">
-                    <VerticalStackLayout Spacing="4">
-                        <HorizontalStackLayout Spacing="6">
-                            <Border HorizontalOptions="Start"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#2563EB"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="⏭️ UP NEXT"
+                    <!-- 3. SIDE-BY-SIDE QR HUBS -->
+                    <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <!-- SONG REQUEST HUB -->
+                        <Border Grid.Column="0"
+                                StrokeShape="RoundRectangle 14"
+                                BackgroundColor="#141E33"
+                                StrokeThickness="1.5"
+                                Stroke="#8B5CF6"
+                                Padding="12">
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
+                                <Border HorizontalOptions="Center"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#2E1065"
+                                        StrokeThickness="1"
+                                        Stroke="#8B5CF6"
+                                        Padding="8,2">
+                                    <Label Text="📱 SONG REQUESTS"
+                                           FontSize="10"
+                                           FontAttributes="Bold"
+                                           TextColor="#C4B5FD"
+                                           CharacterSpacing="1" />
+                                </Border>
+
+                                <Border StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White"
+                                        StrokeThickness="0"
+                                        Padding="6"
+                                        HorizontalOptions="Center"
+                                        IsVisible="{Binding ShowQrCodeOnRotationScreen}">
+                                    <Image Source="{Binding QrCodeImage}"
+                                           WidthRequest="100"
+                                           HeightRequest="100"
+                                           Aspect="AspectFit" />
+                                </Border>
+
+                                <Label Text="Scan To Pick Song"
                                        FontSize="12"
                                        FontAttributes="Bold"
                                        TextColor="White"
-                                       CharacterSpacing="1" />
-                            </Border>
-                            <Border HorizontalOptions="Start"
-                                    IsVisible="{Binding NextSingerIsRotationStart}"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#DC2626"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="⚓ ANCHOR" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
-                            </Border>
-                            <Border HorizontalOptions="Start"
-                                    IsVisible="{Binding NextSingerIsSpecial}"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#8B5CF6"
-                                    StrokeThickness="0"
-                                    Padding="8,2">
-                                <Label Text="⭐ SPECIAL" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
-                            </Border>
-                        </HorizontalStackLayout>
+                                       HorizontalTextAlignment="Center" />
 
-                        <Label Text="{Binding NextSingerNameDisplay}"
-                               FontSize="19"
-                               FontAttributes="Bold"
-                               TextColor="White"
-                               LineBreakMode="TailTruncation" />
-
-                        <Label Text="{Binding NextSingerSongDisplay, StringFormat='&quot;{0}&quot;'}"
-                               FontSize="15"
-                               FontAttributes="Italic"
-                               TextColor="#93C5FD"
-                               LineBreakMode="TailTruncation" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- 3. SIDE-BY-SIDE QR HUBS -->
-                <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <!-- SONG REQUEST HUB -->
-                    <Border Grid.Column="0"
-                            StrokeShape="RoundRectangle 14"
-                            BackgroundColor="#141E33"
-                            StrokeThickness="1.5"
-                            Stroke="#8B5CF6"
-                            Padding="12">
-                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
-                            <Border HorizontalOptions="Center"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#2E1065"
-                                    StrokeThickness="1"
-                                    Stroke="#8B5CF6"
-                                    Padding="8,2">
-                                <Label Text="📱 SONG REQUESTS"
+                                <Label Text="{Binding ConnectionUrl}"
                                        FontSize="10"
                                        FontAttributes="Bold"
-                                       TextColor="#C4B5FD"
-                                       CharacterSpacing="1" />
-                            </Border>
+                                       TextColor="#A78BFA"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                        </Border>
 
-                            <Border StrokeShape="RoundRectangle 8"
-                                    BackgroundColor="White"
-                                    StrokeThickness="0"
-                                    Padding="6"
-                                    HorizontalOptions="Center"
-                                    IsVisible="{Binding ShowQrCodeOnRotationScreen}">
-                                <Image Source="{Binding QrCodeImage}"
-                                       WidthRequest="100"
-                                       HeightRequest="100"
-                                       Aspect="AspectFit" />
-                            </Border>
+                        <!-- WI-FI JOIN HUB -->
+                        <Border Grid.Column="1"
+                                StrokeShape="RoundRectangle 14"
+                                BackgroundColor="#0F172A"
+                                StrokeThickness="1"
+                                Stroke="#10B981"
+                                Padding="12">
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
+                                <Border HorizontalOptions="Center"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#064E3B"
+                                        StrokeThickness="1"
+                                        Stroke="#10B981"
+                                        Padding="8,2">
+                                    <Label Text="📶 FAST WI-FI JOIN"
+                                           FontSize="10"
+                                           FontAttributes="Bold"
+                                           TextColor="#6EE7B7"
+                                           CharacterSpacing="1" />
+                                </Border>
 
-                            <Label Text="Scan To Pick Song"
-                                   FontSize="12"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   HorizontalTextAlignment="Center" />
+                                <Border StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White"
+                                        StrokeThickness="0"
+                                        Padding="6"
+                                        HorizontalOptions="Center"
+                                        IsVisible="{Binding ShowQrCodeOnRotationScreen}">
+                                    <Image Source="{Binding WifiQrCodeImage}"
+                                           WidthRequest="80"
+                                           HeightRequest="80"
+                                           Aspect="AspectFit" />
+                                </Border>
 
-                            <Label Text="{Binding ConnectionUrl}"
-                                   FontSize="10"
-                                   FontAttributes="Bold"
-                                   TextColor="#A78BFA"
-                                   HorizontalTextAlignment="Center"
-                                   LineBreakMode="TailTruncation" />
-                        </VerticalStackLayout>
+                                <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                                    <Label Text="Network:" FontSize="10" TextColor="#94A3B8" />
+                                    <Label Text="{Binding WifiSsidDisplay}" FontSize="10" FontAttributes="Bold" TextColor="White" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                                    <Label Text="Password:" FontSize="10" TextColor="#94A3B8" />
+                                    <Label Text="{Binding WifiPasswordDisplay}" FontSize="10" FontAttributes="Bold" TextColor="White" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- Right Column: FULL-HEIGHT UPCOMING ROTATION LIST or STAR WARS CRAWL -->
+                <Grid Grid.Column="1">
+                    <Border x:Name="UpcomingQueueBorder"
+                            IsVisible="{Binding IsNormalBillboardView}"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#0E1626"
+                            StrokeThickness="1"
+                            Stroke="#1E293B"
+                            Padding="16">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                            <HorizontalStackLayout Grid.Row="0" Spacing="6" VerticalOptions="Center">
+                                <Label Text="UPCOMING IN ROTATION"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="#64748B"
+                                       CharacterSpacing="1.5" />
+                                <Label Text="( {N} = Est. wait )"
+                                       FontSize="13"
+                                       TextColor="#475569"
+                                       IsVisible="{Binding ShowEstimatedWaitTime}" />
+                            </HorizontalStackLayout>
+
+                            <CollectionView Grid.Row="1"
+                                            ItemsSource="{Binding UpcomingSingers}"
+                                            EmptyView="Rotation is open. Add your song to get on stage!">
+                                <CollectionView.EmptyViewTemplate>
+                                    <DataTemplate>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6" Padding="20">
+                                            <Label Text="📋" FontSize="28" HorizontalTextAlignment="Center" />
+                                            <Label Text="Rotation is open. Submit your song to take the stage!"
+                                                   FontSize="14"
+                                                   TextColor="#64748B"
+                                                   HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.EmptyViewTemplate>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:SingerEntry">
+                                        <Border StrokeShape="RoundRectangle 8"
+                                                BackgroundColor="#152033"
+                                                StrokeThickness="1"
+                                                Stroke="#1E293B"
+                                                Padding="12,8"
+                                                Margin="0,0,0,6">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                    <HorizontalStackLayout Spacing="6">
+                                                        <Border IsVisible="{Binding IsRotationStart}"
+                                                                StrokeShape="RoundRectangle 4"
+                                                                BackgroundColor="#DC2626"
+                                                                StrokeThickness="0"
+                                                                Padding="4,1"
+                                                                VerticalOptions="Center">
+                                                            <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                                        </Border>
+                                                        <Label Text="{Binding DisplayNameWithDuet}"
+                                                               FontSize="16"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               LineBreakMode="TailTruncation" />
+                                                        <Border IsVisible="{Binding HasScaryokeCategory}"
+                                                                StrokeShape="RoundRectangle 8"
+                                                                BackgroundColor="#FF6D00"
+                                                                StrokeThickness="0"
+                                                                Padding="6,1"
+                                                                VerticalOptions="Center">
+                                                            <Label Text="{Binding ScaryokeCategory, StringFormat='🎃 {0}'}" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                                        </Border>
+                                                        <Border IsVisible="{Binding HasEstimatedWait}"
+                                                                StrokeShape="RoundRectangle 4"
+                                                                BackgroundColor="#1E3A5F"
+                                                                Stroke="#0EA5E9"
+                                                                StrokeThickness="1"
+                                                                Padding="4,1"
+                                                                VerticalOptions="Center">
+                                                            <Label Text="{Binding EstimatedWaitMinutes, StringFormat='{}{{{0}}}'}" FontSize="11" FontAttributes="Bold" TextColor="#0EA5E9" />
+                                                        </Border>
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding Song}"
+                                                           FontSize="14"
+                                                           FontAttributes="Italic"
+                                                           TextColor="#94A3B8"
+                                                           LineBreakMode="TailTruncation" />
+                                                </VerticalStackLayout>
+
+                                                <!-- Status badges (Special / Skipped / Paused) -->
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                                    <Border IsVisible="{Binding IsSpecial}"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            BackgroundColor="#8B5CF6"
+                                                            StrokeThickness="0"
+                                                            Padding="6,2">
+                                                        <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                                    </Border>
+                                                    <Border IsVisible="{Binding IsSkipped}"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            BackgroundColor="#D97706"
+                                                            StrokeThickness="0"
+                                                            Padding="6,2">
+                                                        <Label Text="SKIP" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                                    </Border>
+                                                    <Border IsVisible="{Binding IsPaused}"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            BackgroundColor="#475569"
+                                                            StrokeThickness="0"
+                                                            Padding="6,2">
+                                                        <Label Text="PAUSED" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                                    </Border>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Grid>
                     </Border>
 
-                    <!-- WI-FI JOIN HUB -->
-                    <Border Grid.Column="1"
+                    <!-- Star Wars Crawl View Panel -->
+                    <Border IsVisible="{Binding IsStarWarsCrawlView}"
                             StrokeShape="RoundRectangle 14"
-                            BackgroundColor="#0F172A"
-                            StrokeThickness="1"
-                            Stroke="#10B981"
-                            Padding="12">
-                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
-                            <Border HorizontalOptions="Center"
-                                    StrokeShape="RoundRectangle 6"
-                                    BackgroundColor="#064E3B"
-                                    StrokeThickness="1"
-                                    Stroke="#10B981"
-                                    Padding="8,2">
-                                <Label Text="📶 FAST WI-FI JOIN"
-                                       FontSize="10"
+                            BackgroundColor="#02040A"
+                            StrokeThickness="1.5"
+                            Stroke="#FFE81F"
+                            Padding="20">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                            <Label Grid.Row="0"
+                                   Text="★ EPISODE KSR — TONIGHT'S ROTATION ★"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#FFE81F"
+                                   HorizontalTextAlignment="Center"
+                                   CharacterSpacing="2" />
+                            <ScrollView Grid.Row="1">
+                                <Label x:Name="StarWarsCrawlLabel"
+                                       Text="{Binding StarWarsCrawlText}"
+                                       FontSize="20"
                                        FontAttributes="Bold"
-                                       TextColor="#6EE7B7"
-                                       CharacterSpacing="1" />
-                            </Border>
-
-                            <Border StrokeShape="RoundRectangle 8"
-                                    BackgroundColor="White"
-                                    StrokeThickness="0"
-                                    Padding="6"
-                                    HorizontalOptions="Center"
-                                    IsVisible="{Binding ShowQrCodeOnRotationScreen}">
-                                <Image Source="{Binding WifiQrCodeImage}"
-                                       WidthRequest="80"
-                                       HeightRequest="80"
-                                       Aspect="AspectFit" />
-                            </Border>
-
-                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
-                                <Label Text="Network:" FontSize="10" TextColor="#94A3B8" />
-                                <Label Text="{Binding WifiSsidDisplay}" FontSize="10" FontAttributes="Bold" TextColor="White" />
-                            </HorizontalStackLayout>
-
-                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
-                                <Label Text="Password:" FontSize="10" TextColor="#94A3B8" />
-                                <Label Text="{Binding WifiPasswordDisplay}" FontSize="10" FontAttributes="Bold" TextColor="White" />
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
+                                       TextColor="#FFE81F"
+                                       HorizontalTextAlignment="Center"
+                                       LineHeight="1.35" />
+                            </ScrollView>
+                        </Grid>
                     </Border>
                 </Grid>
             </Grid>
+        </Grid>
 
-            <!-- Right Column: FULL-HEIGHT UPCOMING ROTATION LIST -->
-            <Border Grid.Column="1"
-                    StrokeShape="RoundRectangle 14"
-                    BackgroundColor="#0E1626"
-                    StrokeThickness="1"
-                    Stroke="#1E293B"
-                    Padding="16">
-                <Grid RowDefinitions="Auto,*" RowSpacing="10">
-                    <HorizontalStackLayout Grid.Row="0" Spacing="6" VerticalOptions="Center">
-                        <Label Text="UPCOMING IN ROTATION"
-                               FontSize="14"
-                               FontAttributes="Bold"
-                               TextColor="#64748B"
-                               CharacterSpacing="1.5" />
-                        <Label Text="( {N} = Est. wait )"
-                               FontSize="13"
-                               TextColor="#475569"
-                               IsVisible="{Binding ShowEstimatedWaitTime}" />
-                    </HorizontalStackLayout>
+        <!-- Holiday Rotation Screen Overlay (Non-Interactive) -->
+        <Grid x:Name="HolidayOverlayRoot"
+              InputTransparent="True"
+              CascadeInputTransparent="True"
+              IsVisible="False">
+            <BoxView x:Name="HolidayFogBox"
+                     VerticalOptions="End"
+                     HeightRequest="140"
+                     Opacity="0.18"
+                     InputTransparent="True" />
+            <AbsoluteLayout x:Name="HolidaySpriteCanvas"
+                            InputTransparent="True"
+                            CascadeInputTransparent="True" />
+        </Grid>
 
-                    <CollectionView Grid.Row="1"
-                                    ItemsSource="{Binding UpcomingSingers}"
-                                    EmptyView="Rotation is open. Add your song to get on stage!">
-                        <CollectionView.EmptyViewTemplate>
-                            <DataTemplate>
-                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6" Padding="20">
-                                    <Label Text="📋" FontSize="28" HorizontalTextAlignment="Center" />
-                                    <Label Text="Rotation is open. Submit your song to take the stage!"
-                                           FontSize="14"
-                                           TextColor="#64748B"
-                                           HorizontalTextAlignment="Center" />
-                                </VerticalStackLayout>
-                            </DataTemplate>
-                        </CollectionView.EmptyViewTemplate>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:SingerEntry">
-                                <Border StrokeShape="RoundRectangle 8"
-                                        BackgroundColor="#152033"
-                                        StrokeThickness="1"
-                                        Stroke="#1E293B"
-                                        Padding="12,8"
-                                        Margin="0,0,0,6">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <HorizontalStackLayout Spacing="6">
-                                                <Border IsVisible="{Binding IsRotationStart}"
-                                                        StrokeShape="RoundRectangle 4"
-                                                        BackgroundColor="#DC2626"
-                                                        StrokeThickness="0"
-                                                        Padding="4,1"
-                                                        VerticalOptions="Center">
-                                                    <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" />
-                                                </Border>
-                                                <Label Text="{Binding DisplayNameWithDuet}"
-                                                       FontSize="16"
-                                                       FontAttributes="Bold"
-                                                       TextColor="White"
-                                                       LineBreakMode="TailTruncation" />
-                                                <Border IsVisible="{Binding HasEstimatedWait}"
-                                                        StrokeShape="RoundRectangle 4"
-                                                        BackgroundColor="#1E3A5F"
-                                                        Stroke="#0EA5E9"
-                                                        StrokeThickness="1"
-                                                        Padding="4,1"
-                                                        VerticalOptions="Center">
-                                                    <Label Text="{Binding EstimatedWaitMinutes, StringFormat='{}{{{0}}}'}" FontSize="11" FontAttributes="Bold" TextColor="#0EA5E9" />
-                                                </Border>
-                                            </HorizontalStackLayout>
-                                            <Label Text="{Binding Song}"
-                                                   FontSize="14"
-                                                   FontAttributes="Italic"
-                                                   TextColor="#94A3B8"
-                                                   LineBreakMode="TailTruncation" />
-                                        </VerticalStackLayout>
-
-                                        <!-- Status badges (Special / Skipped / Paused) -->
-                                        <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                                            <Border IsVisible="{Binding IsSpecial}"
-                                                    StrokeShape="RoundRectangle 4"
-                                                    BackgroundColor="#8B5CF6"
-                                                    StrokeThickness="0"
-                                                    Padding="6,2">
-                                                <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" />
-                                            </Border>
-                                            <Border IsVisible="{Binding IsSkipped}"
-                                                    StrokeShape="RoundRectangle 4"
-                                                    BackgroundColor="#D97706"
-                                                    StrokeThickness="0"
-                                                    Padding="6,2">
-                                                <Label Text="SKIP" FontSize="11" FontAttributes="Bold" TextColor="White" />
-                                            </Border>
-                                            <Border IsVisible="{Binding IsPaused}"
-                                                    StrokeShape="RoundRectangle 4"
-                                                    BackgroundColor="#475569"
-                                                    StrokeThickness="0"
-                                                    Padding="6,2">
-                                                <Label Text="PAUSED" FontSize="11" FontAttributes="Bold" TextColor="White" />
-                                            </Border>
-                                        </HorizontalStackLayout>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+        <!-- Live Scaryoke Wheel Projection Overlay -->
+        <Grid x:Name="ScaryokeWheelOverlay"
+              BackgroundColor="#EE0D061A"
+              IsVisible="False"
+              Padding="24">
+            <VerticalStackLayout HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="14">
+                <Label Text="🎃 SCARYOKE WHEEL OF FATE 🎃"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="#FF6D00"
+                       HorizontalTextAlignment="Center"
+                       CharacterSpacing="1.5" />
+                <Label x:Name="ProjectedWheelSingerLabel"
+                       Text="Stage Open"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#E9D5FF"
+                       HorizontalTextAlignment="Center" />
+                <Grid WidthRequest="380" HeightRequest="396" HorizontalOptions="Center">
+                    <GraphicsView x:Name="ProjectedWheelGraphicsView"
+                                  WidthRequest="380"
+                                  HeightRequest="380"
+                                  VerticalOptions="End" />
+                    <Polygon Points="0,0 28,0 14,28"
+                             Fill="#FF3D00"
+                             Stroke="#1A1822"
+                             StrokeThickness="2"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Start" />
                 </Grid>
-            </Border>
+                <Border StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E133A"
+                        Stroke="#FACC15"
+                        StrokeThickness="1.5"
+                        Padding="20,10"
+                        HorizontalOptions="Center">
+                    <Label x:Name="ProjectedWheelResultLabel"
+                           Text="Spin the wheel for a challenge!"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#FDE047"
+                           HorizontalTextAlignment="Center" />
+                </Border>
+            </VerticalStackLayout>
         </Grid>
     </Grid>
 </ContentView>

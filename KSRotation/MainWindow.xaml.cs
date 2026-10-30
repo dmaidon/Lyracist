@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 13:00:00 -> Restore BtnScaryokeBatch_Click with cancellation support for multi-singer spin
+// Edited on Oct 30, 2026 @ 06:13:00 -> Add manual Scaryoke category assignment dialog from context menu and badge click
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -36,6 +36,8 @@ namespace KSRotation
             {
                 vm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
                 vm.SingerInsertedForEditing += OnSingerInsertedForEditing;
+                vm.PromptManualScaryokeRequested -= OnPromptManualScaryokeRequested;
+                vm.PromptManualScaryokeRequested += OnPromptManualScaryokeRequested;
             }
         }
 
@@ -44,12 +46,20 @@ namespace KSRotation
             if (e.OldValue is ViewModels.MainViewModel oldVm)
             {
                 oldVm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
+                oldVm.PromptManualScaryokeRequested -= OnPromptManualScaryokeRequested;
             }
             if (e.NewValue is ViewModels.MainViewModel newVm)
             {
                 newVm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
                 newVm.SingerInsertedForEditing += OnSingerInsertedForEditing;
+                newVm.PromptManualScaryokeRequested -= OnPromptManualScaryokeRequested;
+                newVm.PromptManualScaryokeRequested += OnPromptManualScaryokeRequested;
             }
+        }
+
+        private void OnPromptManualScaryokeRequested(object? sender, Models.SingerEntry entry)
+        {
+            PromptManualScaryokeCategory(entry);
         }
 
         private void OnSingerInsertedForEditing(object? sender, Models.SingerEntry entry)
@@ -62,6 +72,7 @@ namespace KSRotation
             if (DataContext is ViewModels.MainViewModel vm)
             {
                 vm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
+                vm.PromptManualScaryokeRequested -= OnPromptManualScaryokeRequested;
                 vm.Shutdown();
             }
             System.Windows.Application.Current.Shutdown();
@@ -627,6 +638,122 @@ namespace KSRotation
                 btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
                 btn.ContextMenu.IsOpen = true;
             }
+        }
+
+        private void ScaryokeBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is Models.SingerEntry singer)
+            {
+                e.Handled = true;
+                PromptManualScaryokeCategory(singer);
+            }
+        }
+
+        private void PromptManualScaryokeCategory(Models.SingerEntry singer)
+        {
+            if (DataContext is not ViewModels.MainViewModel vm) return;
+
+            var dlg = new Window
+            {
+                Title = $"🎃 Set Scaryoke Category — {singer.Name}",
+                Width = 360,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                ResizeMode = ResizeMode.NoResize,
+                WindowStyle = WindowStyle.ToolWindow,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x16, 0x12, 0x24)),
+                Foreground = System.Windows.Media.Brushes.White
+            };
+
+            var stack = new System.Windows.Controls.StackPanel { Margin = new Thickness(16) };
+            stack.Children.Add(new System.Windows.Controls.TextBlock
+            {
+                Text = $"Select or type a Scaryoke challenge for {singer.Name}:",
+                FontWeight = FontWeights.SemiBold,
+                FontSize = 13,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE9, 0xD5, 0xFF)),
+                Margin = new Thickness(0, 0, 0, 8),
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            var combo = new System.Windows.Controls.ComboBox
+            {
+                IsEditable = true,
+                FontSize = 13,
+                Padding = new Thickness(6, 4, 6, 4),
+                Margin = new Thickness(0, 0, 0, 16),
+                Text = singer.ScaryokeCategory ?? string.Empty
+            };
+            foreach (var cat in vm.ScaryokeCategories)
+            {
+                combo.Items.Add(cat);
+            }
+            if (!combo.Items.Contains("Singer's Choice")) combo.Items.Add("Singer's Choice");
+            if (!combo.Items.Contains("DJ's Choice")) combo.Items.Add("DJ's Choice");
+            stack.Children.Add(combo);
+
+            var btnRow = new System.Windows.Controls.StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+            };
+
+            if (singer.HasScaryokeCategory)
+            {
+                var clearBtn = new System.Windows.Controls.Button
+                {
+                    Content = "✕ Clear",
+                    Padding = new Thickness(10, 4, 10, 4),
+                    Margin = new Thickness(0, 0, 8, 0),
+                    Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xDC, 0x26, 0x26)),
+                    Foreground = System.Windows.Media.Brushes.White
+                };
+                clearBtn.Click += (_, _) =>
+                {
+                    vm.ClearScaryokeForSinger(singer);
+                    dlg.DialogResult = true;
+                };
+                btnRow.Children.Add(clearBtn);
+            }
+
+            var cancelBtn = new System.Windows.Controls.Button
+            {
+                Content = "Cancel",
+                Padding = new Thickness(10, 4, 10, 4),
+                Margin = new Thickness(0, 0, 8, 0),
+                IsCancel = true
+            };
+            btnRow.Children.Add(cancelBtn);
+
+            var saveBtn = new System.Windows.Controls.Button
+            {
+                Content = "📌 Assign",
+                Padding = new Thickness(12, 4, 12, 4),
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED)),
+                Foreground = System.Windows.Media.Brushes.White,
+                FontWeight = FontWeights.Bold,
+                IsDefault = true
+            };
+            saveBtn.Click += (_, _) =>
+            {
+                string chosen = combo.Text?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(chosen))
+                {
+                    vm.ClearScaryokeForSinger(singer);
+                }
+                else
+                {
+                    vm.AssignScaryokeCategory(singer, chosen);
+                }
+                dlg.DialogResult = true;
+            };
+            btnRow.Children.Add(saveBtn);
+
+            stack.Children.Add(btnRow);
+            dlg.Content = stack;
+            dlg.Loaded += (_, _) => combo.Focus();
+            dlg.ShowDialog();
         }
     }
 }

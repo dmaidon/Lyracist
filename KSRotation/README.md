@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 04:13:30 -> Document Holiday Rotation Screens under Display tab summary -->
+<!-- Edited on Oct 30, 2026 @ 07:27:30 -> Document Scaryoke manual category assignment, 12-color palette, and MAUI rotation screen transmission -->
 
 # KSRotation
 
@@ -6,7 +6,7 @@ KSRotation ("Karaoke Singer Rotation") is a WPF (.NET, C#, Material Design in XA
 
 ## Tabs
 
-- **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, dynamic round completion estimation and duration notices, singer pause/inactive states, round-scoped Singer Skip, and one-time Special Singers.
+- **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, dynamic round completion estimation and duration notices, singer pause/inactive states, round-scoped Singer Skip, one-time Special Singers, and Scaryoke challenge wheel spins or manual category assignments with a distinct 12-color category palette.
 - **Users** — Centralized user, performer, and staff management with high-DPI quick-search, profile management, and history.
 - **Settings** — Venue, DJ, banner, target monitor display & TV overscan guidance, and general app settings (theme, etc.).
 - **Display** — Controls the audience-facing display window(s)/monitor output, themed projection views, Holiday Rotation Screens (Off, Auto by show-night date, or explicit holiday themes with full-color Twemoji particles, glow halos, and drifting fog), live synth bars, and special event banners.

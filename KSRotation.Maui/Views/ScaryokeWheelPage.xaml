@@ -1,15 +1,16 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<!-- Edited on Oct 30, 2026 @ 06:19:30 -> Add Target Singer picker and manual Scaryoke category assignment section -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.Maui.ViewModels"
              xmlns:services="clr-namespace:KSRotation.Maui.Services"
+             xmlns:models="clr-namespace:KSRotation.Models"
              x:Class="KSRotation.Maui.Views.ScaryokeWheelPage"
              x:DataType="viewmodels:ScaryokeWheelViewModel"
              Title="Scaryoke Wheel"
              BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#12141C}">
 
     <ScrollView>
-        <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="16">
+        <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="16">
 
             <!-- Wheel + fixed pointer -->
             <Grid Grid.Row="0" HeightRequest="340" HorizontalOptions="Center">
@@ -21,8 +22,31 @@
 
             <Button Grid.Row="2" x:Name="SpinButton" Text="🎃 SPIN" Clicked="OnSpinClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="48" WidthRequest="160" HorizontalOptions="Center" />
 
-            <!-- Category management -->
+            <!-- Manual Category Assignment to Singer -->
             <Border Grid.Row="3" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Target Singer &amp; Manual Challenge" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" TextColor="{AppThemeBinding Light=#EA580C, Dark=#FB923C}" />
+
+                    <Picker Title="Target Singer (for Spin or Manual Set)"
+                            ItemsSource="{Binding Singers}"
+                            ItemDisplayBinding="{Binding Name, x:DataType=models:SingerEntry}"
+                            SelectedItem="{Binding SelectedTargetSinger}"
+                            TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                        <Picker Grid.Column="0"
+                                Title="Select Category..."
+                                ItemsSource="{Binding AssignableCategories}"
+                                SelectedItem="{Binding SelectedManualCategory}"
+                                TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Button Grid.Column="1" Text="📌 Set Singer" Command="{Binding AssignManualCategoryCommand}" BackgroundColor="#EA580C" TextColor="White" FontAttributes="Bold" />
+                        <Button Grid.Column="2" Text="✕ Clear" Command="{Binding ClearManualCategoryCommand}" BackgroundColor="#475569" TextColor="White" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Category management -->
+            <Border Grid.Row="4" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="Categories" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" />
 

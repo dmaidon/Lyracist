@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 08:55:00 -> Support duet partner display via partner or duetPartnerName fallback -->
+<!-- Edited on Oct 29, 2026 @ 14:48:00 -> Add Holiday overlays, 12 themed projection views, Scaryoke badges, and live Scaryoke wheel spin projection -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,6 +25,88 @@
             --red-flag: #DC2626;
         }
 
+        /* Themed Projection View Overrides */
+        body[data-view="Vegas Marquee"] {
+            --bg-base: #1A0805;
+            --bg-panel: #2B0D08;
+            --bg-card: #3D140D;
+            --amber-glow: #FFD700;
+            --blue-glow: #FF4500;
+            background-image: radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.18) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(255, 69, 0, 0.16) 0%, transparent 45%);
+        }
+        body[data-view="Disco Ball"] {
+            --bg-base: #0E0521;
+            --bg-panel: #190A38;
+            --bg-card: #261054;
+            --amber-glow: #EC4899;
+            --blue-glow: #06B6D4;
+            background-image: radial-gradient(circle at 15% 25%, rgba(236, 72, 153, 0.2) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.2) 0%, transparent 45%);
+        }
+        body[data-view="Synthwave Grid"] {
+            --bg-base: #090218;
+            --bg-panel: #140530;
+            --bg-card: #21094A;
+            --amber-glow: #FF007F;
+            --blue-glow: #00F0FF;
+            background-image: linear-gradient(180deg, rgba(255, 0, 127, 0.12) 0%, rgba(0, 240, 255, 0.12) 100%), repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.06) 0px, rgba(0, 240, 255, 0.06) 1px, transparent 1px, transparent 36px);
+        }
+        body[data-view="Vinyl Turntable"] {
+            --bg-base: #111113;
+            --bg-panel: #1A1A1E;
+            --bg-card: #25252B;
+            --amber-glow: #D97706;
+            --blue-glow: #A1A1AA;
+        }
+        body[data-view="Concert Festival Lineup"] {
+            --bg-base: #180B20;
+            --bg-panel: #271234;
+            --bg-card: #381A4A;
+            --amber-glow: #F97316;
+            --blue-glow: #FACC15;
+        }
+        body[data-view="Casino Slot Reels"] {
+            --bg-base: #061A10;
+            --bg-panel: #0C2B1B;
+            --bg-card: #123D27;
+            --amber-glow: #FBBF24;
+            --blue-glow: #EF4444;
+        }
+        body[data-view="Jukebox"] {
+            --bg-base: #190B04;
+            --bg-panel: #2B1308;
+            --bg-card: #3E1C0D;
+            --amber-glow: #FB923C;
+            --blue-glow: #2DD4BF;
+        }
+        body[data-view="Stadium Jumbotron"] {
+            --bg-base: #040D1A;
+            --bg-panel: #091930;
+            --bg-card: #102648;
+            --amber-glow: #38BDF8;
+            --blue-glow: #FACC15;
+        }
+        body[data-view="Movie Theater 'Now Showing'"] {
+            --bg-base: #160408;
+            --bg-panel: #26080E;
+            --bg-card: #380C15;
+            --amber-glow: #FDE047;
+            --blue-glow: #F87171;
+        }
+        body[data-view="Purple Velvet Curtain"] {
+            --bg-base: #120422;
+            --bg-panel: #1F083A;
+            --bg-card: #2E0D54;
+            --amber-glow: #E879F9;
+            --blue-glow: #FBBF24;
+        }
+        body[data-view="Star Wars Crawl"] {
+            --bg-base: #000000;
+            --bg-panel: #08080C;
+            --bg-card: #101018;
+            --amber-glow: #FFE81F;
+            --blue-glow: #FFE81F;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -42,6 +124,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: relative;
             background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
         }
 
@@ -56,6 +139,7 @@
             padding: 0 36px;
             flex-shrink: 0;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 20;
         }
 
         .header-brand {
@@ -93,7 +177,33 @@
         .header-status {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 16px;
+        }
+
+        .view-mode-pill {
+            background: rgba(245, 158, 11, 0.16);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #FDE68A;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .holiday-pill {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(167, 139, 250, 0.45);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #DDD6FE;
+            display: none;
+            align-items: center;
+            gap: 6px;
         }
 
         .status-pill {
@@ -130,6 +240,7 @@
             padding: 20px 32px;
             height: calc(100vh - 72px);
             overflow: hidden;
+            z-index: 10;
         }
 
         /* Left Column: Stage & Side-by-Side QR Codes */
@@ -203,6 +314,7 @@
             line-height: 1.15;
             letter-spacing: -0.5px;
             display: flex;
+            flex-wrap: wrap;
             align-items: baseline;
             gap: 12px;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
@@ -226,10 +338,31 @@
             letter-spacing: 0.3px;
         }
 
+        .scaryoke-badge {
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background-color: #FF6D00;
+            color: #FFFFFF;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .queue-name .rotation-start-badge {
             font-size: 0.65rem;
             padding: 2px 6px;
             margin-right: 6px;
+        }
+
+        .queue-name .scaryoke-badge {
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            margin-left: 6px;
+            vertical-align: middle;
         }
 
         .now-song-meta {
@@ -291,6 +424,7 @@
             color: #FFFFFF;
             line-height: 1.2;
             display: flex;
+            flex-wrap: wrap;
             align-items: baseline;
             gap: 10px;
         }
@@ -388,6 +522,56 @@
             text-overflow: ellipsis;
         }
 
+        /* Star Wars 3D Perspective Crawl Overlay */
+        #star-wars-crawl-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 360px;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #0B0F19 0%, #000000 85%);
+            border: 1.5px solid rgba(255, 232, 31, 0.35);
+            border-radius: 18px;
+            padding: 20px;
+        }
+
+        body[data-view="Star Wars Crawl"] .card-upcoming-queue {
+            display: none;
+        }
+
+        body[data-view="Star Wars Crawl"] #star-wars-crawl-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .star-wars-crawl-plane {
+            width: 90%;
+            color: #FFE81F;
+            font-weight: 800;
+            font-size: 1.55rem;
+            line-height: 1.65;
+            text-align: center;
+            transform-origin: 50% 100%;
+            animation: sw-crawl 28s linear infinite;
+            text-shadow: 0 0 12px rgba(255, 232, 31, 0.35);
+        }
+
+        @keyframes sw-crawl {
+            0% {
+                transform: rotateX(24deg) translateY(70%);
+                opacity: 1;
+            }
+            88% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotateX(24deg) translateY(-120%);
+                opacity: 0;
+            }
+        }
+
         /* Side-By-Side QR Hubs Row (Bottom of Left Column) */
         .qr-hubs-row {
             display: grid;
@@ -468,50 +652,6 @@
         }
 
         .hub-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: #FFFFFF;
-            margin-bottom: 2px;
-        }
-
-        .hub-desc {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.3;
-        }
-
-        .hub-link {
-            margin-top: 4px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #A78BFA;
-            letter-spacing: 0.2px;
-            word-break: break-all;
-        }
-
-        .wifi-details {
-            margin-top: 4px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            font-size: 0.82rem;
-        }
-
-        .qr-image-lg {
-            width: 170px;
-            height: 170px;
-            display: block;
-            image-rendering: pixelated;
-        }
-
-        .qr-image-sm {
-            width: 120px;
-            height: 120px;
-            display: block;
-            image-rendering: pixelated;
-        }
-
-        .hub-title {
             font-size: 1.25rem;
             font-weight: 800;
             color: #FFFFFF;
@@ -566,9 +706,122 @@
             .empty-placeholder .icon {
                 font-size: 2.5rem;
             }
+
+        /* Holiday Rotation Screen Overlay */
+        #holiday-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 90;
+            overflow: hidden;
+            display: none;
+        }
+
+        #holiday-vignette {
+            position: absolute;
+            inset: 0;
+        }
+
+        #holiday-fog {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 22vh;
+        }
+
+        #holiday-particles {
+            position: absolute;
+            inset: 0;
+        }
+
+        .holiday-sprite {
+            position: absolute;
+            font-size: 2.8rem;
+            line-height: 1;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 8px;
+        }
+
+        /* Live Scaryoke Wheel Projection Overlay */
+        #scaryoke-wheel-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: radial-gradient(circle at center, rgba(20, 8, 38, 0.94) 0%, rgba(5, 2, 12, 0.97) 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 24px;
+        }
+
+        .scaryoke-overlay-title {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: #FF6D00;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 22px rgba(255, 109, 0, 0.65);
+        }
+
+        .scaryoke-overlay-singer {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #E9D5FF;
+            margin-top: -8px;
+        }
+
+        .scaryoke-wheel-stage {
+            position: relative;
+            width: min(62vh, 62vw);
+            height: min(62vh, 62vw);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scaryoke-wheel-pointer {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 34px solid #FF3D00;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.75));
+            z-index: 5;
+        }
+
+        #scaryoke-wheel-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.55);
+        }
+
+        .scaryoke-overlay-result {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #FDE047;
+            text-align: center;
+            padding: 10px 28px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1.5px solid rgba(250, 204, 21, 0.45);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            max-width: 85vw;
+        }
     </style>
 </head>
-<body>
+<body data-view="Normal List">
     <!-- Top Header Bar -->
     <header class="billboard-header">
         <div class="header-brand">
@@ -580,6 +833,8 @@
         </div>
 
         <div class="header-status">
+            <div class="holiday-pill" id="billboard-holiday-badge"></div>
+            <div class="view-mode-pill" id="billboard-view-badge"></div>
             <div class="status-pill">
                 <span>Active Rotation:</span>
                 <strong id="billboard-singer-count">0 Singers</strong>
@@ -605,6 +860,7 @@
                     <span class="rotation-start-badge" id="now-special-badge" style="display: none; background: var(--purple-glow);" title="Special Performer (One-Time)">⭐ SPECIAL</span>
                     <span id="now-singer-name">Stage is Open</span>
                     <span class="now-duet-tag" id="now-duet-tag" style="display: none;"></span>
+                    <span class="scaryoke-badge" id="now-scaryoke-badge" style="display: none;"></span>
                 </div>
                 <div class="now-song-meta" id="now-song-meta">
                     <span id="now-song-title">Get ready to sing!</span>
@@ -620,6 +876,7 @@
                     <span class="rotation-start-badge" id="next-special-badge" style="display: none; background: var(--purple-glow);" title="Special Performer (One-Time)">⭐ SPECIAL</span>
                     <span id="next-singer-name">Ready for singers</span>
                     <span class="now-duet-tag" id="next-duet-tag" style="display: none;"></span>
+                    <span class="scaryoke-badge" id="next-scaryoke-badge" style="display: none;"></span>
                 </div>
                 <div class="next-song-meta" id="next-song-meta">
                     <span id="next-song-title">Scan QR code to submit a song</span>
@@ -654,7 +911,7 @@
             </div>
         </section>
 
-        <!-- Right Column: Full-Height Upcoming Rotation Queue -->
+        <!-- Right Column: Full-Height Upcoming Rotation Queue or Star Wars Crawl -->
         <aside class="rotation-column">
             <div class="card-upcoming-queue">
                 <div class="queue-title">
@@ -668,240 +925,583 @@
                     </div>
                 </div>
             </div>
+            <div id="star-wars-crawl-container">
+                <div class="star-wars-crawl-plane" id="star-wars-crawl-plane"></div>
+            </div>
         </aside>
     </main>
 
+    <!-- Holiday Rotation Screen Overlay -->
+    <div id="holiday-overlay">
+        <div id="holiday-vignette"></div>
+        <div id="holiday-fog"></div>
+        <div id="holiday-particles"></div>
+    </div>
+
+    <!-- Live Scaryoke Wheel Projection Overlay -->
+    <div id="scaryoke-wheel-overlay">
+        <div class="scaryoke-overlay-title">🎃 SCARYOKE WHEEL OF FATE 🎃</div>
+        <div class="scaryoke-overlay-singer" id="scaryoke-wheel-singer">Stage Open</div>
+        <div class="scaryoke-wheel-stage">
+            <div class="scaryoke-wheel-pointer"></div>
+            <canvas id="scaryoke-wheel-canvas" width="640" height="640"></canvas>
+        </div>
+        <div class="scaryoke-overlay-result" id="scaryoke-wheel-result">Spin the wheel for a challenge!</div>
+    </div>
+
     <script>
-                let previousRotationHash = "";
-                let previousInfoHash = "";
+        let previousRotationHash = "";
+        let previousInfoHash = "";
+        let activeHolidayKey = "";
+        let holidayTimerIds = [];
+        let activeSprites = 0;
+        const MAX_HOLIDAY_SPRITES = 7;
 
-                // Clock display
-                function updateClock() {
-                    const now = new Date();
-                    let hours = now.getHours();
-                    const minutes = String(now.getMinutes()).padStart(2, '0');
-                    const ampm = hours >= 12 ? 'PM' : 'AM';
-                    hours = hours % 12;
-                    hours = hours ? hours : 12;
-                    const clockEl = document.getElementById('billboard-clock');
-                    if (clockEl) {
-                        clockEl.textContent = `${hours}:${minutes} ${ampm}`;
-                    }
-                }
-                setInterval(updateClock, 1000);
-                updateClock();
+        let wheelAnimFrame = null;
+        let wheelCurrentAngle = 0;
+        let wheelLastTargetAngle = null;
+        let wheelWasSpinning = false;
 
-                // Fetch Venue & Wi-Fi Info
-                async function fetchInfo() {
-                    try {
-                        const response = await fetch('/api/info');
-                        if (!response.ok) return;
-                        const data = await response.json();
-                        const hash = JSON.stringify(data);
-                        if (hash === previousInfoHash) return;
-                        previousInfoHash = hash;
+        // Clock display
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const clockEl = document.getElementById('billboard-clock');
+            if (clockEl) {
+                clockEl.textContent = `${hours}:${minutes} ${ampm}`;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-                        const brandTitlesEl = document.querySelector('.brand-titles');
-                        if (brandTitlesEl) {
-                            if (data.listDjAndVenue === false) {
-                                brandTitlesEl.style.display = 'none';
+        // Fetch Venue, Wi-Fi, View Mode, Holiday Theme & Scaryoke Wheel Info
+        async function fetchInfo() {
+            try {
+                const response = await fetch('/api/info');
+                if (!response.ok) return;
+                const data = await response.json();
+                const hash = JSON.stringify(data);
+                if (hash === previousInfoHash) return;
+                previousInfoHash = hash;
+
+                const brandTitlesEl = document.querySelector('.brand-titles');
+                if (brandTitlesEl) {
+                    if (data.listDjAndVenue === false) {
+                        brandTitlesEl.style.display = 'none';
+                    } else {
+                        brandTitlesEl.style.display = 'flex';
+                        const venueEl = document.getElementById('billboard-venue-name');
+                        if (venueEl) {
+                            venueEl.textContent = data.venue || "Karaoke Night";
+                        }
+                        const djEl = document.getElementById('billboard-dj-name');
+                        if (djEl) {
+                            if (data.dj && data.dj.trim()) {
+                                djEl.textContent = `Hosted by ${data.dj}`;
+                                djEl.style.display = "";
                             } else {
-                                brandTitlesEl.style.display = 'flex';
-                                const venueEl = document.getElementById('billboard-venue-name');
-                                if (venueEl) {
-                                    venueEl.textContent = data.venue || "Karaoke Night";
-                                }
-                                const djEl = document.getElementById('billboard-dj-name');
-                                if (djEl) {
-                                    if (data.dj && data.dj.trim()) {
-                                        djEl.textContent = `Hosted by ${data.dj}`;
-                                        djEl.style.display = "";
-                                    } else {
-                                        djEl.textContent = "";
-                                        djEl.style.display = "none";
-                                    }
-                                }
+                                djEl.textContent = "";
+                                djEl.style.display = "none";
                             }
                         }
-
-                        // Portal URL & QR
-                        const portalUrl = data.portalUrl || window.location.origin;
-                        document.getElementById('portal-url-display').textContent = portalUrl;
-                        document.getElementById('portal-qr-image').src = `/api/qr?text=${encodeURIComponent(portalUrl)}`;
-
-                        // Wi-Fi details & QR
-                        const ssid = data.wifiSsid || "";
-                        const pass = data.wifiPassword || "";
-                        document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
-
-                        const passContainer = document.getElementById('wifi-pass-container');
-                        if (pass) {
-                            passContainer.style.display = "block";
-                            document.getElementById('wifi-pass-display').textContent = pass;
-                        } else {
-                            document.getElementById('wifi-pass-display').textContent = "Open / No password";
-                        }
-
-                        const wifiPayload = `WIFI:S:${ssid};T:${pass ? 'WPA' : 'nopass'};P:${pass};;`;
-                        document.getElementById('wifi-qr-image').src = `/api/qr?text=${encodeURIComponent(wifiPayload)}`;
-
-                        const lastRoundBanner = document.getElementById('last-round-banner');
-                        if (lastRoundBanner) {
-                            lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
-                        }
-
-                        const showQrCode = data.showQrCode !== false;
-                        document.getElementById('portal-qr-container').style.display = showQrCode ? "" : "none";
-                        document.getElementById('wifi-qr-container').style.display = showQrCode ? "" : "none";
-                    } catch (err) {
-                        console.warn("Error fetching info", err);
                     }
                 }
 
-                // Fetch Rotation Queue
-                async function fetchRotation() {
-                    try {
-                        const response = await fetch('/api/rotation');
-                        if (!response.ok) return;
-                        const singers = await response.json();
-                        const hash = JSON.stringify(singers);
-                        if (hash === previousRotationHash) return;
-                        previousRotationHash = hash;
-
-                        renderRotation(singers || []);
-                    } catch (err) {
-                        console.warn("Error fetching rotation", err);
-                    }
-                }
-
-                function renderRotation(singers) {
-                    const activeSingers = singers.filter(s => !s.isInactive && !s.hasSungInLastRound);
-                    document.getElementById('billboard-singer-count').textContent = `${activeSingers.length} Singers`;
-
-                    // 1. Current Performer
-                    const currentSinger = singers.find(s => s.isCurrent && !s.hasSungInLastRound);
-                    const nowNameEl = document.getElementById('now-singer-name');
-                    const nowDuetEl = document.getElementById('now-duet-tag');
-                    const nowTitleEl = document.getElementById('now-song-title');
-                    const nowArtistEl = document.getElementById('now-song-artist');
-                    const nowRotationStartEl = document.getElementById('now-rotation-start-badge');
-                    const nowSpecialEl = document.getElementById('now-special-badge');
-
-                    if (currentSinger) {
-                        nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
-                        if (nowSpecialEl) nowSpecialEl.style.display = currentSinger.isSpecial ? "inline-block" : "none";
-                        nowNameEl.textContent = currentSinger.name;
-                        const curPartner = currentSinger.partner || currentSinger.duetPartnerName;
-                        if (curPartner && curPartner !== "None") {
-                            nowDuetEl.textContent = `w/ ${curPartner}`;
-                            nowDuetEl.style.display = "inline";
-                        } else {
-                            nowDuetEl.style.display = "none";
-                        }
-
-                        if (currentSinger.isMusic) {
-                            nowTitleEl.textContent = "♪ Background Music Track";
-                            nowArtistEl.textContent = "";
-                        } else {
-                            nowTitleEl.textContent = currentSinger.song ? `"${currentSinger.song}"` : "Song not selected";
-                            nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
-                        }
+                // Projection View Mode
+                const projView = data.projectionView || "Normal List";
+                document.body.setAttribute('data-view', projView);
+                const viewBadge = document.getElementById('billboard-view-badge');
+                if (viewBadge) {
+                    if (projView !== "Normal List") {
+                        viewBadge.textContent = `✨ ${projView}`;
+                        viewBadge.style.display = "inline-flex";
                     } else {
-                        nowRotationStartEl.style.display = "none";
-                        if (nowSpecialEl) nowSpecialEl.style.display = "none";
-                        nowNameEl.textContent = "Stage is Open";
-                        nowDuetEl.style.display = "none";
-                        nowTitleEl.textContent = "Ready for the next singer!";
-                        nowArtistEl.textContent = "";
-                    }
-
-                    // 2. Next Up Performer
-                    const nextSinger = singers.find(s => s.isNext && !s.hasSungInLastRound);
-                    const nextNameEl = document.getElementById('next-singer-name');
-                    const nextDuetEl = document.getElementById('next-duet-tag');
-                    const nextTitleEl = document.getElementById('next-song-title');
-                    const nextRotationStartEl = document.getElementById('next-rotation-start-badge');
-                    const nextSpecialEl = document.getElementById('next-special-badge');
-
-                    if (nextSinger) {
-                        nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
-                        if (nextSpecialEl) nextSpecialEl.style.display = nextSinger.isSpecial ? "inline-block" : "none";
-                        nextNameEl.textContent = nextSinger.name;
-                        const nextPartner = nextSinger.partner || nextSinger.duetPartnerName;
-                        if (nextPartner && nextPartner !== "None") {
-                            nextDuetEl.textContent = `w/ ${nextPartner}`;
-                            nextDuetEl.style.display = "inline";
-                        } else {
-                            nextDuetEl.style.display = "none";
-                        }
-
-                        if (nextSinger.isMusic) {
-                            nextTitleEl.textContent = "♪ Background Music Track";
-                        } else {
-                            const song = nextSinger.song ? `"${nextSinger.song}"` : "Picking a song";
-                            const artist = nextSinger.artist ? ` by ${nextSinger.artist}` : "";
-                            nextTitleEl.textContent = `${song}${artist}`;
-                        }
-                    } else {
-                        nextRotationStartEl.style.display = "none";
-                        if (nextSpecialEl) nextSpecialEl.style.display = "none";
-                        nextNameEl.textContent = "On Deck";
-                        nextDuetEl.style.display = "none";
-                        nextTitleEl.textContent = "Scan QR code to be up next!";
-                    }
-
-                    // 3. Upcoming Queue (all active singers after current & next)
-                    const queueListEl = document.getElementById('billboard-queue-list');
-                    const upcoming = activeSingers.filter(s => !s.isCurrent && !s.isNext);
-
-                    if (upcoming.length === 0) {
-                        queueListEl.innerHTML = `
-                                    <div class="empty-placeholder">
-                                        <span class="icon">📋</span>
-                                        <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
-                                    </div>`;
-                    } else {
-                        let html = "";
-                        upcoming.forEach((s, idx) => {
-                            const partner = s.partner || s.duetPartnerName;
-                            const partnerText = (partner && partner !== "None") ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(partner)}</span>` : "";
-                            const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
-                            const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
-                            const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
-                            const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:var(--orange-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIP</span>' : '';
-                            const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:var(--purple-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
-                            const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
-
-                            html += `
-                                        <div class="queue-row"${pausedClass}>
-                                            <span class="queue-pos">${idx + 1}</span>
-                                            <div class="queue-info">
-                                                <div class="queue-name">${rotationStartBadge}${specialBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}${skippedBadge}</div>
-                                                <div class="queue-song">${songDesc}</div>
-                                            </div>
-                                        </div>`;
-                        });
-                        queueListEl.innerHTML = html;
+                        viewBadge.style.display = "none";
                     }
                 }
 
-                function escapeHtml(text) {
-                    if (!text) return "";
-                    return String(text)
-                        .replace(/&/g, "&amp;")
-                        .replace(/</g, "&lt;")
-                        .replace( />/g, "&gt;")
-                        .replace(/"/g, "&quot;")
-                        .replace(/'/g, "&#039;");
+                // Holiday Overlay
+                applyHolidayOverlay(data.activeHoliday || null);
+
+                // Scaryoke Live Wheel Overlay
+                applyScaryokeWheelState(data.scaryokeState || null);
+
+                // Portal URL & QR
+                const portalUrl = data.portalUrl || window.location.origin;
+                document.getElementById('portal-url-display').textContent = portalUrl;
+                document.getElementById('portal-qr-image').src = `/api/qr?text=${encodeURIComponent(portalUrl)}`;
+
+                // Wi-Fi details & QR
+                const ssid = data.wifiSsid || "";
+                const pass = data.wifiPassword || "";
+                document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
+
+                const passContainer = document.getElementById('wifi-pass-container');
+                if (pass) {
+                    passContainer.style.display = "block";
+                    document.getElementById('wifi-pass-display').textContent = pass;
+                } else {
+                    document.getElementById('wifi-pass-display').textContent = "Open / No password";
                 }
 
-                // Initialize polling loops
-                document.addEventListener("DOMContentLoaded", () => {
-                    fetchInfo();
-                    fetchRotation();
-                    setInterval(fetchInfo, 10000); // refresh venue/wifi info every 10s
-                    setInterval(fetchRotation, 3000); // refresh queue every 3s
+                const wifiPayload = `WIFI:S:${ssid};T:${pass ? 'WPA' : 'nopass'};P:${pass};;`;
+                document.getElementById('wifi-qr-image').src = `/api/qr?text=${encodeURIComponent(wifiPayload)}`;
+
+                const lastRoundBanner = document.getElementById('last-round-banner');
+                if (lastRoundBanner) {
+                    lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
+                }
+
+                const showQrCode = data.showQrCode !== false;
+                document.getElementById('portal-qr-container').style.display = showQrCode ? "" : "none";
+                document.getElementById('wifi-qr-container').style.display = showQrCode ? "" : "none";
+            } catch (err) {
+                console.warn("Error fetching info", err);
+            }
+        }
+
+        function clearHolidayTimers() {
+            holidayTimerIds.forEach(id => clearInterval(id));
+            holidayTimerIds = [];
+            activeSprites = 0;
+            const container = document.getElementById('holiday-particles');
+            if (container) container.innerHTML = '';
+        }
+
+        function applyHolidayOverlay(holiday) {
+            const overlay = document.getElementById('holiday-overlay');
+            const badge = document.getElementById('billboard-holiday-badge');
+            if (!holiday || !holiday.key) {
+                if (overlay) overlay.style.display = 'none';
+                if (badge) badge.style.display = 'none';
+                if (activeHolidayKey !== "") {
+                    activeHolidayKey = "";
+                    clearHolidayTimers();
+                }
+                return;
+            }
+
+            if (badge) {
+                badge.textContent = holiday.display || holiday.key;
+                badge.style.display = 'inline-flex';
+            }
+            if (overlay) overlay.style.display = 'block';
+
+            if (activeHolidayKey === holiday.key) return;
+            activeHolidayKey = holiday.key;
+            clearHolidayTimers();
+
+            const vignette = document.getElementById('holiday-vignette');
+            if (vignette) {
+                const vc = holiday.vignetteColor || '#FF6D00';
+                vignette.style.background = `radial-gradient(ellipse at center, transparent 55%, ${vc}33 100%)`;
+            }
+
+            const fog = document.getElementById('holiday-fog');
+            if (fog) {
+                if (holiday.fogOpacity > 0 && holiday.fogColor) {
+                    fog.style.display = 'block';
+                    fog.style.opacity = String(holiday.fogOpacity);
+                    fog.style.background = `linear-gradient(to top, ${holiday.fogColor} 0%, transparent 100%)`;
+                } else {
+                    fog.style.display = 'none';
+                }
+            }
+
+            const crossMs = Math.max(2500, (holiday.crossSeconds || 6) * 1000);
+            const ambMs = Math.max(900, (holiday.ambientSeconds || 1.2) * 1000);
+
+            if (Array.isArray(holiday.crossers) && holiday.crossers.length > 0) {
+                spawnHolidayCrosser(holiday);
+                holidayTimerIds.push(setInterval(() => spawnHolidayCrosser(holiday), crossMs));
+            }
+            if (Array.isArray(holiday.ambient) && holiday.ambient.length > 0) {
+                spawnHolidayAmbient(holiday);
+                holidayTimerIds.push(setInterval(() => spawnHolidayAmbient(holiday), ambMs));
+            }
+        }
+
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function spawnHolidayCrosser(holiday) {
+            if (activeSprites >= MAX_HOLIDAY_SPRITES) return;
+            const container = document.getElementById('holiday-particles');
+            if (!container) return;
+
+            activeSprites++;
+            const el = document.createElement('div');
+            el.className = 'holiday-sprite';
+            el.textContent = pickRandom(holiday.crossers);
+            const color = (Array.isArray(holiday.palette) && holiday.palette.length > 0) ? pickRandom(holiday.palette) : '#FF6D00';
+            el.style.background = `radial-gradient(circle, ${color}55 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 12px ${color})`;
+            el.style.fontSize = `${2.6 + Math.random() * 1.4}rem`;
+
+            const leftToRight = Math.random() >= 0.5;
+            const startY = 8 + Math.random() * 68;
+            const endY = Math.max(5, Math.min(82, startY + (Math.random() * 24 - 12)));
+            const dur = 8000 + Math.random() * 5000;
+
+            el.style.top = `${startY}vh`;
+            el.style.left = leftToRight ? '-8vw' : '104vw';
+            container.appendChild(el);
+
+            const anim = el.animate([
+                { transform: 'translate(0, 0) scale(0.9)', opacity: 0.95 },
+                { transform: `translate(${leftToRight ? '115vw' : '-115vw'}, ${endY - startY}vh) scale(1.08)`, opacity: 0.95 }
+            ], { duration: dur, easing: ' ease-in-out' });
+
+            anim.onfinish = () => {
+                el.remove();
+                activeSprites = Math.max(0, activeSprites - 1);
+            };
+        }
+
+        function spawnHolidayAmbient(holiday) {
+            if (activeSprites >= MAX_HOLIDAY_SPRITES) return;
+            const container = document.getElementById('holiday-particles');
+            if (!container) return;
+
+            activeSprites++;
+            const el = document.createElement('div');
+            el.className = 'holiday-sprite';
+            el.textContent = pickRandom(holiday.ambient);
+            const color = (Array.isArray(holiday.palette) && holiday.palette.length > 0) ? pickRandom(holiday.palette) : '#FF6D00';
+            el.style.background = `radial-gradient(circle, ${color}44 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 10px ${color})`;
+            el.style.fontSize = `${1.9 + Math.random() * 1.2}rem`;
+
+            const motion = holiday.ambientMotion || 'Fall';
+            const x = 4 + Math.random() * 90;
+            el.style.left = `${x}vw`;
+            let keyframes;
+            let dur = 6500 + Math.random() * 4000;
+
+            if (motion === 'Rise') {
+                el.style.top = '102vh';
+                keyframes = [
+                    { transform: 'translate(0, 0)', opacity: 0.95 },
+                    { transform: `translate(${(Math.random() - 0.5) * 12}vw, -112vh)`, opacity: 0.1 }
+                ];
+            } else if (motion === 'Sparkle' || motion === 'Pop') {
+                el.style.top = `${10 + Math.random() * 75}vh`;
+                dur = 2600 + Math.random() * 1600;
+                keyframes = [
+                    { transform: 'scale(0.2)', opacity: 0 },
+                    { transform: 'scale(1.15)', opacity: 0.95, offset: 0.5 },
+                    { transform: 'scale(0.3)', opacity: 0 }
+                ];
+            } else {
+                el.style.top = '-8vh';
+                keyframes = [
+                    { transform: 'translate(0, 0)', opacity: 0.95 },
+                    { transform: `translate(${(Math.random() - 0.5) * 14}vw, 112vh)`, opacity: 0.2 }
+                ];
+            }
+
+            container.appendChild(el);
+            const anim = el.animate(keyframes, { duration: dur, easing: 'ease-in-out' });
+            anim.onfinish = () => {
+                el.remove();
+                activeSprites = Math.max(0, activeSprites - 1);
+            };
+        }
+
+        function applyScaryokeWheelState(state) {
+            const overlay = document.getElementById('scaryoke-wheel-overlay');
+            if (!overlay) return;
+
+            if (!state || !state.IsActive) {
+                overlay.style.display = 'none';
+                wheelWasSpinning = false;
+                return;
+            }
+
+            overlay.style.display = 'flex';
+            const singerEl = document.getElementById('scaryoke-wheel-singer');
+            if (singerEl) {
+                singerEl.textContent = state.CurrentSingerName ? `Spinning for: ${state.CurrentSingerName}` : 'Stage Open';
+            }
+
+            const resultEl = document.getElementById('scaryoke-wheel-result');
+            if (resultEl) {
+                resultEl.textContent = state.ResultText || (state.IsSpinning ? 'Spinning...' : 'Spin the wheel!');
+            }
+
+            const segments = Array.isArray(state.Segments) ? state.Segments : [];
+            const targetAngle = typeof state.TargetAngle === 'number' ? state.TargetAngle : 0;
+            const durationMs = Math.max(1200, (state.SpinDuration || 4.2) * 1000);
+
+            if (state.IsSpinning && (!wheelWasSpinning || wheelLastTargetAngle !== targetAngle)) {
+                wheelWasSpinning = true;
+                wheelLastTargetAngle = targetAngle;
+                const startAngle = wheelCurrentAngle % 360;
+                const finalAngle = targetAngle;
+                const startTime = performance.now();
+
+                if (wheelAnimFrame) cancelAnimationFrame(wheelAnimFrame);
+                const step = (now) => {
+                    const t = Math.min(1, (now - startTime) / durationMs);
+                    const eased = 1 - Math.pow(1 - t, 3);
+                    wheelCurrentAngle = startAngle + (finalAngle - startAngle) * eased;
+                    drawScaryokeWheel(segments, wheelCurrentAngle);
+                    if (t < 1) {
+                        wheelAnimFrame = requestAnimationFrame(step);
+                    }
+                };
+                wheelAnimFrame = requestAnimationFrame(step);
+            } else if (!state.IsSpinning) {
+                wheelWasSpinning = false;
+                wheelCurrentAngle = targetAngle % 360;
+                drawScaryokeWheel(segments, wheelCurrentAngle);
+            }
+        }
+
+        function drawScaryokeWheel(segments, rotationDeg) {
+            const canvas = document.getElementById('scaryoke-wheel-canvas');
+            if (!canvas || !segments || segments.length === 0) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const radius = Math.min(cx, cy) - 12;
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate((rotationDeg - 90) * Math.PI / 180);
+
+            let startDeg = 0;
+            segments.forEach(seg => {
+                const sweep = seg.Sweep || (360 / segments.length);
+                const r0 = startDeg * Math.PI / 180;
+                const r1 = (startDeg + sweep) * Math.PI / 180;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, r0, r1);
+                ctx.closePath();
+                ctx.fillStyle = seg.Color || '#6A0DAD';
+                ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#1E133A';
+                ctx.stroke();
+
+                if (sweep >= 7) {
+                    ctx.save();
+                    ctx.rotate((r0 + r1) / 2);
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = seg.TextColor || '#FFFFFF';
+                    ctx.font = sweep < 14 ? '700 13px Outfit, sans-serif' : '800 18px Outfit, sans-serif';
+                    ctx.fillText(seg.Name || '', radius - 22, 0);
+                    ctx.restore();
+                }
+
+                startDeg += sweep;
+            });
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 34, 0, Math.PI * 2);
+            ctx.fillStyle = '#140926';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#FF6D00';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Fetch Rotation Queue
+        async function fetchRotation() {
+            try {
+                const response = await fetch('/api/rotation');
+                if (!response.ok) return;
+                const singers = await response.json();
+                const hash = JSON.stringify(singers);
+                if (hash === previousRotationHash) return;
+                previousRotationHash = hash;
+
+                renderRotation(singers || []);
+            } catch (err) {
+                console.warn("Error fetching rotation", err);
+            }
+        }
+
+        function renderRotation(singers) {
+            const activeSingers = singers.filter(s => !s.isInactive && !s.hasSungInLastRound);
+            document.getElementById('billboard-singer-count').textContent = `${activeSingers.length} Singers`;
+
+            // 1. Current Performer
+            const currentSinger = singers.find(s => s.isCurrent && !s.hasSungInLastRound);
+            const nowNameEl = document.getElementById('now-singer-name');
+            const nowDuetEl = document.getElementById('now-duet-tag');
+            const nowTitleEl = document.getElementById('now-song-title');
+            const nowArtistEl = document.getElementById('now-song-artist');
+            const nowRotationStartEl = document.getElementById('now-rotation-start-badge');
+            const nowSpecialEl = document.getElementById('now-special-badge');
+            const nowScaryokeEl = document.getElementById('now-scaryoke-badge');
+
+            if (currentSinger) {
+                nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
+                if (nowSpecialEl) nowSpecialEl.style.display = currentSinger.isSpecial ? "inline-block" : "none";
+                nowNameEl.textContent = currentSinger.name;
+                const curPartner = currentSinger.partner || currentSinger.duetPartnerName;
+                if (curPartner && curPartner !== "None") {
+                    nowDuetEl.textContent = `w/ ${curPartner}`;
+                    nowDuetEl.style.display = "inline";
+                } else {
+                    nowDuetEl.style.display = "none";
+                }
+
+                if (nowScaryokeEl) {
+                    if (currentSinger.hasScaryokeCategory && currentSinger.scaryokeCategory) {
+                        nowScaryokeEl.textContent = `🎃 ${currentSinger.scaryokeCategory}`;
+                        nowScaryokeEl.style.backgroundColor = currentSinger.scaryokeColor || "#FF6D00";
+                        nowScaryokeEl.style.display = "inline-flex";
+                    } else {
+                        nowScaryokeEl.style.display = "none";
+                    }
+                }
+
+                if (currentSinger.isMusic) {
+                    nowTitleEl.textContent = "♪ Background Music Track";
+                    nowArtistEl.textContent = "";
+                } else {
+                    nowTitleEl.textContent = currentSinger.song ? `"${currentSinger.song}"` : "Song not selected";
+                    nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
+                }
+            } else {
+                nowRotationStartEl.style.display = "none";
+                if (nowSpecialEl) nowSpecialEl.style.display = "none";
+                if (nowScaryokeEl) nowScaryokeEl.style.display = "none";
+                nowNameEl.textContent = "Stage is Open";
+                nowDuetEl.style.display = "none";
+                nowTitleEl.textContent = "Ready for the next singer!";
+                nowArtistEl.textContent = "";
+            }
+
+            // 2. Next Up Performer
+            const nextSinger = singers.find(s => s.isNext && !s.hasSungInLastRound);
+            const nextNameEl = document.getElementById('next-singer-name');
+            const nextDuetEl = document.getElementById('next-duet-tag');
+            const nextTitleEl = document.getElementById('next-song-title');
+            const nextRotationStartEl = document.getElementById('next-rotation-start-badge');
+            const nextSpecialEl = document.getElementById('next-special-badge');
+            const nextScaryokeEl = document.getElementById('next-scaryoke-badge');
+
+            if (nextSinger) {
+                nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
+                if (nextSpecialEl) nextSpecialEl.style.display = nextSinger.isSpecial ? "inline-block" : "none";
+                nextNameEl.textContent = nextSinger.name;
+                const nextPartner = nextSinger.partner || nextSinger.duetPartnerName;
+                if (nextPartner && nextPartner !== "None") {
+                    nextDuetEl.textContent = `w/ ${nextPartner}`;
+                    nextDuetEl.style.display = "inline";
+                } else {
+                    nextDuetEl.style.display = "none";
+                }
+
+                if (nextScaryokeEl) {
+                    if (nextSinger.hasScaryokeCategory && nextSinger.scaryokeCategory) {
+                        nextScaryokeEl.textContent = `🎃 ${nextSinger.scaryokeCategory}`;
+                        nextScaryokeEl.style.backgroundColor = nextSinger.scaryokeColor || "#FF6D00";
+                        nextScaryokeEl.style.display = "inline-flex";
+                    } else {
+                        nextScaryokeEl.style.display = "none";
+                    }
+                }
+
+                if (nextSinger.isMusic) {
+                    nextTitleEl.textContent = "♪ Background Music Track";
+                } else {
+                    const song = nextSinger.song ? `"${nextSinger.song}"` : "Picking a song";
+                    const artist = nextSinger.artist ? ` by ${nextSinger.artist}` : "";
+                    nextTitleEl.textContent = `${song}${artist}`;
+                }
+            } else {
+                nextRotationStartEl.style.display = "none";
+                if (nextSpecialEl) nextSpecialEl.style.display = "none";
+                if (nextScaryokeEl) nextScaryokeEl.style.display = "none";
+                nextNameEl.textContent = "On Deck";
+                nextDuetEl.style.display = "none";
+                nextTitleEl.textContent = "Scan QR code to be up next!";
+            }
+
+            // 3. Upcoming Queue (all active singers after current & next)
+            const queueListEl = document.getElementById('billboard-queue-list');
+            const upcoming = activeSingers.filter(s => !s.isCurrent && !s.isNext);
+
+            if (upcoming.length === 0) {
+                queueListEl.innerHTML = `
+                    <div class="empty-placeholder">
+                        <span class="icon">📋</span>
+                        <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
+                    </div>`;
+            } else {
+                let html = "";
+                upcoming.forEach((s, idx) => {
+                    const partner = s.partner || s.duetPartnerName;
+                    const partnerText = (partner && partner !== "None") ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(partner)}</span>` : "";
+                    const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
+                    const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
+                    const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
+                    const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:var(--orange-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIP</span>' : '';
+                    const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:var(--purple-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
+                    const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
+                    const scaryokeBadge = (s.hasScaryokeCategory && s.scaryokeCategory)
+                        ? `<span class="scaryoke-badge" style="background-color:${escapeHtml(s.scaryokeColor || '#FF6D00')};">🎃 ${escapeHtml(s.scaryokeCategory)}</span>`
+                        : '';
+
+                    html += `
+                        <div class="queue-row"${pausedClass}>
+                            <span class="queue-pos">${idx + 1}</span>
+                            <div class="queue-info">
+                                <div class="queue-name">${rotationStartBadge}${specialBadge}${escapeHtml(s.name)}${partnerText}${scaryokeBadge}${pausedBadge}${skippedBadge}</div>
+                                <div class="queue-song">${songDesc}</div>
+                            </div>
+                        </div>`;
                 });
+                queueListEl.innerHTML = html;
+            }
+
+            // 4. Populate Star Wars Crawl text
+            const crawlEl = document.getElementById('star-wars-crawl-plane');
+            if (crawlEl) {
+                let crawlLines = `<div style="font-size:1.9rem; letter-spacing:3px; margin-bottom:18px;">EPISODE KSR — TONIGHT'S ROTATION</div>`;
+                activeSingers.forEach((s, i) => {
+                    const role = s.isCurrent ? "★ NOW PERFORMING: " : (s.isNext ? "⏭ UP NEXT: " : `${i + 1}. `);
+                    const songPart = s.song ? ` — "${escapeHtml(s.song)}"` : "";
+                    const catPart = (s.hasScaryokeCategory && s.scaryokeCategory) ? ` [🎃 ${escapeHtml(s.scaryokeCategory)}]` : "";
+                    crawlLines += `<div style="margin-bottom:14px;">${role}${escapeHtml(s.name)}${songPart}${catPart}</div>`;
+                });
+                crawlEl.innerHTML = crawlLines;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize polling loops
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchInfo();
+            fetchRotation();
+            setInterval(fetchInfo, 1500); // poll info & live wheel/theme state every 1.5s
+            setInterval(fetchRotation, 2500); // refresh queue every 2.5s
+        });
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 07:35:00 -> Add ResetColor command to reset category color to auto (by app)
+// Edited on Oct 30, 2026 @ 07:02:00 -> Update SegmentColors to 12 distinct colors so every Scaryoke category gets a unique color
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -71,17 +71,18 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
     private static readonly string[] SegmentColors =
     [
-        "#6A0DAD", // Purple
-        "#FF6D00", // Orange
-        "#00838F", // Teal
-        "#C2185B", // Pink
-        "#4527A0", // Deep Blue
-        "#EF6C00", // Bright Orange
-        "#00695C", // Deep Teal
-        "#AD1457", // Deep Pink
-        "#5E35B1", // Dark Purple
-        "#F57C00", // Yellow Orange
-        "#00796B"  // Teal Blue
+        "#7C3AED", // Royal Purple (Violet)
+        "#FF6D00", // Blaze Orange
+        "#0284C7", // Sky Blue (Cerulean)
+        "#DC2626", // Crimson Red
+        "#0D9488", // Emerald Teal
+        "#D97706", // Golden Amber
+        "#DB2777", // Hot Pink (Rose)
+        "#2563EB", // Cobalt Royal Blue
+        "#65A30D", // Acid Lime Green
+        "#C026D3", // Fuchsia Magenta
+        "#B45309", // Copper Bronze (Sienna)
+        "#4338CA"  // Deep Indigo
     ];
 
     [ObservableProperty]
@@ -637,13 +638,34 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     public void RebuildWheelSegments()
     {
         var list = new List<WheelSegment>();
+        var usedColors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var c in CustomCategories)
+        {
+            if (!string.IsNullOrWhiteSpace(c.Color))
+            {
+                usedColors.Add(c.Color);
+            }
+        }
 
         // Map enabled categories to wheel segments; colour falls back by list position so it stays
         // stable when another category is toggled off
         for (int i = 0; i < CustomCategories.Count; i++)
         {
             var item = CustomCategories[i];
-            string color = item.Color ?? SegmentColors[i % SegmentColors.Length];
+            string color;
+            if (!string.IsNullOrWhiteSpace(item.Color))
+            {
+                color = item.Color;
+            }
+            else
+            {
+                color = SegmentColors[i % SegmentColors.Length];
+                if (usedColors.Contains(color))
+                {
+                    color = SegmentColors.FirstOrDefault(c => !usedColors.Contains(c)) ?? color;
+                }
+                usedColors.Add(color);
+            }
             item.DisplayColor = color;
             if (!item.IsEnabled) continue;
 

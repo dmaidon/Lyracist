@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 11:52:00 -> Ensure ScaryokeMonitorDevice is loaded before monitor refresh and defaulted if unassigned
+// Edited on Oct 30, 2026 @ 07:01:30 -> Update MauiScaryokePalette to 12 distinct colors so every category gets a unique color
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -483,7 +483,22 @@ namespace KSRotation.ViewModels
 
                 case nameof(SelectedProjectionView):
                     _displayWindowService.SetProjectionView(SelectedProjectionView);
+                    OnPropertyChanged(nameof(IsStarWarsCrawlView));
+                    OnPropertyChanged(nameof(IsNormalBillboardView));
+                    OnPropertyChanged(nameof(BillboardViewModeBadge));
+                    OnPropertyChanged(nameof(HasBillboardViewModeBadge));
+                    OnPropertyChanged(nameof(StarWarsCrawlText));
                     QueueSaveSettings();
+                    break;
+
+                case nameof(HolidayThemeChoice):
+                    OnPropertyChanged(nameof(SelectedHolidayThemeDisplay));
+                    OnPropertyChanged(nameof(ActiveHolidayTheme));
+                    OnPropertyChanged(nameof(HasActiveHolidayTheme));
+                    OnPropertyChanged(nameof(ActiveHolidayDisplay));
+#if MAUI
+                    QueueSaveSettings();
+#endif
                     break;
 
                 case nameof(WatermarkOpacity):
@@ -595,6 +610,132 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string SelectedProjectionView { get; set; } = "Normal List";
+
+        /// <summary>Holiday rotation-screen choice: "None", "Auto" (by date) or a holiday key.</summary>
+        [ObservableProperty]
+        public partial string HolidayThemeChoice { get; set; } = HolidayThemes.None;
+
+        public IReadOnlyList<KeyValuePair<string, string>> HolidayThemeOptions => HolidayThemes.Options;
+
+        public IReadOnlyList<string> HolidayThemeDisplayOptions { get; } =
+            HolidayThemes.Options.Select(o => o.Value).ToList();
+
+        public string SelectedHolidayThemeDisplay
+        {
+            get => HolidayThemeOptions.FirstOrDefault(o => string.Equals(o.Key, HolidayThemeChoice, StringComparison.OrdinalIgnoreCase)).Value
+                ?? HolidayThemeOptions[0].Value;
+            set
+            {
+                var match = HolidayThemeOptions.FirstOrDefault(o => string.Equals(o.Value, value, StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(match.Key) && !string.Equals(HolidayThemeChoice, match.Key, StringComparison.Ordinal))
+                {
+                    HolidayThemeChoice = match.Key;
+                }
+            }
+        }
+
+        public HolidayTheme? ActiveHolidayTheme => HolidayThemes.Resolve(HolidayThemeChoice, HolidayThemes.ShowDate(DateTime.Now));
+        public bool HasActiveHolidayTheme => ActiveHolidayTheme != null;
+        public string ActiveHolidayDisplay => ActiveHolidayTheme?.Display ?? string.Empty;
+
+#if MAUI
+        public ScaryokeStateDto? MauiScaryokeState { get; private set; }
+        public event Action<ScaryokeStateDto?>? MauiScaryokeStateChanged;
+        public event Action? MauiScaryokeCategoriesChanged;
+
+        private static readonly string[] MauiScaryokePalette =
+        [
+            "#7C3AED", "#FF6D00", "#0284C7", "#DC2626", "#0D9488", "#D97706",
+            "#DB2777", "#2563EB", "#65A30D", "#C026D3", "#B45309", "#4338CA"
+        ];
+
+        public void SetMauiScaryokeState(ScaryokeStateDto? state)
+        {
+            MauiScaryokeState = state;
+            MauiScaryokeStateChanged?.Invoke(state);
+        }
+
+        public void AssignMauiScaryokeCategory(SingerEntry? singer, string? categoryName)
+        {
+            if (singer == null) return;
+            string trimmed = categoryName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(trimmed) || string.Equals(trimmed, "None", StringComparison.OrdinalIgnoreCase))
+            {
+                singer.ScaryokeCategory = null;
+                singer.ScaryokeColor = null;
+                singer.ScaryokeCurse = null;
+            }
+            else
+            {
+                var settings = KSRotation.Maui.Services.ScaryokeSettingsService.Load();
+                string? color = null;
+                if (string.Equals(trimmed, "Singer's Choice", StringComparison.OrdinalIgnoreCase))
+                {
+                    color = "#228B22";
+                }
+                else if (string.Equals(trimmed, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
+                {
+                    color = "#000000";
+                }
+                else if (settings.Styles.TryGetValue(trimmed, out var style) && !string.IsNullOrWhiteSpace(style.Color))
+                {
+                    color = style.Color;
+                }
+                else
+                {
+                    int idx = settings.Categories.FindIndex(c => string.Equals(c, trimmed, StringComparison.OrdinalIgnoreCase));
+                    color = idx >= 0
+                        ? MauiScaryokePalette[idx % MauiScaryokePalette.Length]
+                        : MauiScaryokePalette[Math.Abs(trimmed.GetHashCode()) % MauiScaryokePalette.Length];
+                }
+
+                singer.ScaryokeCategory = trimmed;
+                singer.ScaryokeColor = color;
+                singer.ScaryokeCurse = null;
+            }
+
+            _displayWindowService.Update(Singers);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+        }
+
+        public bool TryAddMauiScaryokeCategory(string categoryName, out string error)
+        {
+            error = string.Empty;
+            string cat = categoryName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(cat))
+            {
+                error = "Category name is required.";
+                return false;
+            }
+
+            var settings = KSRotation.Maui.Services.ScaryokeSettingsService.Load();
+            if (settings.Categories.Count >= KSRotation.Maui.Services.ScaryokeSettingsService.MaxCategories)
+            {
+                error = $"Maximum of {KSRotation.Maui.Services.ScaryokeSettingsService.MaxCategories} categories allowed.";
+                return false;
+            }
+
+            if (string.Equals(cat, "Singer's Choice", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(cat, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
+            {
+                error = $"'{cat}' is already included on the wheel.";
+                return false;
+            }
+
+            if (settings.Categories.Any(c => string.Equals(c, cat, StringComparison.OrdinalIgnoreCase)))
+            {
+                error = $"'{cat}' is already in the categories list.";
+                return false;
+            }
+
+            settings.Categories.Add(cat);
+            KSRotation.Maui.Services.ScaryokeSettingsService.Save(settings);
+            MauiScaryokeCategoriesChanged?.Invoke();
+            return true;
+        }
+#endif
 
         /// <summary>When true, the projection display automatically cycles through the enabled entries
         /// in <see cref="ProjectionRotationSchedule"/> instead of staying on one fixed screen.</summary>
@@ -1102,6 +1243,74 @@ namespace KSRotation.ViewModels
         public bool CurrentSingerIsSpecial => CurrentSinger?.IsSpecial ?? false;
         public bool NextSingerIsSpecial => NextSinger?.IsSpecial ?? false;
 
+        public bool CurrentSingerHasScaryokeCategory => CurrentSinger?.HasScaryokeCategory ?? false;
+        public string CurrentSingerScaryokeBadge => CurrentSinger?.HasScaryokeCategory == true ? $"🎃 {CurrentSinger.ScaryokeCategory}" : string.Empty;
+        public string CurrentSingerScaryokeColor => !string.IsNullOrWhiteSpace(CurrentSinger?.ScaryokeColor) ? CurrentSinger.ScaryokeColor! : "#FF6D00";
+
+        public bool NextSingerHasScaryokeCategory => NextSinger?.HasScaryokeCategory ?? false;
+        public string NextSingerScaryokeBadge => NextSinger?.HasScaryokeCategory == true ? $"🎃 {NextSinger.ScaryokeCategory}" : string.Empty;
+        public string NextSingerScaryokeColor => !string.IsNullOrWhiteSpace(NextSinger?.ScaryokeColor) ? NextSinger.ScaryokeColor! : "#FF6D00";
+
+        public bool IsStarWarsCrawlView => string.Equals(SelectedProjectionView, "Star Wars Crawl", StringComparison.OrdinalIgnoreCase);
+        public bool IsNormalBillboardView => !IsStarWarsCrawlView;
+
+        public string BillboardViewModeBadge => SelectedProjectionView switch
+        {
+            "Star Wars Crawl" => "🚀 STAR WARS CRAWL",
+            "Vegas Marquee" => "🌟 VEGAS MARQUEE",
+            "Vinyl Turntable" => "💿 VINYL LOUNGE",
+            "Disco Ball" => "🪩 DISCO BALL",
+            "Synthwave Grid" => "🌆 SYNTHWAVE GRID",
+            "Concert Festival Lineup" => "🎪 FESTIVAL LINEUP",
+            "Casino Slot Reels" => "🎰 CASINO SLOTS",
+            "Jukebox" => "🎶 CLASSIC JUKEBOX",
+            "Stadium Jumbotron" => "🏟️ STADIUM JUMBOTRON",
+            "Movie Theater 'Now Showing'" => "🎬 NOW SHOWING",
+            "Purple Velvet Curtain" => "🎭 VELVET CURTAIN",
+            _ => string.Empty
+        };
+
+        public bool HasBillboardViewModeBadge => !string.IsNullOrEmpty(BillboardViewModeBadge);
+
+        public string StarWarsCrawlText
+        {
+            get
+            {
+                string intro = (string.IsNullOrWhiteSpace(CrawlBannerText) ? AppSettings.DefaultCrawlBannerText : CrawlBannerText)
+                    .Replace("{venue}", string.IsNullOrWhiteSpace(VenueName) ? "Karaoke Night" : VenueName, StringComparison.OrdinalIgnoreCase)
+                    .Replace("{dj}", string.IsNullOrWhiteSpace(DjName) ? "Guest DJ" : DjName, StringComparison.OrdinalIgnoreCase);
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine(intro.ToUpperInvariant());
+                sb.AppendLine();
+                if (CurrentSinger != null)
+                {
+                    string badge = CurrentSinger.HasScaryokeCategory ? $" [🎃 {CurrentSinger.ScaryokeCategory}]" : "";
+                    sb.AppendLine($"★ NOW ON STAGE: {CurrentSinger.DisplayNameWithDuet.ToUpperInvariant()}{badge}");
+                    sb.AppendLine($"   \"{CurrentSinger.Song}\" — {CurrentSinger.Artist}");
+                    sb.AppendLine();
+                }
+                if (NextSinger != null)
+                {
+                    string badge = NextSinger.HasScaryokeCategory ? $" [🎃 {NextSinger.ScaryokeCategory}]" : "";
+                    sb.AppendLine($"⏭ UP NEXT: {NextSinger.DisplayNameWithDuet.ToUpperInvariant()}{badge}");
+                    sb.AppendLine($"   \"{NextSinger.Song}\" — {NextSinger.Artist}");
+                    sb.AppendLine();
+                }
+                var upcoming = UpcomingSingers;
+                if (upcoming.Count > 0)
+                {
+                    sb.AppendLine("═══ UPCOMING PERFORMERS ═══");
+                    for (int i = 0; i < upcoming.Count; i++)
+                    {
+                        var s = upcoming[i];
+                        string badge = s.HasScaryokeCategory ? $" [🎃 {s.ScaryokeCategory}]" : "";
+                        sb.AppendLine($"{i + 1}. {s.DisplayNameWithDuet}{badge} — \"{s.Song}\"");
+                    }
+                }
+                return sb.ToString();
+            }
+        }
+
         public void RefreshBillboardState()
         {
             OnPropertyChanged(nameof(IsLastRound));
@@ -1125,6 +1334,21 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(NextSingerIsRotationStart));
             OnPropertyChanged(nameof(CurrentSingerIsSpecial));
             OnPropertyChanged(nameof(NextSingerIsSpecial));
+            OnPropertyChanged(nameof(CurrentSingerHasScaryokeCategory));
+            OnPropertyChanged(nameof(CurrentSingerScaryokeBadge));
+            OnPropertyChanged(nameof(CurrentSingerScaryokeColor));
+            OnPropertyChanged(nameof(NextSingerHasScaryokeCategory));
+            OnPropertyChanged(nameof(NextSingerScaryokeBadge));
+            OnPropertyChanged(nameof(NextSingerScaryokeColor));
+            OnPropertyChanged(nameof(IsStarWarsCrawlView));
+            OnPropertyChanged(nameof(IsNormalBillboardView));
+            OnPropertyChanged(nameof(BillboardViewModeBadge));
+            OnPropertyChanged(nameof(HasBillboardViewModeBadge));
+            OnPropertyChanged(nameof(StarWarsCrawlText));
+            OnPropertyChanged(nameof(SelectedHolidayThemeDisplay));
+            OnPropertyChanged(nameof(ActiveHolidayTheme));
+            OnPropertyChanged(nameof(HasActiveHolidayTheme));
+            OnPropertyChanged(nameof(ActiveHolidayDisplay));
         }
         #endregion
 
@@ -1528,7 +1752,10 @@ namespace KSRotation.ViewModels
             LoadProjectionRotationSchedule(settings.ProjectionRotationSchedule);
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
-            SelectedProjectionView = "Normal List";
+            SelectedProjectionView = !string.IsNullOrWhiteSpace(settings.ProjectionView) && ProjectionViews.Contains(settings.ProjectionView)
+                ? settings.ProjectionView
+                : "Normal List";
+            HolidayThemeChoice = string.IsNullOrWhiteSpace(settings.HolidayTheme) ? HolidayThemes.None : settings.HolidayTheme;
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
             _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
             _displayWindowService.SetMarqueeSpeed(MarqueeSpeed);
@@ -3545,7 +3772,8 @@ namespace KSRotation.ViewModels
                 SpectrumOnDjBanners = SpectrumOnDjBanners,
                 SpectrumOnSpecialEvents = SpectrumOnSpecialEvents,
                 AutoRotateDurationSeconds = AutoRotateDurationSeconds > 0 ? AutoRotateDurationSeconds : 180,
-                ProjectionRotationSchedule = [.. ProjectionRotationSchedule]
+                ProjectionRotationSchedule = [.. ProjectionRotationSchedule],
+                HolidayTheme = HolidayThemeChoice
             };
 
             try

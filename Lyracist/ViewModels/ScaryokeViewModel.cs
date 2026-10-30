@@ -1,5 +1,6 @@
-// Edited on Oct 27, 2026 @ 12:35:00 -> Assign and show Scaryoke category on current singer after wheel finishes spinning
+// Edited on Oct 30, 2026 @ 07:02:00 -> Update Scaryoke Palette to 12 distinct colors so every category gets a unique color
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Lyracist.Services.Display;
 using System.Collections.ObjectModel;
 
@@ -21,16 +22,39 @@ public partial class ScaryokeViewModel : BaseViewModel
 
     public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
 
+    public ObservableCollection<string> AssignableCategories { get; } = [];
+
+    public ObservableCollection<Models.Singer> Singers => _rotation.Rotation;
+
+    [ObservableProperty]
+    private Models.Singer? _selectedTargetSinger;
+
+    [ObservableProperty]
+    private string _manualCategoryText = string.Empty;
+
     private const double SliverWeight = 0.15;
 
     /// <summary>Wheel palette, also used by Settings to cycle a category's colour.</summary>
     public static readonly string[] Palette =
     [
-        "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
-        "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
+        "#7C3AED", "#FF6D00", "#0284C7", "#DC2626", "#0D9488", "#D97706",
+        "#DB2777", "#2563EB", "#65A30D", "#C026D3", "#B45309", "#4338CA"
     ];
 
-    public static string PaletteColor(int index) => Palette[index % Palette.Length];
+    public static string PaletteColor(int index) => Palette[((index % Palette.Length) + Palette.Length) % Palette.Length];
+
+    public static string PickDistinctPaletteColor(int preferredIndex, HashSet<string> usedColors)
+    {
+        string preferred = PaletteColor(preferredIndex);
+        if (!usedColors.Contains(preferred)) return preferred;
+
+        for (int offset = 1; offset < Palette.Length; offset++)
+        {
+            string candidate = PaletteColor(preferredIndex + offset);
+            if (!usedColors.Contains(candidate)) return candidate;
+        }
+        return preferred;
+    }
 
     private const int RecentLimit = 11;
     private readonly List<string> _recent = [];
@@ -68,11 +92,30 @@ public partial class ScaryokeViewModel : BaseViewModel
     {
         var list = new List<WheelSegment>();
         var customCategories = Core.Helpers.AppSettings.ScaryokeCategories;
+        var usedColors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (string cat in customCategories)
+        {
+            var st = Core.Helpers.AppSettings.GetScaryokeStyle(cat);
+            if (!string.IsNullOrWhiteSpace(st.Color))
+            {
+                usedColors.Add(st.Color);
+            }
+        }
 
         for (int i = 0; i < customCategories.Count; i++)
         {
             var style = Core.Helpers.AppSettings.GetScaryokeStyle(customCategories[i]);
-            string color = style.Color ?? PaletteColor(i);
+            string color;
+            if (!string.IsNullOrWhiteSpace(style.Color))
+            {
+                color = style.Color;
+            }
+            else
+            {
+                color = PickDistinctPaletteColor(i, usedColors);
+                usedColors.Add(color);
+            }
             list.Add(new WheelSegment
             {
                 Name = customCategories[i],
@@ -143,6 +186,64 @@ public partial class ScaryokeViewModel : BaseViewModel
         {
             WheelSegments.Add(segment);
         }
+
+        AssignableCategories.Clear();
+        foreach (string cat in customCategories)
+        {
+            AssignableCategories.Add(cat);
+        }
+        if (!AssignableCategories.Contains("Singer's Choice"))
+        {
+            AssignableCategories.Add("Singer's Choice");
+        }
+        if (!AssignableCategories.Contains("DJ's Choice"))
+        {
+            AssignableCategories.Add("DJ's Choice");
+        }
+        if (string.IsNullOrWhiteSpace(ManualCategoryText) && AssignableCategories.Count > 0)
+        {
+            ManualCategoryText = AssignableCategories[0];
+        }
+    }
+
+    [RelayCommand]
+    private void AssignManualCategory()
+    {
+        var singer = SelectedTargetSinger ?? _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        if (singer == null)
+        {
+            ResultText = "⚠️ No active singer in rotation to assign a category.";
+            return;
+        }
+
+        string category = ManualCategoryText?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            singer.ScaryokeCategory = null;
+            singer.ScaryokeColor = null;
+            ResultText = $"Cleared Scaryoke category for {singer.Name}.";
+            _display.UpdateRotation([.. _rotation.Rotation]);
+            return;
+        }
+
+        singer.ScaryokeCategory = category;
+        var matchedSegment = WheelSegments.FirstOrDefault(s => string.Equals(s.Name, category, StringComparison.OrdinalIgnoreCase));
+        singer.ScaryokeColor = matchedSegment?.Color ?? EditSingerViewModel.ResolveScaryokeColor(category);
+
+        ResultText = $"📌 {singer.Name}: {category}!";
+        _display.UpdateRotation([.. _rotation.Rotation]);
+    }
+
+    [RelayCommand]
+    private void ClearManualCategory()
+    {
+        var singer = SelectedTargetSinger ?? _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        if (singer == null) return;
+
+        singer.ScaryokeCategory = null;
+        singer.ScaryokeColor = null;
+        ResultText = $"Cleared Scaryoke category for {singer.Name}.";
+        _display.UpdateRotation([.. _rotation.Rotation]);
     }
 
     private static string GetContrastingTextColor(string hexColor)
@@ -175,7 +276,7 @@ public partial class ScaryokeViewModel : BaseViewModel
     /// <summary>Captures the singer the spin is for and clears their previous challenge, so the new category is revealed only once the wheel stops.</summary>
     public void BeginSpin()
     {
-        _spinSinger = _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
+        _spinSinger = SelectedTargetSinger ?? _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
         if (_spinSinger != null)
         {
             _spinSinger.ScaryokeCategory = null;

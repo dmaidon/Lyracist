@@ -1,5 +1,6 @@
-// Edited on Oct 26, 2026 @ 08:05:00 -> Add Scaryoke overlay monitor selection and choices
+// Edited on Oct 30, 2026 @ 07:03:00 -> Expose AvailableScaryokePaletteColors and SetScaryokeColorCommand for 12-color Scaryoke palette
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,6 +15,8 @@ public partial class SettingsViewModel
     // ─── Scaryoke Configuration ────────────────────────────────────────
 
     public ObservableCollection<string> ScaryokeCategories { get; } = [];
+
+    public IReadOnlyList<string> AvailableScaryokePaletteColors => ScaryokeViewModel.Palette;
 
     [ObservableProperty]
     private string? _selectedScaryokeCategory;
@@ -91,7 +94,39 @@ public partial class SettingsViewModel
         bool hasCustom = !string.IsNullOrWhiteSpace(style.Color);
         IsSelectedCategoryCustomColor = hasCustom;
         SelectedCategoryColorModeText = hasCustom ? "Custom Color" : "Auto (by app)";
-        SelectedScaryokeColor = hasCustom ? style.Color! : ScaryokeViewModel.PaletteColor(ScaryokeCategories.IndexOf(SelectedScaryokeCategory));
+        if (hasCustom)
+        {
+            SelectedScaryokeColor = style.Color!;
+        }
+        else
+        {
+            var usedColors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string c in ScaryokeCategories)
+            {
+                var st = AppSettings.GetScaryokeStyle(c);
+                if (!string.IsNullOrWhiteSpace(st.Color))
+                {
+                    usedColors.Add(st.Color);
+                }
+            }
+
+            string resolvedColor = ScaryokeViewModel.PaletteColor(0);
+            int targetIdx = ScaryokeCategories.IndexOf(SelectedScaryokeCategory);
+            for (int i = 0; i <= targetIdx && i < ScaryokeCategories.Count; i++)
+            {
+                var st = AppSettings.GetScaryokeStyle(ScaryokeCategories[i]);
+                if (!string.IsNullOrWhiteSpace(st.Color))
+                {
+                    resolvedColor = st.Color;
+                }
+                else
+                {
+                    resolvedColor = ScaryokeViewModel.PickDistinctPaletteColor(i, usedColors);
+                    usedColors.Add(resolvedColor);
+                }
+            }
+            SelectedScaryokeColor = resolvedColor;
+        }
     }
 
     [RelayCommand]
@@ -114,6 +149,16 @@ public partial class SettingsViewModel
         int index = Array.FindIndex(ScaryokeViewModel.Palette, c => string.Equals(c, SelectedScaryokeColor, StringComparison.OrdinalIgnoreCase));
         string next = ScaryokeViewModel.Palette[(index + 1) % ScaryokeViewModel.Palette.Length];
         AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, style.Weight, next);
+        UpdateSelectedScaryokeStyle();
+    }
+
+    [RelayCommand]
+    private void SetScaryokeColor(string? color)
+    {
+        if (SelectedScaryokeCategory == null || string.IsNullOrWhiteSpace(color)) return;
+
+        var style = AppSettings.GetScaryokeStyle(SelectedScaryokeCategory);
+        AppSettings.SetScaryokeStyle(SelectedScaryokeCategory, style.Weight, color.Trim());
         UpdateSelectedScaryokeStyle();
     }
 

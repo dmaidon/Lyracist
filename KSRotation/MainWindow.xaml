@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 04:13:00 -> Document Holiday Rotation Screens in the Display Projection help panel -->
+<!-- Edited on Oct 30, 2026 @ 07:24:30 -> Update KSRotation Help tab with manual Scaryoke category assignment, 12-color palette, and MAUI rotation screen transmission -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -183,6 +183,9 @@
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                         <MenuItem Header="🎃 Scaryoke: Spin &amp; Project to Screen"
                                   Command="{Binding Path=PlacementTarget.Tag.SpinScaryokeForSingerProjectedCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="🎃 Scaryoke: Set Category Manually..."
+                                  Command="{Binding Path=PlacementTarget.Tag.PromptManualScaryokeForSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                         <MenuItem Header="⚡ Scaryoke: Multi-Singer Spin">
                             <MenuItem Header="Spin Next 3 Singers" Command="{Binding Path=PlacementTarget.Tag.BatchSpinScaryokeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="3" />
@@ -959,7 +962,9 @@
                                                                 Padding="5,2"
                                                                 Margin="0,0,4,0"
                                                                 VerticalAlignment="Center"
-                                                                ToolTip="{Binding ScaryokeCategory, StringFormat='Scaryoke Challenge: {0}'}"
+                                                                Cursor="Hand"
+                                                                MouseLeftButtonUp="ScaryokeBadge_MouseLeftButtonUp"
+                                                                ToolTip="{Binding ScaryokeCategory, StringFormat='Scaryoke Challenge: {0} (Click to change or clear)'}"
                                                                 Visibility="{Binding HasScaryokeCategory, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock Text="{Binding ScaryokeCategory, StringFormat='🎃 {0}'}" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                                                         </Border>
@@ -4596,7 +4601,7 @@
                                     <BulletDecorator.Bullet>
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="Auto-accept incoming requests: Checkbox above the Incoming Requests list. When checked, patron requests skip the pending queue entirely and are added straight into the rotation the moment they come in." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="Auto-accept incoming requests: Checkbox above the Incoming Requests list. When checked, patron requests skip the pending queue entirely and are added straight into the rotation the moment they come in. Also right-click any singer and select '🎃 Scaryoke: Set Category Manually...', click their '🎃 {Category}' badge, or use the 'Manual:' bar in Scaryoke Controller (and '📌 Set' on dj.html) to assign, change, or clear a category without spinning the wheel (each category uses a distinct color from the 12-color palette)." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
@@ -4700,7 +4705,7 @@
                                     <BulletDecorator.Bullet>
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="Chromecast TV Billboard (billboard.html): Stream the live stage billboard to Google Cast / Chromecast displays directly from KSRotation.Maui, featuring a dedicated full-height rotation queue and side-by-side QR code cards." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                    <TextBlock Text="Chromecast &amp; HDMI TV Billboard (billboard.html &amp; BillboardView): Stream the live stage billboard from KSRotation.Maui over Chromecast, Smart TV web browsers, or HDMI / Wireless Display, complete with all 12 themed rotation views, Holiday Rotation Screens, Scaryoke challenge badges, and live Scaryoke Wheel spin projection." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                             </StackPanel>
 

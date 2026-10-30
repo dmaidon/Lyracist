@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 17:05:00 -> Add scaryoke-toggle-project, scaryoke-set-batch, and scaryoke-spin-configured endpoints
+// Edited on Oct 30, 2026 @ 06:13:45 -> Support manual Scaryoke category assignment and wheel category addition in /api/info and /api/dj/action for both WPF and MAUI
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -510,6 +510,7 @@ namespace KSRotation.ViewModels
                 pass = _cachedWifiInfo.Password;
             }
 
+            var resolvedHoliday = ActiveHolidayTheme;
             var dto = new VenueInfoResponseDto
             {
                 venue = VenueName,
@@ -522,12 +523,31 @@ namespace KSRotation.ViewModels
                 showQrCode = ShowQrCodeOnRotationScreen,
                 listDjAndVenue = ListDjAndVenueOnBillboard,
                 defaultSongLengthMinutes = DefaultSongLengthMinutes,
+                projectionView = SelectedProjectionView,
+                holidayTheme = HolidayThemeChoice,
+                activeHoliday = resolvedHoliday == null ? null : new HolidayThemeDto
+                {
+                    key = resolvedHoliday.Key,
+                    display = resolvedHoliday.Display,
+                    vignetteColor = resolvedHoliday.VignetteColor,
+                    fogColor = resolvedHoliday.FogColor,
+                    fogOpacity = resolvedHoliday.FogOpacity,
+                    flicker = resolvedHoliday.Flicker,
+                    crossers = resolvedHoliday.Crossers,
+                    ambient = resolvedHoliday.Ambient,
+                    ambientMotion = resolvedHoliday.AmbientMotion.ToString(),
+                    crossSeconds = resolvedHoliday.CrossSeconds,
+                    ambientSeconds = resolvedHoliday.AmbientSeconds,
+                    palette = resolvedHoliday.Palette
+                },
 #if !MAUI
                 isScaryokeActive = IsScaryokeActive,
-                scaryokeState = GetScaryokeStateDto()
+                scaryokeState = GetScaryokeStateDto(),
+                scaryokeCategories = [.. ScaryokeCategories]
 #else
-                isScaryokeActive = false,
-                scaryokeState = null
+                isScaryokeActive = MauiScaryokeState?.IsActive ?? false,
+                scaryokeState = MauiScaryokeState,
+                scaryokeCategories = [.. KSRotation.Maui.Services.ScaryokeSettingsService.Load().Categories]
 #endif
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
@@ -789,6 +809,77 @@ namespace KSRotation.ViewModels
                         ClearLastRoundDone(singer);
                         return "";
                     }
+                case "scaryoke-clear":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer != null)
+                        {
+#if !MAUI
+                            ClearScaryokeForSinger(singer);
+#else
+                            singer.ScaryokeCategory = null;
+                            singer.ScaryokeColor = null;
+                            singer.ScaryokeCurse = null;
+                            _displayWindowService.Update(Singers);
+                            RebuildRotationJsonCacheNow();
+                            QueueSaveDatabase();
+#endif
+                        }
+                        return "";
+                    }
+                case "scaryoke-assign":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase))
+                            ?? (string.IsNullOrWhiteSpace(targetId)
+                                ? (Singers.FirstOrDefault(s => s.IsCurrent && !s.IsMusic) ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsMusic))
+                                : null);
+                        if (singer != null)
+                        {
+                            if (string.Equals(name, "add-to-wheel", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(extraData))
+                            {
+#if !MAUI
+                                TryAddScaryokeCategory(extraData, out _);
+#else
+                                TryAddMauiScaryokeCategory(extraData, out _);
+#endif
+                            }
+#if !MAUI
+                            AssignScaryokeCategory(singer, extraData);
+#else
+                            AssignMauiScaryokeCategory(singer, extraData);
+#endif
+                        }
+                        return "";
+                    }
+                case "scaryoke-add-category":
+                    {
+                        string catToAdd = !string.IsNullOrWhiteSpace(extraData) ? extraData : targetId;
+#if !MAUI
+                        return TryAddScaryokeCategory(catToAdd, out string err) ? "" : err;
+#else
+                        return TryAddMauiScaryokeCategory(catToAdd, out string err) ? "" : err;
+#endif
+                    }
+                case "scaryoke-clear-all":
+                    {
+#if !MAUI
+                        ClearAllScaryokeCategories();
+#else
+                        foreach (var singer in Singers)
+                        {
+                            if (singer.HasScaryokeCategory)
+                            {
+                                singer.ScaryokeCategory = null;
+                                singer.ScaryokeColor = null;
+                                singer.ScaryokeCurse = null;
+                            }
+                        }
+                        _displayWindowService.Update(Singers);
+                        RebuildRotationJsonCacheNow();
+                        QueueSaveDatabase();
+#endif
+                        return "";
+                    }
 #if !MAUI
                 case "toggle-scaryoke":
                     {
@@ -800,24 +891,6 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         bool project = string.Equals(extraData, "project", StringComparison.OrdinalIgnoreCase);
                         _ = SpinScaryokeForSingerAsync(singer, projectToAudience: project);
-                        return "";
-                    }
-                case "scaryoke-clear":
-                    {
-                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
-                        if (singer != null)
-                        {
-                            ClearScaryokeForSinger(singer);
-                        }
-                        return "";
-                    }
-                case "scaryoke-assign":
-                    {
-                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
-                        if (singer != null && !string.IsNullOrWhiteSpace(extraData))
-                        {
-                            AssignScaryokeCategory(singer, extraData);
-                        }
                         return "";
                     }
                 case "set-scaryoke-avoid-repeats":
@@ -842,11 +915,6 @@ namespace KSRotation.ViewModels
                         bool onlyUnassigned = !string.Equals(extraData, "all", StringComparison.OrdinalIgnoreCase);
                         ScaryokeBatchOnlyUnassigned = onlyUnassigned;
                         _ = BatchSpinScaryokeAsync(count);
-                        return "";
-                    }
-                case "scaryoke-clear-all":
-                    {
-                        ClearAllScaryokeCategories();
                         return "";
                     }
                 case "scaryoke-toggle-project":
@@ -934,6 +1002,20 @@ namespace KSRotation.ViewModels
                 case "add-performer":
                     {
                         if (!TryAddPerformer(name, song, artist, duetPartner, isSpecial)) return "Singer name is required.";
+
+                        if (!string.IsNullOrWhiteSpace(extraData))
+                        {
+                            string norm = RotationHelpers.NormalizeForComparison(name);
+                            var added = Singers.FirstOrDefault(s => RotationHelpers.IsSameSingerName(s.Name, norm) && !s.IsMusic);
+                            if (added != null)
+                            {
+#if !MAUI
+                                AssignScaryokeCategory(added, extraData);
+#else
+                                AssignMauiScaryokeCategory(added, extraData);
+#endif
+                            }
+                        }
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

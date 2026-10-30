@@ -1,4 +1,4 @@
-<!-- Edited on Oct 26, 2026 @ 15:55:00 -> Update DJ Name entry placeholder to Guest DJ -->
+<!-- Edited on Oct 29, 2026 @ 14:55:00 -> Add View Mode and Holiday Screen pickers to BillboardOverlay and CastDeviceOverlay -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -165,6 +165,9 @@
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" IsVisible="{Binding IsSpecial}" StrokeThickness="0" ToolTipProperties.Text="Special one-time performer">
                                                     <Label Text="⭐ SPECIAL" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                </Border>
+                                                <Border StrokeShape="RoundRectangle 8" BackgroundColor="#FF6D00" Padding="5,2" IsVisible="{Binding HasScaryokeCategory}" StrokeThickness="0" ToolTipProperties.Text="Scaryoke Challenge Category">
+                                                    <Label Text="{Binding ScaryokeCategory, StringFormat='🎃 {0}'}" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Button Text="DONE (LAST ROUND) ✕"
                                                         IsVisible="{Binding HasSungInLastRound}"
@@ -1023,53 +1026,99 @@
                         Margin="0,0,0,16"
                         HorizontalOptions="Center"
                         Shadow="{Shadow Brush=Black, Offset='0,4', Radius=12, Opacity=0.6}">
-                    <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
-                        <Label Text="📺 Billboard / Attractor Mode Active"
-                               FontSize="12"
-                               FontAttributes="Bold"
-                               TextColor="#FBBF24"
-                               VerticalOptions="Center" />
-                        <Button Text="📺 Output To TV / HDMI"
-                                Clicked="OnToggleExternalDisplayClicked"
-                                BackgroundColor="#2563EB"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                FontSize="12"
-                                HeightRequest="32"
-                                Padding="12,0" />
-                        <Button Text="📡 Cast to TV"
-                                Clicked="OnShowCastDialogClicked"
-                                BackgroundColor="#D97706"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                FontSize="12"
-                                HeightRequest="32"
-                                Padding="12,0" />
-                        <Button Text="Exit Billboard"
-                                Clicked="OnCloseBillboardClicked"
-                                BackgroundColor="#EF4444"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                FontSize="12"
-                                HeightRequest="32"
-                                Padding="12,0" />
-                    </HorizontalStackLayout>
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                            <Label Text="📺 Billboard Active"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="#FBBF24"
+                                   VerticalOptions="Center" />
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="View:" FontSize="11" FontAttributes="Bold" TextColor="#94A3B8" VerticalOptions="Center" />
+                                <Picker ItemsSource="{Binding ProjectionViews}"
+                                        SelectedItem="{Binding SelectedProjectionView}"
+                                        Title="View Mode"
+                                        TextColor="White"
+                                        BackgroundColor="#0F172A"
+                                        FontSize="11"
+                                        WidthRequest="145"
+                                        HeightRequest="32"
+                                        VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="Holiday:" FontSize="11" FontAttributes="Bold" TextColor="#94A3B8" VerticalOptions="Center" />
+                                <Picker ItemsSource="{Binding HolidayThemeDisplayOptions}"
+                                        SelectedItem="{Binding SelectedHolidayThemeDisplay}"
+                                        Title="Holiday Screen"
+                                        TextColor="White"
+                                        BackgroundColor="#0F172A"
+                                        FontSize="11"
+                                        WidthRequest="145"
+                                        HeightRequest="32"
+                                        VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Button Text="📺 Output To TV / HDMI"
+                                    Clicked="OnToggleExternalDisplayClicked"
+                                    BackgroundColor="#2563EB"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    HeightRequest="32"
+                                    Padding="12,0" />
+                            <Button Text="📡 Cast to TV"
+                                    Clicked="OnShowCastDialogClicked"
+                                    BackgroundColor="#D97706"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    HeightRequest="32"
+                                    Padding="12,0" />
+                            <Button Text="Exit Billboard"
+                                    Clicked="OnCloseBillboardClicked"
+                                    BackgroundColor="#EF4444"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    HeightRequest="32"
+                                    Padding="12,0" />
+                        </HorizontalStackLayout>
+                    </ScrollView>
                 </Border>
             </Grid>
         </Grid>
 
         <!-- CAST TO TV / CHROMECAST DEVICE PICKER OVERLAY -->
         <Grid x:Name="CastDeviceOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False" ZIndex="200">
-            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="340" MaximumHeightRequest="520" HorizontalOptions="Center" VerticalOptions="Center">
-                <Grid RowDefinitions="Auto, Auto, *, Auto" RowSpacing="10">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="360" MaximumHeightRequest="580" HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid RowDefinitions="Auto, Auto, Auto, *, Auto" RowSpacing="10">
                     <!-- Title Header -->
                     <VerticalStackLayout Grid.Row="0" Spacing="4">
                         <Label Text="📡 CAST TO CHROMECAST" TextColor="{AppThemeBinding Light=#D97706, Dark=#FBBF24}" FontSize="13" FontAttributes="Bold" CharacterSpacing="1.2" HorizontalOptions="Center" />
                         <Label Text="Stream Audience Billboard to TV" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="11" HorizontalOptions="Center" />
                     </VerticalStackLayout>
 
+                    <!-- Billboard View Mode & Holiday Screen Options -->
+                    <Border Grid.Row="1" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151924}" Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#2A3042}" StrokeThickness="1" Padding="10,8">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Rotation View" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}" />
+                                <Picker ItemsSource="{Binding ProjectionViews}"
+                                        SelectedItem="{Binding SelectedProjectionView}"
+                                        FontSize="11"
+                                        TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Holiday Screen" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}" />
+                                <Picker ItemsSource="{Binding HolidayThemeDisplayOptions}"
+                                        SelectedItem="{Binding SelectedHolidayThemeDisplay}"
+                                        FontSize="11"
+                                        TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
                     <!-- Active Casting Status / Control -->
-                    <Border Grid.Row="1" x:Name="CastActiveStatusCard" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=#FEF3C7, Dark=#2E2315}" Stroke="#F59E0B" StrokeThickness="1" Padding="10" IsVisible="False">
+                    <Border Grid.Row="2" x:Name="CastActiveStatusCard" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=#FEF3C7, Dark=#2E2315}" Stroke="#F59E0B" StrokeThickness="1" Padding="10" IsVisible="False">
                         <VerticalStackLayout Spacing="6">
                             <Label x:Name="CastActiveDeviceLabel" Text="Currently Casting to TV" TextColor="{AppThemeBinding Light=#92400E, Dark=#FDE68A}" FontSize="12" FontAttributes="Bold" HorizontalOptions="Center" />
                             <Button Text="Stop Casting" Clicked="OnStopCastingClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" FontSize="11" HeightRequest="32" CornerRadius="6" />
@@ -1077,13 +1126,13 @@
                     </Border>
 
                     <!-- Discovery State & Discovered Device List -->
-                    <Grid Grid.Row="2" RowDefinitions="Auto, *">
+                    <Grid Grid.Row="3" RowDefinitions="Auto, *">
                         <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,6" VerticalOptions="Center">
                             <ActivityIndicator x:Name="CastScanningSpinner" IsRunning="False" IsVisible="False" WidthRequest="18" HeightRequest="18" Color="{AppThemeBinding Light=#D97706, Dark=#FBBF24}" />
                             <Label x:Name="CastStatusLabel" Text="Scanning for devices on Wi-Fi..." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="11" VerticalOptions="Center" />
                         </HorizontalStackLayout>
 
-                        <ScrollView Grid.Row="1" HeightRequest="200">
+                        <ScrollView Grid.Row="1" HeightRequest="180">
                             <VerticalStackLayout x:Name="CastDevicesList" Spacing="6">
                                 <!-- Populated dynamically by RefreshCastDeviceListUI -->
                             </VerticalStackLayout>
@@ -1091,7 +1140,7 @@
                     </Grid>
 
                     <!-- Actions Footer -->
-                    <Grid Grid.Row="3" ColumnDefinitions="*, *" ColumnSpacing="8" Margin="0,8,0,0">
+                    <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="8" Margin="0,8,0,0">
                         <Button Grid.Column="0" Text="🔄 Rescan" Clicked="OnRescanCastDevicesClicked" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="6" />
                         <Button Grid.Column="1" Text="Close" Clicked="OnCloseCastDialogClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="12" HeightRequest="36" CornerRadius="6" />
                     </Grid>

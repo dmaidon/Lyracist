@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 00:27:00 -> Add ScaryokeStateDto and ScaryokeWheelSegment to AppJsonContext
+// Edited on Oct 29, 2026 @ 14:43:30 -> Register HolidayThemeDto in AppJsonContext
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -25,6 +25,7 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(RequestedSong))]
     [JsonSerializable(typeof(List<RequestedSong>))]
     [JsonSerializable(typeof(VenueInfoResponseDto))]
+    [JsonSerializable(typeof(HolidayThemeDto))]
     [JsonSerializable(typeof(SessionHandoffPayload))]
     [JsonSerializable(typeof(DiscoveredPeer))]
     [JsonSerializable(typeof(List<DiscoveredPeer>))]

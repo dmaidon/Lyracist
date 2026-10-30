@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 08:51:30 -> Color-code SettingsPage TabItem headers for high visibility in dark venues -->
+<!-- Edited on Oct 30, 2026 @ 07:04:00 -> Add 12-color palette swatch picker for Scaryoke categories -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -945,7 +945,24 @@
                                         <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" BorderBrush="Gray" BorderThickness="1" Background="{Binding SelectedScaryokeColor}" ToolTip="Category color" />
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding SelectedCategoryColorModeText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" />
-                                            <TextBlock Text="Auto colors assigned by app palette if custom color is not set" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock Text="Each category is assigned its own distinct color from the 12-color palette" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock Text="Choose Palette Color:" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,6,0,2" />
+                                            <ItemsControl ItemsSource="{Binding AvailableScaryokePaletteColors}" Margin="0,0,0,2">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Width="20" Height="20" Margin="0,0,4,4" Padding="0"
+                                                                Background="{Binding}" BorderBrush="#66FFFFFF" BorderThickness="1"
+                                                                Cursor="Hand" ToolTip="{Binding}"
+                                                                Command="{Binding DataContext.SetScaryokeColorCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                                CommandParameter="{Binding}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </StackPanel>
                                     </Grid>
 

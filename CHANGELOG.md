@@ -1,13 +1,38 @@
-<!-- Edited on Oct 29, 2026 @ 08:54:00 -> Document high-contrast color-coded navigation and page tabs in Lyracist -->
-Last Edit: Oct 29, 2026 - High-Contrast Color-Coded Tabs & Shared Holiday Rotation Screens in Lyracist
+<!-- Edited on Oct 30, 2026 @ 07:07:00 -> Document distinct 12-color Scaryoke category palette across KSRotation, KSRotation.Maui, Lyracist, ScaryokeWheel, and DJ portal -->
+Last Edit: Oct 30, 2026 - Distinct 12-Color Scaryoke Category Palette, Manual Scaryoke Category Assignment to Singers, Compact DJ Portal Singer Listings, KSRotation.Maui Rotation Screen Transmission Enhancements, Color-Coded Tabs & Shared Holiday Rotation Screens
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - 2026-10-29
+## [Unreleased] - 2026-10-30
+
+### Changed
+- **Distinct 12-Color Scaryoke Category Palette (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `ScaryokeWheel`, `dj.html`)**:
+  - Replaced the previous repeating 4-color-family Scaryoke palette (which cycled through 3 similar shades of Purple, Orange, Teal, and Pink) with **12 genuinely distinct, high-contrast colors** so every category on the wheel (up to the 11-category maximum) and its corresponding singer badge has a unique color: Royal Purple (`#7C3AED`), Blaze Orange (`#FF6D00`), Sky Blue (`#0284C7`), Crimson Red (`#DC2626`), Emerald Teal (`#0D9488`), Golden Amber (`#D97706`), Hot Pink (`#DB2777`), Cobalt Royal Blue (`#2563EB`), Acid Lime Green (`#65A30D`), Fuchsia Magenta (`#C026D3`), Copper Bronze (`#B45309`), and Deep Indigo (`#4338CA`).
+  - Added collision-free automatic color assignment (`PickDistinctPaletteColor`) in `KSRotation`, `KSRotation.Maui`, `Lyracist`, and `ScaryokeWheel` so auto-colored categories never duplicate a color already claimed by another category on the wheel.
+  - Added a clickable 12-color palette swatch picker (`Choose Palette Color`) to the `Scaryoke Categories` section of `Lyracist/Views/Pages/SettingsPage.xaml` (matching `KSRotation`), and color-coded the quick-pick category chips in `#manual-scaryoke-modal` (`KSRotation/Resources/dj.html`).
 
 ### Added
+- **Manual Scaryoke Category Assignment to Singers (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `dj.html`)**:
+  - **KSRotation Host Console (`MainWindow.xaml`, `MainWindow.xaml.cs`, `ScaryokeControlWindow.xaml`, `MainViewModel.Scaryoke.cs`)**: Added a `Manual:` category selector (`ComboBox`), `📌 Set Singer` button, and `✕` clear button to Step 2 of `ScaryokeControlWindow`; added `🎃 Scaryoke: Set Category Manually...` to the singer right-click `ContextMenu` and made each singer's `🎃 {Category}` badge clickable to open a manual category assignment/change dialog.
+  - **Remote DJ Web Portal (`KSRotation/Resources/dj.html`, `MainViewModel.Requests.cs`, `VenueInfoResponseDto.cs`)**: Exposed `scaryokeCategories` on `/api/info`; added an inline `📌 Set` button and clickable `🎃 {Category}` badge on each singer card opening `#manual-scaryoke-modal` with quick-pick category chips and custom input; added an optional `🎃 Scaryoke Challenge` field to `#add-performer-modal`; and added an `Assign Category Manually` bar to `#scaryoke-tablet-modal` (`scaryoke-assign` and `scaryoke-clear` actions supported in both WPF and MAUI).
+  - **KSRotation.Maui (`ScaryokeWheelPage.xaml`, `ScaryokeWheelViewModel.cs`, `MainViewModel.cs`)**: Added a `Target Singer & Manual Challenge` card to `ScaryokeWheelPage` with a Target Singer `Picker`, Category `Picker`, `📌 Set Singer` button, and `✕ Clear` button.
+  - **Lyracist (`EditSingerWindow.xaml`, `EditSingerViewModel.cs`, `ScaryokeWindow.xaml`, `ScaryokeViewModel.cs`)**: Added a `🎃 Scaryoke Challenge (Optional)` dropdown and `✕ Clear` button to `EditSingerWindow`, and a `Manual:` target singer + category selector row with `📌 Set Singer` and `✕` clear buttons to `ScaryokeWindow`.
+
+### Fixed
+- **Compact DJ Portal Singer Listings (`KSRotation/Resources/dj.html`)**:
+  - Restructured `.singer-card` into a compact two-row layout so `.singer-details` always spans 100% of the card width instead of being squeezed horizontally beside `.actions-container`.
+  - Placed singer name, duet partner, `- Song Title (Artist)` (`white-space: nowrap; overflow: hidden; text-overflow: ellipsis`), and status badges on a single top line so multi-word song titles never word-wrap onto multiple lines.
+  - Placed all 10 song completion checkboxes (`1`–`10`) in a non-wrapping horizontal row (`.rounds-container { flex-wrap: nowrap; flex-shrink: 0; }`) on the left of `.singer-controls-row` alongside the action buttons on the right, keeping all 10 checkboxes on a single line across both desktop and mobile viewports.
+
+### Added
+- **Enhanced Rotation Screen Transmission in `KSRotation.Maui` (`billboard.html`, `BillboardView.xaml`, `MainPage.xaml`, `ScaryokeWheelPage.xaml.cs`, `MainViewModel.cs`)**:
+  - Enriched `/api/info` (`VenueInfoResponseDto`) with `projectionView`, `holidayTheme`, and resolved `activeHoliday` (`HolidayThemeDto`) so Chromecast and Smart TV web browsers (`billboard.html`) synchronize themed views and holiday overlays live.
+  - Added Holiday Rotation Screen overlays (floating/crossing/falling/rising characters with palette glow halos, vignette tint, ground fog, and `Auto` late-night show-date resolution) to both `billboard.html` and native MAUI `BillboardView.xaml` (for HDMI / Wireless Display output and full-screen tablet preview).
+  - Added all 12 themed rotation views (`Normal List`, `Star Wars Crawl`, `Vegas Marquee`, `Vinyl Turntable`, `Disco Ball`, `Synthwave Grid`, `Concert Festival Lineup`, `Casino Slot Reels`, `Jukebox`, `Stadium Jumbotron`, `Movie Theater 'Now Showing'`, `Purple Velvet Curtain`) and Scaryoke `🎃 {Category}` challenge badges to `billboard.html`, `BillboardView.xaml`, and `MainPage.xaml`.
+  - Added `Rotation View` and `Holiday Screen` pickers to the `BillboardOverlay` control bar and `CastDeviceOverlay` dialog in `KSRotation.Maui/MainPage.xaml`, persisted in `AppSettings`.
+  - Added live Scaryoke Wheel Spin projection from `ScaryokeWheelPage` on the MAUI tablet (`BroadcastSpinStart` / `BroadcastSpinResult` -> `MainViewModel.SetMauiScaryokeState`), animating the wheel spin and winner reveal on both `billboard.html` (HTML5 `<canvas>`) and `BillboardView.xaml` (`GraphicsView` + `ScaryokeWheelDrawable`) before auto-dismissing back to the rotation screen.
 - **High-Contrast Color-Coded Navigation & Page Tabs (`Lyracist/Themes/LyracistTheme.xaml`, `MainWindow.xaml`, `SettingsPage.xaml`, `KaraokePage.xaml`, `RotationPage.xaml`, `UsersPage.xaml`, `OccasionSearchWindow.xaml`, `SingerSettingsWindow.xaml`)**:
   - Overrode WPF-UI's default transparent `TabItem` style and `TopCompactNavigationViewItemTemplate` in `LyracistTheme.xaml` so tabs render rounded colored pills with contrasting borders, crisp white text, hover brightening, and a bright white active border + bottom indicator bar.
   - Assigned distinct, venue-friendly color palettes to all 14 top navigation tabs (`Karaoke`, `Rotation`, `Lyrics`, `Trivia`, `Playlists`, `Sample Pad`, `Requests`, `Store`, `Users`, `Settings`, `Trivia Settings`, `Casting`, `Help`, `About`) and all sub-page `TabItem` headers across `SettingsPage`, `KaraokePage`, `RotationPage`, `UsersPage`, `OccasionSearchWindow`, and `SingerSettingsWindow` for instant visual differentiation in dark venues.
