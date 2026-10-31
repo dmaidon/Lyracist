@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Bind Spin button IsEnabled to CanSpin and add Continue Game button -->
+<!-- Edited on Oct 31, 2026 @ 10:44:00 -> Enable BitmapCache on WheelCanvas for GPU-accelerated rotation -->
 <UserControl x:Class="KnockoutTrivia.Views.WheelView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -28,7 +28,7 @@
                 </Ellipse>
 
                 <!-- Rotating Canvas for Wheel Wedges -->
-                <Canvas x:Name="WheelCanvas" Width="480" Height="480" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <Canvas x:Name="WheelCanvas" Width="480" Height="480" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" CacheMode="BitmapCache">
                     <Canvas.RenderTransform>
                         <RotateTransform Angle="{Binding WheelAngle}" CenterX="240" CenterY="240" />
                     </Canvas.RenderTransform>

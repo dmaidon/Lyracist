@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:20:00 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 31, 2026 @ 09:18:00 -> Bump AssemblyVersion and FileVersion to 26.10.31.103 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -15,8 +15,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.10.30.102</AssemblyVersion>
-    <FileVersion>26.10.30.102</FileVersion>
+    <AssemblyVersion>26.10.31.103</AssemblyVersion>
+    <FileVersion>26.10.31.103</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

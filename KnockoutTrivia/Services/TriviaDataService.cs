@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Support TriviaQuestionPack wrapper and raw JSON arrays with cached JsonSerializerOptions
+// Edited on Oct 31, 2026 @ 11:20:30 -> Exclude non-trivia databases (lyracist.db), verify Questions table existence, and ensure default trivia.db schema
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,10 +37,19 @@ public class TriviaDataService : ITriviaDataService
         Directory.CreateDirectory(BasePacksDir);
     }
 
+    public static bool IsExcludedNonTriviaDatabase(string dbPath)
+    {
+        string fileName = Path.GetFileName(dbPath);
+        return fileName.Equals("lyracist.db", StringComparison.OrdinalIgnoreCase) ||
+               fileName.StartsWith("lyracist_", StringComparison.OrdinalIgnoreCase) ||
+               fileName.Equals("noartist.db", StringComparison.OrdinalIgnoreCase);
+    }
+
     public List<string> GetAvailableDatabases()
     {
         if (!Directory.Exists(BaseDataDir)) return [];
-        return [.. Directory.GetFiles(BaseDataDir, "*.db")];
+        return [.. Directory.GetFiles(BaseDataDir, "*.db")
+            .Where(path => !IsExcludedNonTriviaDatabase(path))];
     }
 
     public List<string> GetAvailablePacks()
@@ -53,10 +62,16 @@ public class TriviaDataService : ITriviaDataService
     {
         var sources = new List<SelectableTriviaSource>();
 
-        // Discover Databases in KoTrivia/Data
+        // Discover Trivia Databases in Data/ (excluding non-trivia DBs like lyracist.db)
         foreach (var db in GetAvailableDatabases())
         {
             int count = await GetQuestionCountFromDbAsync(db);
+            if (count <= 0 && !Path.GetFileName(db).Equals("trivia.db", StringComparison.OrdinalIgnoreCase))
+            {
+                // Skip non-trivia or empty auxiliary .db files in the shared Data folder
+                continue;
+            }
+
             sources.Add(new SelectableTriviaSource
             {
                 Name = Path.GetFileName(db),
@@ -67,7 +82,7 @@ public class TriviaDataService : ITriviaDataService
             });
         }
 
-        // Discover Packs in KoTrivia/Packs
+        // Discover Packs in Packs/
         foreach (var pack in GetAvailablePacks())
         {
             int count = await GetQuestionCountFromPackAsync(pack);
@@ -84,14 +99,47 @@ public class TriviaDataService : ITriviaDataService
         return sources;
     }
 
+    private static async Task<bool> HasQuestionsTableAsync(SqliteConnection conn)
+    {
+        using var checkCmd = conn.CreateCommand();
+        checkCmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Questions' LIMIT 1;";
+        var exists = await checkCmd.ExecuteScalarAsync();
+        return exists != null && exists != DBNull.Value;
+    }
+
+    private static async Task EnsureQuestionsTableExistsAsync(SqliteConnection conn)
+    {
+        using var createCmd = conn.CreateCommand();
+        createCmd.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Questions (
+                Id TEXT PRIMARY KEY,
+                Category TEXT NOT NULL,
+                Difficulty INTEGER NOT NULL,
+                QuestionType INTEGER NOT NULL,
+                Prompt TEXT NOT NULL,
+                OptionsJson TEXT NOT NULL,
+                CorrectAnswerIndex INTEGER NOT NULL,
+                Explanation TEXT,
+                AudioSnippetPath TEXT,
+                TimeLimitSeconds INTEGER NOT NULL DEFAULT 15,
+                CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );";
+        await createCmd.ExecuteNonQueryAsync();
+    }
+
     private static async Task<int> GetQuestionCountFromDbAsync(string dbPath)
     {
         try
         {
-            if (!File.Exists(dbPath)) return 0;
+            if (!File.Exists(dbPath) || IsExcludedNonTriviaDatabase(dbPath)) return 0;
             string connString = $"Data Source={dbPath};";
             await using var conn = new SqliteConnection(connString);
             await conn.OpenAsync();
+
+            if (!await HasQuestionsTableAsync(conn))
+            {
+                return 0;
+            }
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT COUNT(*) FROM Questions";
@@ -168,7 +216,7 @@ public class TriviaDataService : ITriviaDataService
     public async Task<List<KnockoutQuestion>> LoadQuestionsFromDatabaseAsync(string? dbPath = null)
     {
         string path = dbPath ?? Path.Combine(BaseDataDir, "trivia.db");
-        if (!File.Exists(path))
+        if (!File.Exists(path) || IsExcludedNonTriviaDatabase(path))
         {
             return [];
         }
@@ -176,55 +224,71 @@ public class TriviaDataService : ITriviaDataService
         var questions = new List<KnockoutQuestion>();
         string connString = $"Data Source={path};";
 
-        await using var conn = new SqliteConnection(connString);
-        await conn.OpenAsync();
-
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"
-            SELECT Id, Category, Difficulty, QuestionType, Prompt, OptionsJson, CorrectAnswerIndex, Explanation, AudioSnippetPath, TimeLimitSeconds
-            FROM Questions";
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        try
         {
-            string id = reader.IsDBNull(0) ? Guid.NewGuid().ToString("N")[..8] : reader.GetString(0);
-            string category = reader.IsDBNull(1) ? "General" : reader.GetString(1);
-            var difficulty = reader.IsDBNull(2) ? TriviaDifficulty.Medium : (TriviaDifficulty)reader.GetInt32(2);
-            var questionType = reader.IsDBNull(3) ? TriviaQuestionType.MultipleChoice : (TriviaQuestionType)reader.GetInt32(3);
-            string prompt = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
-            int correctIndex = reader.IsDBNull(6) ? -1 : reader.GetInt32(6);
-            string explanation = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
-            string? audioPath = reader.IsDBNull(8) ? null : reader.GetString(8);
-            int timeLimit = reader.IsDBNull(9) ? 15 : reader.GetInt32(9);
+            await using var conn = new SqliteConnection(connString);
+            await conn.OpenAsync();
 
-            List<string> options = [];
-            if (!reader.IsDBNull(5))
+            if (!await HasQuestionsTableAsync(conn))
             {
-                try
+                if (Path.GetFileName(path).Equals("trivia.db", StringComparison.OrdinalIgnoreCase))
                 {
-                    options = JsonSerializer.Deserialize<List<string>>(reader.GetString(5)) ?? [];
+                    await EnsureQuestionsTableExistsAsync(conn);
                 }
-                catch { }
+                return [];
             }
 
-            if (string.IsNullOrWhiteSpace(prompt) || options.Count < 2 || options.Count > 4 || correctIndex < 0 || correctIndex >= options.Count)
-            {
-                continue;
-            }
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT Id, Category, Difficulty, QuestionType, Prompt, OptionsJson, CorrectAnswerIndex, Explanation, AudioSnippetPath, TimeLimitSeconds
+                FROM Questions";
 
-            questions.Add(new KnockoutQuestion
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                Id = id,
-                Category = category,
-                Difficulty = difficulty,
-                QuestionType = questionType,
-                Prompt = prompt,
-                Options = options,
-                CorrectAnswerIndex = correctIndex,
-                Explanation = explanation,
-                AudioSnippetPath = audioPath,
-                TimeLimitSeconds = timeLimit > 0 ? timeLimit : 15
-            });
+                string id = reader.IsDBNull(0) ? Guid.NewGuid().ToString("N")[..8] : reader.GetString(0);
+                string category = reader.IsDBNull(1) ? "General" : reader.GetString(1);
+                var difficulty = reader.IsDBNull(2) ? TriviaDifficulty.Medium : (TriviaDifficulty)reader.GetInt32(2);
+                var questionType = reader.IsDBNull(3) ? TriviaQuestionType.MultipleChoice : (TriviaQuestionType)reader.GetInt32(3);
+                string prompt = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                int correctIndex = reader.IsDBNull(6) ? -1 : reader.GetInt32(6);
+                string explanation = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
+                string? audioPath = reader.IsDBNull(8) ? null : reader.GetString(8);
+                int timeLimit = reader.IsDBNull(9) ? 15 : reader.GetInt32(9);
+
+                List<string> options = [];
+                if (!reader.IsDBNull(5))
+                {
+                    try
+                    {
+                        options = JsonSerializer.Deserialize<List<string>>(reader.GetString(5)) ?? [];
+                    }
+                    catch { }
+                }
+
+                if (string.IsNullOrWhiteSpace(prompt) || options.Count < 2 || options.Count > 4 || correctIndex < 0 || correctIndex >= options.Count)
+                {
+                    continue;
+                }
+
+                questions.Add(new KnockoutQuestion
+                {
+                    Id = id,
+                    Category = category,
+                    Difficulty = difficulty,
+                    QuestionType = questionType,
+                    Prompt = prompt,
+                    Options = options,
+                    CorrectAnswerIndex = correctIndex,
+                    Explanation = explanation,
+                    AudioSnippetPath = audioPath,
+                    TimeLimitSeconds = timeLimit > 0 ? timeLimit : 15
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Globals.LogError("KnockoutTrivia", $"TriviaDataService.LoadQuestionsFromDatabaseAsync({path})", ex);
         }
 
         return questions;
@@ -291,21 +355,36 @@ public class TriviaDataService : ITriviaDataService
     public async Task<List<string>> GetCategoriesAsync(string? dbPath = null)
     {
         string path = dbPath ?? Path.Combine(BaseDataDir, "trivia.db");
-        if (!File.Exists(path)) return [];
+        if (!File.Exists(path) || IsExcludedNonTriviaDatabase(path)) return [];
 
         var categories = new List<string>();
         string connString = $"Data Source={path};";
 
-        await using var conn = new SqliteConnection(connString);
-        await conn.OpenAsync();
-
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT Category FROM Questions ORDER BY Category";
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        try
         {
-            categories.Add(reader.GetString(0));
+            await using var conn = new SqliteConnection(connString);
+            await conn.OpenAsync();
+
+            if (!await HasQuestionsTableAsync(conn))
+            {
+                return [];
+            }
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT Category FROM Questions ORDER BY Category";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    categories.Add(reader.GetString(0));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Globals.LogError("KnockoutTrivia", $"TriviaDataService.GetCategoriesAsync({path})", ex);
         }
 
         return categories;

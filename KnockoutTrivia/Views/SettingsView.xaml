@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Expose QuestionTimerSeconds setting in SettingsView -->
+<!-- Edited on Oct 31, 2026 @ 10:53:00 -> Add SpeedBonus, Category filter, SuperStreakEnabled, VenueName/HostName, and Import Pack button -->
 <UserControl x:Class="KnockoutTrivia.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -59,7 +59,27 @@
                         <!-- Points per correct answer -->
                         <TextBlock Text="Points Per Correct Answer" FontWeight="SemiBold" Foreground="White" FontSize="12" />
                         <TextBlock Text="Score awarded for correct answers." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ui:TextBox Text="{Binding Settings.PointsPerCorrectAnswer, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                        <ui:TextBox Text="{Binding Settings.PointsPerCorrectAnswer, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                        <!-- Speed Bonus Option -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="⚡ Speed Bonus (+1 to +5 Pts)" FontWeight="SemiBold" Foreground="#38BDF8" FontSize="11" />
+                                <TextBlock Text="Award extra points for fast answers." FontSize="10" Foreground="#9CA3AF" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableSpeedBonus}" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <!-- Category Filter -->
+                        <TextBlock Text="Category Filter" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Filter round questions by category." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ComboBox ItemsSource="{Binding AvailableCategories}"
+                                  SelectedItem="{Binding Settings.SelectedCategory, Mode=TwoWay}"
+                                  Height="38" Width="200" HorizontalAlignment="Left" Margin="0,0,0,12" />
 
                         <!-- Questions per game -->
                         <TextBlock Text="Questions Per Game" FontWeight="SemiBold" Foreground="White" FontSize="12" />
@@ -74,7 +94,7 @@
                         <!-- Game Advance Mode -->
                         <TextBlock Text="Game Advance Mode" FontWeight="SemiBold" Foreground="White" FontSize="12" />
                         <TextBlock Text="Manual (DJ advances) or Automatic." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ComboBox SelectedIndex="{Binding Settings.GameMode, Mode=TwoWay}" Height="32" Width="200" HorizontalAlignment="Left" Margin="0,0,0,12">
+                        <ComboBox SelectedIndex="{Binding Settings.GameMode, Mode=TwoWay}" Height="38" Width="200" HorizontalAlignment="Left" Margin="0,0,0,12">
                             <ComboBoxItem Content="Manual (DJ Controlled)" />
                             <ComboBoxItem Content="Automatic (Auto Advance)" />
                         </ComboBox>
@@ -133,12 +153,38 @@
                         <!-- Web Server Port -->
                         <TextBlock Text="Companion Server Port" FontWeight="SemiBold" Foreground="White" FontSize="12" />
                         <TextBlock Text="Local HTTP port for phone buzzer (Default: 8088)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ui:TextBox Text="{Binding Settings.WebServerPort, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,14" />
+                        <ui:TextBox Text="{Binding Settings.WebServerPort, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10" />
+
+                        <!-- Venue & Host Name -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Venue Name" FontWeight="SemiBold" Foreground="White" FontSize="11" />
+                                <ui:TextBox Text="{Binding Settings.VenueName, UpdateSourceTrigger=PropertyChanged}" Height="38" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Host / DJ Name" FontWeight="SemiBold" Foreground="White" FontSize="11" />
+                                <ui:TextBox Text="{Binding Settings.HostName, UpdateSourceTrigger=PropertyChanged}" Height="38" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
 
                         <Separator Background="#262238" Margin="0,0,0,12" />
 
                         <!-- Shield Tokens & Super Streak -->
                         <TextBlock Text="🛡️ Shields &amp; Super Streak" FontSize="14" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,10" />
+
+                        <!-- Enable Super Streak Wheel -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Enable Super Streak Target Wheel" FontSize="11" FontWeight="SemiBold" Foreground="#A78BFA" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" IsChecked="{Binding Settings.SuperStreakEnabled}" VerticalAlignment="Center" />
+                        </Grid>
 
                         <!-- Max Shield Tokens -->
                         <TextBlock Text="Max Shield Tokens (Cap)" FontWeight="SemiBold" Foreground="White" FontSize="12" />
@@ -180,22 +226,30 @@
                     <!-- Row 0: DB Header & Select All -->
                     <Grid Grid.Row="0" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="💾 Databases &amp; Packs" FontSize="15" FontWeight="Bold" Foreground="#10B981" />
                             <TextBlock Text="Select active trivia sources:" FontSize="10" Foreground="#9CA3AF" />
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:Button Content="📂 Load Pack"
+                                       Height="32"
+                                       Padding="8,0"
+                                       Margin="0,0,4,0"
+                                       Appearance="Secondary"
+                                       ToolTip="Import external JSON Question Pack or SQLite Database"
+                                       Command="{Binding ImportPackCommand}"
+                                       Cursor="Hand" />
                             <ui:Button Content="All"
-                                       Height="35" Width="61"
+                                       Height="32" Width="48"
                                        Margin="0,0,4,0"
                                        Appearance="Secondary"
                                        Command="{Binding SelectAllSourcesCommand}"
                                        Cursor="Hand" />
                             <ui:Button Content="Clear"
-                                       Height="35" Width="86"
+                                       Height="32" Width="58"
                                        Appearance="Secondary"
                                        Command="{Binding DeselectAllSourcesCommand}"
                                        Cursor="Hand" />

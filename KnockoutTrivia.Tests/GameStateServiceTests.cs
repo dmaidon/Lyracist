@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Add tests for pack wrapper deserialization, UpdateSettings, no double-grading, and question-limit winner
+// Edited on Oct 31, 2026 @ 11:21:30 -> Add test for TriviaDataService ignoring non-trivia databases without Questions table
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -395,5 +395,265 @@ public class GameStateServiceTests
         Assert.True(p.HasToken1);
         Assert.True(p.HasToken2);
         Assert.True(p.HasToken3);
+    }
+
+    [Fact]
+    public async Task EvaluateSubmittedAnswers_DefersSuperStreakUntilAllPlayersAreGraded()
+    {
+        var trivia = new TriviaDataService();
+        var token = new TokenService();
+        var streak = new StreakService(token);
+        using var game = new GameStateService(trivia, token, streak);
+
+        string tempPack = Path.Combine(Path.GetTempPath(), $"ko_defer_{Guid.NewGuid():N}.json");
+        try
+        {
+            await File.WriteAllTextAsync(tempPack, """
+            [
+              {
+                "Id": "Q1",
+                "Prompt": "Question 1?",
+                "Options": ["A", "B", "C", "D"],
+                "CorrectAnswerIndex": 0
+              }
+            ]
+            """, TestContext.Current.CancellationToken);
+
+            game.InitializeGame(new KnockoutSettings { SuperStreakEnabled = true, SuperStreakThreshold = 20 });
+            await game.LoadGameQuestionsAsync(tempPack);
+
+            var streaker = game.RegisterOrGetPlayer("Streaker");
+            streaker.StreakCount = 19;
+
+            var opponent = game.RegisterOrGetPlayer("OpponentWithLastShield");
+            opponent.Tokens = 1; // Will miss Q1 and lose this shield before wheel segments are built!
+
+            var survivingOpponent = game.RegisterOrGetPlayer("SurvivingShieldHolder");
+            survivingOpponent.Tokens = 2;
+            survivingOpponent.Score = 50;
+
+            int opponentTokensWhenSuperStreakFired = -1;
+            game.SuperStreakTriggered += (s, p) =>
+            {
+                opponentTokensWhenSuperStreakFired = opponent.Tokens;
+            };
+
+            game.StartGame();
+            streaker.StreakCount = 19;
+
+            game.SubmitPlayerAnswer(streaker.Id, 0, 1000, streaker.SessionToken); // Correct -> hits 20
+            game.SubmitPlayerAnswer(opponent.Id, 1, 1200, opponent.SessionToken); // Wrong -> loses shield
+            game.SubmitPlayerAnswer(survivingOpponent.Id, 0, 1100, survivingOpponent.SessionToken); // Correct -> keeps 2 shields
+
+            game.RevealAnswer();
+
+            Assert.Equal(GameStatePhase.SuperStreak, game.Phase);
+            Assert.Equal(0, opponentTokensWhenSuperStreakFired);
+            Assert.Equal(0, opponent.Tokens);
+        }
+        finally
+        {
+            if (File.Exists(tempPack)) File.Delete(tempPack);
+        }
+    }
+
+    [Fact]
+    public async Task RecordPlayerAnswer_PreventsRepeatedManualAdjudicationOnSameQuestion()
+    {
+        var trivia = new TriviaDataService();
+        var token = new TokenService();
+        var streak = new StreakService(token);
+        using var game = new GameStateService(trivia, token, streak);
+
+        string tempPack = Path.Combine(Path.GetTempPath(), $"ko_manual_dup_{Guid.NewGuid():N}.json");
+        try
+        {
+            await File.WriteAllTextAsync(tempPack, """
+            [
+              {
+                "Id": "Q1",
+                "Prompt": "Question 1?",
+                "Options": ["A", "B"],
+                "CorrectAnswerIndex": 0
+              }
+            ]
+            """, TestContext.Current.CancellationToken);
+
+            game.InitializeGame(new KnockoutSettings { PointsPerCorrectAnswer = 10 });
+            await game.LoadGameQuestionsAsync(tempPack);
+
+            var p = game.RegisterOrGetPlayer("ManualTester");
+            game.StartGame();
+
+            game.RecordPlayerAnswer(p.Id, true);
+            game.RecordPlayerAnswer(p.Id, true); // Duplicate click on same active question
+
+            Assert.Equal(10, p.Score);
+            Assert.Equal(1, p.StreakCount);
+        }
+        finally
+        {
+            if (File.Exists(tempPack)) File.Delete(tempPack);
+        }
+    }
+
+    [Fact]
+    public async Task SpeedBonusAndTieBreaker_AwardsExtraPointsAndBreaksTiesByFastestAverageTime()
+    {
+        var trivia = new TriviaDataService();
+        var token = new TokenService();
+        var streak = new StreakService(token);
+        using var game = new GameStateService(trivia, token, streak);
+
+        string tempPack = Path.Combine(Path.GetTempPath(), $"ko_speed_{Guid.NewGuid():N}.json");
+        try
+        {
+            await File.WriteAllTextAsync(tempPack, """
+            [
+              {
+                "Id": "Q1",
+                "Prompt": "Fast question?",
+                "Options": ["A", "B"],
+                "CorrectAnswerIndex": 0
+              }
+            ]
+            """, TestContext.Current.CancellationToken);
+
+            game.InitializeGame(new KnockoutSettings
+            {
+                PointsPerCorrectAnswer = 10,
+                EnableSpeedBonus = true,
+                QuestionTimerSeconds = 15,
+                NumberOfQuestionsPerGame = 1
+            });
+            await game.LoadGameQuestionsAsync(tempPack);
+
+            var slowPlayer = game.RegisterOrGetPlayer("Slow");
+            var fastPlayer = game.RegisterOrGetPlayer("Fast");
+
+            game.StartGame();
+            game.SubmitPlayerAnswer(slowPlayer.Id, 0, 14000, slowPlayer.SessionToken);
+            game.SubmitPlayerAnswer(fastPlayer.Id, 0, 1000, fastPlayer.SessionToken);
+            game.RevealAnswer();
+
+            Assert.True(fastPlayer.Score > slowPlayer.Score);
+            Assert.Equal(1000, fastPlayer.AverageResponseTimeMs);
+            Assert.Equal(14000, slowPlayer.AverageResponseTimeMs);
+
+            // Force tie on score and strikes to verify tie-breaker picks faster average response time
+            slowPlayer.Score = 50;
+            fastPlayer.Score = 50;
+
+            KnockoutPlayer? winner = null;
+            game.GameWon += (s, w) => winner = w;
+
+            game.NextQuestion();
+            Assert.NotNull(winner);
+            Assert.Equal("Fast", winner!.Name);
+        }
+        finally
+        {
+            if (File.Exists(tempPack)) File.Delete(tempPack);
+        }
+    }
+
+    [Fact]
+    public void RevivePlayer_RestoresEliminatedPlayerToActiveWithOneShield()
+    {
+        var trivia = new TriviaDataService();
+        var token = new TokenService();
+        var streak = new StreakService(token);
+        using var game = new GameStateService(trivia, token, streak);
+
+        var p1 = game.RegisterOrGetPlayer("Survivor");
+        var p2 = game.RegisterOrGetPlayer("KnockedOut");
+        p2.Tokens = 0;
+
+        game.AddPlayerStrike(p2);
+        game.AddPlayerStrike(p2);
+        game.AddPlayerStrike(p2);
+
+        Assert.True(p2.IsEliminated);
+        Assert.Equal(GameStatePhase.GameOver, game.Phase);
+
+        game.RevivePlayer(p2);
+
+        Assert.False(p2.IsEliminated);
+        Assert.Equal(2, p2.StrikeCount);
+        Assert.Equal(1, p2.Tokens);
+    }
+
+    [Fact]
+    public async Task CategoryFilter_FiltersQuestionsBySelectedCategory()
+    {
+        var trivia = new TriviaDataService();
+        var token = new TokenService();
+        var streak = new StreakService(token);
+        using var game = new GameStateService(trivia, token, streak);
+
+        string tempPack = Path.Combine(Path.GetTempPath(), $"ko_cat_{Guid.NewGuid():N}.json");
+        try
+        {
+            await File.WriteAllTextAsync(tempPack, """
+            [
+              {
+                "Id": "Q1",
+                "Category": "Science",
+                "Prompt": "Science Q?",
+                "Options": ["A", "B"],
+                "CorrectAnswerIndex": 0
+              },
+              {
+                "Id": "Q2",
+                "Category": "Sports",
+                "Prompt": "Sports Q?",
+                "Options": ["A", "B"],
+                "CorrectAnswerIndex": 1
+              }
+            ]
+            """, TestContext.Current.CancellationToken);
+
+            game.InitializeGame(new KnockoutSettings { SelectedCategory = "All Categories" });
+            await game.LoadGameQuestionsAsync(tempPack);
+
+            Assert.Equal(2, game.TotalQuestions);
+            Assert.Contains("Science", game.AvailableCategories);
+            Assert.Contains("Sports", game.AvailableCategories);
+
+            game.UpdateSettings(new KnockoutSettings { SelectedCategory = "Sports" });
+            Assert.Equal(1, game.TotalQuestions);
+            Assert.Equal("Sports", game.CurrentQuestion?.Category);
+        }
+        finally
+        {
+            if (File.Exists(tempPack)) File.Delete(tempPack);
+        }
+    }
+
+    [Fact]
+    public async Task TriviaDataService_IgnoresNonTriviaDatabasesWithoutQuestionsTable()
+    {
+        var trivia = new TriviaDataService();
+        Assert.True(TriviaDataService.IsExcludedNonTriviaDatabase(@"C:\Data\lyracist.db"));
+        Assert.True(TriviaDataService.IsExcludedNonTriviaDatabase(@"C:\Data\lyracist_backup.db"));
+        Assert.False(TriviaDataService.IsExcludedNonTriviaDatabase(@"C:\Data\trivia.db"));
+
+        string tempDb = Path.Combine(Path.GetTempPath(), $"non_trivia_{Guid.NewGuid():N}.db");
+        try
+        {
+            await File.WriteAllBytesAsync(tempDb, [], TestContext.Current.CancellationToken);
+            var questions = await trivia.LoadQuestionsFromDatabaseAsync(tempDb);
+            Assert.Empty(questions);
+
+            var categories = await trivia.GetCategoriesAsync(tempDb);
+            Assert.Empty(categories);
+        }
+        finally
+        {
+            if (File.Exists(tempDb))
+            {
+                try { File.Delete(tempDb); } catch { }
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
-// Edited on Oct 1, 2026 @ 08:46:00 -> Use AtomicJsonFile and back up corrupted settings file before defaulting
+// Edited on Oct 31, 2026 @ 11:21:00 -> Strip non-trivia databases (lyracist.db) from SelectedSourcePaths when loading settings
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using KnockoutTrivia.Models;
 using Lyracist.Shared;
@@ -52,7 +53,19 @@ public class ConfigService : IConfigService
             if (File.Exists(ConfigFile))
             {
                 string json = File.ReadAllText(ConfigFile);
-                return JsonSerializer.Deserialize<KnockoutSettings>(json, JsonOptions) ?? new KnockoutSettings();
+                var loaded = JsonSerializer.Deserialize<KnockoutSettings>(json, JsonOptions) ?? new KnockoutSettings();
+                if (loaded.SelectedSourcePaths != null && loaded.SelectedSourcePaths.Count > 0)
+                {
+                    int before = loaded.SelectedSourcePaths.Count;
+                    loaded.SelectedSourcePaths = loaded.SelectedSourcePaths
+                        .Where(p => !TriviaDataService.IsExcludedNonTriviaDatabase(p))
+                        .ToList();
+                    if (loaded.SelectedSourcePaths.Count != before)
+                    {
+                        SaveSettings(loaded);
+                    }
+                }
+                return loaded;
             }
         }
         catch (Exception ex)

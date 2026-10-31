@@ -1,4 +1,4 @@
-<!-- Edited on Jul 17, 2026 @ 10:13:00 -> Add About tab displaying project logo -->
+<!-- Edited on Oct 31, 2026 @ 09:17:30 -> Bind About tab version TextBlock dynamically to assembly version -->
 <Window x:Class="LyracistKeyGen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -257,7 +257,7 @@
                             <Image Source="Lyracist_Pro.png" Width="140" Height="140" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                             
                             <TextBlock Text="Lyracist Pro" FontSize="24" FontWeight="Bold" Foreground="#FF8E53" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Version 26.7.17" FontSize="12" Foreground="#FFAAAAAA" Margin="0,4,0,16" HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="TxtVersion" Text="Version 1.0.0" FontSize="12" Foreground="#FFAAAAAA" Margin="0,4,0,16" HorizontalAlignment="Center"/>
                             
                             <TextBlock Text="Lyracist Pro is a premium lyrics projection, singer rotation, and venue management server tailored for professional host services and venue layouts." TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Foreground="White" Margin="0,0,0,24" LineHeight="20"/>
                             

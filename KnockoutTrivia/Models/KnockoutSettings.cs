@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Update HostName default to Guest DJ
+// Edited on Oct 31, 2026 @ 10:35:00 -> Add EnableSpeedBonus and SelectedCategory settings
 using System;
 using System.Collections.Generic;
 
@@ -14,11 +14,13 @@ public class KnockoutSettings
 {
     // DJ Panel & Game Rules
     public int PointsPerCorrectAnswer { get; set; } = 10;
+    public bool EnableSpeedBonus { get; set; } = false;
     public int NumberOfQuestionsPerGame { get; set; } = 20;
     public bool UnlimitedQuestions { get; set; } = false;
     public GameAdvanceMode GameMode { get; set; } = GameAdvanceMode.Manual;
     public int AutoAdvanceDelaySeconds { get; set; } = 5;
     public int QuestionTimerSeconds { get; set; } = 15;
+    public string SelectedCategory { get; set; } = "All Categories";
 
     // Token & Streak Settings
     public int MaxTokens { get; set; } = 3;

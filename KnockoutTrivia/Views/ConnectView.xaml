@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Color status dot gray when player IsConnected is false -->
+<!-- Edited on Oct 31, 2026 @ 10:49:00 -> Enable VirtualizingStackPanel on Connected Players list -->
 <UserControl x:Class="KnockoutTrivia.Views.ConnectView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -197,52 +197,66 @@
                             <TextBlock Text="Scan the QR codes to test your connection" FontSize="11" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,3,0,0" />
                         </StackPanel>
 
-                        <!-- Scrollable Players List -->
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding Players}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type models:KnockoutPlayer}">
-                                        <Border Margin="0,0,0,8" Background="#1B1728" CornerRadius="8" Padding="10,8" BorderBrush="#2D2640" BorderThickness="1">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
+                        <!-- Scrollable Virtualized Players List -->
+                        <ItemsControl ItemsSource="{Binding Players}"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      ScrollViewer.CanContentScroll="True"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.Template>
+                                <ControlTemplate TargetType="ItemsControl">
+                                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" Focusable="False">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:KnockoutPlayer}">
+                                    <Border Margin="0,0,0,8" Background="#1B1728" CornerRadius="8" Padding="10,8" BorderBrush="#2D2640" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
-                                                <!-- Online Pulse Dot -->
-                                                <Ellipse Grid.Column="0" Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
-                                                    <Ellipse.Style>
-                                                        <Style TargetType="Ellipse">
-                                                            <Setter Property="Fill" Value="#10B981" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsConnected}" Value="False">
-                                                                    <Setter Property="Fill" Value="#6B7280" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Ellipse.Style>
-                                                </Ellipse>
+                                            <!-- Online Pulse Dot -->
+                                            <Ellipse Grid.Column="0" Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="#10B981" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsConnected}" Value="False">
+                                                                <Setter Property="Fill" Value="#6B7280" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
 
-                                                <!-- Player Name -->
-                                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="White" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <!-- Player Name -->
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="White" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
 
-                                                <!-- Shields Badge -->
-                                                <Border Grid.Column="2" Background="#261E38" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Tokens, StringFormat='🛡️ {0}'}" FontSize="11" FontWeight="Bold" Foreground="#FBBF24" />
-                                                </Border>
+                                            <!-- Shields Badge -->
+                                            <Border Grid.Column="2" Background="#261E38" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Tokens, StringFormat='🛡️ {0}'}" FontSize="11" FontWeight="Bold" Foreground="#FBBF24" />
+                                            </Border>
 
-                                                <!-- Strike Badge -->
-                                                <Border Grid.Column="3" Background="#1B281E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding StatusText}" FontSize="10" FontWeight="Bold" Foreground="{Binding StrikeColorBrush}" />
-                                                </Border>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                            <!-- Strike Badge -->
+                                            <Border Grid.Column="3" Background="#1B281E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StatusText}" FontSize="10" FontWeight="Bold" Foreground="{Binding StrikeColorBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </Grid>
                 </Grid>
             </Border>

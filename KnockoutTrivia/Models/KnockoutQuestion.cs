@@ -1,6 +1,7 @@
-// Created on Aug 27, 2026 @ 14:35:10 -> KnockoutQuestion data model compatible with Lyracist.Trivia database format
+// Edited on Oct 31, 2026 @ 10:35:00 -> Add QuestionOptionDisplay model for option letters and live answer distribution
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KnockoutTrivia.Models;
 
@@ -16,6 +17,31 @@ public enum TriviaQuestionType
     MultipleChoice = 0,
     TrueFalse = 1,
     TextEntry = 2
+}
+
+public partial class QuestionOptionDisplay : ObservableObject
+{
+    public int Index { get; init; }
+    public string Letter { get; init; } = "A";
+    public string Text { get; init; } = string.Empty;
+    public bool IsCorrect { get; init; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowCorrectHighlight))]
+    [NotifyPropertyChangedFor(nameof(ShowDistribution))]
+    private bool _isRevealed;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DistributionBadge))]
+    private int _voteCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DistributionBadge))]
+    private int _votePercentage;
+
+    public bool ShowCorrectHighlight => IsRevealed && IsCorrect;
+    public bool ShowDistribution => IsRevealed;
+    public string DistributionBadge => $"{VotePercentage}% ({VoteCount})";
 }
 
 public class KnockoutQuestion

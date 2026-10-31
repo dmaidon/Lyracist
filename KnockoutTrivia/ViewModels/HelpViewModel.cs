@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 14:36:00 -> Update KnockoutTrivia HelpViewModel with Super Streak Wheel continuation and standard Lyracist Trivia pack loading
+// Edited on Oct 31, 2026 @ 10:55:00 -> Document Speed Bonus, response-time tie-breaker, Player Revive, live answer distribution, and category filter
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KnockoutTrivia.Models;
@@ -23,15 +23,15 @@ public partial class HelpViewModel : ViewModelBase
                 Icon = "Trophy24",
                 AccentColor = "#10B981",
                 DescriptionHeader = "Knockout Trivia Rules & Elimination Mechanics",
-                DescriptionContent = "• Game Concept: Knockout Trivia is a high-energy, bar-friendly elimination game where players or teams compete to survive while racking up points.\n\n• Strike System: Each player starts healthy (0 strikes) and accumulates strikes when missing questions (unless protected by a Shield Token). Reaching 3 strikes results in a Knockout (elimination).\n\n• Winning Condition: The last remaining active player wins the game, or the highest score after the question limit is reached.\n\n• Fast Gameplay: High-visibility 16:9 boards make questions, options, timer countdowns, and scoreboard changes clearly visible from anywhere in the bar or venue."
+                DescriptionContent = "• Game Concept: Knockout Trivia is a high-energy, bar-friendly elimination game where players or teams compete to survive while racking up points.\n\n• Strike System: Each player starts healthy (0 strikes) and accumulates strikes when missing questions (unless protected by a Shield Token). Reaching 3 strikes results in a Knockout (elimination).\n\n• Winning Condition & Speed Tie-Breaker: The last remaining active player wins the game, or the highest score after the question limit is reached. Ties are broken by fewest strikes, then fastest average answer response time.\n\n• Fast Gameplay: High-visibility 16:9 boards make questions, A/B/C/D options, live vote distributions, timer countdowns, and scoreboard changes clearly visible from anywhere in the bar or venue."
             },
             new()
             {
                 Title = "2. Scoreboard & Strike Colors",
                 Icon = "Table24",
                 AccentColor = "#38BDF8",
-                DescriptionHeader = "Horizontal Status Bars & Dynamic Strike Tinting",
-                DescriptionContent = "• Green Bar (0 Strikes - Active): Healthy status with full visibility and active play.\n\n• Yellow Bar (1 Strike - Warning): Player has missed one question; caution is advised.\n\n• Orange Bar (2 Strikes - Danger Zone): Player is one miss away from knockout elimination.\n\n• Red Bar (3 Strikes - Knocked Out): Bar turns dimmed red and status becomes 'KNOCKED OUT'. Eliminated players stop accumulating points for regular rounds.\n\n• Player Bar Layout: [PLAYER NAME] [SHIELD TOKENS] [5-BLOCK STREAK METER] [SCORE]."
+                DescriptionHeader = "Horizontal Status Bars, Dynamic Strike Tinting & Revive",
+                DescriptionContent = "• Green Bar (0 Strikes - Active): Healthy status with full visibility and active play.\n\n• Yellow Bar (1 Strike - Warning): Player has missed one question; caution is advised.\n\n• Orange Bar (2 Strikes - Danger Zone): Player is one miss away from knockout elimination.\n\n• Red Bar (3 Strikes - Knocked Out): Bar turns dimmed red and status becomes 'KNOCKED OUT'. Eliminated players stop accumulating points for regular rounds.\n\n• Player Revive (💚): Use the green heart '💚' button on the Scoreboard to revive an eliminated player back into the round (with 2 strikes and 1 shield) or remove a strike.\n\n• Player Bar Layout: [PLAYER NAME] [SHIELD TOKENS] [5-BLOCK STREAK METER] [SCORE]."
             },
             new()
             {
@@ -55,31 +55,31 @@ public partial class HelpViewModel : ViewModelBase
                 Icon = "Flash24",
                 AccentColor = "#8B5CF6",
                 DescriptionHeader = "Scaryoke-Style Super Streak Rotary Target Wheel",
-                DescriptionContent = "• Super Streak Milestone: Reaching 20 consecutive correct answers unlocks the Super Streak challenge!\n\n• Wheel Generation: The game pauses regular question flow and opens the Rotary Wheel populated with wedges for all opponents who currently hold shield tokens (excluding the Super Streak player).\n\n• Spin, Target Strike & Continue: The DJ spins the wheel. When it slows and lands on a player's wedge, that target opponent is stripped of 1 shield token (stealing/destroying their defense). Click '▶ CONTINUE GAME' on the Wheel view to return to the question board and advance to the next question.\n\n• Fallback Reward: If no opponents hold shield tokens when Super Streak is unlocked, the wheel awards +50 Bonus Points directly to the Super Streak player."
+                DescriptionContent = "• Super Streak Milestone: Reaching 20 consecutive correct answers unlocks the Super Streak challenge after all answers for the current question are graded!\n\n• Wheel Generation: The game pauses regular question flow and opens the Rotary Wheel populated with wedges for all surviving opponents who currently hold shield tokens (excluding the Super Streak player).\n\n• Spin, Target Strike & Continue: The DJ spins the wheel (or it spins automatically in Automatic Mode). When it slows and lands on a player's wedge, that target opponent is stripped of 1 shield token (stealing/destroying their defense). Click '▶ CONTINUE GAME' on the Wheel view to return to the question board.\n\n• Fallback Reward: If no opponents hold shield tokens when Super Streak is unlocked, the wheel awards +50 Bonus Points directly to the Super Streak player."
             },
             new()
             {
                 Title = "6. DJ Host Console & Operations",
                 Icon = "Headset24",
                 AccentColor = "#EC4899",
-                DescriptionHeader = "Live Question Control & Fast Player Adjudication",
-                DescriptionContent = "• Question Flow: The DJ controls the active question display with 'Reveal Answer' and 'Next Question ▶'.\n\n• Player Adjudication: Click the green checkmark '✓' to mark a player's answer correct (+Points, +Streak), or click the red '✗' to mark incorrect (consumes Shield or adds Strike).\n\n• Quick Player Management: Add new walk-up players anytime using the '+ Add' quick input bar on the host console.\n\n• Manual vs. Automatic Modes: Manual mode gives the DJ full microphone control to read questions at their own pace; Automatic mode runs question countdowns and transitions on automated timers."
+                DescriptionHeader = "Live Question Control, Answer Distribution & Adjudication",
+                DescriptionContent = "• Question Flow & Live Distribution: The DJ controls the active question display with 'Reveal Answer' and 'Next Question ▶'. When revealed, both the Host Console and Big Screen highlight the correct option and display the percentage and count of players who chose A, B, C, or D.\n\n• Player Adjudication: Click the green checkmark '✓' to mark a player's answer correct (+Points, +Streak), or click the red '✗' to mark incorrect (consumes Shield or adds Strike).\n\n• Quick Player Management: Add new walk-up players anytime using the '+ Add' quick input bar on the host console.\n\n• Manual vs. Automatic Modes: Manual mode gives the DJ full microphone control to read questions at their own pace; Automatic mode runs question countdowns, wheel spins, and transitions on automated timers."
             },
             new()
             {
                 Title = "7. 16:9 Presentation & Banners",
                 Icon = "Tv24",
                 AccentColor = "#F97316",
-                DescriptionHeader = "16:9 Auto-Scaling Display & Event Screens",
-                DescriptionContent = "• Proportional Scaling: Designed for standard 16:9 logical canvas (1920x1080) with automatic uniform scaling, letterboxing, and pillarboxing for any projector or TV resolution.\n\n• Dynamic Event Banners: One-click display of Intro Screen, Round Intermission, Champion Celebration, Knockout Elimination, and Super Streak Alerts.\n\n• Official Branding: High-resolution official Knockout Trivia logos (kotrv_logo.png / kotrv_logo.webp) are rendered with high-quality antialiasing and glow shaders."
+                DescriptionHeader = "16:9 Auto-Scaling Display, Presets & Custom Static Banners",
+                DescriptionContent = "• Proportional Scaling: Designed for standard 16:9 logical canvas (1920x1080) with automatic uniform scaling, letterboxing, and pillarboxing for any projector or TV resolution.\n\n• Dynamic Event Banners & Custom Static Images: One-click display of Intro Screen, Round Intermission, Champion Celebration, and Super Streak Alerts, plus a Custom Image selector to display sponsor or venue graphics from the CustomBanners folder.\n\n• Official Branding: High-resolution official Knockout Trivia logos (kotrv_logo.png / kotrv_logo.webp) are rendered with high-quality antialiasing and glow shaders."
             },
             new()
             {
                 Title = "8. Settings & Multi-Database Selection",
                 Icon = "Settings24",
                 AccentColor = "#10B981",
-                DescriptionHeader = "3-Column Settings Panel & Database Management",
-                DescriptionContent = "• 3-Column Layout: Organizes scoring, shields/streaks, and database sources side-by-side to eliminate unnecessary scrolling.\n\n• Database & Pack Selection ListBox: The DJ can check/uncheck active SQLite trivia databases (from KoTrivia/Data) and themed JSON packs (from KoTrivia/Packs or standard Lyracist Trivia Packs/*.json via '📂 Load Pack') to mix categories (e.g. 80s Rock + Pop Culture + General Knowledge).\n\n• Display & Monitor Assignment: Choose which monitor displays the DJ Host Console and which monitor projects the big screen audience views.\n\n• Audio/Visual FX: Toggle sound effects (countdown beeps, strike chimes, wheel ticks) and smooth color transition animations."
+                DescriptionHeader = "3-Column Settings Panel, Speed Bonus & Pack Management",
+                DescriptionContent = "• Scoring, Speed Bonus & Category Filter: Configure base points, toggle the ⚡ Speed Bonus (+1 to +5 extra points for fast answers), and filter questions by a specific Category or All Categories.\n\n• Database & Pack Selection ListBox: Check/uncheck active SQLite trivia databases and themed JSON packs, or click '📂 Load Pack' to import external .json packs or .db files directly into your library.\n\n• Display & Monitor Assignment: Choose which monitor displays the DJ Host Console and which monitor projects the big screen audience views.\n\n• Audio/Visual FX: Toggle synthesized desktop sound effects (countdown ticks, reveal chimes, strike buzzers, shield absorption, wheel ticks, winner fanfare, and audio question snippets) and smooth animations."
             },
             new()
             {
@@ -102,4 +102,3 @@ public partial class HelpViewModel : ViewModelBase
         _selectedTopic = _helpTopics[0];
     }
 }
-

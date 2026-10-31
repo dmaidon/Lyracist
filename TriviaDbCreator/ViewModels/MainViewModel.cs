@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:23:00 -> Fix correct-answer radio bindings, distribution warning visibility, custom pack banner generation, pack filename normalization, and help text
+// Edited on Oct 31, 2026 @ 09:17:30 -> Read AppVersion dynamically from executing assembly version instead of hardcoded string
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -145,8 +145,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private TriviaHelpTopic? _selectedHelpTopic;
 
+    private static readonly string s_appVersion = typeof(MainViewModel).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+
     public string AppName => "Lyracist Trivia DB Creator";
-    public string AppVersion => "26.8.19.1";
+    public string AppVersion => s_appVersion;
     public string Company => "PAROLE Software";
     public string Author => "Dennis N. Maidon";
     public string Copyright => "Copyright © 2026 PAROLE Software. Licensed under GPL-3.0-or-later.";

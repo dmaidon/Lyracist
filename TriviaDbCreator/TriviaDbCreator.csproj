@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:19:30 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Oct 31, 2026 @ 09:18:15 -> Bump AssemblyVersion and FileVersion to 26.10.31.129 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.10.30.128</AssemblyVersion>
-    <FileVersion>26.10.30.128</FileVersion>
+    <AssemblyVersion>26.10.31.129</AssemblyVersion>
+    <FileVersion>26.10.31.129</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

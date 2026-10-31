@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Wire WheelVM.ContinueRequested, GameWon banner, SettingsUpdated, and tab active states
+// Edited on Oct 31, 2026 @ 10:54:00 -> Implement IDisposable to close AudienceWindow and clean up subscriptions on shutdown
 using System;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,12 +9,13 @@ using KnockoutTrivia.Views;
 
 namespace KnockoutTrivia.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IGameStateService _gameStateService;
     private readonly IDisplayService _displayService;
     private readonly IKnockoutWebServer _webServer;
     private AudienceWindow? _audienceWindow;
+    private bool _disposed;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsConnectTabActive))]
@@ -302,6 +303,25 @@ public partial class MainViewModel : ViewModelBase
     {
         CurrentView = AboutVM;
         ActiveTabTitle = "About Knockout";
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        if (_audienceWindow != null)
+        {
+            try
+            {
+                _audienceWindow.Close();
+            }
+            catch { }
+            _audienceWindow = null;
+        }
+        GameVM.Dispose();
+        ConnectVM.Dispose();
+        QuestionVM.Dispose();
+        SettingsVM.Dispose();
     }
 }
 

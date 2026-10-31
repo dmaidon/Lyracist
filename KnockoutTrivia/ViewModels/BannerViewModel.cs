@@ -1,10 +1,14 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Select top surviving scorer in ShowWinner and top streaker in ShowSuperStreak
+// Edited on Oct 31, 2026 @ 10:46:00 -> Load static banners with frozen BitmapCacheOption.OnLoad and break winner ties by response speed
+using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
 using KnockoutTrivia.Services;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.ViewModels;
 
@@ -49,6 +53,7 @@ public partial class BannerViewModel : ViewModelBase
             .OrderByDescending(p => !p.IsEliminated)
             .ThenByDescending(p => p.Score)
             .ThenBy(p => p.StrikeCount)
+            .ThenBy(p => p.AverageResponseTimeMs)
             .FirstOrDefault() ?? new KnockoutPlayer { Name = "Champion", Score = 150 };
         CurrentBanner = _bannerService.CreateWinnerBanner(winner);
     }
@@ -71,18 +76,40 @@ public partial class BannerViewModel : ViewModelBase
         {
             StaticBanners.Add(b);
         }
+
+        if (string.IsNullOrEmpty(SelectedStaticBannerPath) && StaticBanners.Count > 0)
+        {
+            SelectedStaticBannerPath = StaticBanners[0];
+        }
     }
 
     [RelayCommand]
     public void DisplaySelectedStaticBanner()
     {
-        if (!string.IsNullOrEmpty(SelectedStaticBannerPath))
+        if (!string.IsNullOrEmpty(SelectedStaticBannerPath) && File.Exists(SelectedStaticBannerPath))
         {
+            BitmapSource? loadedImage = null;
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(SelectedStaticBannerPath, UriKind.Absolute);
+                bitmap.EndInit();
+                bitmap.Freeze();
+                loadedImage = bitmap;
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("KnockoutTrivia", "BannerViewModel.DisplaySelectedStaticBanner", ex);
+            }
+
             CurrentBanner = new BannerInfo
             {
                 Type = BannerType.CustomStatic,
                 Title = "SPONSORED ANNOUNCEMENT",
-                ImagePath = SelectedStaticBannerPath
+                ImagePath = SelectedStaticBannerPath,
+                ImageSource = loadedImage
             };
         }
     }

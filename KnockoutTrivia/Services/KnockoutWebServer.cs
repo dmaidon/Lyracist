@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Use SerializeToUtf8Bytes, guard IsConnected mutations, and support manual adjudication status
+// Edited on Oct 31, 2026 @ 10:39:00 -> Cache local IP and leaderboard projection, include player id in leaderboard, and optimize header reading
 using System;
 using System.IO;
 using System.Linq;
@@ -83,6 +83,9 @@ public class KnockoutWebServer : IKnockoutWebServer
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
     private byte[]? _cachedHtmlBytes;
+    private string? _cachedLocalIp;
+    private object? _cachedLeaderboard;
+    private long _cachedLeaderboardTick;
     private bool _disposed;
 
     public bool IsRunning { get; private set; }
@@ -92,9 +95,14 @@ public class KnockoutWebServer : IKnockoutWebServer
     {
         get
         {
-            string ip = LocalNetworkHelper.GetLocalIPv4();
+            string ip = _cachedLocalIp ??= LocalNetworkHelper.GetLocalIPv4();
             return $"http://{ip}:{Port}";
         }
+    }
+
+    public void RefreshNetworkAddress()
+    {
+        _cachedLocalIp = LocalNetworkHelper.GetLocalIPv4();
     }
 
     public KnockoutWebServer(IGameStateService gameStateService, int defaultPort = 8088)
@@ -105,6 +113,7 @@ public class KnockoutWebServer : IKnockoutWebServer
 
     public bool Start(int? port = null)
     {
+        RefreshNetworkAddress();
         if (IsRunning)
         {
             if (port.HasValue && port.Value != Port)
@@ -447,21 +456,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     wasShieldProtected = player.WasShieldProtected,
                     isCorrect = isCorrect
                 } : null,
-                leaderboard = allPlayers
-                    .OrderByDescending(p => !p.IsEliminated)
-                    .ThenByDescending(p => p.Score)
-                    .Take(15)
-                    .Select((p, idx) => new
-                    {
-                        rank = idx + 1,
-                        name = p.Name,
-                        score = p.Score,
-                        strikes = p.StrikeCount,
-                        tokens = p.Tokens,
-                        streak = p.StreakCount,
-                        isEliminated = p.IsEliminated,
-                        hasAnswered = p.HasAnsweredCurrentQuestion
-                    })
+                leaderboard = GetLeaderboardSnapshot(allPlayers)
             };
 
             await SendResponseAsync(stream, 200, "application/json; charset=utf-8", JsonSerializer.SerializeToUtf8Bytes(statePayload, JsonOptions));
@@ -470,6 +465,40 @@ public class KnockoutWebServer : IKnockoutWebServer
 
         // 404 Not Found
         await SendResponseAsync(stream, 404, "text/plain", Encoding.UTF8.GetBytes("404 Not Found"));
+    }
+
+    private object GetLeaderboardSnapshot(System.Collections.Generic.List<KnockoutPlayer> allPlayers)
+    {
+        long nowTick = Environment.TickCount64;
+        var cached = _cachedLeaderboard;
+        if (cached != null && (nowTick - Interlocked.Read(ref _cachedLeaderboardTick)) < 250)
+        {
+            return cached;
+        }
+
+        var computed = allPlayers
+            .OrderByDescending(p => !p.IsEliminated)
+            .ThenByDescending(p => p.Score)
+            .ThenBy(p => p.StrikeCount)
+            .ThenBy(p => p.AverageResponseTimeMs)
+            .Take(15)
+            .Select((p, idx) => new
+            {
+                rank = idx + 1,
+                id = p.Id,
+                name = p.Name,
+                score = p.Score,
+                strikes = p.StrikeCount,
+                tokens = p.Tokens,
+                streak = p.StreakCount,
+                isEliminated = p.IsEliminated,
+                hasAnswered = p.HasAnsweredCurrentQuestion
+            })
+            .ToArray();
+
+        _cachedLeaderboard = computed;
+        Interlocked.Exchange(ref _cachedLeaderboardTick, nowTick);
+        return computed;
     }
 
     private async Task<byte[]> GetHtmlBytesAsync()
@@ -545,25 +574,33 @@ public class KnockoutWebServer : IKnockoutWebServer
 
     private static async Task<string> ReadHeadersAsync(ChunkedReader stream, CancellationToken token)
     {
-        await using var ms = new MemoryStream();
-        int pattern = 0; // Tracks \r\n\r\n
-
-        while (ms.Length < 8192)
+        byte[] headerBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(8192);
+        try
         {
-            int b = await stream.ReadByteAsync(token);
-            if (b < 0) break;
+            int length = 0;
+            int pattern = 0; // Tracks \r\n\r\n
 
-            ms.WriteByte((byte)b);
+            while (length < 8192)
+            {
+                int b = await stream.ReadByteAsync(token);
+                if (b < 0) break;
 
-            if (b == '\r' && (pattern == 0 || pattern == 2)) pattern++;
-            else if (b == '\n' && (pattern == 1 || pattern == 3)) pattern++;
-            else if (b == '\r') pattern = 1;
-            else pattern = 0;
+                headerBuffer[length++] = (byte)b;
 
-            if (pattern == 4) break;
+                if (b == '\r' && (pattern == 0 || pattern == 2)) pattern++;
+                else if (b == '\n' && (pattern == 1 || pattern == 3)) pattern++;
+                else if (b == '\r') pattern = 1;
+                else pattern = 0;
+
+                if (pattern == 4) break;
+            }
+
+            return Encoding.UTF8.GetString(headerBuffer, 0, length);
         }
-
-        return Encoding.UTF8.GetString(ms.ToArray());
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(headerBuffer);
+        }
     }
 
     private sealed class ChunkedReader(Stream inner)

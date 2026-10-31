@@ -1,5 +1,6 @@
-// Created on Aug 27, 2026 @ 14:35:30 -> BannerInfo model for dynamic and static 16:9 banner displays
+// Edited on Oct 31, 2026 @ 10:35:00 -> Add frozen ImageSource property to avoid file locks and unbounded URI image caching
 using System;
+using System.Windows.Media.Imaging;
 
 namespace KnockoutTrivia.Models;
 
@@ -21,6 +22,7 @@ public class BannerInfo
     public string Subtitle { get; set; } = "Get Ready for the Challenge!";
     public string DetailText { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
+    public BitmapSource? ImageSource { get; set; }
     public string? WinnerName { get; set; }
     public int FinalScore { get; set; }
     public string AccentColorHex { get; set; } = "#10B981";

@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:35:00 -> Clean up whitespace (RCS1037)
+// Edited on Oct 31, 2026 @ 09:18:15 -> Set About tab version text dynamically from executing assembly version
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -13,6 +13,7 @@ namespace LyracistKeyGen
         public MainWindow()
         {
             InitializeComponent();
+            TxtVersion.Text = $"Version {typeof(MainWindow).Assembly.GetName().Version}";
 
             // Initialize Database
             KeyGenDatabase.Initialize();

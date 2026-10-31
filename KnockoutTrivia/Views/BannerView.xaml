@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Render CustomStatic banner ImagePath in BannerView -->
+<!-- Edited on Oct 31, 2026 @ 10:46:00 -> Bind CustomStatic banner Image to frozen ImageSource and add static banner selector controls -->
 <UserControl x:Class="KnockoutTrivia.Views.BannerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -100,7 +100,7 @@
                     </Grid>
 
                     <!-- Custom Static Banner Image Overlay -->
-                    <Image Source="{Binding CurrentBanner.ImagePath}"
+                    <Image Source="{Binding CurrentBanner.ImageSource}"
                            Stretch="Uniform"
                            RenderOptions.BitmapScalingMode="HighQuality">
                         <Image.Style>
@@ -120,8 +120,8 @@
 
         <!-- Banner Selection Toolbar -->
         <Border Grid.Row="1" Background="#14121F" CornerRadius="10" Padding="15,10" BorderBrush="#252136" BorderThickness="1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Preview Presets:" VerticalAlignment="Center" Foreground="#9CA3AF" FontWeight="SemiBold" Margin="0,0,15,0" />
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Presets:" VerticalAlignment="Center" Foreground="#9CA3AF" FontWeight="SemiBold" Margin="0,0,10,0" />
 
                 <ui:Button Content="Intro Screen"
                            Margin="0,0,8,0"
@@ -145,11 +145,31 @@
                            Cursor="Hand" />
 
                 <ui:Button Content="Super Streak Alert"
+                           Margin="0,0,16,0"
                            Appearance="Primary"
                            Background="#8B5CF6"
                            Command="{Binding ShowSuperStreakCommand}"
                            Cursor="Hand" />
-            </StackPanel>
+
+                <TextBlock Text="Custom Image:" VerticalAlignment="Center" Foreground="#9CA3AF" FontWeight="SemiBold" Margin="0,0,8,0" />
+                <ComboBox ItemsSource="{Binding StaticBanners}"
+                          SelectedItem="{Binding SelectedStaticBannerPath, Mode=TwoWay}"
+                          Width="200"
+                          Height="34"
+                          Margin="0,0,6,0" />
+
+                <ui:Button Content="🖼️ Display Image"
+                           Margin="0,0,6,0"
+                           Appearance="Secondary"
+                           Command="{Binding DisplaySelectedStaticBannerCommand}"
+                           Cursor="Hand" />
+
+                <ui:Button Content="🔄"
+                           ToolTip="Refresh Custom Banners Folder"
+                           Appearance="Secondary"
+                           Command="{Binding RefreshStaticBannersCommand}"
+                           Cursor="Hand" />
+            </WrapPanel>
         </Border>
     </Grid>
 </UserControl>

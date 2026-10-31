@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:12:00 -> Document automatic database & FTS5 search self-repair engine and music/karaoke search resilience
+// Edited on Oct 31, 2026 @ 10:48:00 -> Document KnockoutTrivia sound engine, speed bonus, live answer distribution, player revive, category filtering, and custom pack import
 
 Lyracist & LyracistDbEditor: Automatic Database & FTS5 Search Self-Repair, Tab Layout & High-Speed Drive Rescanning - (October 2026)
 
@@ -28,8 +28,11 @@ Section: Entertainment & Gamification / Trivia Host Console, Database Creator & 
    - 16:9 Category Banner Studio: Clicking '🎨 Generate Banner' renders and saves a 1920x1080 announcement banner for the selected pack (including custom user-authored packs and updated pack titles/descriptions).
 
 0B. Knockout Trivia Standalone Game Show ('KnockoutTrivia.exe'):
-   - Question Pack Loading: '📂 Load Pack' supports both standard Lyracist Trivia pack files ('Packs/*.json') and custom Knockout question arrays.
-   - Super Streak Wheel Continuation: After spinning the Super Streak Wheel, click '▶ CONTINUE GAME' on the Wheel view to return to the question board and advance to the next question.
+   - Question Pack Loading & Category Filtering: '📂 Load Pack' in Settings imports both standard Lyracist Trivia pack files ('Packs/*.json') and custom Knockout question arrays, and the 'Question Category / Topic Filter' dropdown lets hosts filter the active question deck to a specific category or 'All Categories'.
+   - Answer Reveal Highlighting & Live Audience Vote Distribution: Multiple-choice options display 'A', 'B', 'C', and 'D' badges on both the Host Console and Audience TV. When the answer is revealed, the winning option highlights in green and each option displays live audience vote counts and percentage bars.
+   - Speed Bonus & Tie-Breaking: Enabling 'Speed Bonus (+1 to +5 pts for fast answers)' in Settings awards bonus points based on how quickly each player locks in a correct answer, and average response time ('AverageResponseTimeMs') automatically breaks ties at the end of a game.
+   - Built-In Game Show Sound Cues: Automatically plays synthesized audio cues for the final 5-second countdown ticks, answer reveals, strike buzzers, shield deflections, prize wheel ticks, Super Streak fanfare, and winner fanfare, plus audio snippet playback for 'AudioClip' questions.
+   - Super Streak Wheel & Player Revive: In Automatic mode, the Super Streak Wheel spins and resumes the game automatically; in Manual mode, hosts can click 'SPIN THE WHEEL' and '▶ CONTINUE GAME'. On the Scoreboard tab, hosts can click the green '💚' button to revive an eliminated player with 2 strikes or 'Clear ❌' to reset strikes to 0, and on the Banners tab hosts can display custom static banners from 'Banners/'.
 
 KSRotation, KSRotation.Maui, Lyracist & ScaryokeWheel: Distinct 12-Color Scaryoke Category Palette, Manual Category Assignment & Compact DJ Portal Singer Listings - (October 2026)
 

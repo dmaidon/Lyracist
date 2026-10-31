@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Pass Settings.MaxTokens to AwardToken and check elimination/winner on AddStrike
+// Edited on Oct 31, 2026 @ 10:48:00 -> Add RevivePlayerCommand and route ResetStrikes through GameStateService
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -77,7 +77,16 @@ public partial class ScoreboardViewModel : ViewModelBase
     {
         if (player != null)
         {
-            player.StrikeCount = 0;
+            _gameStateService.ResetPlayerStrikes(player);
+        }
+    }
+
+    [RelayCommand]
+    private void RevivePlayer(KnockoutPlayer? player)
+    {
+        if (player != null)
+        {
+            _gameStateService.RevivePlayer(player);
         }
     }
 }

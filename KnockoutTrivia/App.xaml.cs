@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Pass webServer to SettingsViewModel and dispose SimulatorService/SettingsViewModel on exit
+// Edited on Oct 31, 2026 @ 11:22:00 -> Call Shutdown on single-instance exit or startup failure and wire SoundService
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,7 +13,8 @@ public partial class App : Application
     private GameStateService? _gameStateService;
     private KnockoutWebServer? _webServer;
     private SimulatorService? _simulatorService;
-    private SettingsViewModel? _settingsVM;
+    private SoundService? _soundService;
+    private MainViewModel? _mainVM;
 
     public App()
     {
@@ -30,6 +31,7 @@ public partial class App : Application
     {
         if (!SingleInstanceHelper.EnsureSingleInstance("KnockoutTrivia"))
         {
+            Shutdown();
             return;
         }
 
@@ -41,7 +43,9 @@ public partial class App : Application
             var triviaDataService = new TriviaDataService();
             var tokenService = new TokenService();
             var streakService = new StreakService(tokenService);
-            var gameStateService = new GameStateService(triviaDataService, tokenService, streakService);
+            var soundService = new SoundService();
+            _soundService = soundService;
+            var gameStateService = new GameStateService(triviaDataService, tokenService, streakService, soundService);
             _gameStateService = gameStateService;
             var wheelService = new WheelService();
             var bannerService = new BannerService();
@@ -73,11 +77,10 @@ public partial class App : Application
             var connectVM = new ConnectViewModel(gameStateService, webServer);
             var scoreboardVM = new ScoreboardViewModel(gameStateService, tokenService);
             var questionVM = new QuestionViewModel(gameStateService);
-            var wheelVM = new WheelViewModel(wheelService, gameStateService, tokenService);
+            var wheelVM = new WheelViewModel(wheelService, gameStateService, tokenService, soundService);
             var bannerVM = new BannerViewModel(bannerService, gameStateService);
             var simulatorVM = new SimulatorViewModel(simulatorService, gameStateService);
             var settingsVM = new SettingsViewModel(configService, displayService, triviaDataService, gameStateService, webServer);
-            _settingsVM = settingsVM;
             var helpVM = new HelpViewModel();
             var aboutVM = new AboutViewModel();
             var audienceVM = new AudienceViewModel();
@@ -97,6 +100,7 @@ public partial class App : Application
                 helpVM,
                 aboutVM,
                 audienceVM);
+            _mainVM = mainVM;
 
             // Launch MainWindow
             var mainWindow = new MainWindow
@@ -109,6 +113,7 @@ public partial class App : Application
         {
             Lyracist.Shared.Globals.LogError("KnockoutTrivia", "App.OnStartup", ex);
             System.Windows.MessageBox.Show($"Knockout Trivia encountered an error during startup:\n\n{ex.Message}", "Knockout Trivia", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
         }
     }
 
@@ -116,10 +121,11 @@ public partial class App : Application
     {
         SingleInstanceHelper.Cleanup();
         base.OnExit(e);
-        _settingsVM?.Dispose();
+        _mainVM?.Dispose();
         _simulatorService?.Dispose();
         _webServer?.Dispose();
         _gameStateService?.Dispose();
+        _soundService?.Dispose();
         Environment.Exit(0);
     }
 
@@ -143,4 +149,3 @@ public partial class App : Application
         e.SetObserved();
     }
 }
-

@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Reset CanSpin/HasSpun on RefreshSegments and add ContinueGameCommand flow
+// Edited on Oct 31, 2026 @ 10:44:00 -> Auto-spin wheel in Automatic mode, play wheel tick sound cues, and guard spin state
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ public partial class WheelViewModel : ViewModelBase
     private readonly IWheelService _wheelService;
     private readonly IGameStateService _gameStateService;
     private readonly ITokenService _tokenService;
+    private readonly ISoundService? _soundService;
 
     [ObservableProperty]
     private KnockoutPlayer? _superStreakPlayer;
@@ -46,11 +47,13 @@ public partial class WheelViewModel : ViewModelBase
     public WheelViewModel(
         IWheelService wheelService,
         IGameStateService gameStateService,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        ISoundService? soundService = null)
     {
         _wheelService = wheelService;
         _gameStateService = gameStateService;
         _tokenService = tokenService;
+        _soundService = soundService;
 
         RefreshSegments();
     }
@@ -60,6 +63,20 @@ public partial class WheelViewModel : ViewModelBase
         SuperStreakPlayer = player;
         StatusHeader = $"⚡ {player.Name.ToUpperInvariant()} HIT SUPER STREAK! ⚡";
         RefreshSegments();
+
+        if (_gameStateService.Settings.GameMode == GameAdvanceMode.Automatic && CanSpin)
+        {
+            _ = AutoSpinWhenReadyAsync();
+        }
+    }
+
+    private async Task AutoSpinWhenReadyAsync()
+    {
+        await Task.Delay(1500);
+        if (!IsSpinning && !HasSpun && CanSpin && _gameStateService.Phase == GameStatePhase.SuperStreak)
+        {
+            await SpinWheelAsync();
+        }
     }
 
     [RelayCommand]
@@ -91,22 +108,34 @@ public partial class WheelViewModel : ViewModelBase
         var target = _wheelService.SelectRandomTarget(Segments);
         SelectedSegment = target;
 
-        // Perform multi-rotation spin math (e.g. 5 full turns + target slice offset)
         double targetMidAngle = target?.MidAngle ?? 0;
-        // The pointer is at 12 o'clock (270 deg or top), so rotate canvas to match pointer
         double finalAngle = 360 * 5 + (360 - targetMidAngle);
 
-        // Animate angle in ViewModel steps
         double current = WheelAngle % 360;
         double delta = finalAngle - current;
-        int steps = 60;
-        for (int i = 1; i <= steps; i++)
+
+        if (_gameStateService.Settings.EnableAnimations)
         {
-            double progress = (double)i / steps;
-            // Ease out cubic
-            double ease = 1 - Math.Pow(1 - progress, 3);
-            WheelAngle = current + (delta * ease);
-            await Task.Delay(25);
+            int steps = 60;
+            double sweepAngle = Segments.Count > 0 ? 360.0 / Segments.Count : 90.0;
+            int lastSliceTick = -1;
+
+            for (int i = 1; i <= steps; i++)
+            {
+                double progress = (double)i / steps;
+                double ease = 1 - Math.Pow(1 - progress, 3);
+                double nextAngle = current + (delta * ease);
+                WheelAngle = nextAngle;
+
+                int currentSliceTick = (int)(nextAngle / Math.Max(30.0, sweepAngle));
+                if (currentSliceTick != lastSliceTick)
+                {
+                    lastSliceTick = currentSliceTick;
+                    _soundService?.PlayWheelTick();
+                }
+
+                await Task.Delay(22);
+            }
         }
 
         WheelAngle = finalAngle % 360;
@@ -124,11 +153,13 @@ public partial class WheelViewModel : ViewModelBase
                 _tokenService.DeductToken(target.Player);
             }
 
+            _soundService?.PlayShieldAbsorb();
             string tokenStr = tokensToRemove > 1 ? $"{tokensToRemove} Shields" : "Shield";
             ResultText = $"TARGET HIT: {target.Player.Name}! {tokenStr} Removed!";
         }
         else
         {
+            _soundService?.PlayRevealChime();
             ResultText = "BONUS REWARD: +50 Bonus Points Awarded!";
             if (SuperStreakPlayer != null)
             {

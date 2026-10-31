@@ -1,4 +1,4 @@
-// Created on Aug 28, 2026 @ 09:16:00 -> IKnockoutWebServer interface for embedded phone/tablet companion server
+// Edited on Oct 31, 2026 @ 10:39:00 -> Add RefreshNetworkAddress to IKnockoutWebServer
 using System;
 
 namespace KnockoutTrivia.Services;
@@ -8,6 +8,7 @@ public interface IKnockoutWebServer : IDisposable
     bool IsRunning { get; }
     int Port { get; }
     string ConnectUrl { get; }
+    void RefreshNetworkAddress();
     bool Start(int? port = null);
     void Stop();
 }

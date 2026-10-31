@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Use cached frozen WedgeStrokeBrush in WheelView
+// Edited on Oct 31, 2026 @ 10:44:00 -> Unsubscribe Segments.CollectionChanged on Unloaded to prevent WheelView memory leaks
 using System;
 using System.Collections.Specialized;
 using System.Windows;
@@ -13,6 +13,7 @@ namespace KnockoutTrivia.Views;
 public partial class WheelView : UserControl
 {
     private static readonly Brush WedgeStrokeBrush = CreateWedgeStrokeBrush();
+    private WheelViewModel? _subscribedVm;
 
     private static Brush CreateWedgeStrokeBrush()
     {
@@ -25,25 +26,47 @@ public partial class WheelView : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
         DataContextChanged += OnDataContextChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        AttachToViewModel(DataContext as WheelViewModel);
         RedrawWheel();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        DetachFromViewModel();
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.OldValue is WheelViewModel oldVm)
+        if (IsLoaded)
         {
-            oldVm.Segments.CollectionChanged -= OnSegmentsChanged;
-        }
-
-        if (e.NewValue is WheelViewModel newVm)
-        {
-            newVm.Segments.CollectionChanged += OnSegmentsChanged;
+            AttachToViewModel(e.NewValue as WheelViewModel);
             RedrawWheel();
+        }
+    }
+
+    private void AttachToViewModel(WheelViewModel? vm)
+    {
+        if (ReferenceEquals(_subscribedVm, vm)) return;
+        DetachFromViewModel();
+        if (vm != null)
+        {
+            _subscribedVm = vm;
+            _subscribedVm.Segments.CollectionChanged += OnSegmentsChanged;
+        }
+    }
+
+    private void DetachFromViewModel()
+    {
+        if (_subscribedVm != null)
+        {
+            _subscribedVm.Segments.CollectionChanged -= OnSegmentsChanged;
+            _subscribedVm = null;
         }
     }
 
@@ -71,7 +94,6 @@ public partial class WheelView : UserControl
         {
             var seg = vm.Segments[i];
             double startAngle = i * sweep;
-            double endAngle = startAngle + sweep;
 
             // Draw Pie Wedge
             var path = CreateWedgePath(center, radius, startAngle, sweep, seg.SegmentBrush);

@@ -1,5 +1,8 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Marshal OnQuestionChanged via Dispatcher and sync TotalQuestions on property change
+// Edited on Oct 31, 2026 @ 10:42:00 -> Add OptionItems with A/B/C/D badges and live answer distribution on reveal, sync SecondsRemaining, and implement IDisposable
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,9 +11,10 @@ using KnockoutTrivia.Services;
 
 namespace KnockoutTrivia.ViewModels;
 
-public partial class QuestionViewModel : ViewModelBase
+public partial class QuestionViewModel : ViewModelBase, IDisposable
 {
     private readonly IGameStateService _gameStateService;
+    private bool _disposed;
 
     [ObservableProperty]
     private KnockoutQuestion? _currentQuestion;
@@ -28,36 +32,18 @@ public partial class QuestionViewModel : ViewModelBase
     private int _secondsRemaining = 15;
 
     public ObservableCollection<string> Options { get; } = [];
+    public ObservableCollection<QuestionOptionDisplay> OptionItems { get; } = [];
 
     public QuestionViewModel(IGameStateService gameStateService)
     {
         _gameStateService = gameStateService;
         _gameStateService.QuestionChanged += OnQuestionChanged;
-        _gameStateService.TimerTicked += (s, sec) =>
-        {
-            if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
-            {
-                Application.Current.Dispatcher.Invoke(() => SecondsRemaining = sec);
-            }
-            else
-            {
-                SecondsRemaining = sec;
-            }
-        };
+        _gameStateService.TimerTicked += OnTimerTicked;
+        _gameStateService.AnswersEvaluated += OnAnswersEvaluated;
 
         if (_gameStateService is ObservableObject obs)
         {
-            obs.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(IGameStateService.IsAnswerRevealed))
-                {
-                    IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
-                }
-                else if (e.PropertyName == nameof(IGameStateService.TotalQuestions))
-                {
-                    TotalQuestions = _gameStateService.TotalQuestions;
-                }
-            };
+            obs.PropertyChanged += OnGameStatePropertyChanged;
         }
 
         // Initial question preview
@@ -80,6 +66,51 @@ public partial class QuestionViewModel : ViewModelBase
         }
     }
 
+    private void OnTimerTicked(object? sender, int sec)
+    {
+        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+        {
+            Application.Current.Dispatcher.Invoke(() => SecondsRemaining = sec);
+        }
+        else
+        {
+            SecondsRemaining = sec;
+        }
+    }
+
+    private void OnAnswersEvaluated(object? sender, EventArgs e)
+    {
+        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+        {
+            Application.Current.Dispatcher.Invoke(UpdateOptionDistribution);
+        }
+        else
+        {
+            UpdateOptionDistribution();
+        }
+    }
+
+    private void OnGameStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IGameStateService.IsAnswerRevealed))
+        {
+            IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
+            UpdateOptionDistribution();
+        }
+        else if (e.PropertyName == nameof(IGameStateService.TotalQuestions))
+        {
+            TotalQuestions = _gameStateService.TotalQuestions;
+        }
+        else if (e.PropertyName == nameof(IGameStateService.SecondsRemaining))
+        {
+            SecondsRemaining = _gameStateService.SecondsRemaining;
+        }
+        else if (e.PropertyName == nameof(IGameStateService.CurrentQuestionNumber))
+        {
+            CurrentQuestionNumber = _gameStateService.CurrentQuestionNumber;
+        }
+    }
+
     private void OnQuestionChanged(object? sender, KnockoutQuestion? q)
     {
         if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
@@ -96,22 +127,53 @@ public partial class QuestionViewModel : ViewModelBase
     {
         CurrentQuestion = q;
         Options.Clear();
+        OptionItems.Clear();
         if (q != null)
         {
-            foreach (var opt in q.Options)
+            for (int i = 0; i < q.Options.Count; i++)
             {
+                string opt = q.Options[i];
                 Options.Add(opt);
+                OptionItems.Add(new QuestionOptionDisplay
+                {
+                    Index = i,
+                    Letter = ((char)('A' + i)).ToString(),
+                    Text = opt,
+                    IsCorrect = i == q.CorrectAnswerIndex,
+                    IsRevealed = _gameStateService.IsAnswerRevealed
+                });
             }
             SecondsRemaining = _gameStateService.SecondsRemaining > 0 ? _gameStateService.SecondsRemaining : q.TimeLimitSeconds;
         }
-        CurrentQuestionNumber = _gameStateService.CurrentQuestionIndex + 1;
+        CurrentQuestionNumber = _gameStateService.CurrentQuestionNumber;
         TotalQuestions = _gameStateService.TotalQuestions;
         IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
+        UpdateOptionDistribution();
+    }
+
+    private void UpdateOptionDistribution()
+    {
+        bool revealed = _gameStateService.IsAnswerRevealed;
+        var snapshot = _gameStateService.GetPlayersSnapshot();
+        int totalAnswered = snapshot.Count(p => p.HasAnsweredCurrentQuestion && p.LastAnswerIndex >= 0);
+
+        foreach (var item in OptionItems)
+        {
+            int count = snapshot.Count(p => p.HasAnsweredCurrentQuestion && p.LastAnswerIndex == item.Index);
+            item.VoteCount = count;
+            item.VotePercentage = totalAnswered > 0 ? (int)Math.Round(count * 100.0 / totalAnswered) : 0;
+            item.IsRevealed = revealed;
+        }
     }
 
     [RelayCommand]
     private void NextQuestion()
     {
+        if (!_gameStateService.IsGameActive && _gameStateService.Phase == GameStatePhase.Lobby)
+        {
+            _gameStateService.StartGame();
+            return;
+        }
         _gameStateService.NextQuestion();
     }
 
@@ -121,5 +183,17 @@ public partial class QuestionViewModel : ViewModelBase
         _gameStateService.RevealAnswer();
         IsAnswerRevealed = true;
     }
-}
 
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _gameStateService.QuestionChanged -= OnQuestionChanged;
+        _gameStateService.TimerTicked -= OnTimerTicked;
+        _gameStateService.AnswersEvaluated -= OnAnswersEvaluated;
+        if (_gameStateService is ObservableObject obs)
+        {
+            obs.PropertyChanged -= OnGameStatePropertyChanged;
+        }
+    }
+}

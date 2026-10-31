@@ -1,7 +1,9 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Sync live settings to GameStateService, restart web server on port change, and marshal/dispose MonitorsChanged
+// Edited on Oct 31, 2026 @ 10:52:00 -> Add ImportPackCommand and AvailableCategories filter synchronization
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
 using KnockoutTrivia.Services;
 using Lyracist.Shared;
+using Microsoft.Win32;
 
 namespace KnockoutTrivia.ViewModels;
 
@@ -43,6 +46,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<DisplayMonitorOption> AvailableDisplayOptions { get; } = [];
     public ObservableCollection<SelectableTriviaSource> AvailableSources { get; } = [];
+    public ObservableCollection<string> AvailableCategories { get; } = ["All Categories"];
 
     public event EventHandler<(int Index, string? Device)>? OpenAudienceDisplayRequested;
     public event EventHandler? CloseAudienceDisplayRequested;
@@ -77,8 +81,46 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         }
 
         RefreshMonitors();
+        SyncCategoriesFromGameState();
+        if (_gameStateService is ObservableObject obs)
+        {
+            obs.PropertyChanged += OnGameStatePropertyChanged;
+        }
         MonitorEnumerator.MonitorsChanged += OnMonitorsChanged;
         _ = LoadSourcesAsync();
+    }
+
+    private void OnGameStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IGameStateService.AvailableCategories))
+        {
+            SyncCategoriesFromGameState();
+        }
+    }
+
+    private void SyncCategoriesFromGameState()
+    {
+        string current = Settings.SelectedCategory;
+        AvailableCategories.Clear();
+        foreach (var cat in _gameStateService.AvailableCategories)
+        {
+            AvailableCategories.Add(cat);
+        }
+
+        if (AvailableCategories.Count == 0)
+        {
+            AvailableCategories.Add("All Categories");
+        }
+
+        if (string.IsNullOrWhiteSpace(current) || !AvailableCategories.Contains(current))
+        {
+            Settings.SelectedCategory = AvailableCategories[0];
+        }
+        else
+        {
+            Settings.SelectedCategory = current;
+        }
+        OnPropertyChanged(nameof(Settings));
     }
 
     private void OnMonitorsChanged(object? sender, EventArgs e)
@@ -128,6 +170,51 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         }
 
         UpdateSelectedQuestionsCount();
+    }
+
+    [RelayCommand]
+    public async Task ImportPackAsync()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Import Trivia Pack or Database",
+            Filter = "Trivia Packs & Databases (*.json;*.db)|*.json;*.db|JSON Question Packs (*.json)|*.json|SQLite Databases (*.db)|*.db",
+            Multiselect = true
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            int importedCount = 0;
+            foreach (string file in dialog.FileNames)
+            {
+                try
+                {
+                    if (!File.Exists(file)) continue;
+                    string ext = Path.GetExtension(file);
+                    string targetDir = string.Equals(ext, ".db", StringComparison.OrdinalIgnoreCase)
+                        ? Globals.DataDir
+                        : Globals.PacksDir;
+
+                    Directory.CreateDirectory(targetDir);
+                    string destPath = Path.Combine(targetDir, Path.GetFileName(file));
+                    if (!string.Equals(Path.GetFullPath(file), Path.GetFullPath(destPath), StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(file, destPath, overwrite: true);
+                    }
+                    importedCount++;
+                }
+                catch (Exception ex)
+                {
+                    Globals.LogError("KnockoutTrivia", "SettingsViewModel.ImportPackAsync", ex);
+                }
+            }
+
+            if (importedCount > 0)
+            {
+                await LoadSourcesAsync();
+                StatusMessage = $"Imported {importedCount} trivia file(s) into library.";
+            }
+        }
     }
 
     [RelayCommand]
@@ -276,6 +363,10 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         if (_disposed) return;
         _disposed = true;
         MonitorEnumerator.MonitorsChanged -= OnMonitorsChanged;
+        if (_gameStateService is ObservableObject obs)
+        {
+            obs.PropertyChanged -= OnGameStatePropertyChanged;
+        }
     }
 }
 

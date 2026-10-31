@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Add HasBeenEvaluatedForCurrentQuestion, HasToken1-3 properties, and make LastSeenAt non-observable
+// Edited on Oct 31, 2026 @ 10:35:00 -> Add TotalResponseTimeMs and CorrectAnswersCount for speed tie-breaking and stats
 using System;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -63,6 +63,18 @@ public partial class KnockoutPlayer : ObservableObject
 
     [ObservableProperty]
     private int _responseTimeMs;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AverageResponseTimeMs))]
+    private long _totalResponseTimeMs;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AverageResponseTimeMs))]
+    private int _correctAnswersCount;
+
+    public int AverageResponseTimeMs => CorrectAnswersCount > 0
+        ? (int)(TotalResponseTimeMs / CorrectAnswersCount)
+        : int.MaxValue;
 
     public bool HasToken1 => Tokens >= 1;
     public bool HasToken2 => Tokens >= 2;

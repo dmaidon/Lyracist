@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:26:00 -> Use TriviaStorageHelper settings persistence, restart TriviaWebServer on port change, and marshal/unsubscribe MonitorsChanged
+// Edited on Oct 31, 2026 @ 09:17:30 -> Read AppVersion dynamically from executing assembly version instead of hardcoded string
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -455,8 +455,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private TriviaHelpTopic? _selectedHelpTopic;
 
+    private static readonly string s_appVersion = typeof(MainViewModel).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+
     public static string AppName => "Lyracist Trivia Pro";
-    public static string AppVersion => "26.8.19.20";
+    public static string AppVersion => s_appVersion;
     public static string Company => "PAROLE Software";
     public static string Author => "Dennis N. Maidon";
     public static string Copyright => "Copyright © 2026 PAROLE Software. Licensed under GPL-3.0-or-later.";

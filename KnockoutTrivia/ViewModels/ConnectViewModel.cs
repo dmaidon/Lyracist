@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:20:00 -> Unsubscribe OnPlayerPropertyChanged when players are removed or cleared
+// Edited on Oct 31, 2026 @ 10:49:00 -> Refresh network address on RefreshConnection and implement IDisposable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,11 +16,12 @@ using Lyracist.Shared;
 
 namespace KnockoutTrivia.ViewModels;
 
-public partial class ConnectViewModel : ViewModelBase
+public partial class ConnectViewModel : ViewModelBase, IDisposable
 {
     private readonly IGameStateService _gameStateService;
     private readonly IKnockoutWebServer _webServer;
     private readonly HashSet<KnockoutPlayer> _subscribedPlayers = [];
+    private bool _disposed;
 
     [ObservableProperty]
     private string _wifiSsid = string.Empty;
@@ -239,6 +240,7 @@ public partial class ConnectViewModel : ViewModelBase
     [RelayCommand]
     private void RefreshConnection()
     {
+        _webServer.RefreshNetworkAddress();
         InitializeNetwork();
         StatusMessage = "Connection & QR codes refreshed";
     }
@@ -266,5 +268,17 @@ public partial class ConnectViewModel : ViewModelBase
     {
         PushToAudienceRequested?.Invoke(this, EventArgs.Empty);
         StatusMessage = "Connect Screen sent to Audience Display";
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _gameStateService.Players.CollectionChanged -= OnPlayersCollectionChanged;
+        foreach (var p in _subscribedPlayers.ToList())
+        {
+            p.PropertyChanged -= OnPlayerPropertyChanged;
+        }
+        _subscribedPlayers.Clear();
     }
 }

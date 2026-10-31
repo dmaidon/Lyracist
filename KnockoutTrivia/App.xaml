@@ -1,10 +1,11 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update KnockoutLogo resource URI to Assets/kotrv_logo.png -->
+<!-- Edited on Oct 31, 2026 @ 10:54:00 -> Set ShutdownMode to OnMainWindowClose so hidden AudienceWindow never blocks app exit -->
 <Application x:Class="KnockoutTrivia.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:vm="clr-namespace:KnockoutTrivia.ViewModels"
-             xmlns:views="clr-namespace:KnockoutTrivia.Views">
+             xmlns:views="clr-namespace:KnockoutTrivia.Views"
+             ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 09:20:00 -> Return removed/cleared players cleanly to Join screen instead of auto-rejoining -->
+<!-- Edited on Oct 31, 2026 @ 10:40:00 -> Restore locked-in answer state on reload, sync lastStrikes on reset, and match leaderboard by playerId -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -890,8 +890,8 @@
 
                 if (strikes > lastStrikes) {
                     vibrate([100, 50, 100]);
-                    lastStrikes = strikes;
                 }
+                lastStrikes = strikes;
 
                 if (p.isEliminated && state.phase !== 'GameOver') {
                     showScreen('screen-knockout');
@@ -913,8 +913,8 @@
                         currentQuestionId = q.id;
                         currentQuestionNumber = state.questionNumber;
                         questionStartTime = Date.now();
-                        hasSubmitted = false;
-                        selectedOption = -1;
+                        hasSubmitted = !!(p && p.hasAnswered);
+                        selectedOption = (p && p.hasAnswered && typeof p.selectedOptionIndex === 'number') ? p.selectedOptionIndex : -1;
 
                         document.getElementById('q-category').textContent = q.category || 'GENERAL';
                         document.getElementById('q-num').textContent = `Q #${state.questionNumber}`;
@@ -929,13 +929,26 @@
                             if (i < opts.length) {
                                 btn.style.display = 'flex';
                                 btn.className = `option-btn opt-${i}`;
+                                if (hasSubmitted) {
+                                    if (i === selectedOption) {
+                                        btn.classList.add('selected');
+                                    } else {
+                                        btn.classList.add('disabled');
+                                    }
+                                }
                                 text.textContent = opts[i];
                             } else {
                                 btn.style.display = 'none';
                             }
                         }
 
-                        document.getElementById('locked-badge').classList.remove('show');
+                        const lockedBadge = document.getElementById('locked-badge');
+                        if (hasSubmitted) {
+                            lockedBadge.innerHTML = '<span>🔒</span> ANSWER LOCKED IN • WAITING FOR REVEAL...';
+                            lockedBadge.classList.add('show');
+                        } else {
+                            lockedBadge.classList.remove('show');
+                        }
                         showScreen('screen-question');
                     }
 
@@ -993,12 +1006,19 @@
             lastPhase = state.phase;
         }
 
+        function isCurrentPlayerRow(item) {
+            if (item.id && playerId) {
+                return item.id.toUpperCase() === playerId.toUpperCase();
+            }
+            return item.name === playerName;
+        }
+
         function renderLeaderboard(list) {
             const container = document.getElementById('live-leaderboard');
             if (!list || !container) return;
 
             container.innerHTML = list.map(item => `
-                <div class="lb-row ${item.name === playerName ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
+                <div class="lb-row ${isCurrentPlayerRow(item) ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
                     <span><strong>#${item.rank}</strong> ${escapeHtml(item.name)} ${item.isEliminated ? '💥' : ''}</span>
                     <span style="font-weight: 800;">${item.score} pts • 🛡️${item.tokens}</span>
                 </div>
@@ -1010,7 +1030,7 @@
             if (!list || !container) return;
 
             container.innerHTML = list.map(item => `
-                <div class="lb-row ${item.name === playerName ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
+                <div class="lb-row ${isCurrentPlayerRow(item) ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
                     <span><strong>#${item.rank}</strong> ${escapeHtml(item.name)} ${item.isEliminated ? '💥' : '🏆'}</span>
                     <span style="font-weight: 800; color: #F59E0B;">${item.score} pts</span>
                 </div>
