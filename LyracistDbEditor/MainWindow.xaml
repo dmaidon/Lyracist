@@ -1,4 +1,4 @@
-<!-- Edited on Oct 11, 2026 @ 10:14:00 -> Update Unknown Artist labels to include Needs Repair status -->
+<!-- Edited on Oct 31, 2026 @ 13:20:00 -> Fix Duplicate Detection button placement/binding, add Delete/Open Folder/Genre/Backup DB controls, and add Remove Selected Orphan -->
 <Window x:Class="LyracistDbEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -53,13 +53,15 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="12,6" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Warning24" Margin="0,0,6,0" Foreground="#E0A96D" />
                             <TextBlock Text="Needs Repair: " FontWeight="SemiBold" />
                             <TextBlock Text="{Binding MissingArtistCount}" FontWeight="Bold" Foreground="#E0A96D" />
                         </StackPanel>
                     </Border>
+
+                    <ui:Button Content="Backup DB" Icon="{ui:SymbolIcon Save24}" Command="{Binding CreateManualBackupCommand}" Appearance="Secondary" Height="34" ToolTip="Create a timestamped snapshot backup of lyracist.db in Data/Backups" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -126,6 +128,13 @@
                                             <ContextMenu>
                                                 <MenuItem Header="Scan Metadata for this file"
                                                           Command="{Binding DataContext.ScanSongMetadataCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                          CommandParameter="{Binding}" />
+                                                <MenuItem Header="Open File Location"
+                                                          Command="{Binding DataContext.OpenFileLocationCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                          CommandParameter="{Binding}" />
+                                                <Separator />
+                                                <MenuItem Header="Delete from Database"
+                                                          Command="{Binding DataContext.DeleteSongCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                           CommandParameter="{Binding}" />
                                             </ContextMenu>
                                         </Setter.Value>
@@ -196,9 +205,11 @@
 
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="12" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="1.2*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="1.2*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="0.8*" />
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
@@ -210,10 +221,26 @@
                                     <TextBlock Text="Artist" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                     <ui:TextBox Text="{Binding EditArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist name..." Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" GotFocus="TextBox_GotFocus" />
                                 </StackPanel>
+
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="Genre" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding EditGenre, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Genre..." Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" GotFocus="TextBox_GotFocus" />
+                                </StackPanel>
                             </Grid>
 
                             <CheckBox Content="Auto-capitalize changed Title/Artist" IsChecked="{Binding ApplyProperCase}" Margin="0,0,0,8" ToolTip="When off, edited text is saved exactly as typed (e.g. AC/DC). Unchanged fields are never re-cased." />
-                            <ui:Button Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" HorizontalAlignment="Right" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" Content="Open Folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding OpenFileLocationCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Show file in Windows Explorer" />
+                                <ui:Button Grid.Column="2" Content="Delete" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DeleteSongCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Remove selected track from database" />
+                                <ui:Button Grid.Column="4" Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
+                            </Grid>
                             <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
                     </Border>
@@ -333,7 +360,7 @@
                                 </ComboBox>
                             </Grid>
 
-                            <ui:Button Content="Generate Book" Icon="{ui:SymbolIcon DocumentPrint24}" Command="{Binding GenerateBookCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" />
+                            <ui:Button Content="Generate Book" Icon="{ui:SymbolIcon DocumentPrint24}" Command="{Binding GenerateBookCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsGeneratingBook, Converter={StaticResource InvertBoolConverter}}" />
                         </StackPanel>
                     </Border>
 
@@ -412,16 +439,16 @@
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
                                         </ListBox>
-
-                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *">
-                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveDuplicateSongCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the song selected inside a group from the database" />
-                        <ui:Button Grid.Column="2" Content="Remove All But Suggested" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllButSuggestedDuplicatesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Keep one copy per group (existing file, longest, largest) and remove the rest" />
-                    </Grid>
                                     </StackPanel>
                                 </Expander>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *" Margin="0,10,0,0">
+                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveDuplicateSongCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the song selected inside a group from the database" />
+                        <ui:Button Grid.Column="2" Content="Remove All But Suggested" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllButSuggestedDuplicatesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Keep one copy per group (existing file, longest, largest) and remove the rest" />
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -453,7 +480,7 @@
                         <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindOrphanedFilesCommand}" Appearance="Primary" Height="35" Width="100" IsEnabled="{Binding IsFindingOrphans, Converter={StaticResource InvertBoolConverter}}" />
                     </Grid>
 
-                    <ListBox Grid.Row="4" ItemsSource="{Binding OrphanedSongs}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <ListBox Grid.Row="4" ItemsSource="{Binding OrphanedSongs}" SelectedItem="{Binding SelectedOrphanedSong, Mode=TwoWay}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,3">
@@ -468,7 +495,10 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <ui:Button Grid.Row="6" Content="Remove All Orphaned Entries" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllOrphanedFilesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" Margin="0,10,0,0" />
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *" Margin="0,10,0,0">
+                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSelectedOrphanedFileCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the selected orphaned entry from the database" />
+                        <ui:Button Grid.Column="2" Content="Remove All Orphans" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllOrphanedFilesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" />
+                    </Grid>
                 </Grid>
             </Border>
 

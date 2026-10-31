@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:05:00 -> Run EnsureSchemaAndRepair on startup to self-heal legacy or locked databases
+// Edited on Oct 31, 2026 @ 13:18:30 -> Call Shutdown on duplicate instance and log app start
 using System;
 using System.Windows;
 using Lyracist.Data;
@@ -15,8 +15,12 @@ namespace LyracistDbEditor
         {
             if (!SingleInstanceHelper.EnsureSingleInstance("LyracistDbEditor"))
             {
+                Shutdown();
                 return;
             }
+
+            Globals.LogAppStart("LyracistDbEditor");
+            Globals.PurgeOldLogs(14);
 
             try
             {

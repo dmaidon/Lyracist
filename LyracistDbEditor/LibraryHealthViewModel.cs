@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:58:00 -> Add filler track BPM analysis and mix-in/mix-out cue point detection to readiness audit
+// Edited on Oct 31, 2026 @ 13:19:30 -> Batch FTS5 and NoArtistStore removals, run PickKeeper off UI thread, and add RemoveSelectedOrphanedFile
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -59,7 +59,7 @@ public partial class MainViewModel
             var groups = await Task.Run(() =>
             {
                 using var context = new LyracistDbContext();
-                return context.Songs
+                var list = context.Songs
                     .AsNoTracking()
                     .ToList()
                     .GroupBy(s => (Title: NormalizeKey(s.Title), Artist: NormalizeKey(s.Artist)))
@@ -73,9 +73,14 @@ public partial class MainViewModel
                     .OrderByDescending(g => g.Count)
                     .ThenBy(g => g.Title)
                     .ToList();
-            });
 
-            foreach (var g in groups) g.Keeper = PickKeeper(g.Songs);
+                foreach (var g in list)
+                {
+                    g.Keeper = PickKeeper(g.Songs);
+                }
+
+                return list;
+            });
 
             DuplicateGroups.Clear();
             foreach (var g in groups) DuplicateGroups.Add(g);
@@ -134,15 +139,14 @@ public partial class MainViewModel
         try
         {
             var ids = targets.Select(s => s.SongId).ToList();
+            var paths = targets.Select(s => s.FilePath).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
             using var context = new LyracistDbContext();
             var searchService = new SearchService(context);
             var dbSongs = await context.Songs.Where(s => ids.Contains(s.SongId)).ToListAsync();
             context.Songs.RemoveRange(dbSongs);
             await context.SaveChangesAsync();
-            foreach (var id in ids)
-            {
-                await searchService.RemoveSongFromIndex(id);
-            }
+            await searchService.RemoveSongsFromIndexBatch(ids);
+            await NoArtistStore.RemoveBatchAsync(paths);
 
             DuplicateGroups.Clear();
             SelectedDuplicateGroup = null;
@@ -186,6 +190,7 @@ public partial class MainViewModel
                 context.Songs.Remove(dbSong);
                 await context.SaveChangesAsync();
                 await searchService.RemoveSongFromIndex(dbSong.SongId);
+                await NoArtistStore.RemoveAsync(dbSong.FilePath);
             }
 
             SelectedDuplicateSong = null;
@@ -213,6 +218,9 @@ public partial class MainViewModel
     // ==========================================
 
     public ObservableCollection<Song> OrphanedSongs { get; } = [];
+
+    [ObservableProperty]
+    private Song? _selectedOrphanedSong;
 
     [ObservableProperty]
     private bool _isFindingOrphans;
@@ -299,6 +307,7 @@ public partial class MainViewModel
         try
         {
             var ids = OrphanedSongs.Select(s => s.SongId).ToList();
+            var paths = OrphanedSongs.Select(s => s.FilePath).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
 
             using var context = new LyracistDbContext();
             var searchService = new SearchService(context);
@@ -307,12 +316,11 @@ public partial class MainViewModel
             context.Songs.RemoveRange(dbSongs);
             await context.SaveChangesAsync();
 
-            foreach (var id in ids)
-            {
-                await searchService.RemoveSongFromIndex(id);
-            }
+            await searchService.RemoveSongsFromIndexBatch(ids);
+            await NoArtistStore.RemoveBatchAsync(paths);
 
             OrphanedSongs.Clear();
+            SelectedOrphanedSong = null;
             OrphanStatusText = $"Removed {dbSongs.Count} orphaned entry(ies).";
 
             RefreshStats();
@@ -321,6 +329,40 @@ public partial class MainViewModel
         catch (Exception ex)
         {
             System.Windows.MessageBox.Show($"Failed to remove orphaned entries: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveSelectedOrphanedFile()
+    {
+        if (SelectedOrphanedSong == null) return;
+        var song = SelectedOrphanedSong;
+
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == song.SongId);
+            if (dbSong != null)
+            {
+                var searchService = new SearchService(context);
+                context.Songs.Remove(dbSong);
+                await context.SaveChangesAsync();
+                await searchService.RemoveSongFromIndex(dbSong.SongId);
+                await NoArtistStore.RemoveAsync(dbSong.FilePath);
+            }
+
+            OrphanedSongs.Remove(song);
+            SelectedOrphanedSong = OrphanedSongs.FirstOrDefault();
+            OrphanStatusText = OrphanedSongs.Count == 0
+                ? "All orphaned entries removed."
+                : $"Removed '{song.Title}'. {OrphanedSongs.Count} orphaned entry(ies) remaining.";
+
+            RefreshStats();
+            Search();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to remove orphaned entry: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 

@@ -1,12 +1,14 @@
-// Edited on Oct 31, 2026 @ 09:17:30 -> Read AppVersion dynamically from executing assembly version instead of hardcoded string
+// Edited on Oct 31, 2026 @ 13:22:00 -> Fix banner file lock with unlocked BitmapSource, sync deleted/renamed question IDs, add unsaved-changes guard, difficulty filter, and CSV import
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Trivia.Core.Models;
@@ -25,6 +27,11 @@ public partial class MainViewModel : ObservableObject
         Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
     };
 
+    private readonly HashSet<string> _removedQuestionIds = new(StringComparer.OrdinalIgnoreCase);
+    private bool _isSuppressingDirtyTracking;
+    private bool _isRevertingPackSelection;
+    private TriviaQuestionPack? _previousPack;
+
     public ObservableCollection<TriviaQuestionPack> Packs { get; } = [];
     public ObservableCollection<TriviaQuestionPack> FilteredPacks { get; } = [];
     public ObservableCollection<TriviaQuestion> PackQuestions { get; } = [];
@@ -35,6 +42,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _questionSearchText = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedDifficultyFilter = "All";
 
     [ObservableProperty]
     private TriviaQuestionPack? _selectedPack;
@@ -58,7 +68,13 @@ public partial class MainViewModel : ObservableObject
     private string? _bannerPath;
 
     [ObservableProperty]
+    private BitmapSource? _bannerImage;
+
+    [ObservableProperty]
     private bool _hasBanner;
+
+    [ObservableProperty]
+    private bool _hasUnsavedChanges;
 
     [ObservableProperty]
     private TriviaQuestion? _selectedQuestion;
@@ -135,6 +151,9 @@ public partial class MainViewModel : ObservableObject
     private string _distributionText = "A: 0 | B: 0 | C: 0 | D: 0";
 
     [ObservableProperty]
+    private string _difficultySummaryText = "Easy: 0 | Med: 0 | Hard: 0";
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasDistributionWarning))]
     private string? _distributionWarning;
 
@@ -155,12 +174,18 @@ public partial class MainViewModel : ObservableObject
     public string AppDescription => "Interactive authoring studio and management tool for Lyracist Live Trivia databases. Create custom category packs, write and edit 4-option questions with explanations, balance answer choices evenly across A/B/C/D, generate matching 16:9 announcement banners, and sync directly into SQLite trivia.db.";
 
     public string[] DifficultyOptions { get; } = ["Easy", "Medium", "Hard"];
+    public string[] DifficultyFilterOptions { get; } = ["All", "Easy", "Medium", "Hard"];
 
     public MainViewModel()
     {
         InitializeHelpTopics();
         LoadPacks();
     }
+
+    partial void OnPackTitleChanged(string value) { if (!_isSuppressingDirtyTracking) HasUnsavedChanges = true; }
+    partial void OnPackIdChanged(string value) { if (!_isSuppressingDirtyTracking) HasUnsavedChanges = true; }
+    partial void OnPackCategoryChanged(string value) { if (!_isSuppressingDirtyTracking) HasUnsavedChanges = true; }
+    partial void OnPackDescriptionChanged(string value) { if (!_isSuppressingDirtyTracking) HasUnsavedChanges = true; }
 
     partial void OnPackSearchTextChanged(string value)
     {
@@ -172,29 +197,86 @@ public partial class MainViewModel : ObservableObject
         FilterQuestions();
     }
 
+    partial void OnSelectedDifficultyFilterChanged(string value)
+    {
+        FilterQuestions();
+    }
+
+    public bool ConfirmSaveOrDiscardChanges()
+    {
+        if (!HasUnsavedChanges || _previousPack == null) return true;
+
+        var res = MessageBox.Show(
+            $"You have unsaved changes in '{(string.IsNullOrWhiteSpace(PackTitle) ? _previousPack.Title : PackTitle)}'.\n\nSave changes before continuing?",
+            "Unsaved Pack Changes",
+            MessageBoxButton.YesNoCancel,
+            MessageBoxImage.Warning);
+
+        if (res == MessageBoxResult.Cancel)
+        {
+            return false;
+        }
+
+        if (res == MessageBoxResult.Yes)
+        {
+            SavePackInternal(_previousPack);
+        }
+        else
+        {
+            HasUnsavedChanges = false;
+            _removedQuestionIds.Clear();
+        }
+
+        return true;
+    }
+
     partial void OnSelectedPackChanged(TriviaQuestionPack? value)
     {
+        if (_isRevertingPackSelection) return;
+
+        if (HasUnsavedChanges && _previousPack != null && !ReferenceEquals(_previousPack, value))
+        {
+            if (!ConfirmSaveOrDiscardChanges())
+            {
+                _isRevertingPackSelection = true;
+                SelectedPack = _previousPack;
+                _isRevertingPackSelection = false;
+                return;
+            }
+        }
+
+        _previousPack = value;
+        _removedQuestionIds.Clear();
+
         if (value == null)
         {
+            _isSuppressingDirtyTracking = true;
             PackTitle = string.Empty;
             PackId = string.Empty;
             PackCategory = string.Empty;
             PackDescription = string.Empty;
+            _isSuppressingDirtyTracking = false;
+            HasUnsavedChanges = false;
             PackQuestions.Clear();
             FilteredQuestions.Clear();
             SelectedQuestion = null;
             SelectedPackFilePath = string.Empty;
             BannerPath = null;
+            BannerImage = null;
             HasBanner = false;
             DistributionText = "A: 0 | B: 0 | C: 0 | D: 0";
+            DifficultySummaryText = "Easy: 0 | Med: 0 | Hard: 0";
             DistributionWarning = null;
             return;
         }
 
+        _isSuppressingDirtyTracking = true;
         PackTitle = value.Title;
         PackId = value.PackId;
         PackCategory = value.Category;
         PackDescription = value.Description;
+        _isSuppressingDirtyTracking = false;
+        HasUnsavedChanges = false;
 
         string packsDir = TriviaStorageHelper.GetPacksDirectory();
         string cleanName = CleanFileName(string.IsNullOrWhiteSpace(value.PackId) ? value.Title : value.PackId);
@@ -306,8 +388,16 @@ public partial class MainViewModel : ObservableObject
     {
         FilteredQuestions.Clear();
         string query = QuestionSearchText.Trim();
+        string diffFilter = SelectedDifficultyFilter;
+        bool filterByDiff = !string.IsNullOrWhiteSpace(diffFilter) && !string.Equals(diffFilter, "All", StringComparison.OrdinalIgnoreCase);
+
         foreach (var q in PackQuestions)
         {
+            if (filterByDiff && !string.Equals(q.Difficulty.ToString(), diffFilter, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             if (string.IsNullOrWhiteSpace(query) ||
                 q.Prompt.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 q.Id.Contains(query, StringComparison.OrdinalIgnoreCase) ||
@@ -324,15 +414,23 @@ public partial class MainViewModel : ObservableObject
         if (PackQuestions.Count == 0)
         {
             DistributionText = "A: 0 (0%) | B: 0 (0%) | C: 0 (0%) | D: 0 (0%)";
+            DifficultySummaryText = "Easy: 0 | Med: 0 | Hard: 0";
             DistributionWarning = null;
             return;
         }
 
         var counts = new int[4];
+        int easyCount = 0, medCount = 0, hardCount = 0;
         foreach (var q in PackQuestions)
         {
             int idx = Math.Clamp(q.CorrectAnswerIndex, 0, 3);
             counts[idx]++;
+            switch (q.Difficulty)
+            {
+                case TriviaDifficulty.Easy: easyCount++; break;
+                case TriviaDifficulty.Medium: medCount++; break;
+                case TriviaDifficulty.Hard: hardCount++; break;
+            }
         }
 
         int total = PackQuestions.Count;
@@ -342,9 +440,10 @@ public partial class MainViewModel : ObservableObject
         double pctD = counts[3] * 100.0 / total;
 
         DistributionText = $"▲ A: {counts[0]} ({pctA:F0}%) | ◆ B: {counts[1]} ({pctB:F0}%) | ● C: {counts[2]} ({pctC:F0}%) | ■ D: {counts[3]} ({pctD:F0}%)";
+        DifficultySummaryText = $"Easy: {easyCount} | Med: {medCount} | Hard: {hardCount}";
 
-        // Check if any option is skewed heavily (> 35%)
-        if (pctA > 38 || pctB > 38 || pctC > 38 || pctD > 38 || counts.Any(c => c == 0))
+        // Check if any option is skewed heavily (> 38%)
+        if (pctA > 38 || pctB > 38 || pctC > 38 || pctD > 38 || (total >= 4 && counts.Any(c => c == 0)))
         {
             DistributionWarning = "⚠️ Answer options are unevenly distributed. Click '🔀 Balance Options' to evenly spread correct answers across A/B/C/D.";
         }
@@ -359,27 +458,67 @@ public partial class MainViewModel : ObservableObject
         if (SelectedPack == null)
         {
             BannerPath = null;
+            BannerImage = null;
             HasBanner = false;
             return;
         }
 
-        string? banner = TriviaStorageHelper.GetBannerPathForPack(SelectedPack.PackId);
+        string lookupId = string.IsNullOrWhiteSpace(PackId) ? SelectedPack.PackId : PackId;
+        string lookupTitle = string.IsNullOrWhiteSpace(PackTitle) ? SelectedPack.Title : PackTitle;
+
+        string? banner = TriviaStorageHelper.GetBannerPathForPack(lookupId);
         if (string.IsNullOrEmpty(banner))
         {
-            banner = TriviaStorageHelper.GetBannerPathForPack(SelectedPack.Title);
+            banner = TriviaStorageHelper.GetBannerPathForPack(lookupTitle);
         }
 
         BannerPath = banner;
         HasBanner = !string.IsNullOrEmpty(banner) && File.Exists(banner);
+        BannerImage = LoadBannerBitmap(banner);
+    }
+
+    private static BitmapSource? LoadBannerBitmap(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return null;
+
+        try
+        {
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bmp.StreamSource = stream;
+            bmp.EndInit();
+            bmp.Freeze();
+            return bmp;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     [RelayCommand]
     private void NewPack()
     {
+        if (!ConfirmSaveOrDiscardChanges()) return;
+
+        int suffix = 1;
+        string candidateId = "new_category_pack";
+        string candidateTitle = "New Category Database";
+        while (Packs.Any(p => string.Equals(p.PackId, candidateId, StringComparison.OrdinalIgnoreCase) ||
+                              string.Equals(p.Title, candidateTitle, StringComparison.OrdinalIgnoreCase)))
+        {
+            suffix++;
+            candidateId = $"new_category_pack_{suffix}";
+            candidateTitle = $"New Category Database {suffix}";
+        }
+
         var newPack = new TriviaQuestionPack
         {
-            PackId = "new-category-pack",
-            Title = "New Category Database",
+            PackId = candidateId,
+            Title = candidateTitle,
             Category = "General Trivia",
             Description = "Custom trivia category database.",
             Questions = []
@@ -389,6 +528,7 @@ public partial class MainViewModel : ObservableObject
         FilterPacks();
         SelectedPack = newPack;
         NewQuestion();
+        HasUnsavedChanges = true;
         SetStatus("Created new category pack. Enter metadata and questions, then click 'Save Pack'.");
     }
 
@@ -396,26 +536,30 @@ public partial class MainViewModel : ObservableObject
     private void SavePack()
     {
         if (SelectedPack == null) return;
+        SavePackInternal(SelectedPack);
+    }
 
+    private void SavePackInternal(TriviaQuestionPack targetPack)
+    {
         if (string.IsNullOrWhiteSpace(PackTitle))
         {
             SetStatus("Pack Title cannot be empty.", isError: true);
             return;
         }
 
-        SelectedPack.Title = PackTitle.Trim();
-        SelectedPack.PackId = string.IsNullOrWhiteSpace(PackId) ? CleanFileName(PackTitle) : CleanFileName(PackId);
-        SelectedPack.Category = string.IsNullOrWhiteSpace(PackCategory) ? "General" : PackCategory.Trim();
-        SelectedPack.Description = PackDescription.Trim();
-        SelectedPack.Questions = PackQuestions.ToList();
+        targetPack.Title = PackTitle.Trim();
+        targetPack.PackId = string.IsNullOrWhiteSpace(PackId) ? CleanFileName(PackTitle) : CleanFileName(PackId);
+        targetPack.Category = string.IsNullOrWhiteSpace(PackCategory) ? "General" : PackCategory.Trim();
+        targetPack.Description = PackDescription.Trim();
+        targetPack.Questions = PackQuestions.ToList();
 
         string packsDir = TriviaStorageHelper.GetPacksDirectory();
-        string cleanName = SelectedPack.PackId.Replace("-", "_");
+        string cleanName = targetPack.PackId.Replace("-", "_");
         string filePath = Path.Combine(packsDir, $"{cleanName}.json");
 
         try
         {
-            string json = JsonSerializer.Serialize(SelectedPack, JsonOptions);
+            string json = JsonSerializer.Serialize(targetPack, JsonOptions);
             string tempPath = filePath + ".tmp";
             File.WriteAllText(tempPath, json);
             File.Move(tempPath, filePath, overwrite: true);
@@ -430,10 +574,24 @@ public partial class MainViewModel : ObservableObject
 
             SelectedPackFilePath = filePath;
 
+            // Remove any deleted/renamed question IDs from SQLite before syncing
+            if (_removedQuestionIds.Count > 0)
+            {
+                try
+                {
+                    string dbPath = TriviaStorageHelper.GetDatabasePath();
+                    using var db = new TriviaDatabaseService(dbPath);
+                    db.DeleteQuestionsByIds(_removedQuestionIds);
+                }
+                catch { }
+                _removedQuestionIds.Clear();
+            }
+
             // Sync to database
             SyncDatabaseQuiet();
+            HasUnsavedChanges = false;
 
-            SetStatus($"Saved '{SelectedPack.Title}' ({SelectedPack.Questions.Count} questions) to {Path.GetFileName(filePath)}.");
+            SetStatus($"Saved '{targetPack.Title}' ({targetPack.Questions.Count} questions) to {Path.GetFileName(filePath)}.");
             FilterPacks();
         }
         catch (Exception ex)
@@ -504,9 +662,21 @@ public partial class MainViewModel : ObservableObject
 
         Enum.TryParse<TriviaDifficulty>(EditorDifficulty, true, out var diff);
 
+        string candidateId = string.IsNullOrWhiteSpace(EditorId) ? $"Q-{PackQuestions.Count + 1:D3}" : EditorId.Trim();
+
+        // Check for duplicate ID within the pack
+        var duplicate = PackQuestions.FirstOrDefault(q =>
+            !ReferenceEquals(q, SelectedQuestion) &&
+            string.Equals(q.Id, candidateId, StringComparison.OrdinalIgnoreCase));
+        if (duplicate != null)
+        {
+            SetStatus($"Question ID '{candidateId}' is already used in this pack. Please choose a unique ID.", isError: true);
+            return;
+        }
+
         var question = new TriviaQuestion
         {
-            Id = string.IsNullOrWhiteSpace(EditorId) ? $"Q-{PackQuestions.Count + 1:D3}" : EditorId.Trim(),
+            Id = candidateId,
             Category = string.IsNullOrWhiteSpace(PackCategory) ? "General" : PackCategory.Trim(),
             Difficulty = diff,
             QuestionType = TriviaQuestionType.MultipleChoice,
@@ -520,18 +690,27 @@ public partial class MainViewModel : ObservableObject
         if (IsNewQuestionMode || SelectedQuestion == null)
         {
             PackQuestions.Add(question);
+            if (SelectedPack != null) SelectedPack.Questions = PackQuestions.ToList();
             IsNewQuestionMode = false;
             SelectedQuestion = question;
-            SetStatus($"Added Question {question.Id} ({PackQuestions.Count} total).");
+            HasUnsavedChanges = true;
+            SetStatus($"Added Question {question.Id} ({PackQuestions.Count} total). Click 'Save Pack' to persist.");
         }
         else
         {
+            string oldId = SelectedQuestion.Id;
             int idx = PackQuestions.IndexOf(SelectedQuestion);
             if (idx >= 0)
             {
+                if (!string.Equals(oldId, question.Id, StringComparison.OrdinalIgnoreCase))
+                {
+                    _removedQuestionIds.Add(oldId);
+                }
                 PackQuestions[idx] = question;
+                if (SelectedPack != null) SelectedPack.Questions = PackQuestions.ToList();
                 SelectedQuestion = question;
-                SetStatus($"Updated Question {question.Id}.");
+                HasUnsavedChanges = true;
+                SetStatus($"Updated Question {question.Id}. Click 'Save Pack' to persist.");
             }
         }
 
@@ -544,10 +723,18 @@ public partial class MainViewModel : ObservableObject
     {
         if (SelectedQuestion == null) return;
 
-        int nextNum = PackQuestions.Count + 1;
+        string baseCopyId = $"{SelectedQuestion.Id}-COPY";
+        string copyId = baseCopyId;
+        int copySuffix = 1;
+        while (PackQuestions.Any(q => string.Equals(q.Id, copyId, StringComparison.OrdinalIgnoreCase)))
+        {
+            copySuffix++;
+            copyId = $"{baseCopyId}{copySuffix}";
+        }
+
         var dup = new TriviaQuestion
         {
-            Id = $"{SelectedQuestion.Id}-COPY",
+            Id = copyId,
             Category = SelectedQuestion.Category,
             Difficulty = SelectedQuestion.Difficulty,
             QuestionType = SelectedQuestion.QuestionType,
@@ -559,10 +746,12 @@ public partial class MainViewModel : ObservableObject
         };
 
         PackQuestions.Add(dup);
+        if (SelectedPack != null) SelectedPack.Questions = PackQuestions.ToList();
         FilterQuestions();
         SelectedQuestion = dup;
         RecalculateDistribution();
-        SetStatus($"Duplicated Question as {dup.Id}.");
+        HasUnsavedChanges = true;
+        SetStatus($"Duplicated Question as {dup.Id}. Click 'Save Pack' to persist.");
     }
 
     [RelayCommand]
@@ -575,6 +764,8 @@ public partial class MainViewModel : ObservableObject
 
         string id = SelectedQuestion.Id;
         PackQuestions.Remove(SelectedQuestion);
+        _removedQuestionIds.Add(id);
+        if (SelectedPack != null) SelectedPack.Questions = PackQuestions.ToList();
 
         try
         {
@@ -587,7 +778,8 @@ public partial class MainViewModel : ObservableObject
         FilterQuestions();
         SelectedQuestion = PackQuestions.FirstOrDefault();
         RecalculateDistribution();
-        SetStatus($"Deleted Question {id} ({PackQuestions.Count} remaining).");
+        HasUnsavedChanges = true;
+        SetStatus($"Deleted Question {id} ({PackQuestions.Count} remaining). Click 'Save Pack' to persist.");
     }
 
     [RelayCommand]
@@ -651,7 +843,9 @@ public partial class MainViewModel : ObservableObject
         var currentSel = SelectedQuestion;
         FilterQuestions();
         SelectedQuestion = currentSel;
+        OnSelectedQuestionChanged(currentSel);
         RecalculateDistribution();
+        HasUnsavedChanges = true;
         SetStatus($"Balanced option distributions across all {PackQuestions.Count} questions (~25% for A, B, C, D). Click 'Save Pack' to commit.");
     }
 
@@ -671,23 +865,38 @@ public partial class MainViewModel : ObservableObject
             string clean = CleanFileName(string.IsNullOrWhiteSpace(PackId) ? PackTitle : PackId).Replace("-", "_");
             string bannerFile = Path.Combine(bannersDir, $"{clean}.png");
 
+            // Release any in-memory reference before regenerating
+            BannerImage = null;
+
+            string titleToRender = PackTitle;
+            string descToRender = PackDescription;
+            Exception? renderError = null;
+
             // Execute banner generation on STA thread
             var thread = new Thread(() =>
             {
                 try
                 {
-                    // Call existing banner generator
-                    TriviaBannerGenerator.GenerateBannerForPack(bannersDir, $"{clean}.png", PackTitle, PackDescription);
+                    TriviaBannerGenerator.GenerateBannerForPack(bannersDir, $"{clean}.png", titleToRender, descToRender);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    renderError = ex;
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
-            thread.Join(3000);
+            thread.Join(5000);
 
-            UpdateBannerInfo();
+            if (renderError != null)
+            {
+                SetStatus($"Error generating banner: {renderError.Message}", isError: true);
+                return;
+            }
+
+            BannerPath = bannerFile;
+            HasBanner = File.Exists(bannerFile);
+            BannerImage = LoadBannerBitmap(bannerFile);
             SetStatus($"Banner generated: {Path.GetFileName(bannerFile)}");
         }
         catch (Exception ex)
@@ -739,7 +948,35 @@ public partial class MainViewModel : ObservableObject
             try
             {
                 string json = File.ReadAllText(ofd.FileName);
-                var pack = JsonSerializer.Deserialize<TriviaQuestionPack>(json, JsonOptions);
+                ReadOnlySpan<char> trimmed = json.AsSpan().TrimStart();
+                if (trimmed.IsEmpty)
+                {
+                    SetStatus("Selected JSON file is empty.", isError: true);
+                    return;
+                }
+
+                TriviaQuestionPack? pack = null;
+                if (trimmed[0] == '[')
+                {
+                    var rawQuestions = JsonSerializer.Deserialize<List<TriviaQuestion>>(json, JsonOptions);
+                    if (rawQuestions != null)
+                    {
+                        string baseName = Path.GetFileNameWithoutExtension(ofd.FileName);
+                        pack = new TriviaQuestionPack
+                        {
+                            PackId = CleanFileName(baseName),
+                            Title = baseName.Replace('_', ' ').Replace('-', ' '),
+                            Category = rawQuestions.FirstOrDefault()?.Category ?? "General",
+                            Description = $"Imported from {Path.GetFileName(ofd.FileName)}",
+                            Questions = rawQuestions
+                        };
+                    }
+                }
+                else
+                {
+                    pack = JsonSerializer.Deserialize<TriviaQuestionPack>(json, JsonOptions);
+                }
+
                 if (pack != null && pack.Questions.Count > 0)
                 {
                     // Validate questions in imported pack
@@ -764,9 +1001,10 @@ public partial class MainViewModel : ObservableObject
                     File.WriteAllText(tempPath, JsonSerializer.Serialize(pack, JsonOptions));
                     File.Move(tempPath, destFile, overwrite: true);
 
+                    SyncDatabaseQuiet();
                     LoadPacks();
                     SelectedPack = Packs.FirstOrDefault(p => p.Title == pack.Title || p.PackId == pack.PackId);
-                    SetStatus($"Imported '{pack.Title}' with {pack.Questions.Count} questions.");
+                    SetStatus($"Imported '{pack.Title}' with {pack.Questions.Count} questions and synced to SQLite.");
                 }
                 else
                 {
@@ -778,6 +1016,161 @@ public partial class MainViewModel : ObservableObject
                 SetStatus($"Error importing pack: {ex.Message}", isError: true);
             }
         }
+    }
+
+    [RelayCommand]
+    private void ImportCsv()
+    {
+        if (SelectedPack == null)
+        {
+            SetStatus("Select or create a category pack first before importing CSV questions.", isError: true);
+            return;
+        }
+
+        var ofd = new OpenFileDialog
+        {
+            Title = "Import Questions from CSV (Prompt, OptionA, OptionB, OptionC, OptionD, CorrectAnswer, Difficulty, Explanation)",
+            Filter = "CSV / Text Files (*.csv;*.txt)|*.csv;*.txt|All Files (*.*)|*.*"
+        };
+
+        if (ofd.ShowDialog() != true) return;
+
+        try
+        {
+            string[] lines = File.ReadAllLines(ofd.FileName);
+            int imported = 0;
+
+            string prefix = "Q";
+            if (!string.IsNullOrWhiteSpace(PackTitle))
+            {
+                var words = PackTitle.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                prefix = words.Length >= 2
+                    ? $"{words[0][0]}{words[1][0]}".ToUpperInvariant()
+                    : PackTitle[..Math.Min(3, PackTitle.Length)].ToUpperInvariant();
+            }
+
+            foreach (string rawLine in lines)
+            {
+                if (string.IsNullOrWhiteSpace(rawLine)) continue;
+                var cols = ParseCsvRow(rawLine);
+                if (cols.Count < 6) continue;
+
+                // Skip header row if first column is "Prompt" or "Question"
+                if (imported == 0 && (cols[0].Equals("Prompt", StringComparison.OrdinalIgnoreCase) ||
+                                      cols[0].Equals("Question", StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                string prompt = cols[0].Trim();
+                string optA = cols[1].Trim();
+                string optB = cols[2].Trim();
+                string optC = cols[3].Trim();
+                string optD = cols[4].Trim();
+                string correctRaw = cols[5].Trim();
+
+                if (string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(optA) ||
+                    string.IsNullOrWhiteSpace(optB) || string.IsNullOrWhiteSpace(optC) || string.IsNullOrWhiteSpace(optD))
+                {
+                    continue;
+                }
+
+                int correctIndex = correctRaw.ToUpperInvariant() switch
+                {
+                    "A" or "0" => 0,
+                    "B" or "1" => 1,
+                    "C" or "2" => 2,
+                    "D" or "3" => 3,
+                    _ => string.Equals(correctRaw, optB, StringComparison.OrdinalIgnoreCase) ? 1
+                       : string.Equals(correctRaw, optC, StringComparison.OrdinalIgnoreCase) ? 2
+                       : string.Equals(correctRaw, optD, StringComparison.OrdinalIgnoreCase) ? 3
+                       : 0
+                };
+
+                var diff = TriviaDifficulty.Easy;
+                if (cols.Count >= 7 && Enum.TryParse<TriviaDifficulty>(cols[6].Trim(), true, out var parsedDiff))
+                {
+                    diff = parsedDiff;
+                }
+
+                string explanation = cols.Count >= 8 ? cols[7].Trim() : string.Empty;
+
+                int nextNum = PackQuestions.Count + 1;
+                string qId = $"{prefix}-{nextNum:D3}";
+                while (PackQuestions.Any(q => string.Equals(q.Id, qId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    nextNum++;
+                    qId = $"{prefix}-{nextNum:D3}";
+                }
+
+                PackQuestions.Add(new TriviaQuestion
+                {
+                    Id = qId,
+                    Category = string.IsNullOrWhiteSpace(PackCategory) ? "General" : PackCategory.Trim(),
+                    Difficulty = diff,
+                    QuestionType = TriviaQuestionType.MultipleChoice,
+                    Prompt = prompt,
+                    Options = [optA, optB, optC, optD],
+                    CorrectAnswerIndex = correctIndex,
+                    Explanation = explanation,
+                    TimeLimitSeconds = 15
+                });
+                imported++;
+            }
+
+            if (imported > 0)
+            {
+                SelectedPack.Questions = PackQuestions.ToList();
+                FilterQuestions();
+                RecalculateDistribution();
+                SelectedQuestion = PackQuestions.LastOrDefault();
+                HasUnsavedChanges = true;
+                SetStatus($"Imported {imported} question(s) from '{Path.GetFileName(ofd.FileName)}'. Click 'Save Pack' to commit.");
+            }
+            else
+            {
+                SetStatus("No valid 6+ column rows (Prompt, OptionA, OptionB, OptionC, OptionD, Correct) found in CSV.", isError: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Error importing CSV: {ex.Message}", isError: true);
+        }
+    }
+
+    private static List<string> ParseCsvRow(string line)
+    {
+        var result = new List<string>();
+        var current = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if ((c == ',' || c == '\t') && !inQuotes)
+            {
+                result.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        result.Add(current.ToString());
+        return result;
     }
 
     [RelayCommand]
@@ -833,6 +1226,8 @@ public partial class MainViewModel : ObservableObject
             }
             catch { }
 
+            HasUnsavedChanges = false;
+            _removedQuestionIds.Clear();
             Packs.Remove(SelectedPack);
             FilterPacks();
             SelectedPack = Packs.FirstOrDefault();
@@ -903,11 +1298,12 @@ This application allows you to:
    • Enter choices for **Option A (▲ Purple)**, **Option B (◆ Cyan)**, **Option C (● Amber)**, and **Option D (■ Rose)**.
    • All 4 choices are required for multiple-choice trivia rounds.
 4. **Select Correct Answer**: Click the **Radio Button** on the right side of the option card that represents the correct answer. The selected card will be designated as the winning answer.
-5. **Difficulty**: Select `Easy` (1,000 pts), `Medium` (1,000 pts), or `Hard` (1,000 pts).
+5. **Difficulty & Time Limit**: Select `Easy`, `Medium`, or `Hard` and set the per-question **Time Limit (sec)** (default `15`).
 6. **Explanation / Fun Fact**: Enter interesting background trivia or context. This text is displayed on venue TVs during the 5-second post-reveal buffer after the answer is revealed.
 7. **Commit**: Click **'💾 Apply / Save Question to Pack'** to update the list.
 
-### Duplicating Questions:
+### Filtering & Duplicating Questions:
+• Use the **Difficulty Filter** dropdown (`All`, `Easy`, `Medium`, `Hard`) next to the search box to filter the question list by difficulty.
 • To quickly create similar questions or series, select a question in the table and click **'📋 Duplicate'** in the Question Editor header."
         });
 
@@ -979,10 +1375,9 @@ All applications in the Lyracist suite share centralized folders:
             AccentColor = "#A78BFA",
             DescriptionHeader = "Sharing & Backing Up JSON Question Packs",
             DescriptionContent = 
-@"### Importing External Packs:
-1. Click the **'📂 Import JSON'** button in the top header bar.
-2. Select any valid `.json` trivia database file from your computer or a flash drive.
-3. The file is copied into `Packs/`, indexed, and loaded into your sidebar immediately.
+@"### Importing External Packs & CSV Spreadsheets:
+1. Click **'📂 Import JSON'** in the top header bar to import any `.json` trivia pack (or raw question array) into `Packs/` and automatically sync it to `Data/trivia.db`.
+2. Click **'📥 Import CSV'** in the top header bar to bulk-import questions from a `.csv` or tab-delimited `.txt` spreadsheet (`Prompt, OptionA, OptionB, OptionC, OptionD, CorrectAnswer, Difficulty, Explanation`) directly into the currently selected pack.
 
 ### Exporting Databases:
 1. Select the pack you wish to export in the Left Sidebar.

@@ -1,4 +1,24 @@
-// Edited on Oct 31, 2026 @ 10:48:00 -> Document KnockoutTrivia sound engine, speed bonus, live answer distribution, player revive, category filtering, and custom pack import
+// Edited on Oct 31, 2026 @ 13:27:00 -> Document LyracistDbEditor Genre editing, Manual DB Backup, Duplicate/Orphaned audit tools, and TriviaDbCreator CSV import, Time Limit editor, Difficulty filter, and SQLite sync
+
+LyracistDbEditor & TriviaDbCreator: Database Editor & Trivia Creator Enhancements, Bulk CSV Import & Library Health Tools - (October 2026)
+
+Section: Database & Content Management / Lyracist Database Editor & Trivia Database Creator
+
+0. Lyracist Database Editor ('LyracistDbEditor.exe'):
+   - Genre Editing & Track Management: The 'Edit Track Details' panel now includes a 'Genre' field alongside Title, Artist, and Tags, plus '📂 Open Folder' (reveals the media file in Windows Explorer) and '🗑️ Delete' buttons. Right-clicking any song row in the DataGrid also provides '📂 Open File Location', '🗑️ Delete from Database', and '🔍 Scan Song Metadata'.
+   - Manual Database Backup: Click '💾 Backup DB' in the top header bar to create an immediate timestamped backup of 'lyracist.db' in 'Data/Backups/'.
+   - Library Health & Duplicate / Orphaned File Audit:
+     * Duplicate Detection: 'Remove Selected' and 'Remove All But Suggested' are pinned at the bottom of the Duplicate Detection card for instant access across all duplicate groups, with background keeper selection and batched FTS5 / 'noartist.db' cleanup.
+     * Orphaned File Audit: Provides both 'Remove Selected' (to purge an individual missing file entry) and 'Remove All Orphaned' (to batch-purge all missing entries).
+   - Single-Song Metadata Scan Repair Sync: Resolving an artist via '🔍 Scan Song Metadata' automatically clears 'NeedsRepair' and removes the track from 'Data/noartist.db'.
+   - Responsive Catalog Songbook Export: Generating PDF, Word (.docx), or Text (.txt) songbooks runs asynchronously in the background so the editor UI remains responsive across 50,000+ songs.
+
+0A. Trivia Database Creator & Banner Studio ('TriviaDbCreator.exe'):
+   - Bulk CSV / Text Question Import ('📥 Import CSV'): Import spreadsheets of trivia questions directly into the selected category pack using columns: Prompt, OptionA, OptionB, OptionC, OptionD, Correct (A/B/C/D, 1-4, or 0-3), Difficulty (Easy/Medium/Hard), and Explanation.
+   - Flexible JSON Pack Import ('📂 Import Pack'): Supports both full 'TriviaPack' JSON files and raw JSON question arrays ('[...]'), and automatically syncs imported questions to 'Data/trivia.db'.
+   - Per-Question Time Limit & Difficulty Breakdown: Edit per-question 'Time Limit (s)' (5 to 120 seconds, default 20s) directly in the Question Editor, filter questions by Difficulty ('All', 'Easy', 'Medium', 'Hard'), and view live difficulty distribution counts ('Easy: X | Med: Y | Hard: Z').
+   - Reliable 16:9 Banner Regeneration: Preview images load into unlocked memory bitmaps so regenerating an existing pack banner ('🎨 Generate Banner' or '🎨 Generate Missing Banners') never locks the '.png' file on disk and refreshes the preview immediately.
+   - Clean SQLite Sync & Unsaved Changes Protection: Deleting a question or renaming a question ID automatically purges the old ID from 'Data/trivia.db' on save, duplicate question IDs are prevented within a pack, and prompts protect against losing unsaved changes when switching packs or closing the window.
 
 Lyracist & LyracistDbEditor: Automatic Database & FTS5 Search Self-Repair, Tab Layout & High-Speed Drive Rescanning - (October 2026)
 

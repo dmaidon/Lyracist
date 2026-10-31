@@ -1,4 +1,4 @@
-<!-- Edited on Oct 31, 2026 @ 09:18:15 -> Bump AssemblyVersion and FileVersion to 26.10.31.129 -->
+<!-- Edited on Oct 31, 2026 @ 13:21:00 -> Link Shared\Globals.cs into TriviaDbCreator -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Shared\Globals.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="Shared\SingleInstanceHelper.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />

@@ -1,4 +1,4 @@
-// Edited on Oct 11, 2026 @ 13:32:00 -> Sync NoArtistStore when repairing or deleting songs and during slow metadata scan
+// Edited on Oct 31, 2026 @ 13:19:00 -> Add EditGenre, OpenFileLocation, CreateManualBackup, NeedsRepair reset in ScanSongMetadata, and async GenerateBook
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,6 +43,9 @@ public partial class MainViewModel : ObservableObject
     private string _editArtist = string.Empty;
 
     [ObservableProperty]
+    private string _editGenre = string.Empty;
+
+    [ObservableProperty]
     private bool _onlyShowMissingArtist;
 
     partial void OnSelectedSongChanged(Song? value)
@@ -51,11 +54,13 @@ public partial class MainViewModel : ObservableObject
         {
             EditTitle = value.Title ?? string.Empty;
             EditArtist = value.Artist ?? string.Empty;
+            EditGenre = value.Genre ?? string.Empty;
         }
         else
         {
             EditTitle = string.Empty;
             EditArtist = string.Empty;
+            EditGenre = string.Empty;
         }
     }
 
@@ -293,9 +298,10 @@ public partial class MainViewModel : ObservableObject
                 // Only re-case a field the user actually changed (and only if they haven't turned
                 // re-casing off), so titles like "AC/DC" or "(I Can't Get No) Satisfaction" that are
                 // saved untouched - or typed deliberately - aren't mangled by ProperCase.
+                int targetId = SelectedSong.SongId;
                 dbSong.Artist = RecaseIfChanged(newArtist, dbSong.Artist);
                 dbSong.Title = RecaseIfChanged(newTitle, dbSong.Title);
-                dbSong.Genre = SelectedSong.Genre;
+                dbSong.Genre = (EditGenre ?? string.Empty).Trim();
                 dbSong.Tags = SelectedSong.Tags;
                 dbSong.Duration = SelectedSong.Duration;
                 dbSong.IsKaraoke = SelectedSong.IsKaraoke;
@@ -328,6 +334,7 @@ public partial class MainViewModel : ObservableObject
 
                 RefreshStats();
                 Search();
+                SelectedSong = SearchResults.FirstOrDefault(s => s.SongId == targetId);
 
                 StatusMessage = $"Saved '{dbSong.Title}' by {dbSong.Artist}.";
             }
@@ -339,12 +346,13 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteSong()
+    private async Task DeleteSong(Song? song)
     {
-        if (SelectedSong == null) return;
+        song ??= SelectedSong;
+        if (song == null) return;
 
         var confirm = System.Windows.MessageBox.Show(
-            $"Are you sure you want to delete '{SelectedSong.Title}' by '{SelectedSong.Artist}' from the database?\nThis will not delete the physical file.",
+            $"Are you sure you want to delete '{song.Title}' by '{song.Artist}' from the database?\nThis will not delete the physical file.",
             "Confirm Delete",
             System.Windows.MessageBoxButton.YesNo,
             System.Windows.MessageBoxImage.Warning);
@@ -354,7 +362,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             using var context = new LyracistDbContext();
-            var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == SelectedSong.SongId);
+            var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == song.SongId);
             if (dbSong != null)
             {
                 var searchService = new SearchService(context);
@@ -364,7 +372,10 @@ public partial class MainViewModel : ObservableObject
                 await searchService.RemoveSongFromIndex(dbSong.SongId);
                 await NoArtistStore.RemoveAsync(dbSong.FilePath);
 
-                SelectedSong = null;
+                if (SelectedSong?.SongId == song.SongId)
+                {
+                    SelectedSong = null;
+                }
                 RefreshStats();
                 Search();
 
@@ -374,6 +385,60 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Windows.MessageBox.Show($"Failed to delete song: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenFileLocation(Song? song)
+    {
+        song ??= SelectedSong;
+        if (song == null || string.IsNullOrWhiteSpace(song.FilePath)) return;
+
+        try
+        {
+            if (File.Exists(song.FilePath))
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{song.FilePath}\"")
+                {
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                string? dir = Path.GetDirectoryName(song.FilePath);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe", $"\"{dir}\"")
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("The file and its parent folder do not exist on disk.", "File Not Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to open file location: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CreateManualBackup()
+    {
+        try
+        {
+            StatusMessage = "Creating database snapshot backup...";
+            string backupPath = await DatabaseBackup.CreateAsync("Manual");
+            StatusMessage = $"Backup created: {Path.GetFileName(backupPath)}";
+            AppendLog($"Database backup created: {backupPath}");
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Backup failed: {ex.Message}";
+            System.Windows.MessageBox.Show($"Failed to create database backup: {ex.Message}", "Backup Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 
@@ -445,6 +510,7 @@ public partial class MainViewModel : ObservableObject
             // If tags or artist resolved successfully, update the DB record
             if (!string.IsNullOrWhiteSpace(artist) && artist != "Unknown Artist")
             {
+                int targetId = song.SongId;
                 using var context = new LyracistDbContext();
                 var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == song.SongId);
                 if (dbSong != null)
@@ -453,8 +519,10 @@ public partial class MainViewModel : ObservableObject
                     dbSong.Title = title;
                     dbSong.Genre = genre;
                     dbSong.Tags = tags;
+                    dbSong.NeedsRepair = false;
 
                     await context.SaveChangesAsync();
+                    await NoArtistStore.RemoveAsync(dbSong.FilePath);
 
                     // Sync FTS Search
                     var searchService = new SearchService(context);
@@ -462,6 +530,7 @@ public partial class MainViewModel : ObservableObject
 
                     RefreshStats();
                     Search();
+                    SelectedSong = SearchResults.FirstOrDefault(s => s.SongId == targetId);
 
                     StatusMessage = $"Metadata updated: {dbSong.Artist} - {dbSong.Title}";
                 }
@@ -1264,28 +1333,35 @@ public partial class MainViewModel : ObservableObject
         _renameCts?.Cancel();
     }
 
+    [ObservableProperty]
+    private bool _isGeneratingBook;
+
     [RelayCommand]
     private async Task GenerateBook()
     {
+        if (IsGeneratingBook) return;
+        IsGeneratingBook = true;
+        StatusMessage = "Generating catalog book...";
+
         try
         {
             bool isKaraoke = ExportCatalogIndex == 0;
             int formatIndex = ExportFormatIndex;
 
-            string filePath;
-            if (formatIndex == 0)
+            string filePath = await Task.Run(() =>
             {
-                filePath = Lyracist.Data.Services.CatalogBookGenerator.GeneratePdf(isKaraoke);
-            }
-            else if (formatIndex == 1)
-            {
-                filePath = Lyracist.Data.Services.CatalogBookGenerator.GenerateTxt(isKaraoke);
-            }
-            else
-            {
-                filePath = Lyracist.Data.Services.CatalogBookGenerator.GenerateDocx(isKaraoke);
-            }
+                if (formatIndex == 0)
+                {
+                    return Lyracist.Data.Services.CatalogBookGenerator.GeneratePdf(isKaraoke);
+                }
+                if (formatIndex == 1)
+                {
+                    return Lyracist.Data.Services.CatalogBookGenerator.GenerateTxt(isKaraoke);
+                }
+                return Lyracist.Data.Services.CatalogBookGenerator.GenerateDocx(isKaraoke);
+            });
 
+            StatusMessage = $"Catalog exported: {Path.GetFileName(filePath)}";
             System.Windows.MessageBox.Show($"Catalog book generated successfully!\nSaved to: {filePath}", "Export Complete", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
             if (File.Exists(filePath))
@@ -1299,7 +1375,12 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            StatusMessage = $"Catalog export failed: {ex.Message}";
             System.Windows.MessageBox.Show($"Failed to generate catalog book: {ex.Message}", "Export Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsGeneratingBook = false;
         }
     }
 

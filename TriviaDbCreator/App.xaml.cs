@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:23:00 -> Enforce single-instance application execution using SingleInstanceHelper
+// Edited on Oct 31, 2026 @ 13:21:00 -> Call Shutdown on duplicate instance and log app startup
 using System.Windows;
 using Lyracist.Shared;
 
@@ -10,8 +10,12 @@ public partial class App : Application
     {
         if (!SingleInstanceHelper.EnsureSingleInstance("TriviaDbCreator"))
         {
+            Shutdown();
             return;
         }
+
+        Globals.LogAppStart("TriviaDbCreator");
+        Globals.PurgeOldLogs(14);
 
         TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
         base.OnStartup(e);
