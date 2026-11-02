@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:33:00 -> Add unit tests for skipped anchor singer restored on round completion
+// Edited on Nov 2, 2026 @ 10:38:30 -> Add unit tests for linked singer drag-reorder, anchor insertion, and paused/current adjacency edge cases
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2493,6 +2493,31 @@ public class SampleSingerTests
         int aliceIdx = vm.Singers.IndexOf(s1);
         int bobIdx = vm.Singers.IndexOf(s2);
         Assert.Equal(1, Math.Abs(aliceIdx - bobIdx));
+    }
+
+    [Fact]
+    public void MoveSingerToPosition_DraggingLinkedSingerDownward_MovesEntirePairDown()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var s1 = new SingerEntry { Name = "Alice" };
+        var s2 = new SingerEntry { Name = "Bob" };
+        var s3 = new SingerEntry { Name = "Charlie" };
+        var s4 = new SingerEntry { Name = "Dave" };
+        var s5 = new SingerEntry { Name = "Eve" };
+
+        vm.Singers.Add(s1);
+        vm.Singers.Add(s2);
+        vm.Singers.Add(s3);
+        vm.Singers.Add(s4);
+        vm.Singers.Add(s5);
+        RotationHelpers.LinkSingers(vm.Singers, s1, s2);
+
+        bool moved = vm.MoveSingerToPosition(s1, 3);
+
+        Assert.True(moved);
+        Assert.Equal(["Charlie", "Dave", "Alice", "Bob", "Eve"], vm.Singers.Select(s => s.Name));
     }
 
     [Fact]

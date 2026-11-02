@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 11:35:00 -> Clear singer Scaryoke challenge badge and color when performance completes
+// Edited on Nov 2, 2026 @ 10:29:00 -> Fix linked singer drag-reorder, anchor insertion, paused/current adjacency edge cases
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -235,6 +235,20 @@ namespace Lyracist.Shared
                     {
                         startAnchorIndex = i;
                     }
+                }
+            }
+
+            if (startAnchorIndex > 0)
+            {
+                // If the round anchor is the trailing partner of an adjacent active linked pair,
+                // treat the leading partner's index as the pair's start boundary so a new signup
+                // isn't inserted between the two linked partners.
+                if (singers[startAnchorIndex].LinkedSingerId is Guid anchorPartnerId
+                    && singers[startAnchorIndex - 1].Id == anchorPartnerId
+                    && !singers[startAnchorIndex - 1].IsInactive
+                    && !singers[startAnchorIndex - 1].IsCurrent)
+                {
+                    startAnchorIndex--;
                 }
             }
 
@@ -603,6 +617,25 @@ namespace Lyracist.Shared
                 {
                     MoveSingerInList(singers, index, 0);
                 }
+
+                // If the promoted singer has an active linked partner (who wasn't the displaced previous current),
+                // bring the partner along to index 1 so the pair stays together when floated to the top.
+                if (entry.LinkedSingerId.HasValue)
+                {
+                    for (int i = 1; i < singers.Count; i++)
+                    {
+                        T candidate = singers[i];
+                        if (candidate.Id == entry.LinkedSingerId.Value && !candidate.IsInactive && candidate != previousCurrent)
+                        {
+                            if (i > 1)
+                            {
+                                MoveSingerInList(singers, i, 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+
                 UpdateNextSingerHighlight(singers, isLastRound);
             }
             else
@@ -826,7 +859,10 @@ namespace Lyracist.Shared
                 while (maxMoves-- > 0 && singers.Count > 1 && skipTargetIdx > 0)
                 {
                     T top = singers[0];
-                    if (!top.IsInactive && !top.IsPaused && top.IsSkipped)
+                    bool isSkippedAtTop = !top.IsInactive && !top.IsPaused && top.IsSkipped;
+                    bool isPausedLinkedPartnerOfFinished = !top.IsInactive && top.IsPaused
+                        && top.LinkedSingerId.HasValue && top.LinkedSingerId.Value == finishedEntry.Id;
+                    if (isSkippedAtTop || isPausedLinkedPartnerOfFinished)
                     {
                         MoveSingerInList(singers, 0, skipTargetIdx);
                     }
@@ -1145,12 +1181,19 @@ namespace Lyracist.Shared
                 int entryIndex = singers.IndexOf(entry);
                 if (Math.Abs(partnerIndex - entryIndex) != 1)
                 {
-                    // MoveSingerInList's newIndex must already be the post-removal index: when
-                    // partnerIndex < entryIndex the removal happens before entry's position, so
-                    // entry (and the "immediately before it" slot) shifts down by one; when
-                    // partnerIndex > entryIndex, removal happens after entry so its position is
-                    // unaffected and the "immediately after it" slot is entryIndex + 1 as-is.
-                    if (partnerIndex < entryIndex)
+                    int anchorIndex = FindAnchorIndex(singers);
+                    bool entryIsPausedOrSkipped = entry.IsPaused || entry.IsSkipped;
+                    bool partnerIsActive = !partner.IsPaused && !partner.IsSkipped;
+
+                    // If the earlier entry in the list is paused/skipped while its active partner has already
+                    // sung and cycled past the round anchor to the bottom, move the paused/skipped entry down
+                    // to join its partner rather than pulling the already-sung partner back into the current round.
+                    if (partnerIndex > entryIndex && entryIsPausedOrSkipped && partnerIsActive
+                        && anchorIndex > entryIndex && anchorIndex <= partnerIndex)
+                    {
+                        MoveSingerInList(singers, entryIndex, partnerIndex - 1);
+                    }
+                    else if (partnerIndex < entryIndex)
                     {
                         MoveSingerInList(singers, partnerIndex, entryIndex - 1);
                     }
@@ -1166,23 +1209,29 @@ namespace Lyracist.Shared
         }
 
         /// <summary>
-        /// Finds the active, non-current linked partner of <paramref name="singer"/> in <paramref name="singers"/>,
-        /// or null if the singer is not linked, or the partner is inactive, current, or missing.
+        /// Finds the active linked partner of <paramref name="singer"/> in <paramref name="singers"/>,
+        /// or null if the singer is not linked, or the partner is inactive, missing, or currently separated
+        /// during an active performance.
         /// </summary>
         public static T? GetActiveLinkedPartner<T>(IList<T> singers, T singer) where T : class, IRotationSinger
         {
-            if (singers == null || singer == null || !singer.LinkedSingerId.HasValue || singer.IsInactive || singer.IsCurrent)
+            if (singers == null || singer == null || !singer.LinkedSingerId.HasValue || singer.IsInactive)
                 return null;
 
+            int singerIndex = singers.IndexOf(singer);
             Guid partnerId = singer.LinkedSingerId.Value;
             for (int i = 0; i < singers.Count; i++)
             {
                 T candidate = singers[i];
                 if (candidate != singer && candidate.Id == partnerId)
                 {
-                    if (!candidate.IsInactive && !candidate.IsCurrent)
+                    if (!candidate.IsInactive)
                     {
-                        return candidate;
+                        bool isAdjacent = singerIndex >= 0 && Math.Abs(singerIndex - i) == 1;
+                        if (isAdjacent || (!singer.IsCurrent && !candidate.IsCurrent))
+                        {
+                            return candidate;
+                        }
                     }
                     break;
                 }
@@ -1398,6 +1447,138 @@ namespace Lyracist.Shared
             EnforceLinkedAdjacency(singers);
             UpdateNextSingerHighlight(singers);
             return stateChanged;
+        }
+
+        /// <summary>
+        /// Moves <paramref name="entry"/> directly to <paramref name="targetIndex"/> in <paramref name="singers"/> (drag-and-drop).
+        /// Enforces active/inactive partition boundaries, float-current-to-top locking, and linked singer pair movement
+        /// (moving a linked singer either upward or downward moves its partner with it in their relative order, while dropping
+        /// one partner directly onto the other swaps their internal order).
+        /// </summary>
+        public static bool MoveSingerToIndex<T>(IList<T> singers, T entry, int targetIndex, bool floatCurrentToTop = false) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            if (entry == null || singers.Count == 0) return false;
+
+            int oldIndex = singers.IndexOf(entry);
+            if (oldIndex < 0) return false;
+
+            targetIndex = Math.Clamp(targetIndex, 0, singers.Count - 1);
+            if (oldIndex == targetIndex) return false;
+
+            int firstInactive = singers.Count;
+            for (int i = 0; i < singers.Count; i++)
+            {
+                if (singers[i].IsInactive)
+                {
+                    firstInactive = i;
+                    break;
+                }
+            }
+
+            if (entry.IsInactive)
+            {
+                if (targetIndex < firstInactive)
+                {
+                    targetIndex = firstInactive;
+                }
+            }
+            else
+            {
+                int maxActiveIndex = Math.Max(0, firstInactive - 1);
+                if (targetIndex > maxActiveIndex)
+                {
+                    targetIndex = maxActiveIndex;
+                }
+            }
+
+            if (floatCurrentToTop && singers.Count > 0 && singers[0].IsCurrent)
+            {
+                if (entry != singers[0] && targetIndex == 0)
+                {
+                    targetIndex = 1;
+                }
+                else if (entry == singers[0] && targetIndex > 0)
+                {
+                    targetIndex = 0;
+                }
+            }
+
+            if (oldIndex == targetIndex) return false;
+
+            T? partner = (!entry.IsInactive && !entry.IsCurrent) ? GetActiveLinkedPartner(singers, entry) : null;
+            if (partner != null && !partner.IsCurrent)
+            {
+                int partnerOldIdx = singers.IndexOf(partner);
+                if (partnerOldIdx >= 0)
+                {
+                    // Dropping directly onto the adjacent linked partner swaps their internal order
+                    if (Math.Abs(oldIndex - partnerOldIdx) == 1 && targetIndex == partnerOldIdx)
+                    {
+                        MoveSingerInList(singers, oldIndex, targetIndex);
+                        EnforceLinkedAdjacency(singers);
+                        return true;
+                    }
+
+                    bool entryWasFirst = oldIndex < partnerOldIdx;
+                    MoveSingerInList(singers, oldIndex, targetIndex);
+
+                    int entryNewIdx = singers.IndexOf(entry);
+                    int partnerCurIdx = singers.IndexOf(partner);
+                    if (entryNewIdx >= 0 && partnerCurIdx >= 0 && Math.Abs(entryNewIdx - partnerCurIdx) != 1)
+                    {
+                        if (entryWasFirst)
+                        {
+                            int dest = partnerCurIdx < entryNewIdx ? entryNewIdx : entryNewIdx + 1;
+                            MoveSingerInList(singers, partnerCurIdx, Math.Clamp(dest, 0, singers.Count - 1));
+                        }
+                        else
+                        {
+                            int dest = partnerCurIdx < entryNewIdx ? entryNewIdx - 1 : entryNewIdx;
+                            if (floatCurrentToTop && dest == 0 && singers[0].IsCurrent && partner != singers[0])
+                            {
+                                // Cannot displace current singer at index 0; place partner right after entry instead
+                                int altDest = partnerCurIdx < entryNewIdx ? entryNewIdx : entryNewIdx + 1;
+                                MoveSingerInList(singers, partnerCurIdx, Math.Clamp(altDest, 0, singers.Count - 1));
+                            }
+                            else
+                            {
+                                MoveSingerInList(singers, partnerCurIdx, Math.Clamp(dest, 0, singers.Count - 1));
+                            }
+                        }
+                    }
+
+                    EnforceLinkedAdjacency(singers);
+                    return true;
+                }
+            }
+
+            // If an unlinked singer is dragged upward into the middle of an adjacent linked pair,
+            // step targetIndex above the leading partner so the pair stays together below the dropped singer.
+            if (oldIndex > targetIndex && targetIndex > 0)
+            {
+                T targetAtSlot = singers[targetIndex];
+                T aboveSlot = singers[targetIndex - 1];
+                if (targetAtSlot.LinkedSingerId is Guid slotPartnerId
+                    && aboveSlot.Id == slotPartnerId
+                    && !targetAtSlot.IsInactive && !aboveSlot.IsInactive)
+                {
+                    if (floatCurrentToTop && targetIndex - 1 == 0 && aboveSlot.IsCurrent)
+                    {
+                        targetIndex = Math.Min(targetIndex + 1, singers.Count - 1);
+                    }
+                    else
+                    {
+                        targetIndex--;
+                    }
+                }
+            }
+
+            if (oldIndex == targetIndex) return false;
+
+            MoveSingerInList(singers, oldIndex, targetIndex);
+            EnforceLinkedAdjacency(singers);
+            return true;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 09:30:30 -> Call ShutdownTrivia during MainViewModel.Shutdown to cleanly stop Trivia web server and timers
+// Edited on Nov 2, 2026 @ 10:30:00 -> Use shared RotationHelpers.MoveSingerToIndex for linked-pair-aware drag-and-drop reordering
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2831,50 +2831,19 @@ namespace KSRotation.ViewModels
         {
             if (entry == null || Singers.Count == 0) return false;
 
-            int oldIndex = Singers.IndexOf(entry);
-            if (oldIndex < 0) return false;
-
-            targetIndex = Math.Clamp(targetIndex, 0, Singers.Count - 1);
-            if (oldIndex == targetIndex) return false;
-
-            // Inactive singers cannot be moved into active partition
-            if (entry.IsInactive)
+            bool moved;
+            _isFinishingSong = true;
+            try
             {
-                int firstInactive = Singers.TakeWhile(s => !s.IsInactive).Count();
-                if (targetIndex < firstInactive)
-                {
-                    targetIndex = firstInactive;
-                }
+                moved = RotationHelpers.MoveSingerToIndex(Singers, entry, targetIndex, FloatCurrentSingerToTop);
             }
-            else
+            finally
             {
-                // Active singers cannot be moved into inactive partition
-                int firstInactive = Singers.TakeWhile(s => !s.IsInactive).Count();
-                int maxActiveIndex = Math.Max(0, firstInactive - 1);
-                if (targetIndex > maxActiveIndex)
-                {
-                    targetIndex = maxActiveIndex;
-                }
+                _isFinishingSong = false;
             }
 
-            if (FloatCurrentSingerToTop && Singers.Count > 0 && Singers[0].IsCurrent)
-            {
-                if (entry != Singers[0] && targetIndex == 0)
-                {
-                    targetIndex = 1;
-                }
-                else if (entry == Singers[0] && targetIndex > 0)
-                {
-                    targetIndex = 0;
-                }
-            }
+            if (!moved) return false;
 
-            if (oldIndex == targetIndex) return false;
-
-            Singers.Move(oldIndex, targetIndex);
-
-            // Re-enforce linked pair adjacency if either this singer or affected neighbors are linked
-            RotationHelpers.EnforceLinkedAdjacency(Singers);
             RefreshLinkedPartnerNames();
 
             // Ensure valid rotation start anchor remains set

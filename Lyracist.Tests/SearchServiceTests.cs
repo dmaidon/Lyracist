@@ -292,4 +292,57 @@ public class SearchServiceTests
             }
         }
     }
+
+    [Fact]
+    public void ClearAbandonedMigrationLocks_OnHealthyDatabase_LeavesCatalogUntouched()
+    {
+        static List<string> Snapshot()
+        {
+            var rows = new List<string>();
+            using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={LyracistDbContext.GetDatabaseFilePath()};Pooling=False");
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY type, name;";
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                rows.Add($"{r.GetString(0)}|{r.GetString(1)}|{r.GetString(2)}|{(r.IsDBNull(3) ? "" : r.GetString(3))}");
+            }
+            return rows;
+        }
+
+        var before = Snapshot();
+        LyracistDbContext.ClearAbandonedMigrationLocks();
+        Assert.Equal(before, Snapshot());
+    }
+
+    [Fact]
+    public async Task Search_WithPunctuationOnlyTitleAndLikeWildcards_DoesNotThrowAndFindsSong()
+    {
+        string marker = $"PUNCT{Guid.NewGuid():N}";
+        using var context = new LyracistDbContext();
+        var searchService = new SearchService(context);
+        var song = new Song
+        {
+            Title = $"(...) {marker}_50%",
+            Artist = "Test Artist",
+            FilePath = $"C:\\test\\{marker}.mp3",
+            IsKaraoke = false
+        };
+        try
+        {
+            context.Songs.Add(song);
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await searchService.IndexSongsBatch([song]);
+
+            var results = await searchService.Search(marker, isKaraoke: false);
+            Assert.Contains(results, s => s.SongId == song.SongId);
+        }
+        finally
+        {
+            await searchService.RemoveSongFromIndex(song.SongId);
+            context.Songs.Remove(song);
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+    }
 }

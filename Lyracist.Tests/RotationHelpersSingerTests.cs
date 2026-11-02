@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 06:32:00 -> Add unit tests for skipped anchor singer restored on round completion
+// Edited on Nov 2, 2026 @ 10:33:00 -> Add unit tests for linked singer drag-reorder, anchor insertion, and paused/current adjacency edge cases
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -1290,6 +1290,103 @@ public class RotationHelpersSingerTests
         Assert.Equal(carol, singers[1]);
         Assert.Equal(dave, singers[2]); // Dave pulled adjacent right after Carol
         Assert.Equal(bob, singers[3]);
+    }
+
+    [Fact]
+    public void MoveSingerToIndex_DraggingLinkedSingerDownward_MovesEntirePairDown()
+    {
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol" };
+        var dave = new Singer { Name = "Dave" };
+        var eve = new Singer { Name = "Eve" };
+        var list = new List<Singer> { alice, bob, carol, dave, eve };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        // Drag leading partner (Alice) down to index 3
+        bool moved = RotationHelpers.MoveSingerToIndex(list, alice, 3);
+
+        Assert.True(moved);
+        Assert.Equal(["Carol", "Dave", "Alice", "Bob", "Eve"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void MoveSingerToIndex_DraggingTrailingLinkedPartnerDownward_MovesEntirePairDown()
+    {
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol" };
+        var dave = new Singer { Name = "Dave" };
+        var eve = new Singer { Name = "Eve" };
+        var list = new List<Singer> { alice, bob, carol, dave, eve };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        // Drag trailing partner (Bob) down to index 3
+        bool moved = RotationHelpers.MoveSingerToIndex(list, bob, 3);
+
+        Assert.True(moved);
+        Assert.Equal(["Carol", "Dave", "Alice", "Bob", "Eve"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void SetCurrentSinger_WithFloatCurrentToTop_BringsLinkedPartnerToIndexOne()
+    {
+        var carol = new Singer { Name = "Carol", IsCurrent = true };
+        var dave = new Singer { Name = "Dave" };
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob" };
+        var list = new List<Singer> { carol, dave, alice, bob };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        RotationHelpers.SetCurrentSinger(list, alice, floatCurrentToTop: true);
+
+        Assert.Equal(["Alice", "Bob", "Carol", "Dave"], list.Select(s => s.Name));
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_WithPausedLinkedPartner_DoesNotPullFinishedSingerBackIntoCurrentRound()
+    {
+        var carol = new Singer { Name = "Carol", IsRotationStart = true };
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = Paused("Bob");
+        var eve = new Singer { Name = "Eve" };
+        var list = new List<Singer> { alice, bob, eve, carol };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        // Alice finishes her performance in FloatCurrentToTop mode while Bob is paused
+        RotationHelpers.AdvanceRotationAfterFinished(list, alice, floatCurrentToTop: true);
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        // Eve becomes current at index 0; Alice and Bob stay together at the bottom after Carol (Anchor)
+        Assert.Equal("Eve", list[0].Name);
+        Assert.True(eve.IsCurrent);
+        Assert.Equal("Carol", list[1].Name);
+        Assert.Equal(1, Math.Abs(list.IndexOf(alice) - list.IndexOf(bob)));
+        Assert.True(list.IndexOf(alice) > list.IndexOf(carol));
+    }
+
+    [Fact]
+    public void InsertNewSinger_WhenTrailingLinkedPartnerIsRotationStart_InsertsBeforeEntirePair()
+    {
+        var carol = new Singer { Name = "Carol", IsCurrent = true };
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob", IsRotationStart = true };
+        var list = new List<Singer> { carol, alice, bob };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        var dave = new Singer { Name = "Dave" };
+        RotationHelpers.InsertNewSinger(list, dave);
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        // Dave must sit before the linked pair [Alice, Bob], not pushed after the anchor Bob
+        Assert.Equal(["Carol", "Dave", "Alice", "Bob"], list.Select(s => s.Name));
     }
 }
 

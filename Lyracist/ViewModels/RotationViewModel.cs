@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 11:35:00 -> Clear singer Scaryoke challenge badge and color when performance completes
+// Edited on Nov 2, 2026 @ 10:30:00 -> Enforce linked adjacency on singer reactivation/drag-drop and unlink on inactive deletion
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -661,6 +661,11 @@ public partial class RotationViewModel : BaseViewModel
             
             InactiveSingers.Remove(inactiveSinger);
             Rotation.Add(inactiveSinger);
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
+            RecalculateAllWaitsAndEstimations();
 
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
@@ -1368,6 +1373,10 @@ public partial class RotationViewModel : BaseViewModel
             singer.IsInactive = false;
             InactiveSingers.Remove(singer);
             Rotation.Add(singer);
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
         }
         else
         {
@@ -1416,7 +1425,10 @@ public partial class RotationViewModel : BaseViewModel
             }
 
             Rotation.Remove(singer);
+            if (PendingLinkSinger == singer) PendingLinkSinger = null;
             Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
             InactiveSingers.Add(singer);
 
             // If they are currently singing and we set them inactive, stop playback
@@ -1441,6 +1453,9 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (singer == null) return;
         InactiveSingers.Remove(singer);
+        Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, singer);
+        if (PendingLinkSinger == singer) PendingLinkSinger = null;
+        RefreshLinkedPartnerNames();
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -1490,6 +1505,24 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
             RotationStateChanged?.Invoke();
         }
+    }
+
+    public bool MoveSingerToPosition(Singer singer, int targetIndex)
+    {
+        if (singer == null || Rotation.Count == 0) return false;
+
+        bool moved = false;
+        RunRotationOrderChange(() =>
+        {
+            moved = Lyracist.Shared.RotationHelpers.MoveSingerToIndex(Rotation, singer, targetIndex, FloatCurrentSingerToTop);
+        });
+
+        if (moved)
+        {
+            SelectedSinger = singer;
+            NotifyRotationReordered();
+        }
+        return moved;
     }
 
     public void NotifyRotationReordered()

@@ -98,11 +98,8 @@ namespace Lyracist.Data
                     // 2. Direct catalog purge if __EFMigrationsLock, duplicate objects, or orphaned indexes remain in sqlite_master
                     try
                     {
-                        using var repairCmd = conn.CreateCommand();
-                        repairCmd.CommandText = @"
-                            PRAGMA writable_schema = ON;
-                            DELETE FROM sqlite_master
-                            WHERE name = '__EFMigrationsLock'
+                        const string badRowsPredicate = @"
+                            name = '__EFMigrationsLock'
                                OR tbl_name = '__EFMigrationsLock'
                                OR name = '1'
                                OR (name IS NOT NULL AND rowid NOT IN (
@@ -110,11 +107,68 @@ namespace Lyracist.Data
                                ))
                                OR (type = 'index' AND name NOT LIKE 'sqlite_autoindex_%' AND tbl_name NOT IN (
                                    SELECT name FROM sqlite_master WHERE type = 'table'
-                               ));
-                            PRAGMA writable_schema = OFF;
-                            PRAGMA integrity_check(1);
-                        ";
-                        repairCmd.ExecuteNonQuery();
+                               ))";
+
+                        // Only touch the catalog when there is something to repair; a healthy database is left alone.
+                        long badRows;
+                        using (var countCmd = conn.CreateCommand())
+                        {
+                            countCmd.CommandText = $"SELECT COUNT(*) FROM sqlite_master WHERE {badRowsPredicate};";
+                            badRows = Convert.ToInt64(countCmd.ExecuteScalar());
+                        }
+
+                        if (badRows > 0)
+                        {
+                            // Checkpoint, then keep a copy so a wrong heuristic is recoverable.
+                            using (var cpCmd = conn.CreateCommand())
+                            {
+                                cpCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                                cpCmd.ExecuteNonQuery();
+                            }
+                            try
+                            {
+                                System.IO.File.Copy(dbPath, $"{dbPath}.prerepair-{DateTime.Now:yyyyMMddHHmmss}.bak", overwrite: false);
+                            }
+                            catch (Exception bakEx)
+                            {
+                                Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: pre-repair backup failed, skipping catalog purge: {bakEx.Message}");
+                                badRows = 0;
+                            }
+                        }
+
+                        if (badRows > 0)
+                        {
+                            using (var onCmd = conn.CreateCommand())
+                            {
+                                onCmd.CommandText = "PRAGMA writable_schema = ON;";
+                                onCmd.ExecuteNonQuery();
+                            }
+                            try
+                            {
+                                using var tx = conn.BeginTransaction();
+                                using (var delCmd = conn.CreateCommand())
+                                {
+                                    delCmd.Transaction = tx;
+                                    delCmd.CommandText = $"DELETE FROM sqlite_master WHERE {badRowsPredicate};";
+                                    delCmd.ExecuteNonQuery();
+                                }
+                                tx.Commit();
+                            }
+                            finally
+                            {
+                                using var offCmd = conn.CreateCommand();
+                                offCmd.CommandText = "PRAGMA writable_schema = OFF;";
+                                offCmd.ExecuteNonQuery();
+                            }
+
+                            using var icCmd = conn.CreateCommand();
+                            icCmd.CommandText = "PRAGMA integrity_check(1);";
+                            string? icResult = icCmd.ExecuteScalar()?.ToString();
+                            if (!string.Equals(icResult, "ok", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: integrity_check after purge returned '{icResult}'; a .prerepair backup was kept.");
+                            }
+                        }
                     }
                     catch (Exception catalogEx)
                     {
@@ -151,9 +205,10 @@ namespace Lyracist.Data
                 string sidecar = dbPath + ext;
                 try
                 {
+                    // Rename rather than delete: the WAL may hold committed, un-checkpointed data.
                     if (System.IO.File.Exists(sidecar))
                     {
-                        System.IO.File.Delete(sidecar);
+                        System.IO.File.Move(sidecar, $"{sidecar}.{DateTime.Now:yyyyMMddHHmmss}.bak");
                     }
                 }
                 catch

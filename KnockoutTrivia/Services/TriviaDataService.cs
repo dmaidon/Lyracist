@@ -37,6 +37,12 @@ public class TriviaDataService : ITriviaDataService
         Directory.CreateDirectory(BasePacksDir);
     }
 
+    // Reads never write; schema creation for the default trivia.db happens once during source discovery.
+    private static string ReadOnlyConnectionString(string dbPath) =>
+        new SqliteConnectionStringBuilder { DataSource = dbPath, Mode = SqliteOpenMode.ReadOnly }.ToString();
+
+    // Fast path only: HasQuestionsTableAsync is the authoritative check, so a database
+    // not named here is still ignored when it has no Questions table.
     public static bool IsExcludedNonTriviaDatabase(string dbPath)
     {
         string fileName = Path.GetFileName(dbPath);
@@ -63,6 +69,7 @@ public class TriviaDataService : ITriviaDataService
         var sources = new List<SelectableTriviaSource>();
 
         // Discover Trivia Databases in Data/ (excluding non-trivia DBs like lyracist.db)
+        await EnsureDefaultTriviaDbAsync();
         foreach (var db in GetAvailableDatabases())
         {
             int count = await GetQuestionCountFromDbAsync(db);
@@ -99,6 +106,25 @@ public class TriviaDataService : ITriviaDataService
         return sources;
     }
 
+    private static async Task EnsureDefaultTriviaDbAsync()
+    {
+        try
+        {
+            string path = Path.Combine(BaseDataDir, "trivia.db");
+            if (!File.Exists(path)) return;
+            await using var conn = new SqliteConnection($"Data Source={path};");
+            await conn.OpenAsync();
+            if (!await HasQuestionsTableAsync(conn))
+            {
+                await EnsureQuestionsTableExistsAsync(conn);
+            }
+        }
+        catch
+        {
+            // Discovery continues; a broken trivia.db simply reports zero questions.
+        }
+    }
+
     private static async Task<bool> HasQuestionsTableAsync(SqliteConnection conn)
     {
         using var checkCmd = conn.CreateCommand();
@@ -132,7 +158,7 @@ public class TriviaDataService : ITriviaDataService
         try
         {
             if (!File.Exists(dbPath) || IsExcludedNonTriviaDatabase(dbPath)) return 0;
-            string connString = $"Data Source={dbPath};";
+            string connString = ReadOnlyConnectionString(dbPath);
             await using var conn = new SqliteConnection(connString);
             await conn.OpenAsync();
 
@@ -222,7 +248,7 @@ public class TriviaDataService : ITriviaDataService
         }
 
         var questions = new List<KnockoutQuestion>();
-        string connString = $"Data Source={path};";
+        string connString = ReadOnlyConnectionString(path);
 
         try
         {
@@ -231,10 +257,6 @@ public class TriviaDataService : ITriviaDataService
 
             if (!await HasQuestionsTableAsync(conn))
             {
-                if (Path.GetFileName(path).Equals("trivia.db", StringComparison.OrdinalIgnoreCase))
-                {
-                    await EnsureQuestionsTableExistsAsync(conn);
-                }
                 return [];
             }
 
@@ -358,7 +380,7 @@ public class TriviaDataService : ITriviaDataService
         if (!File.Exists(path) || IsExcludedNonTriviaDatabase(path)) return [];
 
         var categories = new List<string>();
-        string connString = $"Data Source={path};";
+        string connString = ReadOnlyConnectionString(path);
 
         try
         {

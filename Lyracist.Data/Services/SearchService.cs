@@ -218,7 +218,10 @@ namespace Lyracist.Data.Services
                         {
                             try
                             {
-                                string? sampleToken = null;
+                                // Build probe queries with the same sanitizer real searches use, so titles that are
+                                // pure punctuation never produce an unmatchable probe. Only report corruption when
+                                // every usable probe fails.
+                                var probes = new List<string>();
                                 using (var sampleCmd = connection.CreateCommand())
                                 {
                                     sampleCmd.CommandText = "SELECT Title, Artist FROM Songs WHERE (Title IS NOT NULL AND Title != '') OR (Artist IS NOT NULL AND Artist != '') LIMIT 10;";
@@ -227,28 +230,35 @@ namespace Lyracist.Data.Services
                                     {
                                         string t = sampleReader.IsDBNull(0) ? "" : sampleReader.GetString(0);
                                         string a = sampleReader.IsDBNull(1) ? "" : sampleReader.GetString(1);
-                                        string candidate = Normalize(!string.IsNullOrWhiteSpace(t) ? t : a);
-                                        if (!string.IsNullOrWhiteSpace(candidate))
+                                        string probe = PrepareFtsQuery(!string.IsNullOrWhiteSpace(t) ? t : a);
+                                        if (!string.IsNullOrEmpty(probe))
                                         {
-                                            sampleToken = candidate.Split([' '], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-                                            if (!string.IsNullOrWhiteSpace(sampleToken))
-                                            {
-                                                break;
-                                            }
+                                            // First word only keeps the probe cheap.
+                                            probes.Add(probe.Split(" AND ")[0]);
                                         }
                                     }
                                 }
 
-                                if (!string.IsNullOrWhiteSpace(sampleToken))
+                                if (probes.Count > 0)
                                 {
-                                    using var probeCmd = connection.CreateCommand();
-                                    probeCmd.CommandText = "SELECT SongId FROM SongSearch WHERE SongSearch MATCH @probe LIMIT 1;";
-                                    var p = probeCmd.CreateParameter();
-                                    p.ParameterName = "@probe";
-                                    p.Value = $"\"{sampleToken}\"*";
-                                    probeCmd.Parameters.Add(p);
-                                    var probeResult = probeCmd.ExecuteScalar();
-                                    if (probeResult == null || probeResult == DBNull.Value)
+                                    bool anyMatched = false;
+                                    foreach (string probe in probes)
+                                    {
+                                        using var probeCmd = connection.CreateCommand();
+                                        probeCmd.CommandText = "SELECT SongId FROM SongSearch WHERE SongSearch MATCH @probe LIMIT 1;";
+                                        var p = probeCmd.CreateParameter();
+                                        p.ParameterName = "@probe";
+                                        p.Value = probe;
+                                        probeCmd.Parameters.Add(p);
+                                        var probeResult = probeCmd.ExecuteScalar();
+                                        if (probeResult != null && probeResult != DBNull.Value)
+                                        {
+                                            anyMatched = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!anyMatched)
                                     {
                                         needsRebuild = true;
                                     }
@@ -274,6 +284,7 @@ namespace Lyracist.Data.Services
                             {
                                 // Corrupt FTS5 virtual table or shadow tables can prevent DROP TABLE SongSearch;
                                 // drop shadow tables and purge SongSearch% from sqlite_master directly.
+                                TryBackupDatabaseFile(connection);
                                 using var forceDropCmd = connection.CreateCommand();
                                 forceDropCmd.CommandText = @"
                                     DROP TABLE IF EXISTS SongSearch_data;
@@ -471,10 +482,16 @@ namespace Lyracist.Data.Services
             for (int i = 0; i < words.Length; i++)
             {
                 string paramName = $"w{i}";
-                parameters.Add(paramName, $"%{words[i]}%");
-                whereClauses.Add($"(s.Title LIKE @{paramName} OR s.Artist LIKE @{paramName} OR s.FilePath LIKE @{paramName})");
+                string escaped = words[i].Replace("!", "!!").Replace("%", "!%").Replace("_", "!_");
+                parameters.Add(paramName, $"%{escaped}%");
+                whereClauses.Add($"(s.Title LIKE @{paramName} ESCAPE '!' OR s.Artist LIKE @{paramName} ESCAPE '!' OR s.FilePath LIKE @{paramName} ESCAPE '!')");
             }
 
+            // Rank rows whose title or artist (not just the file path) contains every word first,
+            // so the 150-row cap keeps the relevant matches.
+            string titleOrArtistRank = whereClauses.Count > 0
+                ? string.Join(" AND ", Enumerable.Range(0, whereClauses.Count).Select(i => $"(s.Title LIKE @w{i} ESCAPE '!' OR s.Artist LIKE @w{i} ESCAPE '!')"))
+                : "1=1";
             string wordFilter = whereClauses.Count > 0 ? string.Join(" AND ", whereClauses) : "1=1";
             string sql = $@"
                 SELECT s.*, a.*
@@ -482,9 +499,31 @@ namespace Lyracist.Data.Services
                 LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
                 WHERE {wordFilter}
                 AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                ORDER BY (CASE WHEN {titleOrArtistRank} THEN 0 ELSE 1 END), s.Title
                 LIMIT 150";
 
             return (sql, parameters);
+        }
+
+        private static void TryBackupDatabaseFile(System.Data.Common.DbConnection connection)
+        {
+            try
+            {
+                string dbPath = connection.DataSource;
+                if (!string.IsNullOrEmpty(dbPath) && System.IO.File.Exists(dbPath))
+                {
+                    using (var cp = connection.CreateCommand())
+                    {
+                        cp.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                        cp.ExecuteNonQuery();
+                    }
+                    System.IO.File.Copy(dbPath, $"{dbPath}.prerepair-{DateTime.Now:yyyyMMddHHmmss}.bak", overwrite: false);
+                }
+            }
+            catch
+            {
+                // Best effort; the force-drop below is still the only way to recover a corrupt FTS table.
+            }
         }
 
         private async Task<List<Song>> SearchFallbackLikeAsync(SqliteConnection connection, string query, bool? isKaraoke)

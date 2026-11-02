@@ -401,6 +401,8 @@ public class TriviaGameEngine : IDisposable
                 return false;
             }
 
+            // HasAnsweredCurrentQuestion is the authoritative per-question guard; the _questionAnswers
+            // check below is a backstop for state restored/replayed across a pause or reconnect.
             if (player.HasAnsweredCurrentQuestion)
             {
                 return false; // Already submitted

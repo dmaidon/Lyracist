@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 12:14:00 -> Add mouse drag-and-drop reordering with midpoint positioning and empty area drop
+// Edited on Nov 2, 2026 @ 10:30:00 -> Use linked-pair-aware MoveSingerToPosition for drag-and-drop reordering
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -120,23 +120,9 @@ public partial class RotationPage : Page
                     bool dropAfter = pos.Y >= (targetItem.ActualHeight / 2.0);
 
                     int insertIndex = Lyracist.Shared.RotationHelpers.ComputeDropIndex(rotation.Count, sourceIndex, targetIndex, dropAfter);
-                    if (ViewModel.FloatCurrentSingerToTop && rotation.Count > 0 && rotation[0].IsCurrent)
-                    {
-                        if (sourceSinger != rotation[0] && insertIndex == 0)
-                        {
-                            insertIndex = 1;
-                        }
-                        else if (sourceSinger == rotation[0] && insertIndex > 0)
-                        {
-                            insertIndex = 0;
-                        }
-                    }
-
                     if (insertIndex != sourceIndex)
                     {
-                        rotation.Move(sourceIndex, insertIndex);
-                        ViewModel.SelectedSinger = sourceSinger;
-                        ViewModel.NotifyRotationReordered();
+                        ViewModel.MoveSingerToPosition(sourceSinger, insertIndex);
                     }
                 }
             }
@@ -172,9 +158,7 @@ public partial class RotationPage : Page
             int sourceIndex = rotation.IndexOf(sourceSinger);
             if (sourceIndex >= 0 && sourceIndex != rotation.Count - 1)
             {
-                rotation.Move(sourceIndex, rotation.Count - 1);
-                ViewModel.SelectedSinger = sourceSinger;
-                ViewModel.NotifyRotationReordered();
+                ViewModel.MoveSingerToPosition(sourceSinger, rotation.Count - 1);
             }
         }
         _draggedItem = null;

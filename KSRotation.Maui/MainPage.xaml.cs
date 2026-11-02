@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Enforce Guest DJ default on DJ name in KSRotation.Maui
+// Edited on Nov 2, 2026 @ 10:30:00 -> Delegate OnDeleteSingerClicked to MainViewModel.ToggleSingerInactiveCommand
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -185,51 +185,7 @@ public partial class MainPage : ContentPage
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-
-            if (entry.IsInactive)
-            {
-                // Restore singer
-                entry.IsInactive = false;
-                int oldIndex = vm.Singers.IndexOf(entry);
-                if (oldIndex != -1)
-                {
-                    int activeCount = 0;
-                    for (int i = 0; i < vm.Singers.Count; i++)
-                    {
-                        if (!vm.Singers[i].IsInactive && vm.Singers[i] != entry)
-                        {
-                            activeCount++;
-                        }
-                    }
-                    vm.Singers.Move(oldIndex, activeCount);
-                }
-                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
-                return;
-            }
-
-            bool wasCurrent = entry.IsCurrent;
-            KSRotation.Models.SingerEntry? nextCurrent = wasCurrent ? RotationHelpers.FindNextEligibleSinger(vm.Singers, entry) : null;
-
-            entry.IsInactive = true;
-            entry.IsCurrent = false;
-            entry.IsNext = false;
-
-            // Move to the very end of the list
-            int oldIdx = vm.Singers.IndexOf(entry);
-            if (oldIdx != -1)
-            {
-                vm.Singers.Move(oldIdx, vm.Singers.Count - 1);
-            }
-
-            if (wasCurrent)
-            {
-                if (nextCurrent != null)
-                {
-                    nextCurrent.IsCurrent = true;
-                    nextCurrent.IsNext = false;
-                }
-            }
-            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+            vm.ToggleSingerInactiveCommand.Execute(entry);
         }
     }
 
