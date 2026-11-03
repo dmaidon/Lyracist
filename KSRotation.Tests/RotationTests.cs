@@ -2022,6 +2022,60 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void LastRound_SingerAddedMidRound_GetsDoneFlagWhenFinished()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+        var singers = new List<SingerEntry>();
+        for (int i = 1; i <= 4; i++)
+        {
+            var s = new SingerEntry { Name = $"Singer{i}" };
+            vm.Singers.Add(s);
+            singers.Add(s);
+        }
+        singers[0].IsCurrent = true;
+        singers[0].IsRotationStart = true;
+        vm.IsLastRound = true;
+        vm.FinishSingerSongCommand.Execute(singers[0]);
+        vm.FinishSingerSongCommand.Execute(singers[1]);
+
+        var late = new SingerEntry { Name = "Latecomer", Song = "Song", Artist = "Artist" };
+        RotationHelpers.InsertNewSinger(vm.Singers, late);
+
+        var current = RotationHelpers.GetCurrentSinger(vm.Singers);
+        Assert.NotNull(current);
+        vm.FinishSingerSongCommand.Execute(late);
+        Assert.True(late.HasSungInLastRound);
+    }
+
+    [Fact]
+    public void LastRound_AddSingerButtonThenSetCurrentAndFinish_GetsDoneFlag()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+        var singers = new List<SingerEntry>();
+        for (int i = 1; i <= 4; i++)
+        {
+            var s = new SingerEntry { Name = $"Singer{i}" };
+            vm.Singers.Add(s);
+            singers.Add(s);
+        }
+        singers[0].IsCurrent = true;
+        singers[0].IsRotationStart = true;
+        vm.IsLastRound = true;
+        vm.FinishSingerSongCommand.Execute(singers[0]);
+
+        vm.AddSingerCommand.Execute(null);
+        var late = vm.LastInsertedSinger!;
+        late.Name = "Latecomer";
+        late.Song = "Song";
+        vm.SetCurrentSingerCommand.Execute(late);
+        Assert.True(late.IsCurrent);
+        vm.FinishSingerSongCommand.Execute(late);
+        Assert.True(late.HasSungInLastRound);
+    }
+
+    [Fact]
     public void LoadTestData_MarksFirstSeededSingerAsRotationStart()
     {
         // Regression test: LoadTestData used to populate Singers via a raw Add() loop with no

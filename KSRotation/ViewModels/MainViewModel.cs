@@ -3292,8 +3292,17 @@ namespace KSRotation.ViewModels
             }
             else if (e.PropertyName != null && TryGetSongRound(e.PropertyName, out int completionRound))
             {
-                HandleSongCompletionChanged(entry, completionRound, entry.IsRoundCompleted(completionRound));
+                bool roundCompleted = entry.IsRoundCompleted(completionRound);
+                HandleSongCompletionChanged(entry, completionRound, roundCompleted);
                 databaseChanged = true;
+
+                // Ticking a round box by hand (or via the DJ portal) during the last round is the same
+                // as finishing their song - flag them done, including singers added after it started.
+                if (roundCompleted && IsLastRound && !entry.IsMusic && !entry.HasSungInLastRound)
+                {
+                    entry.HasSungInLastRound = true;
+                    UpdateNextSingerHighlight();
+                }
             }
 
             if (databaseChanged)
