@@ -1,4 +1,24 @@
-// Edited on Oct 31, 2026 @ 13:27:00 -> Document LyracistDbEditor Genre editing, Manual DB Backup, Duplicate/Orphaned audit tools, and TriviaDbCreator CSV import, Time Limit editor, Difficulty filter, and SQLite sync
+// Edited on Nov 9, 2026 @ 09:41:25 -> Document Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) across KSRotation, KSRotation.Maui, and Lyracist
+
+Lyracist, KSRotation & KSRotation.Maui: Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) - (November 2026)
+
+Section: Audience Interaction & Display Projection / Crowd Emoji Reactions & Show Themes
+
+0. 7 Performer Vibe Emoji Reaction Sets:
+   - Patrons connected via the smartphone portal (PatronPortal.html in KSRotation / KSRotation.Maui and mobile.html in Lyracist) can tap 6 live emoji reaction buttons to float cheering animations upward across the venue's rotation display, lyric screen, Chromecast/browser billboard (billboard.html), and MAUI TV display.
+   - When '🎭 Patron's Choice (All 7 Sets)' is active, patrons see 7 vibe category tabs directly above the reaction buttons so they can switch emoji sets from singer to singer:
+     * 🌟 Classic: ❤️ 🔥 👏 🙌 🎉 👑
+     * 🤠 Country / Honky-Tonk: 🤠 🍻 ❤️ 🎸 🎶 🌟
+     * 🎸 Rock & Metal: 🤘 🎸 🔥 ⚡ 💥 🎤
+     * 🎤 Hip-Hop / Rap: 🎤 💯 🔥 💰 👑 🚀
+     * 🕯️ Ballad / Slow Jam: 🕯️ 💖 🌹 ✨ 🎶 👏
+     * 🕺 Party / Dance: 🕺 💃 🎉 🥂 🤩 ⚡
+     * 🏆 Superstar / Encore: 🏆 👑 💎 ⭐ 💯 🙌
+
+0A. DJ Show Emoji Theme Override (Lock to Theme or Disable):
+   - In KSRotation (Settings -> Web Server & Patron Requests), KSRotation.Maui (Settings -> Patron Request Server and Cast to TV dialog), DJ Web Remote (dj.html), and Lyracist (Settings -> Display -> Crowd Emoji Reactions), the DJ can select a Show Emoji Theme for the evening.
+   - Selecting a specific theme ('Classic', 'Country', 'Rock', 'HipHop', 'Ballad', 'Party', or 'Superstar') locks all patron smartphones to that theme's 6 emojis for the night, hiding the vibe tabs and displaying a locked theme badge.
+   - Selecting 'Off' hides the reaction bar on patron phones and disables incoming emoji reactions.
 
 LyracistDbEditor & TriviaDbCreator: Database Editor & Trivia Creator Enhancements, Bulk CSV Import & Library Health Tools - (October 2026)
 

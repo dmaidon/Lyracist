@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 14:43:30 -> Add HolidayTheme setting to AppSettings for shared desktop and MAUI persistence
+// Edited on Nov 9, 2026 @ 09:05:00 -> Add EmojiReactionTheme setting to AppSettings for crowd emoji sets and DJ Show Theme override
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -171,6 +171,9 @@ namespace KSRotation.Models
 
         /// <summary>Holiday rotation-screen choice ("None", "Auto", or a HolidayThemes key).</summary>
         public string HolidayTheme { get; init; } = HolidayThemes.None;
+
+        /// <summary>Crowd emoji reaction theme ("PatronChoice", "Off", or an EmojiReactionThemes set key).</summary>
+        public string EmojiReactionTheme { get; init; } = EmojiReactionThemes.PatronChoice;
     }
 }
 

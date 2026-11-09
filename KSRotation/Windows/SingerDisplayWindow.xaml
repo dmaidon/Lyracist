@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 03:55:00 -> Replace perpetual CursedFrame XAML EventTrigger storyboard with code-driven animation stopped on close -->
+<!-- Edited on Nov 9, 2026 @ 09:06:30 -> Add ReactionsCanvas overlay to SingerDisplayWindow for crowd emoji reactions -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -2440,6 +2440,9 @@
                 <DropShadowEffect Color="#FF1744" BlurRadius="40" ShadowDepth="0" Opacity="0.9" />
             </Border.Effect>
         </Border>
+
+        <!-- Floating Audience Emoji Reactions Overlay -->
+        <Canvas x:Name="ReactionsCanvas" Grid.RowSpan="2" Width="1920" Height="1080" Panel.ZIndex="118" IsHitTestVisible="False" Background="Transparent" />
 
         <!-- Scaryoke Wheel Overlay (takes precedence over all projection panels and banners) -->
         <Border x:Name="ScaryokeWheelOverlay"

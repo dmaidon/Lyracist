@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 14:48:00 -> Add Holiday overlays, 12 themed projection views, Scaryoke badges, and live Scaryoke wheel spin projection -->
+<!-- Edited on Nov 9, 2026 @ 09:15:00 -> Add floating crowd emoji reactions overlay to billboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -747,6 +747,27 @@
             padding: 8px;
         }
 
+        /* Crowd Emoji Reactions Overlay */
+        #reactions-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 95;
+            overflow: hidden;
+        }
+
+        .reaction-float {
+            position: absolute;
+            font-size: 3.4rem;
+            line-height: 1;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 12px;
+        }
+
         /* Live Scaryoke Wheel Projection Overlay */
         #scaryoke-wheel-overlay {
             position: fixed;
@@ -938,6 +959,9 @@
         <div id="holiday-particles"></div>
     </div>
 
+    <!-- Crowd Emoji Reactions Overlay -->
+    <div id="reactions-overlay"></div>
+
     <!-- Live Scaryoke Wheel Projection Overlay -->
     <div id="scaryoke-wheel-overlay">
         <div class="scaryoke-overlay-title">🎃 SCARYOKE WHEEL OF FATE 🎃</div>
@@ -956,6 +980,10 @@
         let holidayTimerIds = [];
         let activeSprites = 0;
         const MAX_HOLIDAY_SPRITES = 7;
+
+        let lastSeenReactionId = 0;
+        let activeReactionCount = 0;
+        const MAX_REACTION_FLOATS = 20;
 
         let wheelAnimFrame = null;
         let wheelCurrentAngle = 0;
@@ -984,7 +1012,12 @@
                 const response = await fetch('/api/info');
                 if (!response.ok) return;
                 const data = await response.json();
-                const hash = JSON.stringify(data);
+
+                // Process live crowd emoji reactions before checking info hash so QR codes do not reload
+                processRecentReactions(data.recentReactions);
+
+                const { recentReactions, ...infoForHash } = data;
+                const hash = JSON.stringify(infoForHash);
                 if (hash === previousInfoHash) return;
                 previousInfoHash = hash;
 
@@ -1070,6 +1103,90 @@
             activeSprites = 0;
             const container = document.getElementById('holiday-particles');
             if (container) container.innerHTML = '';
+        }
+
+        function getReactionGlowHex(emoji) {
+            switch (emoji) {
+                case '❤️': case '💖': case '🌹': return '#FF2A85';
+                case '🔥': case '💥': case '🤘': return '#FF5500';
+                case '🤠': case '🍻': case '🥂': case '👑': case '🏆': case '⭐': case '🌟': case '✨': case '🕯️': return '#FFD700';
+                case '💰': return '#10B981';
+                case '💎': case '🚀': return '#38BDF8';
+                case '🎸': case '🎤': case '🎶': case '🕺': case '💃': return '#A855F7';
+                default: return '#F59E0B';
+            }
+        }
+
+        function processRecentReactions(recentReactions) {
+            if (!Array.isArray(recentReactions) || recentReactions.length === 0) return;
+            for (const item of recentReactions) {
+                if (!item || typeof item.id !== 'number' || !item.emoji) continue;
+                if (item.id > lastSeenReactionId) {
+                    lastSeenReactionId = item.id;
+                    spawnReactionEmoji(item.emoji);
+                }
+            }
+        }
+
+        function spawnReactionEmoji(emoji) {
+            if (activeReactionCount >= MAX_REACTION_FLOATS) return;
+            const container = document.getElementById('reactions-overlay');
+            if (!container) return;
+
+            activeReactionCount++;
+            const el = document.createElement('div');
+            el.className = 'reaction-float';
+            el.textContent = emoji;
+
+            const glow = getReactionGlowHex(emoji);
+            el.style.background = `radial-gradient(circle, ${glow}55 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 14px ${glow})`;
+            el.style.fontSize = `${3.0 + Math.random() * 1.1}rem`;
+
+            const edge = Math.floor(Math.random() * 4);
+            let startX, startY, dx, dy;
+            const drift = (Math.random() - 0.5) * 18;
+            if (edge === 0) {
+                // Bottom rising
+                startX = 8 + Math.random() * 84;
+                startY = 94;
+                dx = drift;
+                dy = -(65 + Math.random() * 20);
+            } else if (edge === 1) {
+                // Top descending
+                startX = 8 + Math.random() * 84;
+                startY = 4;
+                dx = drift;
+                dy = 65 + Math.random() * 20;
+            } else if (edge === 2) {
+                // Left drifting right
+                startX = 3;
+                startY = 12 + Math.random() * 72;
+                dx = 70 + Math.random() * 20;
+                dy = drift;
+            } else {
+                // Right drifting left
+                startX = 92;
+                startY = 12 + Math.random() * 72;
+                dx = -(70 + Math.random() * 20);
+                dy = drift;
+            }
+
+            el.style.left = `${startX}vw`;
+            el.style.top = `${startY}vh`;
+            container.appendChild(el);
+
+            const anim = el.animate([
+                { transform: 'translate(0, 0) scale(0.35)', opacity: 0 },
+                { transform: `translate(${dx * 0.15}vw, ${dy * 0.15}vh) scale(1.12)`, opacity: 1, offset: 0.14 },
+                { transform: `translate(${dx * 0.78}vw, ${dy * 0.78}vh) scale(1.0)`, opacity: 0.92, offset: 0.78 },
+                { transform: `translate(${dx}vw, ${dy}vh) scale(0.85)`, opacity: 0 }
+            ], { duration: 5400, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' });
+
+            anim.onfinish = () => {
+                el.remove();
+                activeReactionCount = Math.max(0, activeReactionCount - 1);
+            };
         }
 
         function applyHolidayOverlay(holiday) {

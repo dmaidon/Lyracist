@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 08:54:30 -> Support duet partner display via duetPartnerName or partner fallback -->
+<!-- Edited on Nov 9, 2026 @ 09:14:00 -> Add crowd emoji reactions with 7 performer vibe sets and DJ Show Theme override -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -472,6 +472,95 @@
         .logout-btn:hover {
             background-color: #dc2626;
         }
+        /* Crowd Emoji Reactions Card */
+        .reactions-card {
+            background: linear-gradient(145deg, #1E293B 0%, #172033 100%);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-radius: 16px;
+            padding: 14px 14px 12px 14px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        }
+        .reactions-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        .reaction-vibe-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .vibe-pill {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .vibe-pill.active {
+            background: var(--primary);
+            border-color: #A78BFA;
+            color: #FFFFFF;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.45);
+        }
+        .reaction-theme-badge {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(167, 139, 250, 0.45);
+            color: #DDD6FE;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin: 0 auto 10px auto;
+            width: fit-content;
+        }
+        .reaction-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+        .reaction-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            padding: 8px 0;
+            font-size: 1.65rem;
+            line-height: 1.1;
+            cursor: pointer;
+            transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .reaction-btn:active {
+            transform: scale(1.25);
+            background: rgba(139, 92, 246, 0.28);
+            border-color: var(--primary);
+        }
+        .reaction-btn.pop {
+            animation: reactionPop 0.32s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        @keyframes reactionPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.32); background: rgba(236, 72, 153, 0.32); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -480,6 +569,14 @@
             <h1>KSRotation</h1>
             <p class="subtitle">Karaoke Request Board</p>
         </header>
+
+        <!-- Crowd Emoji Reactions Card -->
+        <div id="reactions-card" class="reactions-card">
+            <div class="reactions-title">🎉 Cheer the Performer on Screen 🎉</div>
+            <div id="reaction-vibe-tabs" class="reaction-vibe-tabs"></div>
+            <div id="reaction-theme-badge" class="reaction-theme-badge"></div>
+            <div id="reaction-buttons-grid" class="reaction-buttons"></div>
+        </div>
 
         <div class="tabs">
             <button id="tab-btn-request" class="tab-btn active" onclick="switchTab('request')">Request Song</button>
@@ -1306,6 +1403,102 @@
             showProfileLoginView();
         }
 
+        // --- Crowd Emoji Reactions (7 Performer Vibe Sets + DJ Show Theme Override) ---
+        const REACTION_VIBE_SETS = {
+            Classic:   { label: '🌟 Classic', title: '🌟 Classic Night Theme',          emojis: ['❤️', '🔥', '👏', '🙌', '🎉', '👑'] },
+            Country:   { label: '🤠 Country', title: '🤠 Country / Honky-Tonk Theme',   emojis: ['🤠', '🍻', '❤️', '🎸', '🎶', '🌟'] },
+            Rock:      { label: '🎸 Rock',    title: '🎸 Rock & Metal Theme',           emojis: ['🤘', '🎸', '🔥', '⚡', '💥', '🎤'] },
+            HipHop:    { label: '🎤 Rap',     title: '🎤 Hip-Hop / Rap Theme',          emojis: ['🎤', '💯', '🔥', '💰', '👑', '🚀'] },
+            Ballad:    { label: '🕯️ Ballad',  title: '🕯️ Ballad / Slow Jam Theme',      emojis: ['🕯️', '💖', '🌹', '✨', '🎶', '👏'] },
+            Party:     { label: '🕺 Party',   title: '🕺 Party / Dance Theme',          emojis: ['🕺', '💃', '🎉', '🥂', '🤩', '⚡'] },
+            Superstar: { label: '🏆 Star',    title: '🏆 Superstar / Encore Theme',     emojis: ['🏆', '👑', '💎', '⭐', '💯', '🙌'] }
+        };
+
+        let activeEmojiThemeMode = 'PatronChoice';
+        let currentVibeKey = localStorage.getItem('ks_reaction_vibe') || 'Classic';
+        if (!REACTION_VIBE_SETS[currentVibeKey]) currentVibeKey = 'Classic';
+        let lastReactionTapMs = 0;
+
+        function selectReactionVibe(vibeKey) {
+            if (!REACTION_VIBE_SETS[vibeKey]) return;
+            currentVibeKey = vibeKey;
+            localStorage.setItem('ks_reaction_vibe', vibeKey);
+            renderReactionCard();
+        }
+
+        function renderReactionCard() {
+            const card = document.getElementById('reactions-card');
+            const tabsEl = document.getElementById('reaction-vibe-tabs');
+            const badgeEl = document.getElementById('reaction-theme-badge');
+            const gridEl = document.getElementById('reaction-buttons-grid');
+            if (!card || !tabsEl || !badgeEl || !gridEl) return;
+
+            if (activeEmojiThemeMode === 'Off') {
+                card.style.display = 'none';
+                return;
+            }
+            card.style.display = 'block';
+
+            const isLocked = activeEmojiThemeMode !== 'PatronChoice' && !!REACTION_VIBE_SETS[activeEmojiThemeMode];
+            const effectiveKey = isLocked ? activeEmojiThemeMode : (REACTION_VIBE_SETS[currentVibeKey] ? currentVibeKey : 'Classic');
+            const activeSet = REACTION_VIBE_SETS[effectiveKey] || REACTION_VIBE_SETS.Classic;
+
+            if (isLocked) {
+                tabsEl.style.display = 'none';
+                badgeEl.style.display = 'inline-flex';
+                badgeEl.textContent = activeSet.title;
+            } else {
+                badgeEl.style.display = 'none';
+                tabsEl.style.display = 'flex';
+                tabsEl.innerHTML = Object.keys(REACTION_VIBE_SETS).map(key => {
+                    const set = REACTION_VIBE_SETS[key];
+                    const activeClass = key === effectiveKey ? ' active' : '';
+                    return `<button type="button" class="vibe-pill${activeClass}" onclick="selectReactionVibe('${key}')">${set.label}</button>`;
+                }).join('');
+            }
+
+            gridEl.innerHTML = activeSet.emojis.map(emoji =>
+                `<button type="button" class="reaction-btn" onclick="sendReaction('${emoji}', this)" aria-label="Send ${emoji} reaction">${emoji}</button>`
+            ).join('');
+        }
+
+        async function sendReaction(emoji, btnEl) {
+            const now = Date.now();
+            if (now - lastReactionTapMs < 280) return;
+            lastReactionTapMs = now;
+
+            if (btnEl) {
+                btnEl.classList.remove('pop');
+                void btnEl.offsetWidth;
+                btnEl.classList.add('pop');
+            }
+
+            try {
+                await fetch('/api/reaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emoji })
+                });
+            } catch (err) {
+                console.warn('Could not send reaction:', err);
+            }
+        }
+
+        async function fetchPortalInfo() {
+            try {
+                const response = await fetch('/api/info');
+                if (!response.ok) return;
+                const data = await response.json();
+                const serverTheme = data.emojiReactionTheme || 'PatronChoice';
+                if (serverTheme !== activeEmojiThemeMode) {
+                    activeEmojiThemeMode = serverTheme;
+                    renderReactionCard();
+                }
+            } catch (err) {
+                // Ignore transient network errors
+            }
+        }
+
         // Initialize from local storage
         document.addEventListener("DOMContentLoaded", () => {
             const savedName = localStorage.getItem('ks_patron_name');
@@ -1313,6 +1506,9 @@
                 const nameInput = document.getElementById('name');
                 if (nameInput) nameInput.value = savedName;
             }
+            renderReactionCard();
+            fetchPortalInfo();
+            setInterval(fetchPortalInfo, 5000);
             loadPastSongs();
             checkSingerSession();
         });

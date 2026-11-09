@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 14:53:00 -> Add Holiday character animations, themed view styling, and live Scaryoke wheel projection to BillboardView
+// Edited on Nov 9, 2026 @ 09:12:15 -> Subscribe to ReactionReceived and spawn floating crowd emoji reactions in BillboardView
 using KSRotation.Maui.ViewModels;
 using KSRotation.Models;
 using KSRotation.ViewModels;
@@ -14,6 +14,7 @@ namespace KSRotation.Maui.Views
     public partial class BillboardView : ContentView
     {
         private const int MaxActiveHolidaySprites = 7;
+        private const int MaxActiveReactions = 20;
 
         private IDispatcherTimer? _clockTimer;
         private IDispatcherTimer? _holidayCrosserTimer;
@@ -21,6 +22,7 @@ namespace KSRotation.Maui.Views
         private MainViewModel? _boundVm;
         private string _activeHolidayKey = string.Empty;
         private int _activeSpriteCount;
+        private int _activeReactionCount;
 
         private readonly ScaryokeWheelDrawable _wheelDrawable = new();
         private double _wheelCurrentAngle;
@@ -40,6 +42,7 @@ namespace KSRotation.Maui.Views
             {
                 _boundVm.PropertyChanged -= OnViewModelPropertyChanged;
                 _boundVm.MauiScaryokeStateChanged -= OnMauiScaryokeStateChanged;
+                _boundVm.ReactionReceived -= OnReactionReceived;
             }
 
             base.OnBindingContextChanged();
@@ -49,6 +52,7 @@ namespace KSRotation.Maui.Views
             {
                 _boundVm.PropertyChanged += OnViewModelPropertyChanged;
                 _boundVm.MauiScaryokeStateChanged += OnMauiScaryokeStateChanged;
+                _boundVm.ReactionReceived += OnReactionReceived;
                 ApplyProjectionViewTheme(_boundVm.SelectedProjectionView);
                 ApplyHolidayOverlay(_boundVm.ActiveHolidayTheme);
                 OnMauiScaryokeStateChanged(_boundVm.MauiScaryokeState);
@@ -373,6 +377,75 @@ namespace KSRotation.Maui.Views
             if (LiveClockLabel != null)
             {
                 LiveClockLabel.Text = DateTime.Now.ToString("h:mm tt");
+            }
+        }
+
+        private void OnReactionReceived(string emoji)
+        {
+            if (string.IsNullOrWhiteSpace(emoji)) return;
+            Dispatcher.Dispatch(() => SpawnReactionEmoji(emoji));
+        }
+
+        private async void SpawnReactionEmoji(string emoji)
+        {
+            if (ReactionsCanvas == null || _activeReactionCount >= MaxActiveReactions || Handler == null)
+            {
+                return;
+            }
+
+            double width = Width > 100 ? Width : 1024;
+            double height = Height > 100 ? Height : 640;
+
+            _activeReactionCount++;
+            var badge = CreateHolidaySpriteView(emoji, EmojiReactionThemes.GetGlowHex(emoji), 48);
+
+            int side = Random.Shared.Next(4);
+            double startX, startY, dx, dy;
+            switch (side)
+            {
+                case 0: // bottom -> up
+                    startX = Random.Shared.Next(40, (int)Math.Max(140, width - 100));
+                    startY = height - Random.Shared.Next(40, 100);
+                    dx = (Random.Shared.NextDouble() * 160) - 80;
+                    dy = -(height - 120);
+                    break;
+                case 1: // top -> down
+                    startX = Random.Shared.Next(40, (int)Math.Max(140, width - 100));
+                    startY = Random.Shared.Next(20, 80);
+                    dx = (Random.Shared.NextDouble() * 160) - 80;
+                    dy = height - 120;
+                    break;
+                case 2: // left -> right
+                    startX = Random.Shared.Next(20, 80);
+                    startY = Random.Shared.Next(40, (int)Math.Max(140, height - 100));
+                    dx = width - 120;
+                    dy = (Random.Shared.NextDouble() * 160) - 80;
+                    break;
+                default: // right -> left
+                    startX = width - Random.Shared.Next(40, 100);
+                    startY = Random.Shared.Next(40, (int)Math.Max(140, height - 100));
+                    dx = -(width - 120);
+                    dy = (Random.Shared.NextDouble() * 160) - 80;
+                    break;
+            }
+
+            AbsoluteLayout.SetLayoutBounds(badge, new Rect(startX, startY, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+            ReactionsCanvas.Children.Add(badge);
+
+            try
+            {
+                await System.Threading.Tasks.Task.WhenAll(
+                    badge.TranslateToAsync(dx, dy, 5200, Easing.SinOut),
+                    badge.FadeToAsync(0, 5200, Easing.CubicIn));
+            }
+            catch
+            {
+                // Ignore cancellation when view unloads
+            }
+            finally
+            {
+                ReactionsCanvas?.Children.Remove(badge);
+                _activeReactionCount = Math.Max(0, _activeReactionCount - 1);
             }
         }
     }

@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 15:55:00 -> Update DjName default to Guest DJ across AppSettings
+// Edited on Nov 9, 2026 @ 09:17:00 -> Add EmojiReactionTheme and EmojiReactionThemeChanged to AppSettings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -1361,6 +1361,24 @@ public static class AppSettings
         set { _data.PreferredLyricsFormat = value; Save(); }
     }
 
+    public static event Action<string>? EmojiReactionThemeChanged;
+
+    /// <summary>Crowd emoji reaction theme mode: "PatronChoice", one of the 7 themed sets, or "Off".</summary>
+    public static string EmojiReactionTheme
+    {
+        get => KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey(_data.EmojiReactionTheme);
+        set
+        {
+            string normalized = KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey(value);
+            if (!string.Equals(_data.EmojiReactionTheme, normalized, StringComparison.OrdinalIgnoreCase))
+            {
+                _data.EmojiReactionTheme = normalized;
+                Save();
+                EmojiReactionThemeChanged?.Invoke(normalized);
+            }
+        }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -1493,6 +1511,7 @@ public static class AppSettings
         ];
 
         public bool IsRatingSystemEnabled { get; set; } = true;
+        public string EmojiReactionTheme { get; set; } = KSRotation.Models.EmojiReactionThemes.PatronChoice;
         public bool ShowQrCodeOnRotationScreen { get; set; } = true;
         public bool ShowQrCodeOnLyricsScreen { get; set; } = true;
         public string SelectedRatingIcon { get; set; } = "⭐ Star";

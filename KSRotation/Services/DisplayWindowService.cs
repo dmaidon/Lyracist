@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 03:48:30 -> Resolve Auto holiday theme using DateTime.Now with a periodic re-evaluation timer across show nights
+// Edited on Nov 9, 2026 @ 09:06:50 -> Add ShowReaction to DisplayWindowService for crowd emoji reactions
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -90,6 +90,15 @@ namespace KSRotation.Services
             if (_window != null)
             {
                 _window.Dispatcher.InvokeAsync(() => _window.SetHolidayTheme(HolidayThemes.Resolve(_holidayChoice, DateTime.Now)));
+            }
+        }
+
+        /// <summary>Spawns a floating audience emoji reaction on the display window if visible.</summary>
+        public void ShowReaction(string emoji)
+        {
+            if (_window != null && !string.IsNullOrWhiteSpace(emoji))
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.ShowReaction(emoji));
             }
         }
 

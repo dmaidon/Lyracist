@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 14:52:00 -> Add Holiday overlay, Scaryoke badges, themed view modes, and live Scaryoke wheel projection to BillboardView -->
+<!-- Edited on Nov 9, 2026 @ 09:12:00 -> Add ReactionsCanvas AbsoluteLayout to BillboardView for floating crowd emoji reactions -->
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:KSRotation.ViewModels;assembly=KSRotation"
@@ -496,6 +496,11 @@
                             InputTransparent="True"
                             CascadeInputTransparent="True" />
         </Grid>
+
+        <!-- Crowd Emoji Reactions Overlay (Non-Interactive) -->
+        <AbsoluteLayout x:Name="ReactionsCanvas"
+                        InputTransparent="True"
+                        CascadeInputTransparent="True" />
 
         <!-- Live Scaryoke Wheel Projection Overlay -->
         <Grid x:Name="ScaryokeWheelOverlay"

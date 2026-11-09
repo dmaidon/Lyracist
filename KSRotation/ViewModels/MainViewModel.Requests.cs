@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 06:13:45 -> Support manual Scaryoke category assignment and wheel category addition in /api/info and /api/dj/action for both WPF and MAUI
+// Edited on Nov 9, 2026 @ 09:09:30 -> Wire HandleReactionReceived, recentReactions buffer, and set-emoji-theme DJ action into MainViewModel.Requests.cs
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -231,7 +231,8 @@ namespace KSRotation.ViewModels
                         payload => ImportSessionHandoffPayloadAsync(payload),
                         GetDiscoveredPeerInfo,
                         OnSessionExportedToPeer,
-                        OnSingerProfileChangedFromPatron);
+                        OnSingerProfileChangedFromPatron,
+                        HandleReactionReceived);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -479,6 +480,52 @@ namespace KSRotation.ViewModels
         private (string Ssid, string Password) _cachedWifiInfo = (string.Empty, string.Empty);
         private DateTime _wifiInfoCachedAt = DateTime.MinValue;
         private readonly object _wifiInfoLock = new();
+        private readonly object _reactionsLock = new();
+        private readonly List<(long Id, string Emoji, DateTime AtUtc)> _recentReactions = [];
+        private long _nextReactionId;
+        private static readonly TimeSpan RecentReactionTtl = TimeSpan.FromSeconds(6);
+        private const int MaxBufferedReactions = 25;
+
+        public bool HandleReactionReceived(string emoji)
+        {
+            if (!EmojiReactionThemes.IsAllowedEmoji(emoji, EmojiReactionThemeChoice))
+            {
+                return false;
+            }
+
+            string cleanEmoji = emoji.Trim();
+            var now = DateTime.UtcNow;
+            lock (_reactionsLock)
+            {
+                _recentReactions.RemoveAll(r => now - r.AtUtc > RecentReactionTtl);
+                while (_recentReactions.Count >= MaxBufferedReactions)
+                {
+                    _recentReactions.RemoveAt(0);
+                }
+                _recentReactions.Add((++_nextReactionId, cleanEmoji, now));
+            }
+
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+            {
+                _displayWindowService.ShowReaction(cleanEmoji);
+                ReactionReceived?.Invoke(cleanEmoji);
+            });
+            return true;
+        }
+
+        private ReactionEventDto[] GetRecentReactionsSnapshot()
+        {
+            var now = DateTime.UtcNow;
+            lock (_reactionsLock)
+            {
+                _recentReactions.RemoveAll(r => now - r.AtUtc > RecentReactionTtl);
+                if (_recentReactions.Count == 0)
+                {
+                    return [];
+                }
+                return [.. _recentReactions.Select(r => new ReactionEventDto { id = r.Id, emoji = r.Emoji })];
+            }
+        }
 
         // WifiHelper.GetConnectedSsid() can fall back to spawning "netsh wlan show interfaces" and
         // blocking up to 1 second when the native WLAN API path fails - GetVenueInfoJson is wired to
@@ -543,12 +590,14 @@ namespace KSRotation.ViewModels
 #if !MAUI
                 isScaryokeActive = IsScaryokeActive,
                 scaryokeState = GetScaryokeStateDto(),
-                scaryokeCategories = [.. ScaryokeCategories]
+                scaryokeCategories = [.. ScaryokeCategories],
 #else
                 isScaryokeActive = MauiScaryokeState?.IsActive ?? false,
                 scaryokeState = MauiScaryokeState,
-                scaryokeCategories = [.. KSRotation.Maui.Services.ScaryokeSettingsService.Load().Categories]
+                scaryokeCategories = [.. KSRotation.Maui.Services.ScaryokeSettingsService.Load().Categories],
 #endif
+                emojiReactionTheme = EmojiReactionThemes.NormalizeThemeKey(EmojiReactionThemeChoice),
+                recentReactions = GetRecentReactionsSnapshot()
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }
@@ -1082,6 +1131,20 @@ namespace KSRotation.ViewModels
                         ActiveSpecialEvent = targetId;
                         UpdateDjBannerPath();
                         UpdateSpecialEventDisplayState();
+                        return "";
+                    }
+                case "set-emoji-theme":
+                    {
+                        string themeKey = !string.IsNullOrWhiteSpace(extraData) ? extraData : targetId;
+                        EmojiReactionThemeChoice = EmojiReactionThemes.NormalizeThemeKey(themeKey);
+                        QueueSaveSettings();
+                        return "";
+                    }
+                case "set-holiday-theme":
+                    {
+                        string holidayKey = !string.IsNullOrWhiteSpace(extraData) ? extraData : targetId;
+                        HolidayThemeChoice = string.IsNullOrWhiteSpace(holidayKey) ? HolidayThemes.None : holidayKey;
+                        QueueSaveSettings();
                         return "";
                     }
                 case "toggle-last-round":

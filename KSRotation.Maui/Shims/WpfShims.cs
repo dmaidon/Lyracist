@@ -1,4 +1,4 @@
-// Edited on Oct 26, 2026 @ 23:25:00 -> Add SetSpecialEventBanner to DisplayWindowService shim for MAUI
+// Edited on Nov 9, 2026 @ 09:07:00 -> Add ShowReaction to DisplayWindowService shim for MAUI
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -185,6 +185,7 @@ namespace KSRotation.Services
         public void SetPreShowMode(bool active) { }
         public event Action? PreShowReset { add { } remove { } }
         public void SetShowSpectrum(bool show) { }
+        public void ShowReaction(string emoji) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => MauiCastingService.Instance.StopCastingAsync();
@@ -211,6 +212,7 @@ namespace KSRotation.Services
         public void Hide() { }
         public void Shutdown() { }
         public void SetShowSpectrum(bool show) { }
+        public void ShowReaction(string emoji) { }
         public void RepositionWindow() { }
     }
 

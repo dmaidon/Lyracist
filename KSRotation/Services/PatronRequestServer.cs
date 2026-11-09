@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 12:26:00 -> Add onSingerProfileChanged callback and normalize uploaded avatar orientation
+// Edited on Nov 9, 2026 @ 09:05:40 -> Add POST /api/reaction endpoint and onReactionReceived callback for crowd emoji reactions
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +35,8 @@ namespace KSRotation.Services
         Func<SessionHandoffPayload, Task<string?>>? onImportSession = null,
         Func<DiscoveredPeer>? onGetProbeInfo = null,
         Action<string, int, string>? onSessionExportedToPeer = null,
-        Action<string>? onSingerProfileChanged = null)
+        Action<string>? onSingerProfileChanged = null,
+        Func<string, bool>? onReactionReceived = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -66,6 +67,7 @@ namespace KSRotation.Services
         private readonly Func<DiscoveredPeer>? _onGetProbeInfo = onGetProbeInfo;
         private readonly Action<string, int, string>? _onSessionExportedToPeer = onSessionExportedToPeer;
         private readonly Action<string>? _onSingerProfileChanged = onSingerProfileChanged;
+        private readonly Func<string, bool>? _onReactionReceived = onReactionReceived;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
         // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
@@ -953,6 +955,33 @@ namespace KSRotation.Services
 #else
                         await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
 #endif
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/reaction", StringComparison.OrdinalIgnoreCase))
+                    {
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+                        string emoji = string.Empty;
+                        try
+                        {
+                            using JsonDocument doc = JsonDocument.Parse(body);
+                            if (doc.RootElement.TryGetProperty("emoji", out var emojiProp))
+                            {
+                                emoji = emojiProp.GetString() ?? string.Empty;
+                            }
+                        }
+                        catch
+                        {
+                            emoji = body.Trim();
+                        }
+
+                        if (string.IsNullOrWhiteSpace(emoji))
+                        {
+                            await SendBadRequestAsync(stream, "{\"error\":\"Emoji is required.\"}");
+                            return;
+                        }
+
+                        bool accepted = _onReactionReceived?.Invoke(emoji) ?? false;
+                        await SendJsonResponseAsync(stream, accepted ? "{\"success\":true}" : "{\"success\":false,\"error\":\"Reaction not active for current show theme.\"}");
                     }
                     else
                     {

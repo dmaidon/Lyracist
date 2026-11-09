@@ -1,4 +1,4 @@
-<!-- Edited on Oct 30, 2026 @ 14:36:00 -> Update Trivia Night Pro help topic with pre-game lobby timer controls, correct answer badges, and live port/monitor updates -->
+<!-- Edited on Nov 9, 2026 @ 09:41:00 -> Add Crowd Emoji Reactions GroupBox and Help documentation in MainWindow.xaml -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2738,6 +2738,23 @@
                                               ToolTip="Holiday theme for the audience rotation screen. Works even when Scaryoke mode is off." />
                                 </StackPanel>
                             </GroupBox>
+
+                            <!-- Crowd Emoji Reactions -->
+                            <GroupBox Header="🎭 Crowd Emoji Reactions (Show Theme)" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,12,0,0">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Let patrons send floating emoji reactions from their phones during performances. Default ('Patron's Choice') lets the crowd switch between all 7 vibe sets per singer, or lock the evening to a single Show Theme."
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Opacity="0.75"
+                                               Margin="0,0,0,8" />
+                                    <ComboBox ItemsSource="{Binding EmojiReactionThemeOptions}"
+                                              SelectedValue="{Binding EmojiReactionThemeChoice, Mode=TwoWay}"
+                                              SelectedValuePath="Key"
+                                              DisplayMemberPath="Value"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              ToolTip="Choose 'Patron's Choice (All 7 Sets)' so guests can pick Country, Rock, Rap, Ballad, Party, etc. per singer, or lock patron phones to a single Show Theme for the night." />
+                                </StackPanel>
+                            </GroupBox>
                         </StackPanel>
                     </ScrollViewer>
 
@@ -4875,6 +4892,7 @@
                                         <TextBlock Text="• Marquee Speed: Adjust the slider in the Appearance group in Settings to control how fast the ticker scrolls at the top of the display." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Banner Template: Type custom text in Settings. Use '{venue}' and '{dj}' in the text to automatically substitute the selected venue and DJ names." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Holiday Rotation Screens: Under Display -> Holiday Rotation Screens, choose Auto (by date) or any holiday (Halloween, Christmas, Thanksgiving, New Year's, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Labor Day, Veterans Day, or Brenda's Birthday) to add a seasonal vignette, drifting fog, and full-color floating characters over the rotation display. Auto mode keeps the evening's holiday active through 6:00 AM for late-night shows." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Crowd Emoji Reactions &amp; DJ Show Theme: Patrons on their smartphones can send live floating emoji reactions across the rotation display and web billboard using 7 performer vibe sets (🌟 Classic, 🤠 Country, 🎸 Rock, 🎤 Hip-Hop/Rap, 🕯️ Ballad, 🕺 Party, 🏆 Superstar). Under Settings -> Web Server &amp; Patron Requests (or from dj.html), the DJ can leave '🎭 Patron's Choice (All 7 Sets)' enabled, lock the entire crowd to one specific show theme for the evening, or select 'Off' to disable reactions." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

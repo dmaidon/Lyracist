@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:33:00 -> Add shared HolidayOverlayEffect for SingerDisplayWindow and RotationWindow
+// Edited on Nov 9, 2026 @ 09:04:00 -> Add shared ReactionBurstEffect for crowd emoji reactions on projection screens
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1655,7 +1655,7 @@ internal sealed class HolidayOverlayEffect(
     // Frozen solid brush + radial-gradient halo brush per palette color (same zero-shader technique as
     // StarfieldEffect and MarqueeBulbChase: avoids per-particle DropShadowEffect pixel shaders that
     // re-rasterize on every Opacity animation frame).
-    private static (SolidColorBrush Brush, RadialGradientBrush Halo) GetLook(string hex)
+    internal static (SolidColorBrush Brush, RadialGradientBrush Halo) GetLook(string hex)
     {
         if (Looks.TryGetValue(hex, out var look)) return look;
         var color = ParseColor(hex);
@@ -1673,7 +1673,7 @@ internal sealed class HolidayOverlayEffect(
     }
 
     /// <summary>The bundled full-color Twemoji image for a glyph (cached, frozen), or null when none ships for it.</summary>
-    private static BitmapImage? EmojiImage(string glyph)
+    internal static BitmapImage? EmojiImage(string glyph)
     {
         if (EmojiImages.TryGetValue(glyph, out var cached)) return cached;
         BitmapImage? image = null;
@@ -2011,5 +2011,124 @@ internal sealed class HolidayOverlayEffect(
             }
         };
         container.BeginAnimation(UIElement.OpacityProperty, fade);
+    }
+}
+
+// ── Crowd emoji reaction bursts (SingerDisplayWindow, RotationWindow, LyricsWindow) ──────────────
+internal static class ReactionBurstEffect
+{
+    public const int MaxOnScreenReactions = 20;
+    private static readonly BitmapCache SharedCache = ProjectionFx.Frozen(new BitmapCache());
+
+    public static void Spawn(Canvas? reactionsCanvas, string emoji, double width = 1920, double height = 1080, bool reduced = false)
+    {
+        if (reactionsCanvas == null || string.IsNullOrWhiteSpace(emoji)) return;
+        if (reactionsCanvas.Children.Count >= MaxOnScreenReactions) return;
+
+        var rng = ProjectionFx.Rng;
+        double size = 86;
+        double haloSize = size * 1.65;
+        var shift = new TranslateTransform();
+
+        var container = new Grid
+        {
+            Width = haloSize,
+            Height = haloSize,
+            IsHitTestVisible = false,
+            RenderTransform = shift,
+            CacheMode = SharedCache
+        };
+
+        var glowLook = HolidayOverlayEffect.GetLook(EmojiReactionThemes.GetGlowHex(emoji));
+        if (!reduced)
+        {
+            container.Children.Add(new Ellipse
+            {
+                Width = haloSize,
+                Height = haloSize,
+                Fill = glowLook.Halo,
+                IsHitTestVisible = false
+            });
+        }
+
+        var emojiImg = HolidayOverlayEffect.EmojiImage(emoji);
+        if (emojiImg != null)
+        {
+            var img = new Image
+            {
+                Source = emojiImg,
+                Width = size,
+                Height = size,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
+            };
+            RenderOptions.SetBitmapScalingMode(img, reduced ? BitmapScalingMode.Linear : BitmapScalingMode.HighQuality);
+            container.Children.Add(img);
+        }
+        else
+        {
+            var textBlock = new TextBlock
+            {
+                Text = emoji,
+                FontSize = size,
+                Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
+            };
+            container.Children.Add(textBlock);
+        }
+
+        int side = rng.Next(4);
+        double toX, toY;
+
+        switch (side)
+        {
+            case 0: // bottom -> travels up
+                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(200, width - 140)));
+                Canvas.SetBottom(container, rng.Next(20, 100));
+                toY = -(height - 150);
+                toX = (rng.NextDouble() * 220) - 110;
+                break;
+            case 1: // top -> travels down
+                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(200, width - 140)));
+                Canvas.SetTop(container, rng.Next(20, 100));
+                toY = height - 150;
+                toX = (rng.NextDouble() * 220) - 110;
+                break;
+            case 2: // left -> travels right
+                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(200, height - 140)));
+                Canvas.SetLeft(container, rng.Next(20, 100));
+                toX = width - 150;
+                toY = (rng.NextDouble() * 220) - 110;
+                break;
+            default: // right -> travels left
+                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(200, height - 140)));
+                Canvas.SetRight(container, rng.Next(20, 100));
+                toX = -(width - 150);
+                toY = (rng.NextDouble() * 220) - 110;
+                break;
+        }
+
+        reactionsCanvas.Children.Add(container);
+
+        var duration = TimeSpan.FromSeconds(5.5);
+        var yAnimation = new DoubleAnimation(0, toY, duration);
+        var xAnimation = new DoubleAnimation(0, toX, duration);
+        var opacityAnimation = new DoubleAnimation(1.0, 0.0, duration);
+
+        opacityAnimation.Completed += (_, _) =>
+        {
+            container.BeginAnimation(UIElement.OpacityProperty, null);
+            shift.BeginAnimation(TranslateTransform.XProperty, null);
+            shift.BeginAnimation(TranslateTransform.YProperty, null);
+            reactionsCanvas.Children.Remove(container);
+        };
+
+        shift.BeginAnimation(TranslateTransform.YProperty, yAnimation);
+        shift.BeginAnimation(TranslateTransform.XProperty, xAnimation);
+        container.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
     }
 }

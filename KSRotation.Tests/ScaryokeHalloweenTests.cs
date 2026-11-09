@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 04:05:30 -> Add Labor Day and Veterans Day Auto date tests
+// Edited on Nov 9, 2026 @ 09:20:00 -> Add EmojiReactionThemeTests for 7 performer vibe sets and DJ Show Theme override
 using System.Linq;
 using ScaryokeWheel;
 using Xunit;
@@ -188,5 +188,55 @@ public class HolidayThemeTests
             Assert.True(t.CrossSeconds > 0 && t.AmbientSeconds > 0);
         }
         Assert.True(KSRotation.Models.HolidayThemes.Find("Halloween")!.Crossers.Length >= 10);
+    }
+}
+
+public class EmojiReactionThemeTests
+{
+    [Fact]
+    public void AllSevenReactionSets_ContainSixNonEmptyEmojis()
+    {
+        Assert.Equal(7, KSRotation.Models.EmojiReactionThemes.All.Count);
+        foreach (var set in KSRotation.Models.EmojiReactionThemes.All)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(set.Key));
+            Assert.False(string.IsNullOrWhiteSpace(set.Display));
+            Assert.False(string.IsNullOrWhiteSpace(set.ShortLabel));
+            Assert.Equal(6, set.Emojis.Length);
+            Assert.All(set.Emojis, e => Assert.False(string.IsNullOrWhiteSpace(e)));
+        }
+    }
+
+    [Fact]
+    public void IsAllowedEmoji_PatronChoiceAllowsAllSevenSets_AndThemeLockRestrictsToSet()
+    {
+        // PatronChoice allows emojis from any of the 7 sets
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🤠", "PatronChoice"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🤘", "PatronChoice"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("💰", "PatronChoice"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🕯️", "PatronChoice"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🕺", "PatronChoice"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("💎", "PatronChoice"));
+        Assert.False(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("💩", "PatronChoice"));
+
+        // Country lock allows Country set emojis and rejects Hip-Hop / Rock exclusives
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🤠", "Country"));
+        Assert.True(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🍻", "Country"));
+        Assert.False(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("💰", "Country"));
+        Assert.False(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("🤘", "Country"));
+
+        // Off blocks all emojis
+        Assert.False(KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji("❤️", "Off"));
+    }
+
+    [Fact]
+    public void NormalizeThemeKey_FallsBackToPatronChoiceOnInvalidInput()
+    {
+        Assert.Equal("PatronChoice", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey(null));
+        Assert.Equal("PatronChoice", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey(""));
+        Assert.Equal("PatronChoice", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey("UnknownVibe"));
+        Assert.Equal("Off", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey("off"));
+        Assert.Equal("Country", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey("country"));
+        Assert.Equal("HipHop", KSRotation.Models.EmojiReactionThemes.NormalizeThemeKey("hiphop"));
     }
 }

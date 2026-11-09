@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:34:00 -> Use shared HolidayOverlayEffect from ProjectionEffects.cs
+// Edited on Nov 9, 2026 @ 09:06:40 -> Add ShowReaction to SingerDisplayWindow using shared ReactionBurstEffect
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -1411,6 +1411,9 @@ namespace KSRotation.Windows
         private void RefreshHolidayLayerActivity() => _holidayOverlay.RefreshActivity();
 
         private void StopHolidayTimersAndAnimations() => _holidayOverlay.Stop();
+
+        /// <summary>Spawns a floating crowd emoji reaction across the 1920x1080 display canvas.</summary>
+        public void ShowReaction(string emoji) => ReactionBurstEffect.Spawn(ReactionsCanvas, emoji, 1920, 1080, ReducedEffects);
 
         #endregion
     }

@@ -1,6 +1,15 @@
-// Edited on Oct 30, 2026 @ 06:10:00 -> Add scaryokeCategories to VenueInfoResponseDto for manual Scaryoke category selection in dj.html
+// Edited on Nov 9, 2026 @ 09:05:10 -> Add emojiReactionTheme and recentReactions to VenueInfoResponseDto
 namespace KSRotation.Models
 {
+    /// <summary>
+    /// Serialized crowd emoji reaction event for <c>billboard.html</c> and remote displays.
+    /// </summary>
+    public sealed class ReactionEventDto
+    {
+        public long id { get; set; }
+        public string emoji { get; set; } = string.Empty;
+    }
+
     /// <summary>
     /// Serialized holiday theme configuration for <c>billboard.html</c> and remote displays.
     /// </summary>
@@ -41,6 +50,8 @@ namespace KSRotation.Models
         public bool isScaryokeActive { get; set; }
         public ScaryokeStateDto? scaryokeState { get; set; }
         public string[] scaryokeCategories { get; set; } = [];
+        public string emojiReactionTheme { get; set; } = EmojiReactionThemes.PatronChoice;
+        public ReactionEventDto[] recentReactions { get; set; } = [];
     }
 }
 

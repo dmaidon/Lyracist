@@ -1,4 +1,4 @@
-<!-- Edited on Nov 2, 2026 @ 10:39:30 -> Document Linked Singers rotation list interaction fixes -->
+<!-- Edited on Nov 9, 2026 @ 09:21:45 -> Document Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) across KSRotation and Lyracist -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), Scaryoke standalone roulette wheel module with dual-monitor audience projection (`ScaryokeWheel.exe`), integrated Scaryoke singer rotation challenge spins with tablet remote control in `KSRotation`, and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,21 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🎭 Crowd Emoji Reactions: 7 Performer Vibe Sets & DJ Show Theme Override (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `PatronPortal.html`, `mobile.html`, `billboard.html`, `dj.html`)
+- **Live Smartphone Audience Reactions in `KSRotation` & `Lyracist`**: Patrons connected via the `KSRotation` Request Portal (`PatronPortal.html`) or the `Lyracist` Performer Portal (`mobile.html`) can tap emoji reactions that float across the live audience rotation screens (`SingerDisplayWindow`, `RotationWindow`, `LyricsWindow`, `KSRotation.Maui` `BillboardView`, and Chromecast/Smart TV `billboard.html`) with vibrant color-matched radial glow halos and smooth 5.5-second flight trajectories from all four screen edges (capped at 20 concurrent on-screen reactions).
+- **7 Curated Performer Vibe Sets (6 Emojis Each)**: Because one singer may be performing a country ballad and the next a hip-hop or rock anthem, patrons can switch between 7 genre/vibe sets directly on their phones:
+  - **🌟 Classic**: `❤️ 🔥 👏 🙌 🎉 👑`
+  - **🤠 Country / Honky-Tonk**: `🤠 🍻 ❤️ 🎸 🎶 🌟`
+  - **🎸 Rock & Metal**: `🤘 🎸 🔥 ⚡ 💥 🎤`
+  - **🎤 Hip-Hop / Rap**: `🎤 💯 🔥 💰 👑 🚀`
+  - **🕯️ Ballad / Slow Jam**: `🕯️ 💖 🌹 ✨ 🎶 👏`
+  - **🕺 Party / Dance**: `🕺 💃 🎉 🥂 🤩 ⚡`
+  - **🏆 Superstar / Encore**: `🏆 👑 💎 ⭐ 💯 🙌`
+- **DJ Show Theme Override (`PatronChoice`, Locked Theme, or `Off`)**:
+  - **🎭 Patron's Choice (Default)**: Guests see all 7 vibe selector pills on their phones and can freely switch sets from singer to singer.
+  - **Single Show Theme Lock**: When the DJ selects a specific Show Emoji Theme (`Classic`, `Country`, `Rock`, `HipHop`, `Ballad`, `Party`, or `Superstar`) from the Display settings tab (`KSRotation` / `Lyracist`), the MAUI Billboard/Cast bar (`KSRotation.Maui`), or the Remote DJ Board (`dj.html`), all patron phones lock to that theme's 6 emojis for the night with a themed header badge, and server validation (`EmojiReactionThemes.IsAllowedEmoji`) enforces the active theme.
+  - **🚫 Off**: Hides the reaction card on patron phones and disables incoming emoji reactions.
 
 ### 🔗 Linked Singers Rotation List Integrity (`Shared/RotationHelpers.cs`, `Lyracist`, `KSRotation`, `KSRotation.Maui`)
 - **Bidirectional Drag-and-Drop Pair Movement (`RotationHelpers.MoveSingerToIndex`)**: Dragging either half of a linked singer pair upward or downward in the rotation list moves both partners together to the target slot while preserving their relative order, while dropping one partner directly onto the other swaps their internal order (`[A, B]` $\leftrightarrow$ `[B, A]`). Dragging an unlinked singer into a linked pair steps cleanly past the pair without splitting them.

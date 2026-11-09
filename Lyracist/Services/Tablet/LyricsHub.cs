@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Include isSpecial in queue payload
+// Edited on Nov 9, 2026 @ 09:17:45 -> Validate emoji reactions against active Show Emoji Theme and include emojiReactionTheme in ActiveSingerUpdated
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Concurrent;
@@ -96,7 +96,8 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
             isPlaying = _karaoke.IsPlaying,
             avgRating = avgRating,
             isRatingSystemEnabled = Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled,
-            ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol
+            ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol,
+            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
         });
 
         await Clients.Caller.SendAsync("NextSingerUpdated", new
@@ -115,6 +116,10 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
 
     public async Task SendReaction(string emoji)
     {
+        if (!KSRotation.Models.EmojiReactionThemes.IsAllowedEmoji(emoji, Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme))
+        {
+            return;
+        }
         await Clients.All.SendAsync("ReactionReceived", emoji);
         ReactionReceived?.Invoke(emoji);
     }

@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:37:00 -> Add HolidayThemeOptions and HolidayThemeChoice to SettingsViewModel.Display
+// Edited on Nov 9, 2026 @ 09:17:15 -> Add EmojiReactionThemeOptions and EmojiReactionThemeChoice to SettingsViewModel.Display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -459,6 +459,17 @@ public partial class SettingsViewModel
     partial void OnHolidayThemeChoiceChanged(string value)
     {
         _display.SetHolidayTheme(value);
+    }
+
+    public IReadOnlyList<KeyValuePair<string, string>> EmojiReactionThemeOptions { get; } = EmojiReactionThemes.Options;
+
+    /// <summary>Crowd emoji reaction theme choice: "PatronChoice", a specific vibe set key, or "Off".</summary>
+    [ObservableProperty]
+    private string _emojiReactionThemeChoice = AppSettings.EmojiReactionTheme;
+
+    partial void OnEmojiReactionThemeChoiceChanged(string value)
+    {
+        AppSettings.EmojiReactionTheme = value;
     }
 
     /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>

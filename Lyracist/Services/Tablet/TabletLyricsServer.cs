@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 08:55:30 -> Include partner and duetPartnerName in BuildQueuePayload for tablet queue compatibility
+// Edited on Nov 9, 2026 @ 09:18:00 -> Broadcast EmojiReactionTheme updates to mobile portal clients
 using System;
 using System.IO;
 using System.Linq;
@@ -181,6 +181,7 @@ public class TabletLyricsServer(
             _karaoke.PropertyChanged += OnKaraokePropertyChanged;
             _scaryokeWindow.SpinStarted += OnScaryokeSpinStarted;
             _scaryokeWindow.SpinCompleted += OnScaryokeSpinCompleted;
+            Lyracist.Core.Helpers.AppSettings.EmojiReactionThemeChanged += OnEmojiReactionThemeChanged;
 
             _webApp.MapHub<LyricsHub>("/lyricsHub");
 
@@ -688,7 +689,11 @@ public class TabletLyricsServer(
     /// <summary>Read-only Scaryoke status/categories, gated behind whether the host has Scaryoke Mode on.</summary>
     private void MapScaryokeReadEndpoints(WebApplication app)
     {
-        app.MapGet("/api/scaryoke/enabled", () => Results.Json(new { enabled = _karaoke.IsScaryokeMode }));
+        app.MapGet("/api/scaryoke/enabled", () => Results.Json(new
+        {
+            enabled = _karaoke.IsScaryokeMode,
+            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
+        }));
 
         app.MapGet("/api/scaryoke/categories", () =>
         {
@@ -1009,6 +1014,7 @@ public class TabletLyricsServer(
         _karaoke.PropertyChanged -= OnKaraokePropertyChanged;
         _scaryokeWindow.SpinStarted -= OnScaryokeSpinStarted;
         _scaryokeWindow.SpinCompleted -= OnScaryokeSpinCompleted;
+        Lyracist.Core.Helpers.AppSettings.EmojiReactionThemeChanged -= OnEmojiReactionThemeChanged;
 
         if (_cts != null)
         {
@@ -1159,12 +1165,32 @@ public class TabletLyricsServer(
                 isPlaying = _karaoke.IsPlaying,
                 avgRating = avgRating,
                 isRatingSystemEnabled = Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled,
-                ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol
+                ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol,
+                emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
             });
         }
         catch (Exception ex)
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting active singer", ex);
+        }
+    }
+
+    private void OnEmojiReactionThemeChanged(string themeKey)
+    {
+        _ = BroadcastEmojiThemeAsync(themeKey);
+    }
+
+    private async Task BroadcastEmojiThemeAsync(string themeKey)
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("EmojiThemeUpdated", themeKey);
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting emoji theme", ex);
         }
     }
 

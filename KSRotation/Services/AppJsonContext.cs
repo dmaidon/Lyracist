@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 14:43:30 -> Register HolidayThemeDto in AppJsonContext
+// Edited on Nov 9, 2026 @ 09:05:20 -> Register ReactionEventDto in AppJsonContext
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -26,6 +26,8 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(List<RequestedSong>))]
     [JsonSerializable(typeof(VenueInfoResponseDto))]
     [JsonSerializable(typeof(HolidayThemeDto))]
+    [JsonSerializable(typeof(ReactionEventDto))]
+    [JsonSerializable(typeof(ReactionEventDto[]))]
     [JsonSerializable(typeof(SessionHandoffPayload))]
     [JsonSerializable(typeof(DiscoveredPeer))]
     [JsonSerializable(typeof(List<DiscoveredPeer>))]

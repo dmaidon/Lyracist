@@ -1,4 +1,4 @@
-// Edited on Nov 2, 2026 @ 10:30:00 -> Use shared RotationHelpers.MoveSingerToIndex for linked-pair-aware drag-and-drop reordering
+// Edited on Nov 9, 2026 @ 09:09:00 -> Add EmojiReactionThemeChoice, ReactionReceived event, and recent reaction buffer for crowd emoji reactions
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -501,6 +501,11 @@ namespace KSRotation.ViewModels
 #endif
                     break;
 
+                case nameof(EmojiReactionThemeChoice):
+                    OnPropertyChanged(nameof(SelectedEmojiReactionThemeDisplay));
+                    QueueSaveSettings();
+                    break;
+
                 case nameof(WatermarkOpacity):
                     _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
                     QueueSaveSettings();
@@ -637,6 +642,32 @@ namespace KSRotation.ViewModels
         public HolidayTheme? ActiveHolidayTheme => HolidayThemes.Resolve(HolidayThemeChoice, HolidayThemes.ShowDate(DateTime.Now));
         public bool HasActiveHolidayTheme => ActiveHolidayTheme != null;
         public string ActiveHolidayDisplay => ActiveHolidayTheme?.Display ?? string.Empty;
+
+        /// <summary>DJ Show Emoji Theme choice: "PatronChoice", "Off", or a specific EmojiReactionThemes set key.</summary>
+        [ObservableProperty]
+        public partial string EmojiReactionThemeChoice { get; set; } = EmojiReactionThemes.PatronChoice;
+
+        public IReadOnlyList<KeyValuePair<string, string>> EmojiReactionThemeOptions => EmojiReactionThemes.Options;
+
+        public IReadOnlyList<string> EmojiReactionThemeDisplayOptions { get; } =
+            EmojiReactionThemes.Options.Select(o => o.Value).ToList();
+
+        public string SelectedEmojiReactionThemeDisplay
+        {
+            get => EmojiReactionThemeOptions.FirstOrDefault(o => string.Equals(o.Key, EmojiReactionThemeChoice, StringComparison.OrdinalIgnoreCase)).Value
+                ?? EmojiReactionThemeOptions[0].Value;
+            set
+            {
+                var match = EmojiReactionThemeOptions.FirstOrDefault(o => string.Equals(o.Value, value, StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(match.Key) && !string.Equals(EmojiReactionThemeChoice, match.Key, StringComparison.Ordinal))
+                {
+                    EmojiReactionThemeChoice = match.Key;
+                }
+            }
+        }
+
+        /// <summary>Raised on the UI thread whenever a valid crowd emoji reaction arrives from a patron phone.</summary>
+        public event Action<string>? ReactionReceived;
 
 #if MAUI
         public ScaryokeStateDto? MauiScaryokeState { get; private set; }
@@ -1349,6 +1380,7 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(ActiveHolidayTheme));
             OnPropertyChanged(nameof(HasActiveHolidayTheme));
             OnPropertyChanged(nameof(ActiveHolidayDisplay));
+            OnPropertyChanged(nameof(SelectedEmojiReactionThemeDisplay));
         }
         #endregion
 
@@ -1756,6 +1788,7 @@ namespace KSRotation.ViewModels
                 ? settings.ProjectionView
                 : "Normal List";
             HolidayThemeChoice = string.IsNullOrWhiteSpace(settings.HolidayTheme) ? HolidayThemes.None : settings.HolidayTheme;
+            EmojiReactionThemeChoice = EmojiReactionThemes.NormalizeThemeKey(settings.EmojiReactionTheme);
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
             _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
             _displayWindowService.SetMarqueeSpeed(MarqueeSpeed);
@@ -3751,7 +3784,8 @@ namespace KSRotation.ViewModels
                 SpectrumOnSpecialEvents = SpectrumOnSpecialEvents,
                 AutoRotateDurationSeconds = AutoRotateDurationSeconds > 0 ? AutoRotateDurationSeconds : 180,
                 ProjectionRotationSchedule = [.. ProjectionRotationSchedule],
-                HolidayTheme = HolidayThemeChoice
+                HolidayTheme = HolidayThemeChoice,
+                EmojiReactionTheme = EmojiReactionThemes.NormalizeThemeKey(EmojiReactionThemeChoice)
             };
 
             try

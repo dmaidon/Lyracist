@@ -1,4 +1,4 @@
-// Edited on Nov 2, 2026 @ 10:38:30 -> Add unit tests for linked singer drag-reorder, anchor insertion, and paused/current adjacency edge cases
+// Edited on Nov 9, 2026 @ 09:28:15 -> Align DjCompleteRoundAction_DuringLastRound_NextHighlightSkipsSungSinger with last-round completion flagging
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -1966,11 +1966,12 @@ public class MainViewModelTests
         vm.IsLastRound = true;
         sungSinger.HasSungInLastRound = true;
 
-        // Act - marking a round complete for Carol recomputes the Next highlight off Alice; it must
+        // Act - marking a round complete for Bob recomputes the Next highlight off Alice; it must
         // skip Bob (already sung) and land on Carol.
-        string result = InvokeDjAction(vm, "complete-round", eligible.Id.ToString(), "1");
+        string result = InvokeDjAction(vm, "complete-round", sungSinger.Id.ToString(), "1");
 
         Assert.Equal("", result);
+        Assert.True(sungSinger.HasSungInLastRound);
         Assert.False(sungSinger.IsNext);
         Assert.True(eligible.IsNext);
     }

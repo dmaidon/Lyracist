@@ -1,6 +1,13 @@
-<!-- Edited on Oct 30, 2026 @ 09:35:00 -> Update KSRotation CHANGELOG with Trivia host tab enhancements, debounced settings saves, port change restart, and ShutdownTrivia -->
+<!-- Edited on Nov 9, 2026 @ 09:22:15 -> Document Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) in KSRotation CHANGELOG -->
 
 # Changelog
+
+## 2026-11-09
+
+- **Crowd Emoji Reactions with 7 Performer Vibe Sets & DJ Show Theme Override (`EmojiReactionThemes.cs`, `Shared/ProjectionEffects.cs`, `PatronRequestServer.cs`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `SingerDisplayWindow.xaml/.cs`, `PatronPortal.html`, `billboard.html`, `dj.html`, `KSRotation.Maui`)**:
+  - Added live smartphone audience emoji reactions to `KSRotation` and `KSRotation.Maui` across native WPF (`SingerDisplayWindow`), native MAUI HDMI/Wireless displays (`BillboardView`), and Chromecast/Smart TV web browsers (`billboard.html`).
+  - Added 7 curated 6-emoji Performer Vibe Sets (`🌟 Classic`, `🤠 Country / Honky-Tonk`, `🎸 Rock & Metal`, `🎤 Hip-Hop / Rap`, `🕯️ Ballad / Slow Jam`, `🕺 Party / Dance`, `🏆 Superstar / Encore`) on `PatronPortal.html` so guests can pick emojis matching the current singer's genre.
+  - Added a **🎭 Crowd Emoji Reactions (Show Theme)** control on the `KSRotation` Display tab, `KSRotation.Maui` Billboard/Cast overlays, and the Remote DJ Board (`dj.html`), allowing the DJ to leave all 7 sets open (`PatronChoice`), lock patron phones to a single evening Show Theme, or turn reactions `Off`.
 
 ## 2026-10-30
 
