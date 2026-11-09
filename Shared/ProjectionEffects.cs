@@ -1,11 +1,14 @@
-// Edited on Nov 9, 2026 @ 09:04:00 -> Add shared ReactionBurstEffect for crowd emoji reactions on projection screens
+// Edited on Nov 9, 2026 @ 11:55:35 -> Qualify System.Windows.Data.Binding in LeadingEmojiImageConverter and LeadingEmojiTextConverter
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -2131,4 +2134,53 @@ internal static class ReactionBurstEffect
         shift.BeginAnimation(TranslateTransform.XProperty, xAnimation);
         container.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
     }
+}
+
+/// <summary>
+/// Extracts a leading emoji token from a display string (e.g. "🤠 Country / Honky-Tonk" or "🎉 Holiday Rotation Screens")
+/// and returns its bundled full-color Twemoji <see cref="BitmapImage"/>, or null if the text does not start with a known emoji.
+/// </summary>
+public sealed class LeadingEmojiImageConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        int spaceIdx = s.IndexOf(' ');
+        string firstToken = spaceIdx > 0 ? s[..spaceIdx] : s;
+        if (!StartsWithEmojiCandidate(firstToken)) return null;
+        return HolidayOverlayEffect.EmojiImage(firstToken);
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        System.Windows.Data.Binding.DoNothing;
+
+    internal static bool StartsWithEmojiCandidate(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return false;
+        return Rune.TryGetRuneAt(token, 0, out Rune rune) && rune.Value > 0xFF;
+    }
+}
+
+/// <summary>
+/// Strips the leading emoji token from a display string when <see cref="HolidayOverlayEffect.EmojiImage"/> has a bundled
+/// full-color PNG for it, returning the remaining label text so it can be paired alongside an <see cref="Image"/> control.
+/// </summary>
+public sealed class LeadingEmojiTextConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return value;
+        int spaceIdx = s.IndexOf(' ');
+        if (spaceIdx <= 0) return s;
+        string firstToken = s[..spaceIdx];
+        if (LeadingEmojiImageConverter.StartsWithEmojiCandidate(firstToken) &&
+            HolidayOverlayEffect.EmojiImage(firstToken) != null)
+        {
+            return s[(spaceIdx + 1)..];
+        }
+        return s;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        System.Windows.Data.Binding.DoNothing;
 }

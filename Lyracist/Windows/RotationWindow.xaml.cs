@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:35:00 -> Wire shared HolidayOverlayEffect into RotationWindow
+// Edited on Nov 9, 2026 @ 11:54:30 -> Delegate OnReactionReceived to ReactionBurstEffect.Spawn for full-color Twemoji reaction bursts and glow halos
 using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
@@ -1379,95 +1379,13 @@ public partial class RotationWindow : Window, ICaptureSource
         }
     }
 
-    // Most reactions allowed on screen at once. Each is a large Emoji.Wpf glyph animating for 5.5s;
-    // a room full of tablets spamming reactions would otherwise pile up without limit, so extras
-    // arriving while the screen is already full are dropped.
-    private const int MaxOnScreenReactions = 20;
-
     private void OnReactionReceived(string emoji)
     {
         // InvokeAsync, not Invoke: this is raised on the SignalR hub's thread, and a synchronous
         // Invoke blocked the hub until the UI thread was free to create and start the animation.
         Dispatcher.InvokeAsync(() =>
         {
-            if (ReactionsCanvas == null || ReactionsCanvas.Children.Count >= MaxOnScreenReactions) return;
-
-            var textBlock = new Emoji.Wpf.TextBlock
-            {
-                Text = emoji,
-                FontSize = 86,
-                RenderTransform = new TranslateTransform()
-            };
-
-            double width = 1920; // design-canvas units (root Viewbox)
-            double height = 1080;
-
-            // Random entry side: 0=bottom, 1=top, 2=left, 3=right
-            int side = _rng.Next(4);
-            double toX, toY;
-
-            switch (side)
-            {
-                case 0: // bottom -> travels up
-                    Canvas.SetLeft(textBlock, _rng.Next(50, (int)Math.Max(200, width - 100)));
-                    Canvas.SetBottom(textBlock, _rng.Next(20, 100));
-                    toY = -(height - 150);
-                    toX = _rng.NextDouble() * 200 - 100;
-                    break;
-                case 1: // top -> travels down
-                    Canvas.SetLeft(textBlock, _rng.Next(50, (int)Math.Max(200, width - 100)));
-                    Canvas.SetTop(textBlock, _rng.Next(20, 100));
-                    toY = height - 150;
-                    toX = _rng.NextDouble() * 200 - 100;
-                    break;
-                case 2: // left -> travels right
-                    Canvas.SetTop(textBlock, _rng.Next(50, (int)Math.Max(200, height - 100)));
-                    Canvas.SetLeft(textBlock, _rng.Next(20, 100));
-                    toX = width - 150;
-                    toY = _rng.NextDouble() * 200 - 100;
-                    break;
-                default: // right -> travels left
-                    Canvas.SetTop(textBlock, _rng.Next(50, (int)Math.Max(200, height - 100)));
-                    Canvas.SetRight(textBlock, _rng.Next(20, 100));
-                    toX = -(width - 150);
-                    toY = _rng.NextDouble() * 200 - 100;
-                    break;
-            }
-
-            ReactionsCanvas.Children.Add(textBlock);
-
-            var transform = (TranslateTransform)textBlock.RenderTransform;
-            var duration = TimeSpan.FromSeconds(5.5);
-
-            var yAnimation = new DoubleAnimation
-            {
-                From = 0,
-                To = toY,
-                Duration = duration
-            };
-
-            var xAnimation = new DoubleAnimation
-            {
-                From = 0,
-                To = toX,
-                Duration = duration
-            };
-
-            var opacityAnimation = new DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = duration
-            };
-
-            opacityAnimation.Completed += (s, e) =>
-            {
-                ReactionsCanvas.Children.Remove(textBlock);
-            };
-
-            transform.BeginAnimation(TranslateTransform.YProperty, yAnimation);
-            transform.BeginAnimation(TranslateTransform.XProperty, xAnimation);
-            textBlock.BeginAnimation(OpacityProperty, opacityAnimation);
+            ReactionBurstEffect.Spawn(ReactionsCanvas, emoji, 1920, 1080, ReducedEffects);
         });
     }
 

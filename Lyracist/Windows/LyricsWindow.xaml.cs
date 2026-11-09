@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 15:55:00 -> GetBarBrush now delegates to Shared/SpectrumBarStyles so KSRotation uses the same themes
+// Edited on Nov 9, 2026 @ 11:54:40 -> Delegate OnReactionReceived to ReactionBurstEffect.Spawn for full-color Twemoji reaction bursts and glow halos
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -282,87 +282,12 @@ public partial class LyricsWindow : Window
 
     private void OnReactionReceived(string emoji)
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             if (ReactionsCanvas == null) return;
-
-            var textBlock = new Emoji.Wpf.TextBlock
-            {
-                Text = emoji,
-                FontSize = 86,
-                RenderTransform = new System.Windows.Media.TranslateTransform()
-            };
-
             double width = ActualWidth > 0 ? ActualWidth : 800;
             double height = ActualHeight > 0 ? ActualHeight : 600;
-
-            // Random entry side: 0=bottom, 1=top, 2=left, 3=right
-            var rng = new System.Random();
-            int side = rng.Next(4);
-            double toX, toY;
-
-            switch (side)
-            {
-                case 0: // bottom -> travels up
-                    Canvas.SetLeft(textBlock, rng.Next(50, (int)System.Math.Max(200, width - 100)));
-                    Canvas.SetBottom(textBlock, rng.Next(20, 100));
-                    toY = -(height - 150);
-                    toX = rng.NextDouble() * 200 - 100;
-                    break;
-                case 1: // top -> travels down
-                    Canvas.SetLeft(textBlock, rng.Next(50, (int)System.Math.Max(200, width - 100)));
-                    Canvas.SetTop(textBlock, rng.Next(20, 100));
-                    toY = height - 150;
-                    toX = rng.NextDouble() * 200 - 100;
-                    break;
-                case 2: // left -> travels right
-                    Canvas.SetTop(textBlock, rng.Next(50, (int)System.Math.Max(200, height - 100)));
-                    Canvas.SetLeft(textBlock, rng.Next(20, 100));
-                    toX = width - 150;
-                    toY = rng.NextDouble() * 200 - 100;
-                    break;
-                default: // right -> travels left
-                    Canvas.SetTop(textBlock, rng.Next(50, (int)System.Math.Max(200, height - 100)));
-                    Canvas.SetRight(textBlock, rng.Next(20, 100));
-                    toX = -(width - 150);
-                    toY = rng.NextDouble() * 200 - 100;
-                    break;
-            }
-
-            ReactionsCanvas.Children.Add(textBlock);
-
-            var transform = (System.Windows.Media.TranslateTransform)textBlock.RenderTransform;
-            var duration = System.TimeSpan.FromSeconds(5.5);
-
-            var yAnimation = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                From = 0,
-                To = toY,
-                Duration = duration
-            };
-
-            var xAnimation = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                From = 0,
-                To = toX,
-                Duration = duration
-            };
-
-            var opacityAnimation = new System.Windows.Media.Animation.DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = duration
-            };
-
-            opacityAnimation.Completed += (s, e) =>
-            {
-                ReactionsCanvas.Children.Remove(textBlock);
-            };
-
-            transform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, yAnimation);
-            transform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, xAnimation);
-            textBlock.BeginAnimation(OpacityProperty, opacityAnimation);
+            Lyracist.Shared.ReactionBurstEffect.Spawn(ReactionsCanvas, emoji, width, height);
         });
     }
 }

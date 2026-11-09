@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:41:00 -> Add Crowd Emoji Reactions GroupBox and Help documentation in MainWindow.xaml -->
+<!-- Edited on Nov 9, 2026 @ 11:52:45 -> Render full-color Twemoji icons in Holiday Rotation Screens and Crowd Emoji Reactions GroupBox headers and dropdown boxes -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -9,6 +9,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:KSRotation.Converters"
+        xmlns:shared="clr-namespace:Lyracist.Shared"
         xmlns:vm="clr-namespace:KSRotation.ViewModels"
         mc:Ignorable="d"
     Title="{Binding WindowTitle}"
@@ -27,9 +28,36 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <shared:LeadingEmojiImageConverter x:Key="LeadingEmojiImageConverter" />
+        <shared:LeadingEmojiTextConverter x:Key="LeadingEmojiTextConverter" />
         <!-- Drives the rotation list's "vertical mode" 3-row layout — true when the list is narrower
              than 700px (e.g. window resized tall and thin, or a portrait tablet). -->
         <converters:NarrowWidthToBooleanConverter x:Key="NarrowWidthConverter" />
+
+        <!-- Full-color Twemoji icon + label template for KeyValuePair<string, string> ComboBox options -->
+        <DataTemplate x:Key="EmojiOptionItemTemplate">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Source="{Binding Value, Converter={StaticResource LeadingEmojiImageConverter}}"
+                       Width="18"
+                       Height="18"
+                       Margin="0,0,7,0"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+                <TextBlock Text="{Binding Value, Converter={StaticResource LeadingEmojiTextConverter}}"
+                           Foreground="{DynamicResource AppContrastTextBrush}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
         <!-- Custom text box style inside ListView rows to ensure perfect contrast and theme syncing -->
         <Style x:Key="GridTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="6,4" />
@@ -348,6 +376,11 @@
         <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
             <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
             <Setter Property="TextElement.Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+            <Style.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                </Style>
+            </Style.Resources>
         </Style>
 
         <Style x:Key="ModernCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
@@ -553,6 +586,8 @@
         <Style x:Key="NavySettingsGroupBoxStyle" TargetType="GroupBox">
             <Setter Property="Margin" Value="0,0,0,12" />
             <Setter Property="Padding" Value="12,6,12,6" />
+            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource AppContrastTextBrush}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
@@ -569,10 +604,29 @@
                                         Background="{StaticResource NavyGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="12,6">
-                                    <TextBlock Text="{TemplateBinding Header}"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="13" />
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource LeadingEmojiImageConverter}}"
+                                               Width="17"
+                                               Height="17"
+                                               Margin="0,0,6,0"
+                                               VerticalAlignment="Center"
+                                               RenderOptions.BitmapScalingMode="HighQuality">
+                                            <Image.Style>
+                                                <Style TargetType="Image">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Source, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource LeadingEmojiTextConverter}}"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="13"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1"
                                         Background="{StaticResource NavyGroupBoxBodyBrush}"
@@ -634,6 +688,8 @@
 
         <!-- Custom TabControl style to show borders/outlines around the content panel -->
         <Style x:Key="BorderedTabControlStyle" TargetType="TabControl">
+            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource AppContrastTextBrush}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabControl">
@@ -2482,7 +2538,7 @@
             </TabItem>
 
             <TabItem Header="Display" Width="65" Height="45">
-                <Grid Margin="12">
+                <Grid Margin="12" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.9*" />
                         <ColumnDefinition Width="0.7*" />
@@ -2728,12 +2784,12 @@
                                     <TextBlock Text="Adds a seasonal tint, drifting fog and floating characters (bats, snowflakes, hearts, fireworks...) over the audience rotation screen. Choose Auto to switch on by date."
                                                TextWrapping="Wrap"
                                                FontSize="11"
-                                               Opacity="0.75"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
                                                Margin="0,0,0,8" />
                                     <ComboBox ItemsSource="{Binding HolidayThemeOptions}"
                                               SelectedValue="{Binding HolidayThemeChoice, Mode=TwoWay}"
                                               SelectedValuePath="Key"
-                                              DisplayMemberPath="Value"
+                                              ItemTemplate="{StaticResource EmojiOptionItemTemplate}"
                                               Style="{StaticResource ModernComboBoxStyle}"
                                               ToolTip="Holiday theme for the audience rotation screen. Works even when Scaryoke mode is off." />
                                 </StackPanel>
@@ -2745,12 +2801,12 @@
                                     <TextBlock Text="Let patrons send floating emoji reactions from their phones during performances. Default ('Patron's Choice') lets the crowd switch between all 7 vibe sets per singer, or lock the evening to a single Show Theme."
                                                TextWrapping="Wrap"
                                                FontSize="11"
-                                               Opacity="0.75"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
                                                Margin="0,0,0,8" />
                                     <ComboBox ItemsSource="{Binding EmojiReactionThemeOptions}"
                                               SelectedValue="{Binding EmojiReactionThemeChoice, Mode=TwoWay}"
                                               SelectedValuePath="Key"
-                                              DisplayMemberPath="Value"
+                                              ItemTemplate="{StaticResource EmojiOptionItemTemplate}"
                                               Style="{StaticResource ModernComboBoxStyle}"
                                               ToolTip="Choose 'Patron's Choice (All 7 Sets)' so guests can pick Country, Rock, Rap, Ballad, Party, etc. per singer, or lock patron phones to a single Show Theme for the night." />
                                 </StackPanel>

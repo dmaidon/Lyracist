@@ -1,9 +1,10 @@
-<!-- Edited on Nov 9, 2026 @ 09:17:30 -> Add Crowd Emoji Reactions Show Theme GroupBox to SettingsPage -->
+<!-- Edited on Nov 9, 2026 @ 11:53:45 -> Render full-color Twemoji icons in Holiday Rotation Screens and Crowd Emoji Reactions GroupBox headers and dropdown boxes -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
+      xmlns:shared="clr-namespace:Lyracist.Shared"
       Title="Settings"
       Background="{DynamicResource AppBackgroundBrush}"
       Foreground="{DynamicResource AppTextPrimaryBrush}">
@@ -12,6 +13,32 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <helpers:NotEmptyToVisibilityConverter x:Key="NotEmptyToVisibilityConverter" />
         <helpers:NotEmptyToVisibilityConverter x:Key="EmptyStringToVisibilityConverter" />
+        <shared:LeadingEmojiImageConverter x:Key="LeadingEmojiImageConverter" />
+        <shared:LeadingEmojiTextConverter x:Key="LeadingEmojiTextConverter" />
+
+        <!-- Full-color Twemoji icon + label template for KeyValuePair<string, string> ComboBox options -->
+        <DataTemplate x:Key="EmojiOptionItemTemplate">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Source="{Binding Value, Converter={StaticResource LeadingEmojiImageConverter}}"
+                       Width="18"
+                       Height="18"
+                       Margin="0,0,7,0"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+                <TextBlock Text="{Binding Value, Converter={StaticResource LeadingEmojiTextConverter}}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
 
         <!-- Page header gradient -->
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
@@ -267,10 +294,29 @@
                                 <Border Background="{StaticResource NavyGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
-                                    <TextBlock Text="{TemplateBinding Header}"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="13" />
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource LeadingEmojiImageConverter}}"
+                                               Width="17"
+                                               Height="17"
+                                               Margin="0,0,6,0"
+                                               VerticalAlignment="Center"
+                                               RenderOptions.BitmapScalingMode="HighQuality">
+                                            <Image.Style>
+                                                <Style TargetType="Image">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Source, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource LeadingEmojiTextConverter}}"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="13"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Border>
                                 <Border Background="{StaticResource NavyGroupBoxBodyBrush}"
                                         Padding="14"
@@ -850,7 +896,7 @@
                                     <ComboBox ItemsSource="{Binding HolidayThemeOptions}"
                                               SelectedValue="{Binding HolidayThemeChoice, Mode=TwoWay}"
                                               SelectedValuePath="Key"
-                                              DisplayMemberPath="Value"
+                                              ItemTemplate="{StaticResource EmojiOptionItemTemplate}"
                                               ToolTip="Holiday theme for the audience rotation screen. Works even when Scaryoke mode is off." />
                                 </StackPanel>
                             </GroupBox>
@@ -865,7 +911,7 @@
                                     <ComboBox ItemsSource="{Binding EmojiReactionThemeOptions}"
                                               SelectedValue="{Binding EmojiReactionThemeChoice, Mode=TwoWay}"
                                               SelectedValuePath="Key"
-                                              DisplayMemberPath="Value"
+                                              ItemTemplate="{StaticResource EmojiOptionItemTemplate}"
                                               ToolTip="Patron's Choice lets guests switch emoji sets per singer; selecting a specific theme locks all patron phones to that show theme." />
                                 </StackPanel>
                             </GroupBox>
