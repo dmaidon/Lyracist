@@ -1,4 +1,4 @@
-// Edited on Nov 2, 2026 @ 10:30:00 -> Enforce linked adjacency on singer reactivation/drag-drop and unlink on inactive deletion
+// Edited on Nov 13, 2026 @ 16:06:30 -> Add SaveRotationCommand and SavedRotationSaved event to RotationViewModel
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -128,6 +128,7 @@ public partial class RotationViewModel : BaseViewModel
 
     public event Action? RotationStateChanged;
     public event Action? RotationCleared;
+    public event Action? SavedRotationReportCreated;
 
     public ObservableCollection<Singer> Rotation { get; } = [];
 
@@ -950,6 +951,51 @@ public partial class RotationViewModel : BaseViewModel
 
         _display.ShowRotationWindow();
         _display.HighlightSinger(SelectedSinger);
+    }
+
+    [RelayCommand]
+    private void SaveRotation()
+    {
+        try
+        {
+            var activeSingers = Rotation
+                .Concat(InactiveSingers)
+                .Select(s => (s.Name, s.IsMusic))
+                .ToList();
+
+            var performances = SessionPerformedSongs
+                .Select(p => (p.SingerName, p.DuetPartnerName, p.SongTitle, p.Artist, p.PerformedAt, IsMusic: false))
+                .ToList();
+
+            if (activeSingers.Count == 0 && performances.Count == 0)
+            {
+                System.Windows.MessageBox.Show(
+                    "There are no singers in the rotation or performed songs in this session to save.",
+                    "Nothing to Save",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            string venueName = AppSettings.SelectedVenue;
+            string csvPath = SavedRotationReportReader.SaveReportCsv(venueName, activeSingers, performances);
+            SavedRotationReportCreated?.Invoke();
+
+            System.Windows.MessageBox.Show(
+                $"Rotation list saved to:\n{csvPath}",
+                "Rotation Saved",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "RotationViewModel.SaveRotation");
+            System.Windows.MessageBox.Show(
+                $"Failed to save rotation list:\n{ex.Message}",
+                "Save Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
     }
 
     [RelayCommand]

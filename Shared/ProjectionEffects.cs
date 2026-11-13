@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 11:55:35 -> Qualify System.Windows.Data.Binding in LeadingEmojiImageConverter and LeadingEmojiTextConverter
+// Edited on Nov 13, 2026 @ 12:32:45 -> Scale floating reaction and holiday emojis up 50% with native 160x160 HD rendering
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1667,8 +1667,8 @@ internal sealed class HolidayOverlayEffect(
         {
             GradientStops =
             {
-                new GradientStop(ProjectionFx.Argb(0xB8, color), 0.0),
-                new GradientStop(ProjectionFx.Argb(0x55, color), 0.48),
+                new GradientStop(ProjectionFx.Argb(0x55, color), 0.0),
+                new GradientStop(ProjectionFx.Argb(0x22, color), 0.48),
                 new GradientStop(ProjectionFx.Argb(0x00, color), 1.0)
             }
         });
@@ -1890,12 +1890,12 @@ internal sealed class HolidayOverlayEffect(
         if (ambient && _ambientCount >= maxAmbient) return;
 
         var rng = ProjectionFx.Rng;
-        double size = ambient ? rng.Next(26, 52) : rng.Next(52, 92);
+        double size = ambient ? rng.Next(40, 78) : rng.Next(78, 138);
         double peak = ambient ? 0.55 + (rng.NextDouble() * 0.3) : 0.9;
         double seconds = ambient ? 9 + (rng.NextDouble() * 6) : 6.5 + (rng.NextDouble() * 3);
 
         var shift = new TranslateTransform();
-        double haloSize = size * 1.65;
+        double haloSize = size * 1.55;
         var container = new Grid
         {
             Width = haloSize,
@@ -1903,6 +1903,8 @@ internal sealed class HolidayOverlayEffect(
             Opacity = 0,
             IsHitTestVisible = false,
             RenderTransform = shift,
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true,
             CacheMode = SharedParticleCache
         };
 
@@ -2029,8 +2031,8 @@ internal static class ReactionBurstEffect
         if (reactionsCanvas.Children.Count >= MaxOnScreenReactions) return;
 
         var rng = ProjectionFx.Rng;
-        double size = 86;
-        double haloSize = size * 1.65;
+        double size = 130;
+        double haloSize = size * 1.55;
         var shift = new TranslateTransform();
 
         var container = new Grid
@@ -2039,6 +2041,8 @@ internal static class ReactionBurstEffect
             Height = haloSize,
             IsHitTestVisible = false,
             RenderTransform = shift,
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true,
             CacheMode = SharedCache
         };
 
@@ -2090,25 +2094,25 @@ internal static class ReactionBurstEffect
         switch (side)
         {
             case 0: // bottom -> travels up
-                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(200, width - 140)));
+                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(220, width - 210)));
                 Canvas.SetBottom(container, rng.Next(20, 100));
                 toY = -(height - 150);
                 toX = (rng.NextDouble() * 220) - 110;
                 break;
             case 1: // top -> travels down
-                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(200, width - 140)));
+                Canvas.SetLeft(container, rng.Next(50, (int)Math.Max(220, width - 210)));
                 Canvas.SetTop(container, rng.Next(20, 100));
                 toY = height - 150;
                 toX = (rng.NextDouble() * 220) - 110;
                 break;
             case 2: // left -> travels right
-                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(200, height - 140)));
+                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(220, height - 210)));
                 Canvas.SetLeft(container, rng.Next(20, 100));
                 toX = width - 150;
                 toY = (rng.NextDouble() * 220) - 110;
                 break;
             default: // right -> travels left
-                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(200, height - 140)));
+                Canvas.SetTop(container, rng.Next(50, (int)Math.Max(220, height - 210)));
                 Canvas.SetRight(container, rng.Next(20, 100));
                 toX = -(width - 150);
                 toY = (rng.NextDouble() * 220) - 110;

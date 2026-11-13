@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code RotationPage TabItem headers for dark venues -->
+<!-- Edited on Nov 13, 2026 @ 16:07:00 -> Add Save Rotation button to RotationPage queue toolbar -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -155,6 +155,7 @@
                         <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
 
                         <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing" />
+                        <ui:Button Icon="{ui:SymbolIcon Save24}" Content="Save" Command="{Binding SaveRotationCommand}" Appearance="Secondary" Margin="0,0,4,0" ToolTip="Save Rotation List Report to Reports folder" />
                         <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation" />
                         <Button Command="{Binding ToggleLastRoundCommand}"
                                 Margin="6,0,0,0"

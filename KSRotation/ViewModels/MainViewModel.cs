@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:09:00 -> Add EmojiReactionThemeChoice, ReactionReceived event, and recent reaction buffer for crowd emoji reactions
+// Edited on Nov 13, 2026 @ 16:04:30 -> Add SavedRotationsMainTabIndex handling and refresh saved reports on SaveRotation
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -78,14 +78,18 @@ namespace KSRotation.ViewModels
             ("I'll Leave This World Loving You","Ricky Van Shelton")
         ];
 
-        public const int UsersMainTabIndex = 4;
+        public const int UsersMainTabIndex = 5;
 
         [ObservableProperty]
         public partial int SelectedMainTabIndex { get; set; }
 
         partial void OnSelectedMainTabIndexChanged(int value)
         {
-            if (value == UsersMainTabIndex)
+            if (value == SavedRotationsMainTabIndex)
+            {
+                _ = RefreshSavedReportsAsync();
+            }
+            else if (value == UsersMainTabIndex)
             {
                 _ = LoadAllUsersAsync();
             }
@@ -3012,6 +3016,7 @@ namespace KSRotation.ViewModels
                 }
                 Singers.Clear();
                 ClearScaryokeHistory();
+                _ = RefreshSavedReportsAsync();
 
                 string emailMsg;
                 if (emailError != null)

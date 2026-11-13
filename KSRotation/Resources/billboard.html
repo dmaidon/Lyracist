@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:15:00 -> Add floating crowd emoji reactions overlay to billboard.html -->
+<!-- Edited on Nov 13, 2026 @ 12:33:10 -> Scale floating reaction and holiday emojis up 50% with 160x160 HD PNGs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1105,6 +1105,38 @@
             if (container) container.innerHTML = '';
         }
 
+        function emojiToFileKey(glyph) {
+            if (!glyph) return '';
+            const cps = [];
+            for (const ch of Array.from(glyph.trim())) {
+                const cp = ch.codePointAt(0);
+                if (cp && cp !== 0xfe0f) {
+                    cps.push(cp.toString(16).toLowerCase());
+                }
+            }
+            return cps.join('-');
+        }
+
+        function setEmojiGraphic(el, glyph, sizeRem) {
+            const key = emojiToFileKey(glyph);
+            if (!key) {
+                el.textContent = glyph;
+                return;
+            }
+            const img = document.createElement('img');
+            img.src = `/api/emoji/${key}.png`;
+            img.alt = glyph;
+            img.style.width = `${sizeRem}rem`;
+            img.style.height = `${sizeRem}rem`;
+            img.style.objectFit = 'contain';
+            img.style.pointerEvents = 'none';
+            img.onerror = () => {
+                img.remove();
+                el.textContent = glyph;
+            };
+            el.appendChild(img);
+        }
+
         function getReactionGlowHex(emoji) {
             switch (emoji) {
                 case '❤️': case '💖': case '🌹': return '#FF2A85';
@@ -1136,12 +1168,13 @@
             activeReactionCount++;
             const el = document.createElement('div');
             el.className = 'reaction-float';
-            el.textContent = emoji;
+            const sizeRem = 4.8 + Math.random() * 1.6;
+            setEmojiGraphic(el, emoji, sizeRem);
 
             const glow = getReactionGlowHex(emoji);
-            el.style.background = `radial-gradient(circle, ${glow}55 0%, transparent 70%)`;
-            el.style.filter = `drop-shadow(0 0 14px ${glow})`;
-            el.style.fontSize = `${3.0 + Math.random() * 1.1}rem`;
+            el.style.background = `radial-gradient(circle, ${glow}33 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 12px ${glow}99)`;
+            el.style.fontSize = `${sizeRem}rem`;
 
             const edge = Math.floor(Math.random() * 4);
             let startX, startY, dx, dy;
@@ -1254,11 +1287,13 @@
             activeSprites++;
             const el = document.createElement('div');
             el.className = 'holiday-sprite';
-            el.textContent = pickRandom(holiday.crossers);
+            const glyph = pickRandom(holiday.crossers);
+            const sizeRem = 3.9 + Math.random() * 2.1;
+            setEmojiGraphic(el, glyph, sizeRem);
             const color = (Array.isArray(holiday.palette) && holiday.palette.length > 0) ? pickRandom(holiday.palette) : '#FF6D00';
-            el.style.background = `radial-gradient(circle, ${color}55 0%, transparent 70%)`;
-            el.style.filter = `drop-shadow(0 0 12px ${color})`;
-            el.style.fontSize = `${2.6 + Math.random() * 1.4}rem`;
+            el.style.background = `radial-gradient(circle, ${color}33 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 10px ${color}99)`;
+            el.style.fontSize = `${sizeRem}rem`;
 
             const leftToRight = Math.random() >= 0.5;
             const startY = 8 + Math.random() * 68;
@@ -1288,11 +1323,13 @@
             activeSprites++;
             const el = document.createElement('div');
             el.className = 'holiday-sprite';
-            el.textContent = pickRandom(holiday.ambient);
+            const glyph = pickRandom(holiday.ambient);
+            const sizeRem = 2.85 + Math.random() * 1.8;
+            setEmojiGraphic(el, glyph, sizeRem);
             const color = (Array.isArray(holiday.palette) && holiday.palette.length > 0) ? pickRandom(holiday.palette) : '#FF6D00';
-            el.style.background = `radial-gradient(circle, ${color}44 0%, transparent 70%)`;
-            el.style.filter = `drop-shadow(0 0 10px ${color})`;
-            el.style.fontSize = `${1.9 + Math.random() * 1.2}rem`;
+            el.style.background = `radial-gradient(circle, ${color}28 0%, transparent 70%)`;
+            el.style.filter = `drop-shadow(0 0 9px ${color}99)`;
+            el.style.fontSize = `${sizeRem}rem`;
 
             const motion = holiday.ambientMotion || 'Fall';
             const x = 4 + Math.random() * 90;

@@ -1,12 +1,14 @@
-// Edited on Nov 9, 2026 @ 09:12:15 -> Subscribe to ReactionReceived and spawn floating crowd emoji reactions in BillboardView
+// Edited on Nov 13, 2026 @ 12:33:15 -> Scale floating reaction and holiday emojis up 50% in BillboardView
 using KSRotation.Maui.ViewModels;
 using KSRotation.Models;
+using KSRotation.Services;
 using KSRotation.ViewModels;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 
 namespace KSRotation.Maui.Views
@@ -203,7 +205,7 @@ namespace KSRotation.Maui.Views
             string glyph = theme.Crossers[Random.Shared.Next(theme.Crossers.Length)];
             string hex = theme.Palette.Length > 0 ? theme.Palette[Random.Shared.Next(theme.Palette.Length)] : "#FF6D00";
 
-            var badge = CreateHolidaySpriteView(glyph, hex, 38);
+            var badge = CreateHolidaySpriteView(glyph, hex, 57);
             bool leftToRight = Random.Shared.Next(2) == 0;
             double startX = leftToRight ? -70 : width + 30;
             double endX = leftToRight ? width + 70 : -70;
@@ -243,7 +245,7 @@ namespace KSRotation.Maui.Views
             string glyph = theme.Ambient[Random.Shared.Next(theme.Ambient.Length)];
             string hex = theme.Palette.Length > 0 ? theme.Palette[Random.Shared.Next(theme.Palette.Length)] : "#FF6D00";
 
-            var badge = CreateHolidaySpriteView(glyph, hex, 28);
+            var badge = CreateHolidaySpriteView(glyph, hex, 42);
             double x = width * (0.05 + (Random.Shared.NextDouble() * 0.88));
             double startY = theme.AmbientMotion == HolidayMotion.Rise ? height + 40 : -50;
 
@@ -268,16 +270,31 @@ namespace KSRotation.Maui.Views
             }
         }
 
-        private static Border CreateHolidaySpriteView(string glyph, string hexColor, double fontSize)
+        private static View CreateHolidaySpriteView(string glyph, string hexColor, double fontSize)
         {
+            string key = HolidayThemes.EmojiFileKey(glyph);
+            byte[]? pngBytes = !string.IsNullOrEmpty(key) ? PatronRequestServer.GetEmbeddedEmojiPngBytes(key + ".png") : null;
+            if (pngBytes != null)
+            {
+                double imgSize = fontSize * 1.35;
+                return new Image
+                {
+                    Source = ImageSource.FromStream(() => new MemoryStream(pngBytes)),
+                    WidthRequest = imgSize,
+                    HeightRequest = imgSize,
+                    Aspect = Aspect.AspectFit,
+                    InputTransparent = true
+                };
+            }
+
             var baseColor = Color.FromArgb(hexColor);
             return new Border
             {
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 999 },
-                BackgroundColor = baseColor.WithAlpha(0.26f),
-                Stroke = baseColor.WithAlpha(0.65f),
-                StrokeThickness = 1.5,
-                Padding = new Thickness(8, 4),
+                BackgroundColor = baseColor.WithAlpha(0.18f),
+                Stroke = Colors.Transparent,
+                StrokeThickness = 0,
+                Padding = new Thickness(6, 4),
                 InputTransparent = true,
                 Content = new Label
                 {
@@ -397,7 +414,7 @@ namespace KSRotation.Maui.Views
             double height = Height > 100 ? Height : 640;
 
             _activeReactionCount++;
-            var badge = CreateHolidaySpriteView(emoji, EmojiReactionThemes.GetGlowHex(emoji), 48);
+            var badge = CreateHolidaySpriteView(emoji, EmojiReactionThemes.GetGlowHex(emoji), 72);
 
             int side = Random.Shared.Next(4);
             double startX, startY, dx, dy;

@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 09:57:00 -> Update AssemblyVersion, FileVersion, and ApplicationDisplayVersion to 26.10.22.* -->
+<!-- Edited on Nov 13, 2026 @ 16:03:10 -> Link SavedRotationReportReader into KSRotation.Maui -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -106,15 +106,17 @@
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.KnownSingers.cs" Link="ViewModels\MainViewModel.KnownSingers.cs" />
+		<Compile Include="..\KSRotation\ViewModels\MainViewModel.SavedRotations.cs" Link="ViewModels\MainViewModel.SavedRotations.cs" />
 	</ItemGroup>
 
-	<!-- Shared Embedded Resources (Patron Web Portal HTML) -->
+	<!-- Shared Embedded Resources (Patron Web Portal HTML & 3D Emoji PNGs) -->
 	<ItemGroup>
 		<EmbeddedResource Include="..\KSRotation\Resources\PatronPortal.html" Link="Resources\PatronPortal.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\kiosk.html" Link="Resources\kiosk.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\billboard.html" Link="Resources\billboard.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\handoff.html" Link="Resources\handoff.html" />
+		<EmbeddedResource Include="..\KSRotation\Resources\Emoji\*.png" Link="Resources\Emoji\%(Filename)%(Extension)" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="..\Lyracist\Assets\rotation_m.png" Link="rotation_m.png">
@@ -171,6 +173,7 @@
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+		<Compile Include="..\Shared\SavedRotationReportReader.cs" Link="SavedRotationReportReader.cs" />
 		<Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
 		<Compile Include="..\Shared\VenueLocation.cs" Link="VenueLocation.cs" />
 		<Compile Include="..\Shared\GeoMath.cs" Link="GeoMath.cs" />

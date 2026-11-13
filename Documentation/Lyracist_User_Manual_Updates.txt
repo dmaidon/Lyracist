@@ -1,4 +1,34 @@
-// Edited on Nov 9, 2026 @ 09:41:25 -> Document Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) across KSRotation, KSRotation.Maui, and Lyracist
+// Edited on Nov 13, 2026 @ 16:14:00 -> Document Saved Rotations tab across KSRotation and Lyracist and 160x160 3D emoji upgrade
+
+KSRotation & Lyracist: Saved Rotations Reader Tab & Rotation Report Browser - (November 2026)
+
+Section: Rotation Management / Saved Rotation Reports & Historical Show Browser
+
+0. Saved Rotations Tab (KSRotation & Lyracist):
+   - Added a dedicated 'Saved Rotations' tab in both KSRotation (top navigation tab adjacent to 'Rotation') and Lyracist (top navigation item adjacent to 'Rotation') to browse, search, inspect, and reload saved rotation lists from the 'Reports/' folder.
+   - Left Panel (Saved Reports Browser):
+     * Lists all saved rotation report files ('[Venue] - MMMddyy.csv', '[Venue] - yyyy-MM-dd.csv', and 'Rotation_*.csv') sorted newest-first.
+     * Displays venue name, show date, singer count, completed songs count, rounds count, and companion format badges ('CSV', 'PDF', 'EML').
+     * Search box filters saved reports by venue, filename, date, singer name, song title, or artist.
+     * Toolbar buttons: '🔄 Refresh', '📂 Open File...' (browse and load any external '.csv' report), and '📁 Reports Folder' (open 'Reports/' in Windows Explorer).
+   - Right Panel (Report Reader & Actions):
+     * Header summary displays the selected show's venue, date, file path, and total statistics (Singers, Completed Songs, Rounds, Total Rows).
+     * Action toolbar provides 1-click buttons:
+       - '➕ Load Singers to Rotation': Adds all singers from the selected saved report into the active rotation queue (automatically skipping duplicates already in tonight's list).
+       - '📄 Open PDF': Opens the companion PDF report (if present) in the default PDF viewer.
+       - '📊 Open CSV': Opens the '.csv' spreadsheet in Excel or the default CSV viewer.
+       - '🗑️ Delete': Deletes the saved report (and companion '.pdf'/'.eml' files) after confirmation.
+     * In-Report Filter: Instant search bar filters singers and song rows within the open report by singer, partner, song title, artist, type, or round.
+     * Dual Reader Views:
+       - '🎤 Singers & Rounds (Grouped)': Displays expandable performer cards showing each singer's duet partner, type badge ('Regular' / 'Anchor'), total completed songs, and round-by-round song performance history.
+       - '📋 All Report Rows (CSV Table)': Full sortable tabular grid displaying Round, Singer, Duet Partner, Type, Completed Count, Song Title, Artist, and Timestamp.
+
+0A. Saving Rotation Reports Directly from Lyracist:
+   - Added a 'Save' button to the Current Queue toolbar on the Lyracist 'Rotation' page (`RotationPage.xaml`), matching KSRotation's 'Save' rotation button.
+   - Prompts for the Venue Name and Date, writes `[Venue] - MMMddyy.csv` to the shared `Reports/` folder, and automatically refreshes the 'Saved Rotations' tab.
+
+0B. 160x160 3D Multi-Color Floating Emoji Upgrade (50% Larger):
+   - Upgraded all 113 emoji PNG assets (`KSRotation/Resources/Emoji/*.png`) from flat vector graphics to native 160x160 high-DPI 3D shaded multi-color PNGs and increased on-screen floating emoji dimensions by 50% across WPF projection (`Shared/ProjectionEffects.cs`), Web/Chromecast billboards (`billboard.html`), and `KSRotation.Maui` (`BillboardView.xaml.cs`).
 
 Lyracist, KSRotation & KSRotation.Maui: Crowd Emoji Reactions (7 Performer Vibe Sets & DJ Show Theme Override) - (November 2026)
 

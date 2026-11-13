@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:03:00 -> Link EmojiReactionThemes into Lyracist -->
+<!-- Edited on Nov 13, 2026 @ 16:03:05 -> Link SavedRotationReportReader into Lyracist -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.11.3.615</AssemblyVersion>
-    <FileVersion>26.11.3.615</FileVersion>
+    <AssemblyVersion>26.11.13.616</AssemblyVersion>
+    <FileVersion>26.11.13.616</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -140,6 +140,7 @@
     <Compile Include="..\Shared\SingleInstanceHelper.cs" Link="SingleInstanceHelper.cs" />
     <Compile Include="..\Shared\DragReorderVisuals.cs" Link="DragReorderVisuals.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+    <Compile Include="..\Shared\SavedRotationReportReader.cs" Link="SavedRotationReportReader.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />

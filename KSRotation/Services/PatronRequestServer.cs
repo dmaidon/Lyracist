@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:05:40 -> Add POST /api/reaction endpoint and onReactionReceived callback for crowd emoji reactions
+// Edited on Nov 13, 2026 @ 12:18:20 -> Serve 3D shaded emoji PNGs via GET /api/emoji/{key}.png for web billboard and portals
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -371,6 +371,23 @@ namespace KSRotation.Services
                             else
                             {
                                 await SendBadRequestAsync(stream, "{\"error\":\"Missing 'text' query parameter.\"}");
+                            }
+                        }
+                        else if (path.StartsWith("/api/emoji/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string fileName = path["/api/emoji/".Length..].Trim();
+                            if (!fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                            {
+                                fileName += ".png";
+                            }
+                            byte[]? emojiBytes = GetEmbeddedEmojiPngBytes(fileName);
+                            if (emojiBytes != null)
+                            {
+                                await SendImageResponseAsync(stream, emojiBytes, "image/png");
+                            }
+                            else
+                            {
+                                await SendNotFoundAsync(stream);
                             }
                         }
                         else if (path.StartsWith("/api/rotation", StringComparison.OrdinalIgnoreCase))
@@ -1393,6 +1410,39 @@ namespace KSRotation.Services
             }
 
             return buffer;
+        }
+
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte[]?> EmojiPngCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public static byte[]? GetEmbeddedEmojiPngBytes(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || fileName.IndexOfAny(['/', '\\']) >= 0 || fileName.Contains("..", StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return EmojiPngCache.GetOrAdd(fileName, static name =>
+            {
+                Assembly assembly = typeof(PatronRequestServer).Assembly;
+                string suffix = "." + name;
+                string? resourceName = Array.Find(
+                    assembly.GetManifestResourceNames(),
+                    n => n.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
+                if (resourceName == null)
+                {
+                    return null;
+                }
+
+                using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream == null)
+                {
+                    return null;
+                }
+
+                using MemoryStream ms = new();
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            });
         }
 
         // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, Resources/dj.html, Resources/billboard.html, and Resources/handoff.html (embedded resources); loaded once on first request.

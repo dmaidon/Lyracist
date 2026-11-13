@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 11:52:45 -> Render full-color Twemoji icons in Holiday Rotation Screens and Crowd Emoji Reactions GroupBox headers and dropdown boxes -->
+<!-- Edited on Nov 13, 2026 @ 17:46:30 -> Add Saved Rotations tab and update Help topic for Saved Rotations -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1820,6 +1820,381 @@
                                 </Grid>
                             </Border>
                         </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- Saved Rotations Tab -->
+            <TabItem Header="Saved Rotations" Width="135" Height="45">
+                <Grid Margin="16" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Top Banner Header -->
+                    <Border Grid.Row="0" Background="{DynamicResource MaterialDesignCardBackground}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📋" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel>
+                                    <TextBlock Text="Saved Rotation Lists &amp; Nightly Reports" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <TextBlock Text="Browse saved rotation reports, inspect singer lineups and round-by-round song logs, open PDF/CSV reports, or reload singers into tonight's rotation."
+                                               FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="🔄 Refresh"
+                                        Command="{Binding RefreshSavedReportsCommand}"
+                                        Style="{StaticResource ModernButtonStyle}"
+                                        Height="34" Padding="14,0" Margin="0,0,8,0"
+                                        ToolTip="Rescan the Reports folder for saved rotation lists" />
+                                <Button Content="📂 Open File..."
+                                        Command="{Binding BrowseSavedReportFileCommand}"
+                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                        Height="34" Padding="14,0" Margin="0,0,8,0"
+                                        ToolTip="Browse and open a saved rotation CSV or PDF report file from disk" />
+                                <Button Content="📁 Reports Folder"
+                                        Command="{Binding OpenReportsFolderCommand}"
+                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                        Height="34" Padding="14,0"
+                                        ToolTip="Open the Reports directory in Windows Explorer" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Main Two-Column Layout -->
+                    <Grid Grid.Row="1" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="360" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Pane: Saved Reports List -->
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="12"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Search Box -->
+                                <Grid Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBox Text="{Binding SavedReportSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             materialDesign:HintAssist.Hint="Search by venue, date, singer, or song..."
+                                             Height="36"
+                                             Padding="34,0,28,0" />
+                                    <materialDesign:PackIcon Kind="Magnify"
+                                                             Width="18"
+                                                             Height="18"
+                                                             Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                             Opacity="0.65"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Left"
+                                                             Margin="10,0,0,0"
+                                                             IsHitTestVisible="False" />
+                                    <Button Command="{Binding ClearSavedReportSearchCommand}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            Width="22"
+                                            Height="22"
+                                            Cursor="Hand"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,8,0"
+                                            ToolTip="Clear search text"
+                                            Visibility="{Binding HasSavedReportSearchText, Converter={StaticResource BoolToVis}}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="Transparent" CornerRadius="11">
+                                                    <TextBlock Text="✕" FontSize="11" FontWeight="Bold"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Saved Reports ListBox -->
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding FilteredSavedReports}"
+                                         SelectedItem="{Binding SelectedSavedReport, Mode=TwoWay}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         BorderThickness="0"
+                                         Background="Transparent">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="8,7" Margin="0,2" CornerRadius="6" Background="Transparent"
+                                                    BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding DisplayTitle}" FontWeight="Bold" FontSize="14"
+                                                                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                        <TextBlock Text="{Binding DisplayDate}" FontSize="11.5" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource AppHeaderBrush}" Margin="0,1,0,0" />
+                                                        <TextBlock Text="{Binding DisplaySummary}" FontSize="11"
+                                                                   Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="1" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1"
+                                                            CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding FormatsBadge}" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" />
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <!-- Footer Status & Delete -->
+                                <Grid Grid.Row="2" Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding SavedReportStatusMessage}"
+                                               FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                                    <Button Grid.Column="1" Content="🗑️ Delete"
+                                            Command="{Binding DeleteSelectedSavedReportCommand}"
+                                            IsEnabled="{Binding HasSelectedSavedReport}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="30" Padding="10,0"
+                                            ToolTip="Delete the selected saved rotation report from disk" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <!-- Right Pane: Selected Saved Rotation Details -->
+                        <Border Grid.Column="2"
+                                Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="16"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <Grid>
+                                <!-- Empty State Placeholder -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Visibility="{Binding HasNoSelectedSavedReport, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="📋" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                                    <TextBlock Text="No Saved Rotation Selected" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Select a saved rotation list on the left or click 'Open File...' to inspect a report."
+                                               FontSize="13" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,4,0,0" />
+                                </StackPanel>
+
+                                <!-- Active Report Inspector -->
+                                <Grid Visibility="{Binding HasSelectedSavedReport, Converter={StaticResource BoolToVis}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Summary Header Card -->
+                                    <Border Grid.Row="0" Background="{DynamicResource MaterialDesignPaper}"
+                                            BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1"
+                                            CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding SelectedSavedReportTitle}" FontSize="17" FontWeight="Bold"
+                                                           Foreground="{DynamicResource AppHeaderBrush}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding SelectedSavedReportSubtitle}" FontSize="12"
+                                                           Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="➕ Load Singers to Rotation"
+                                                        Command="{Binding LoadSavedReportSingersIntoRotationCommand}"
+                                                        Style="{StaticResource ModernButtonStyle}"
+                                                        Height="32" Padding="12,0" Margin="0,0,8,0"
+                                                        ToolTip="Add all karaoke singers from this saved rotation into the active rotation queue" />
+                                                <Button Content="📄 Open PDF"
+                                                        Command="{Binding OpenSelectedReportPdfCommand}"
+                                                        IsEnabled="{Binding SelectedSavedReportHasPdf}"
+                                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                        Height="32" Padding="12,0" Margin="0,0,8,0"
+                                                        ToolTip="Open the companion PDF report in your default PDF viewer" />
+                                                <Button Content="📊 Open CSV"
+                                                        Command="{Binding OpenSelectedReportCsvCommand}"
+                                                        IsEnabled="{Binding SelectedSavedReportHasCsv}"
+                                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                        Height="32" Padding="12,0"
+                                                        ToolTip="Open the raw CSV file in Excel or your default spreadsheet viewer" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Filter Bar Inside Selected Report -->
+                                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                                        <TextBox Text="{Binding SavedReportDetailFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                 materialDesign:HintAssist.Hint="Filter singers, songs, or artists in this report..."
+                                                 Height="34"
+                                                 Padding="34,0,28,0" />
+                                        <materialDesign:PackIcon Kind="FilterOutline"
+                                                                 Width="17"
+                                                                 Height="17"
+                                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                                 Opacity="0.65"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Left"
+                                                                 Margin="10,0,0,0"
+                                                                 IsHitTestVisible="False" />
+                                        <Button Command="{Binding ClearSavedReportDetailFilterCommand}"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="0"
+                                                Width="22"
+                                                Height="22"
+                                                Cursor="Hand"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,8,0"
+                                                ToolTip="Clear filter"
+                                                Visibility="{Binding HasSavedReportDetailFilterText, Converter={StaticResource BoolToVis}}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="Transparent" CornerRadius="11">
+                                                        <TextBlock Text="✕" FontSize="11" FontWeight="Bold"
+                                                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- Inner Tabs: Singers & Rounds vs. All Rows Table -->
+                                    <TabControl Grid.Row="2" Background="Transparent" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}">
+                                        <TabItem Header="Singers &amp; Rounds">
+                                            <ListBox ItemsSource="{Binding SelectedReportSingerGroups}"
+                                                     Background="Transparent"
+                                                     BorderThickness="0"
+                                                     Margin="0,8,0,0"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource MaterialDesignPaper}"
+                                                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="6"
+                                                                Padding="10,8"
+                                                                Margin="0,0,0,6">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="36" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Border Grid.Column="0" Background="{DynamicResource MaterialDesignCardBackground}"
+                                                                        BorderBrush="{DynamicResource AppHeaderBrush}" BorderThickness="1"
+                                                                        CornerRadius="6" Width="28" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                                    <TextBlock Text="{Binding OrderIndex}" FontSize="12" FontWeight="Bold"
+                                                                               Foreground="{DynamicResource AppHeaderBrush}"
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,10,0">
+                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding SingerName}" FontSize="14" FontWeight="Bold"
+                                                                                   Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                                        <Border Background="#047857" CornerRadius="4" Padding="5,1" Margin="8,0,0,0"
+                                                                                VerticalAlignment="Center"
+                                                                                Visibility="{Binding IsMusic, Converter={StaticResource BoolToVis}}">
+                                                                            <TextBlock Text="MUSIC" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                                                        </Border>
+                                                                    </StackPanel>
+                                                                    <TextBlock Text="{Binding SummaryLine}" FontSize="12"
+                                                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                                               TextWrapping="Wrap" Margin="0,3,0,0" />
+                                                                </StackPanel>
+
+                                                                <Border Grid.Column="2" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1"
+                                                                        CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding CountBadgeText}" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" />
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </TabItem>
+
+                                        <TabItem Header="All Report Rows (CSV Table)">
+                                            <DataGrid ItemsSource="{Binding SelectedReportRows}"
+                                                      AutoGenerateColumns="False"
+                                                      CanUserAddRows="False"
+                                                      CanUserDeleteRows="False"
+                                                      IsReadOnly="True"
+                                                      SelectionMode="Single"
+                                                      GridLinesVisibility="Horizontal"
+                                                      Background="Transparent"
+                                                      Foreground="{DynamicResource AppContrastTextBrush}"
+                                                      BorderThickness="0"
+                                                      Margin="0,8,0,0"
+                                                      RowHeight="34">
+                                                <DataGrid.Resources>
+                                                    <Style TargetType="DataGridColumnHeader">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </Style>
+                                                    <Style TargetType="DataGridCell">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                    </Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                    </Style>
+                                                </DataGrid.Resources>
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="#" Binding="{Binding RowNumber}" Width="45" />
+                                                    <DataGridTextColumn Header="Singer" Binding="{Binding SingerName}" Width="160" />
+                                                    <DataGridTextColumn Header="Duet Partner" Binding="{Binding DuetPartnerName}" Width="130" />
+                                                    <DataGridTextColumn Header="Type" Binding="{Binding EntryType}" Width="80" />
+                                                    <DataGridTextColumn Header="Round" Binding="{Binding RoundDisplay}" Width="85" />
+                                                    <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
+                                                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="160" />
+                                                    <DataGridTextColumn Header="Time" Binding="{Binding TimestampDisplay}" Width="90" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </TabItem>
+                                    </TabControl>
+                                </Grid>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -4765,8 +5140,8 @@
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="💾 Saving Reports" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="Clicking 'Save Rotation' writes a text report of the night's performance to the 'Reports' directory. If 'Send email automatically' is enabled in Settings, the report will copy to your clipboard and prompt your default mail client with the rotation report pre-loaded." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="💾 Saving Reports &amp; Saved Rotations Tab" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Clicking 'Save' writes a CSV and PDF report of the night's performance (`[Venue] - MMMddyy.csv` / `.pdf`) to the 'Reports' directory. Open the 'Saved Rotations' tab (right beside 'Rotation') to browse all past shows, search by venue/date/singer/song, inspect grouped singer cards &amp; round histories or the full CSV table, open companion PDF/CSV reports, or click '➕ Load Singers to Rotation' to re-import singers from a saved show into tonight's queue." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:04:00 -> Use EnsureSchemaAndRepair on startup so legacy or partially migrated databases self-heal automatically
+// Edited on Nov 13, 2026 @ 16:09:00 -> Register SavedRotationsViewModel and SavedRotationsPage in DI container
 using System;
 using System.Linq;
 using System.Windows;
@@ -185,6 +185,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<SplashViewModel>();
                 services.AddSingleton<KaraokeViewModel>();
                 services.AddSingleton<RotationViewModel>();
+                services.AddSingleton<SavedRotationsViewModel>();
                 services.AddSingleton<RotationWindowViewModel>();
                 services.AddSingleton<LyricsViewModel>();
                 services.AddSingleton<LyricsWindowViewModel>();
@@ -226,6 +227,7 @@ public partial class App : System.Windows.Application
                 // Pages
                 services.AddSingleton<KaraokePage>();
                 services.AddSingleton<RotationPage>();
+                services.AddSingleton<SavedRotationsPage>();
                 services.AddSingleton<LyricsPage>();
                 services.AddSingleton<TriviaPage>();
                 services.AddSingleton<SettingsPage>();
