@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.11.13.236</AssemblyVersion>
-    <FileVersion>26.11.13.236</FileVersion>
+    <AssemblyVersion>26.11.14.242</AssemblyVersion>
+    <FileVersion>26.11.14.242</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

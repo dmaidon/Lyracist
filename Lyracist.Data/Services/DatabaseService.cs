@@ -1,4 +1,5 @@
-// Edited on Sep 6, 2026 @ 08:48:00 -> Add GetAllSingers, DeleteSinger, and MergeSingers
+// Edited on Nov 14, 2026 @ 09:15:10 -> Merge Venues and IsDistinctName when merging duplicate singer accounts
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,6 +12,34 @@ namespace Lyracist.Data.Services
     public class DatabaseService(LyracistDbContext context)
     {
         private readonly LyracistDbContext _context = context;
+
+        public static string MergeVenueLists(string? existingVenues, string? additionalVenues)
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var ordered = new List<string>();
+
+            static void AddTokens(string? raw, HashSet<string> seenSet, List<string> list)
+            {
+                if (string.IsNullOrWhiteSpace(raw)) return;
+                foreach (string part in raw.Split([',', ';', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    if (string.IsNullOrWhiteSpace(part) ||
+                        string.Equals(part, "None", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(part, "Saved Rotation", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    if (seenSet.Add(part))
+                    {
+                        list.Add(part);
+                    }
+                }
+            }
+
+            AddTokens(existingVenues, seen, ordered);
+            AddTokens(additionalVenues, seen, ordered);
+            return string.Join(", ", ordered);
+        }
 
         // ==========================================
         // SONG OPERATIONS
@@ -160,6 +189,11 @@ namespace Lyracist.Data.Services
             {
                 target.AvatarType = duplicate.AvatarType;
                 target.AvatarSource = duplicate.AvatarSource;
+            }
+            target.Venues = MergeVenueLists(target.Venues, duplicate.Venues);
+            if (duplicate.IsDistinctName)
+            {
+                target.IsDistinctName = true;
             }
 
             // 5. If target has no audio settings but duplicate does, copy them

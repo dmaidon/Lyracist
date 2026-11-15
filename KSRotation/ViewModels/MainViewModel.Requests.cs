@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:09:30 -> Wire HandleReactionReceived, recentReactions buffer, and set-emoji-theme DJ action into MainViewModel.Requests.cs
+// Edited on Nov 14, 2026 @ 13:23:45 -> Add BuzzSingerPhoneCommand, recentBuzzEvents buffer, and buzz-singer DJ action
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -527,6 +527,62 @@ namespace KSRotation.ViewModels
             }
         }
 
+        private readonly object _buzzEventsLock = new();
+        private readonly List<(long Id, string SingerName, string DuetPartnerName, string Song, string Artist, string Level, DateTime AtUtc)> _recentBuzzEvents = [];
+        private long _nextBuzzEventId;
+        private static readonly TimeSpan RecentBuzzTtl = TimeSpan.FromSeconds(15);
+        private const int MaxBufferedBuzzEvents = 15;
+
+        [RelayCommand]
+        public void BuzzSingerPhone(SingerEntry? singer)
+        {
+            if (singer == null || singer.IsMusic || string.IsNullOrWhiteSpace(singer.Name))
+            {
+                return;
+            }
+
+            string level = singer.IsCurrent ? "current" : (singer.IsNext ? "next" : "current");
+            var now = DateTime.UtcNow;
+            lock (_buzzEventsLock)
+            {
+                _recentBuzzEvents.RemoveAll(b => now - b.AtUtc > RecentBuzzTtl);
+                while (_recentBuzzEvents.Count >= MaxBufferedBuzzEvents)
+                {
+                    _recentBuzzEvents.RemoveAt(0);
+                }
+                _recentBuzzEvents.Add((
+                    ++_nextBuzzEventId,
+                    singer.Name.Trim(),
+                    singer.DuetPartnerName?.Trim() ?? string.Empty,
+                    singer.Song?.Trim() ?? string.Empty,
+                    singer.Artist?.Trim() ?? string.Empty,
+                    level,
+                    now));
+            }
+        }
+
+        private PatronBuzzEventDto[] GetRecentBuzzEventsSnapshot()
+        {
+            var now = DateTime.UtcNow;
+            lock (_buzzEventsLock)
+            {
+                _recentBuzzEvents.RemoveAll(b => now - b.AtUtc > RecentBuzzTtl);
+                if (_recentBuzzEvents.Count == 0)
+                {
+                    return [];
+                }
+                return [.. _recentBuzzEvents.Select(b => new PatronBuzzEventDto
+                {
+                    id = b.Id,
+                    singerName = b.SingerName,
+                    duetPartnerName = b.DuetPartnerName,
+                    song = b.Song,
+                    artist = b.Artist,
+                    level = b.Level
+                })];
+            }
+        }
+
         // WifiHelper.GetConnectedSsid() can fall back to spawning "netsh wlan show interfaces" and
         // blocking up to 1 second when the native WLAN API path fails - GetVenueInfoJson is wired to
         // /api/info, polled every few seconds by every connected patron/kiosk/billboard client, and
@@ -597,7 +653,9 @@ namespace KSRotation.ViewModels
                 scaryokeCategories = [.. KSRotation.Maui.Services.ScaryokeSettingsService.Load().Categories],
 #endif
                 emojiReactionTheme = EmojiReactionThemes.NormalizeThemeKey(EmojiReactionThemeChoice),
-                recentReactions = GetRecentReactionsSnapshot()
+                recentReactions = GetRecentReactionsSnapshot(),
+                enablePatronTurnAlerts = EnablePatronTurnAlerts,
+                recentBuzzEvents = GetRecentBuzzEventsSnapshot()
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }
@@ -781,6 +839,14 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
                         FinishSingerSong(singer);
+                        return "";
+                    }
+                case "buzz-singer":
+                case "buzz":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+                        BuzzSingerPhone(singer);
                         return "";
                     }
                 case "move-up":

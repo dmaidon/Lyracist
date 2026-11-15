@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:14:00 -> Add crowd emoji reactions with 7 performer vibe sets and DJ Show Theme override -->
+<!-- Edited on Nov 14, 2026 @ 13:28:00 -> Add Patron Phone Turn Alerts (On Deck 1-ahead and Your Turn Now buzz/chime/pager modal) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -561,6 +561,238 @@
             50% { transform: scale(1.32); background: rgba(236, 72, 153, 0.32); }
             100% { transform: scale(1); }
         }
+        /* Turn Alert ("Buzz My Phone") Card & Full-Screen Pager Modal */
+        .turn-alert-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(30, 41, 59, 0.95));
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+        }
+        .turn-alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .turn-alert-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .turn-alert-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #A7F3D0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .turn-alert-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .turn-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .turn-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .turn-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #334155;
+            transition: 0.25s;
+            border-radius: 999px;
+            border: 1px solid #475569;
+        }
+        .turn-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.25s;
+            border-radius: 50%;
+        }
+        .turn-switch input:checked + .turn-slider {
+            background-color: var(--green);
+            border-color: #34D399;
+        }
+        .turn-switch input:checked + .turn-slider:before {
+            transform: translateX(20px);
+        }
+        .turn-alert-controls {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .turn-watch-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .turn-watch-input {
+            flex: 1;
+            padding: 8px 10px !important;
+            font-size: 0.88rem !important;
+            border-radius: 8px !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid #475569 !important;
+            color: #fff !important;
+        }
+        .turn-test-btn {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid #F59E0B;
+            color: #FDE68A;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .turn-test-btn:active {
+            transform: scale(0.96);
+        }
+        .turn-status-pill {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.65);
+            color: #CBD5E1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .watch-bell-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #CBD5E1;
+            border-radius: 8px;
+            padding: 5px 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .watch-bell-btn.watching {
+            background: rgba(16, 185, 129, 0.22);
+            border-color: #10B981;
+            color: #A7F3D0;
+        }
+        .turn-pager-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            padding: 24px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .turn-pager-modal.active {
+            display: flex;
+        }
+        .turn-pager-modal.mode-next {
+            animation: pagerFlashNext 1.1s infinite alternate;
+        }
+        .turn-pager-modal.mode-current {
+            animation: pagerFlashCurrent 0.75s infinite alternate;
+        }
+        @keyframes pagerFlashNext {
+            0% { background: rgba(15, 23, 42, 0.96); }
+            100% { background: rgba(180, 83, 9, 0.94); }
+        }
+        @keyframes pagerFlashCurrent {
+            0% { background: rgba(6, 78, 59, 0.96); }
+            100% { background: rgba(16, 185, 129, 0.92); }
+        }
+        .turn-pager-box {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.92);
+            border: 3px solid #FBBF24;
+            border-radius: 22px;
+            padding: 28px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+        }
+        .turn-pager-icon {
+            font-size: 4.2rem;
+            line-height: 1;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: pagerIconBounce 0.6s infinite alternate;
+        }
+        @keyframes pagerIconBounce {
+            0% { transform: scale(1) rotate(-6deg); }
+            100% { transform: scale(1.18) rotate(6deg); }
+        }
+        .turn-pager-stage-badge {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #F59E0B;
+            color: #0F172A;
+            margin-bottom: 10px;
+        }
+        .turn-pager-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+            line-height: 1.15;
+        }
+        .turn-pager-subtitle {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #FDE68A;
+            margin-bottom: 16px;
+        }
+        .turn-pager-song {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #E2E8F0;
+            margin-bottom: 22px;
+        }
+        .turn-pager-dismiss-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            background: linear-gradient(135deg, #F59E0B, #10B981);
+            color: #0F172A;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -569,6 +801,41 @@
             <h1>KSRotation</h1>
             <p class="subtitle">Karaoke Request Board</p>
         </header>
+
+        <!-- Patron Phone Turn Alert ("Buzz My Phone") Card -->
+        <div id="turn-alert-card" class="turn-alert-card">
+            <div class="turn-alert-header">
+                <div class="turn-alert-title-wrap">
+                    <div class="turn-alert-title">📳 Buzz My Phone When I'm Up</div>
+                    <div class="turn-alert-sub">Alerts 1 performer ahead (On Deck) &amp; when it's your turn</div>
+                </div>
+                <label class="turn-switch" title="Enable phone vibration, chime, and screen alert when you are On Deck and Up Now">
+                    <input type="checkbox" id="turn-alert-toggle" onchange="onTurnAlertToggleChanged(this.checked)">
+                    <span class="turn-slider"></span>
+                </label>
+            </div>
+            <div id="turn-alert-controls" class="turn-alert-controls" style="display: none;">
+                <div class="turn-watch-row">
+                    <input type="text" id="turn-alert-name-input" class="turn-watch-input" placeholder="Performer name to alert..." oninput="onWatchedSingerNameInput(this.value)">
+                    <button type="button" class="turn-test-btn" onclick="testTurnAlert()">📳 Test</button>
+                </div>
+                <div id="turn-alert-status-pill" class="turn-status-pill">
+                    <span id="turn-alert-status-text">🔔 Enter your name or submit a request to watch your turn</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full-Screen Flashing Pager Modal -->
+        <div id="turn-pager-modal" class="turn-pager-modal" role="dialog" aria-modal="true">
+            <div class="turn-pager-box">
+                <div id="turn-pager-icon" class="turn-pager-icon">🎤</div>
+                <div id="turn-pager-stage-badge" class="turn-pager-stage-badge">STAGE CALL</div>
+                <div id="turn-pager-title" class="turn-pager-title">IT'S YOUR TURN!</div>
+                <div id="turn-pager-subtitle" class="turn-pager-subtitle">Head to the stage now!</div>
+                <div id="turn-pager-song" class="turn-pager-song">🎵 Your Song</div>
+                <button type="button" id="turn-pager-dismiss-btn" class="turn-pager-dismiss-btn" onclick="dismissTurnPagerModal()">🎤 On My Way!</button>
+            </div>
+        </div>
 
         <!-- Crowd Emoji Reactions Card -->
         <div id="reactions-card" class="reactions-card">
@@ -893,7 +1160,10 @@
             try {
                 const response = await fetch('/api/rotation');
                 const singers = await response.json();
+                latestRotationSingers = Array.isArray(singers) ? singers : [];
+                evaluateRotationTurnAlerts(latestRotationSingers);
                 const listDiv = document.getElementById('rotation-list');
+                if (!listDiv) return;
 
                 if (singers.length === 0) {
                     listDiv.innerHTML = '<div class="no-singers">No singers in rotation yet.</div>';
@@ -964,6 +1234,13 @@
                         nameHtml += titleSuffix + rangeSuffix + badge;
                     }
 
+                    let watchBtnHtml = '';
+                    if (!singer.isMusic && serverTurnAlertsEnabled) {
+                        const isWatched = isWatchingSingerEntry(singer);
+                        const safeNameAttr = escapeHtml(singer.name).replace(/'/g, "\\'");
+                        watchBtnHtml = `<button type="button" class="watch-bell-btn${isWatched ? ' watching' : ''}" title="Buzz my phone when ${escapeHtml(singer.name)} is On Deck and Up Now" onclick="watchSpecificSinger('${safeNameAttr}')">${isWatched ? '🔔 Watching' : '🔔 Watch'}</button>`;
+                    }
+
                     let avatarUrl = `/api/singer/avatar?name=${encodeURIComponent(singer.name)}`;
                     html += `
                         <div class="${cssClass}">
@@ -973,6 +1250,7 @@
                                 <div class="singer-name">${nameHtml}</div>
                                 <div class="singer-song">${songHtml}</div>
                             </div>
+                            ${watchBtnHtml}
                         </div>
                     `;
                 });
@@ -992,17 +1270,19 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Poll rotation if on that panel
+        // Poll rotation when viewing the Rotation tab OR when Turn Alerts are enabled
         setInterval(() => {
-            if (document.getElementById('rotation-panel').classList.contains('active')) {
+            if (document.getElementById('rotation-panel').classList.contains('active') || (turnAlertsEnabled && serverTurnAlertsEnabled)) {
                 loadRotation();
             }
-        }, 5000);
+        }, 4000);
 
         // --- Past Requests local storage database ---
         function saveRequestToLocal(name, songs) {
             if (name && name.trim()) {
-                localStorage.setItem('ks_patron_name', name.trim());
+                const clean = name.trim();
+                localStorage.setItem('ks_patron_name', clean);
+                autoAdoptWatchedSingerName(clean, true);
             }
 
             let pastSongs = [];
@@ -1276,6 +1556,7 @@
                     localStorage.setItem('ks_patron_name', performerSession.name);
                     const nameInput = document.getElementById('name');
                     if (nameInput) nameInput.value = performerSession.name;
+                    autoAdoptWatchedSingerName(performerSession.name, true);
 
                     showProfileDetailsView();
                 } else {
@@ -1484,6 +1765,332 @@
             }
         }
 
+        // --- Patron Phone Turn Alerts ("Buzz My Phone" - 1 Performer Ahead & Your Turn Now) ---
+        let serverTurnAlertsEnabled = true;
+        let turnAlertsEnabled = localStorage.getItem('ks_turn_alert_enabled') !== 'false';
+        let watchedSingerName = (localStorage.getItem('ks_turn_alert_name') || localStorage.getItem('ks_patron_name') || '').trim();
+        let latestRotationSingers = [];
+        let lastAlertedNextKey = '';
+        let lastAlertedCurrentKey = '';
+        let lastSeenBuzzEventId = -1;
+        let turnAudioCtx = null;
+        let pagerRepeatTimer = null;
+        let screenWakeLock = null;
+
+        function ensureTurnAudioUnlocked() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return null;
+                if (!turnAudioCtx) {
+                    turnAudioCtx = new AudioCtx();
+                }
+                if (turnAudioCtx.state === 'suspended') {
+                    turnAudioCtx.resume();
+                }
+                return turnAudioCtx;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        ['pointerdown', 'touchstart', 'click'].forEach(evt => {
+            document.addEventListener(evt, () => {
+                if (turnAlertsEnabled) ensureTurnAudioUnlocked();
+            }, { passive: true });
+        });
+
+        async function updateScreenWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                if (turnAlertsEnabled && serverTurnAlertsEnabled && document.visibilityState === 'visible') {
+                    if (!screenWakeLock) {
+                        screenWakeLock = await navigator.wakeLock.request('screen');
+                        screenWakeLock.addEventListener('release', () => { screenWakeLock = null; });
+                    }
+                } else if (screenWakeLock) {
+                    await screenWakeLock.release();
+                    screenWakeLock = null;
+                }
+            } catch (e) {
+                // Wake lock is best-effort
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                updateScreenWakeLock();
+            }
+        });
+
+        function normalizeTurnName(n) {
+            return (n || '').trim().toLowerCase();
+        }
+
+        function isWatchingSingerEntry(singer) {
+            if (!singer || singer.isMusic) return false;
+            const target = normalizeTurnName(watchedSingerName);
+            if (!target) return false;
+            const sName = normalizeTurnName(singer.name);
+            const pName = normalizeTurnName(singer.duetPartnerName || singer.partner);
+            return sName === target || (pName && pName !== 'none' && pName === target);
+        }
+
+        function syncTurnAlertUi() {
+            const card = document.getElementById('turn-alert-card');
+            const toggle = document.getElementById('turn-alert-toggle');
+            const controls = document.getElementById('turn-alert-controls');
+            const nameInput = document.getElementById('turn-alert-name-input');
+            if (!card || !toggle || !controls || !nameInput) return;
+
+            card.style.display = serverTurnAlertsEnabled ? 'block' : 'none';
+            toggle.checked = !!turnAlertsEnabled;
+            controls.style.display = turnAlertsEnabled ? 'flex' : 'none';
+            if (document.activeElement !== nameInput) {
+                nameInput.value = watchedSingerName;
+            }
+            updateTurnStatusPill(latestRotationSingers);
+        }
+
+        function onTurnAlertToggleChanged(checked) {
+            turnAlertsEnabled = !!checked;
+            localStorage.setItem('ks_turn_alert_enabled', turnAlertsEnabled ? 'true' : 'false');
+            if (turnAlertsEnabled) {
+                ensureTurnAudioUnlocked();
+                if (!watchedSingerName) {
+                    const formName = (document.getElementById('name')?.value || localStorage.getItem('ks_patron_name') || '').trim();
+                    if (formName) {
+                        watchedSingerName = formName;
+                        localStorage.setItem('ks_turn_alert_name', watchedSingerName);
+                    }
+                }
+                loadRotation();
+            } else {
+                dismissTurnPagerModal();
+            }
+            syncTurnAlertUi();
+            updateScreenWakeLock();
+        }
+
+        function onWatchedSingerNameInput(val) {
+            watchedSingerName = (val || '').trim();
+            localStorage.setItem('ks_turn_alert_name', watchedSingerName);
+            lastAlertedNextKey = '';
+            lastAlertedCurrentKey = '';
+            updateTurnStatusPill(latestRotationSingers);
+        }
+
+        function autoAdoptWatchedSingerName(name, enableIfOff) {
+            const clean = (name || '').trim();
+            if (!clean) return;
+            watchedSingerName = clean;
+            localStorage.setItem('ks_turn_alert_name', clean);
+            if (enableIfOff && localStorage.getItem('ks_turn_alert_enabled') === null) {
+                turnAlertsEnabled = true;
+                localStorage.setItem('ks_turn_alert_enabled', 'true');
+            }
+            ensureTurnAudioUnlocked();
+            syncTurnAlertUi();
+            updateScreenWakeLock();
+            loadRotation();
+        }
+
+        function watchSpecificSinger(name) {
+            const clean = (name || '').trim();
+            if (!clean) return;
+            watchedSingerName = clean;
+            turnAlertsEnabled = true;
+            localStorage.setItem('ks_turn_alert_name', clean);
+            localStorage.setItem('ks_turn_alert_enabled', 'true');
+            lastAlertedNextKey = '';
+            lastAlertedCurrentKey = '';
+            ensureTurnAudioUnlocked();
+            syncTurnAlertUi();
+            updateScreenWakeLock();
+            loadRotation();
+        }
+
+        function getSingerTurnStateKey(singer) {
+            let completedMask = '';
+            for (let r = 1; r <= 10; r++) {
+                completedMask += singer[`song${r}Completed`] ? '1' : '0';
+            }
+            return `${normalizeTurnName(singer.name)}|${(singer.song || '').trim().toLowerCase()}|${completedMask}`;
+        }
+
+        function updateTurnStatusPill(singers) {
+            const statusText = document.getElementById('turn-alert-status-text');
+            if (!statusText) return;
+
+            if (!watchedSingerName) {
+                statusText.textContent = '🔔 Enter your name above (or submit a song) to get buzzed when you are up!';
+                return;
+            }
+
+            const list = Array.isArray(singers) ? singers : [];
+            const activeSingers = list.filter(s => !s.isInactive && !s.isPaused && !s.isSkipped);
+            const matchIdx = activeSingers.findIndex(s => isWatchingSingerEntry(s));
+            if (matchIdx === -1) {
+                statusText.textContent = `👀 Watching for "${watchedSingerName}" in rotation...`;
+                return;
+            }
+
+            const matched = activeSingers[matchIdx];
+            if (matched.isCurrent) {
+                statusText.textContent = `🎤 "${watchedSingerName}" is UP ON STAGE NOW! (${matched.song || 'Your Song'})`;
+            } else if (matched.isNext) {
+                statusText.textContent = `🔔 "${watchedSingerName}" is ON DECK (1 performer ahead)!`;
+            } else {
+                const waitSuffix = matched.estimatedWaitMinutes > 0 ? ` • ~${matched.estimatedWaitMinutes}m wait` : '';
+                statusText.textContent = `✅ Watching "${watchedSingerName}" (Position #${matchIdx + 1} in active rotation${waitSuffix})`;
+            }
+        }
+
+        function evaluateRotationTurnAlerts(singers) {
+            updateTurnStatusPill(singers);
+            if (!turnAlertsEnabled || !serverTurnAlertsEnabled || !watchedSingerName) return;
+
+            const list = Array.isArray(singers) ? singers : [];
+            const matched = list.find(s => !s.isInactive && !s.isPaused && !s.isSkipped && isWatchingSingerEntry(s));
+            if (!matched) {
+                lastAlertedNextKey = '';
+                lastAlertedCurrentKey = '';
+                return;
+            }
+
+            const turnKey = getSingerTurnStateKey(matched);
+            if (matched.isCurrent) {
+                if (lastAlertedCurrentKey !== turnKey) {
+                    lastAlertedCurrentKey = turnKey;
+                    triggerTurnPagerAlert('current', watchedSingerName, matched.song, matched.artist, false);
+                }
+            } else if (matched.isNext) {
+                if (lastAlertedNextKey !== turnKey) {
+                    lastAlertedNextKey = turnKey;
+                    triggerTurnPagerAlert('next', watchedSingerName, matched.song, matched.artist, false);
+                }
+            } else {
+                lastAlertedNextKey = '';
+                lastAlertedCurrentKey = '';
+            }
+        }
+
+        function playPagerChime(level) {
+            const ctx = ensureTurnAudioUnlocked();
+            if (!ctx) return;
+            try {
+                const now = ctx.currentTime;
+                const notes = level === 'current'
+                    ? [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50]
+                    : [523.25, 659.25, 783.99, 659.25, 783.99];
+                const step = level === 'current' ? 0.14 : 0.16;
+
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = level === 'current' ? 'triangle' : 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * step);
+
+                    gain.gain.setValueAtTime(0.001, now + idx * step);
+                    gain.gain.exponentialRampToValueAtTime(0.32, now + idx * step + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + (idx + 1) * step - 0.01);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * step);
+                    osc.stop(now + (idx + 1) * step);
+                });
+            } catch (e) {
+                // Ignore Web Audio errors if blocked
+            }
+        }
+
+        function triggerHardwareVibrate(level) {
+            try {
+                if (navigator.vibrate) {
+                    if (level === 'current') {
+                        navigator.vibrate([500, 150, 500, 150, 700, 200, 500]);
+                    } else {
+                        navigator.vibrate([300, 150, 300, 150, 300]);
+                    }
+                }
+            } catch (e) { }
+        }
+
+        function triggerTurnPagerAlert(level, singerName, song, artist, isManualTest) {
+            if (pagerRepeatTimer) {
+                clearInterval(pagerRepeatTimer);
+                pagerRepeatTimer = null;
+            }
+
+            const modal = document.getElementById('turn-pager-modal');
+            const iconEl = document.getElementById('turn-pager-icon');
+            const badgeEl = document.getElementById('turn-pager-stage-badge');
+            const titleEl = document.getElementById('turn-pager-title');
+            const subEl = document.getElementById('turn-pager-subtitle');
+            const songEl = document.getElementById('turn-pager-song');
+            const btnEl = document.getElementById('turn-pager-dismiss-btn');
+            if (!modal) return;
+
+            const displaySinger = singerName || watchedSingerName || 'Performer';
+            const songLine = song ? `🎵 ${song}${artist ? ' — ' + artist : ''}` : '🎵 Ready at the Stage';
+
+            modal.classList.remove('mode-next', 'mode-current');
+            if (level === 'current') {
+                modal.classList.add('mode-current');
+                if (iconEl) iconEl.textContent = '🎤';
+                if (badgeEl) badgeEl.textContent = isManualTest ? 'TEST • STAGE CALL' : 'STAGE CALL • UP NOW';
+                if (titleEl) titleEl.textContent = `IT'S YOUR TURN, ${displaySinger.toUpperCase()}!`;
+                if (subEl) subEl.textContent = 'Head to the stage now!';
+                if (btnEl) btnEl.textContent = '🎤 On My Way!';
+            } else {
+                modal.classList.add('mode-next');
+                if (iconEl) iconEl.textContent = '🔔';
+                if (badgeEl) badgeEl.textContent = isManualTest ? 'TEST • ON DECK' : 'HEADS UP • 1 PERFORMER AHEAD';
+                if (titleEl) titleEl.textContent = `YOU'RE UP NEXT, ${displaySinger.toUpperCase()}!`;
+                if (subEl) subEl.textContent = 'You are On Deck (1 performer ahead) — get ready!';
+                if (btnEl) btnEl.textContent = '👍 Got It — I\'m Ready!';
+            }
+            if (songEl) songEl.textContent = songLine;
+            modal.classList.add('active');
+
+            triggerHardwareVibrate(level);
+            playPagerChime(level);
+
+            let repeats = 0;
+            const maxRepeats = level === 'current' ? 3 : 1;
+            pagerRepeatTimer = setInterval(() => {
+                repeats++;
+                if (repeats > maxRepeats || !modal.classList.contains('active')) {
+                    clearInterval(pagerRepeatTimer);
+                    pagerRepeatTimer = null;
+                    return;
+                }
+                triggerHardwareVibrate(level);
+                playPagerChime(level);
+            }, 3400);
+        }
+
+        function dismissTurnPagerModal() {
+            if (pagerRepeatTimer) {
+                clearInterval(pagerRepeatTimer);
+                pagerRepeatTimer = null;
+            }
+            try {
+                if (navigator.vibrate) navigator.vibrate(0);
+            } catch (e) { }
+            const modal = document.getElementById('turn-pager-modal');
+            if (modal) {
+                modal.classList.remove('active', 'mode-next', 'mode-current');
+            }
+        }
+
+        function testTurnAlert() {
+            ensureTurnAudioUnlocked();
+            updateScreenWakeLock();
+            const testName = watchedSingerName || (document.getElementById('name')?.value || '').trim() || 'Singer';
+            triggerTurnPagerAlert('current', testName, 'Your Requested Song', 'Test Buzz & Chime', true);
+        }
+
         async function fetchPortalInfo() {
             try {
                 const response = await fetch('/api/info');
@@ -1493,6 +2100,33 @@
                 if (serverTheme !== activeEmojiThemeMode) {
                     activeEmojiThemeMode = serverTheme;
                     renderReactionCard();
+                }
+
+                const alertsAllowed = data.enablePatronTurnAlerts !== false;
+                if (alertsAllowed !== serverTurnAlertsEnabled) {
+                    serverTurnAlertsEnabled = alertsAllowed;
+                    syncTurnAlertUi();
+                    updateScreenWakeLock();
+                }
+
+                if (Array.isArray(data.recentBuzzEvents)) {
+                    if (lastSeenBuzzEventId === -1) {
+                        lastSeenBuzzEventId = data.recentBuzzEvents.reduce((maxId, b) => Math.max(maxId, b.id || 0), 0);
+                    } else {
+                        data.recentBuzzEvents.forEach(ev => {
+                            if ((ev.id || 0) > lastSeenBuzzEventId) {
+                                lastSeenBuzzEventId = ev.id;
+                                if (turnAlertsEnabled && serverTurnAlertsEnabled && watchedSingerName) {
+                                    const target = normalizeTurnName(watchedSingerName);
+                                    const sName = normalizeTurnName(ev.singerName);
+                                    const pName = normalizeTurnName(ev.duetPartnerName);
+                                    if (target && (target === sName || (pName && pName !== 'none' && target === pName))) {
+                                        triggerTurnPagerAlert(ev.level === 'next' ? 'next' : 'current', watchedSingerName, ev.song, ev.artist, false);
+                                    }
+                                }
+                            }
+                        });
+                    }
                 }
             } catch (err) {
                 // Ignore transient network errors
@@ -1505,10 +2139,15 @@
             if (savedName) {
                 const nameInput = document.getElementById('name');
                 if (nameInput) nameInput.value = savedName;
+                if (!watchedSingerName) {
+                    watchedSingerName = savedName.trim();
+                }
             }
+            syncTurnAlertUi();
             renderReactionCard();
             fetchPortalInfo();
-            setInterval(fetchPortalInfo, 5000);
+            loadRotation();
+            setInterval(fetchPortalInfo, 4000);
             loadPastSongs();
             checkSingerSession();
         });

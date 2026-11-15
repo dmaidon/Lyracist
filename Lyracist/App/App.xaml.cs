@@ -1,4 +1,4 @@
-// Edited on Nov 13, 2026 @ 16:09:00 -> Register SavedRotationsViewModel and SavedRotationsPage in DI container
+// Edited on Nov 14, 2026 @ 09:21:00 -> Sync qualifying singers, songs, and venues from saved rotation reports on startup
 using System;
 using System.Linq;
 using System.Windows;
@@ -73,6 +73,7 @@ public partial class App : System.Windows.Application
     {
         Lyracist.Data.LyracistDbContext.EnsureSchemaColumnsAndTables(db.Database.GetDbConnection());
         Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+        _ = Task.Run(() => Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup());
         new Lyracist.Data.Services.SearchService(db).EnsureFtsIndexSynchronized(forceCheck: true);
     }
 

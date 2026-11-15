@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:06:00 -> Release open SQLite connections and pools before ClearDatabase and RestoreDatabase to prevent WAL corruption
+// Edited on Nov 14, 2026 @ 15:43:30 -> Preserve Data/singers.db during ClearDatabase and clarify prompt that singer profiles & history are kept
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -123,8 +123,8 @@ public partial class SettingsViewModel
     private void ClearDatabase()
     {
         var confirm = System.Windows.MessageBox.Show(
-            "Are you sure you want to clear the entire database? This will remove all songs, playlists, performer history, and active rotation queue.",
-            "Confirm Clear Database",
+            "Are you sure you want to clear the song library database (lyracist.db)?\n\nThis will remove indexed songs and playlists so you can rescan from scratch.\nYour performer profiles, vocal settings, and song performance history in Data\\singers.db will be preserved.",
+            "Confirm Clear Song Database",
             System.Windows.MessageBoxButton.YesNo,
             System.Windows.MessageBoxImage.Warning);
 
@@ -154,7 +154,11 @@ public partial class SettingsViewModel
             _rotation.ClearRotationQueue();
             _library.NotifyLibraryUpdated();
 
-            System.Windows.MessageBox.Show("Database cleared successfully.", "Database Cleared", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            System.Windows.MessageBox.Show(
+                "Song library database cleared successfully. All performer profiles and performance history in Data\\singers.db were preserved.",
+                "Song Database Cleared",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
         }
         catch (Exception ex)
         {

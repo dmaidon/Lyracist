@@ -1,4 +1,4 @@
-// Edited on Nov 13, 2026 @ 16:04:30 -> Add SavedRotationsMainTabIndex handling and refresh saved reports on SaveRotation
+// Edited on Nov 14, 2026 @ 13:23:00 -> Add EnablePatronTurnAlerts setting property, persistence, and change handler
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -123,6 +123,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool BlockDuplicateSongsInSession { get; set; }
+
+        [ObservableProperty]
+        public partial bool EnablePatronTurnAlerts { get; set; } = true;
 
         [ObservableProperty]
         public partial bool EnableSessionSchedule { get; set; }
@@ -573,6 +576,7 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(BlockDuplicateSongsInSession):
+                case nameof(EnablePatronTurnAlerts):
                 case nameof(EnableSessionSchedule):
                 case nameof(SessionStartTime):
                 case nameof(SessionStopTime):
@@ -1768,6 +1772,7 @@ namespace KSRotation.ViewModels
             DefaultSongLengthMinutes = Math.Clamp(settings.DefaultSongLengthMinutes > 0 ? settings.DefaultSongLengthMinutes : 4.75, 1, 20);
             ShowEstimatedWaitTime = settings.ShowEstimatedWaitTime;
             BlockDuplicateSongsInSession = settings.BlockDuplicateSongsInSession;
+            EnablePatronTurnAlerts = settings.EnablePatronTurnAlerts;
             EnableSessionSchedule = settings.EnableSessionSchedule;
             SessionStartTime = string.IsNullOrWhiteSpace(settings.SessionStartTime) ? "8:00 PM" : settings.SessionStartTime;
             SessionStopTime = string.IsNullOrWhiteSpace(settings.SessionStopTime) ? "2:00 AM" : settings.SessionStopTime;
@@ -1928,9 +1933,18 @@ namespace KSRotation.ViewModels
             RebuildRotationJsonCacheNow();
             _ = AutoDetectVenueLocationAsync();
 #if !MAUI
+            Lyracist.Data.LyracistDbContext.EnsureSchemaAndRepair();
+            Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
             InitializeTrivia();
             InitializeScaryoke();
-            _ = LoadAllUsersAsync();
+            _ = Task.Run(() => Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup())
+                .ContinueWith(_ =>
+                {
+                    if (System.Windows.Application.Current?.Dispatcher != null)
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(() => _ = LoadAllUsersAsync());
+                    else
+                        _ = LoadAllUsersAsync();
+                });
 #endif
         }
 
@@ -3017,6 +3031,10 @@ namespace KSRotation.ViewModels
                 Singers.Clear();
                 ClearScaryokeHistory();
                 _ = RefreshSavedReportsAsync();
+#if !MAUI
+                _ = Task.Run(() => Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup())
+                    .ContinueWith(_ => LoadAllUsersAsync(), TaskScheduler.FromCurrentSynchronizationContext());
+#endif
 
                 string emailMsg;
                 if (emailError != null)
@@ -3456,6 +3474,7 @@ namespace KSRotation.ViewModels
                     bool exists = _performanceHistory.Any(p => p.SingerId == entry.Id && p.Round == round);
                     if (!exists)
                     {
+                        var now = DateTime.Now;
                         _performanceHistory.Add(new SongPerformance
                         {
                             SingerId = entry.Id,
@@ -3464,9 +3483,42 @@ namespace KSRotation.ViewModels
                             SongTitle = entry.Song,
                             ArtistName = entry.Artist,
                             Round = round,
-                            Timestamp = DateTime.Now,
+                            Timestamp = now,
                             IsMusic = entry.IsMusic
                         });
+
+#if !MAUI
+                        if (!IsTestMode && !entry.IsMusic)
+                        {
+                            string singerNameSnap = entry.Name;
+                            string duetPartnerSnap = entry.DuetPartnerName;
+                            string songTitleSnap = entry.Song;
+                            string artistSnap = entry.Artist;
+                            string activeVenueSnap = !string.IsNullOrWhiteSpace(SelectedVenue) ? SelectedVenue : VenueName;
+                            DateTime utcSnap = now.ToUniversalTime();
+
+                            _ = Task.Run(() =>
+                            {
+                                Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+                                    singerNameSnap,
+                                    songTitleSnap,
+                                    artistSnap,
+                                    activeVenueSnap,
+                                    timestampUtc: utcSnap);
+
+                                if (!string.IsNullOrWhiteSpace(duetPartnerSnap) &&
+                                    !string.Equals(duetPartnerSnap, "None", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+                                        duetPartnerSnap,
+                                        songTitleSnap,
+                                        artistSnap,
+                                        activeVenueSnap,
+                                        timestampUtc: utcSnap);
+                                }
+                            });
+                        }
+#endif
                     }
                 }
                 else
@@ -3772,6 +3824,7 @@ namespace KSRotation.ViewModels
                 DefaultSongLengthMinutes = Math.Clamp(DefaultSongLengthMinutes, 1, 20),
                 ShowEstimatedWaitTime = ShowEstimatedWaitTime,
                 BlockDuplicateSongsInSession = BlockDuplicateSongsInSession,
+                EnablePatronTurnAlerts = EnablePatronTurnAlerts,
                 EnableSessionSchedule = EnableSessionSchedule,
                 SessionStartTime = SessionStartTime,
                 SessionStopTime = SessionStopTime,

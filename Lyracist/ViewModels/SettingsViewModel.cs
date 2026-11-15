@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:37:00 -> Initialize HolidayThemeChoice from DisplayPreferences in SettingsViewModel constructor
+// Edited on Nov 14, 2026 @ 13:31:45 -> Add EnablePatronTurnAlerts property to SettingsViewModel
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -570,6 +570,14 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnSelectedRecordingDeviceChanged(string value)
     {
         AppSettings.RecordingInputDevice = value ?? string.Empty;
+    }
+
+    [ObservableProperty]
+    private bool _enablePatronTurnAlerts = AppSettings.EnablePatronTurnAlerts;
+
+    partial void OnEnablePatronTurnAlertsChanged(bool value)
+    {
+        AppSettings.EnablePatronTurnAlerts = value;
     }
 
     [ObservableProperty]

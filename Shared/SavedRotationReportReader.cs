@@ -1,10 +1,12 @@
-// Edited on Nov 13, 2026 @ 16:06:00 -> Add SaveReportCsv to SavedRotationReportReader so both apps can write and read saved rotation lists
+// Edited on Nov 14, 2026 @ 14:26:00 -> Extract venue from PDF Title / EML Subject and sync singer song edits/deletions to CSV reports
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using Lyracist.Core.Helpers;
 
 namespace Lyracist.Shared
 {
@@ -206,6 +208,16 @@ namespace Lyracist.Shared
                 string? emlPath = File.Exists(candidateEml) ? candidateEml : null;
 
                 var (venueName, parsedDate) = ParseVenueAndDateFromBaseName(baseName, fileInfo.LastWriteTime);
+                if (string.IsNullOrWhiteSpace(venueName) ||
+                    string.Equals(venueName, "Saved Rotation", StringComparison.OrdinalIgnoreCase))
+                {
+                    string? extractedVenue = ExtractVenueFromPdfOrEml(pdfPath, emlPath);
+                    if (!string.IsNullOrWhiteSpace(extractedVenue))
+                    {
+                        venueName = extractedVenue;
+                    }
+                }
+
                 var rows = ParseCsvRows(filePath);
 
                 // If any row has a valid timestamp, refine the report date from the earliest performance
@@ -257,6 +269,15 @@ namespace Lyracist.Shared
                 string candidateEml = Path.Combine(dir, $"{baseName}.eml");
                 string? emlPath = File.Exists(candidateEml) ? candidateEml : null;
                 var (venueName, reportDate) = ParseVenueAndDateFromBaseName(baseName, fileInfo.LastWriteTime);
+                if (string.IsNullOrWhiteSpace(venueName) ||
+                    string.Equals(venueName, "Saved Rotation", StringComparison.OrdinalIgnoreCase))
+                {
+                    string? extractedVenue = ExtractVenueFromPdfOrEml(pdfPath, emlPath);
+                    if (!string.IsNullOrWhiteSpace(extractedVenue))
+                    {
+                        venueName = extractedVenue;
+                    }
+                }
 
                 return new SavedRotationReportItem
                 {
@@ -293,6 +314,131 @@ namespace Lyracist.Shared
             {
                 return null;
             }
+        }
+
+        private static readonly Regex PdfTitleRegex = new(
+            @"/Title\s*\((?<title>(?:\\.|[^\\)])*)\)",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        /// <summary>
+        /// Extracts the venue name from the companion PDF metadata <c>/Title (Karaoke Rotation Report - &lt;Venue&gt;)</c>
+        /// or companion <c>.eml</c> <c>Subject: Karaoke Rotation Report - &lt;Venue&gt;</c> header when the filename
+        /// uses a legacy timestamp format such as <c>Rotation_yyyyMMdd_HHmmss</c>.
+        /// </summary>
+        public static string? ExtractVenueFromPdfOrEml(string? pdfPath, string? emlPath)
+        {
+            if (!string.IsNullOrWhiteSpace(pdfPath) && File.Exists(pdfPath))
+            {
+                try
+                {
+                    // SkiaSharp writes the PDF document info dictionary near the end of the file.
+                    using var fs = new FileStream(pdfPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    long readLen = Math.Min(fs.Length, 65536L);
+                    fs.Seek(fs.Length - readLen, SeekOrigin.Begin);
+                    byte[] buffer = new byte[readLen];
+                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    string tailText = Encoding.Latin1.GetString(buffer, 0, bytesRead);
+
+                    var match = PdfTitleRegex.Match(tailText);
+                    if (!match.Success && fs.Length > readLen)
+                    {
+                        fs.Seek(0, SeekOrigin.Begin);
+                        byte[] fullBuffer = new byte[fs.Length];
+                        int fullRead = fs.Read(fullBuffer, 0, fullBuffer.Length);
+                        tailText = Encoding.Latin1.GetString(fullBuffer, 0, fullRead);
+                        match = PdfTitleRegex.Match(tailText);
+                    }
+
+                    if (match.Success)
+                    {
+                        string rawTitle = UnescapePdfLiteralString(match.Groups["title"].Value);
+                        string? parsed = ExtractVenueFromReportTitleString(rawTitle);
+                        if (!string.IsNullOrWhiteSpace(parsed))
+                        {
+                            return parsed;
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore PDF read errors and try EML fallback
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(emlPath) && File.Exists(emlPath))
+            {
+                try
+                {
+                    foreach (string line in File.ReadLines(emlPath).Take(50))
+                    {
+                        if (line.StartsWith("Subject:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string subject = line["Subject:".Length..].Trim();
+                            string? parsed = ExtractVenueFromReportTitleString(subject);
+                            if (!string.IsNullOrWhiteSpace(parsed))
+                            {
+                                return parsed;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore EML read errors
+                }
+            }
+
+            return null;
+        }
+
+        private static string UnescapePdfLiteralString(string raw)
+        {
+            if (string.IsNullOrEmpty(raw))
+            {
+                return string.Empty;
+            }
+
+            return raw
+                .Replace(@"\(", "(", StringComparison.Ordinal)
+                .Replace(@"\)", ")", StringComparison.Ordinal)
+                .Replace(@"\\", @"\", StringComparison.Ordinal)
+                .Trim();
+        }
+
+        private static string? ExtractVenueFromReportTitleString(string? title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return null;
+            }
+
+            string trimmed = title.Trim();
+            const string prefix = "Karaoke Rotation Report -";
+            if (trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                trimmed = trimmed[prefix.Length..].Trim();
+            }
+
+            // Strip optional trailing " - MMMddyy" date suffix if present
+            int dashIdx = trimmed.LastIndexOf(" - ", StringComparison.Ordinal);
+            if (dashIdx > 0)
+            {
+                string rightPart = trimmed[(dashIdx + 3)..].Trim();
+                if (TryParseReportDateToken(rightPart, out _))
+                {
+                    trimmed = trimmed[..dashIdx].Trim();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(trimmed) ||
+                string.Equals(trimmed, "Saved Rotation", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(trimmed, "Karaoke Rotation Report", StringComparison.OrdinalIgnoreCase) ||
+                TryParseReportDateToken(trimmed, out _))
+            {
+                return null;
+            }
+
+            return trimmed;
         }
 
         /// <summary>
@@ -668,6 +814,213 @@ namespace Lyracist.Shared
                 val = "'" + val;
             }
             return val.Replace("\"", "\"\"", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Updates matching <c>(singerName, oldSongTitle, oldArtist)</c> rows across all saved rotation CSV files
+        /// in <paramref name="reportsDirectory"/> so user edits to song title or artist in Singer Performance History
+        /// persist across future report syncs.
+        /// </summary>
+        public static int UpdateSingerSongInReports(
+            string singerName,
+            string oldSongTitle,
+            string oldArtist,
+            string newSongTitle,
+            string newArtist,
+            string? reportsDirectory = null)
+        {
+            if (string.IsNullOrWhiteSpace(singerName) || string.IsNullOrWhiteSpace(oldSongTitle) || string.IsNullOrWhiteSpace(newSongTitle))
+            {
+                return 0;
+            }
+
+            string dir = string.IsNullOrWhiteSpace(reportsDirectory) ? Globals.KSRotationReportsDir : reportsDirectory;
+            if (!Directory.Exists(dir))
+            {
+                return 0;
+            }
+
+            string cleanTargetSinger = NameFormatting.CleanSingerName(singerName);
+            string cleanOldTitle = NameFormatting.ProperCase(oldSongTitle.Trim());
+            string cleanOldArtist = string.IsNullOrWhiteSpace(oldArtist) ? string.Empty : NameFormatting.ProperCase(oldArtist.Trim());
+            string cleanNewTitle = NameFormatting.ProperCase(newSongTitle.Trim());
+            string cleanNewArtist = string.IsNullOrWhiteSpace(newArtist) ? string.Empty : NameFormatting.ProperCase(newArtist.Trim());
+
+            int updatedRows = 0;
+
+            try
+            {
+                foreach (string csvPath in Directory.GetFiles(dir, "*.csv", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        DateTime originalWriteTime = File.GetLastWriteTime(csvPath);
+                        string[] lines = File.ReadAllLines(csvPath, Encoding.UTF8);
+                        if (lines.Length <= 1) continue;
+
+                        bool fileModified = false;
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                            if (string.IsNullOrWhiteSpace(lines[i])) continue;
+                            List<string> fields = ParseCsvLine(lines[i]);
+                            if (fields.Count < 7) continue;
+
+                            string rowSinger = NameFormatting.CleanSingerName(UnescapeFormulaPrefix(GetField(fields, 0)));
+                            if (!string.Equals(rowSinger, cleanTargetSinger, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            string rowTitle = NameFormatting.ProperCase(UnescapeFormulaPrefix(GetField(fields, 5)).Trim());
+                            if (!string.Equals(rowTitle, cleanOldTitle, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            string rowArtist = NameFormatting.ProperCase(UnescapeFormulaPrefix(GetField(fields, 6)).Trim());
+                            bool artistMatches =
+                                string.IsNullOrEmpty(cleanOldArtist) ||
+                                string.IsNullOrEmpty(rowArtist) ||
+                                string.Equals(rowArtist, cleanOldArtist, StringComparison.OrdinalIgnoreCase);
+
+                            if (!artistMatches)
+                            {
+                                continue;
+                            }
+
+                            fields[5] = cleanNewTitle;
+                            fields[6] = cleanNewArtist;
+                            lines[i] = FormatCsvRowFields(fields);
+                            fileModified = true;
+                            updatedRows++;
+                        }
+
+                        if (fileModified)
+                        {
+                            File.WriteAllLines(csvPath, lines, Encoding.UTF8);
+                            File.SetLastWriteTime(csvPath, originalWriteTime);
+                        }
+                    }
+                    catch
+                    {
+                        // Continue scanning other CSV files
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("SavedRotationReportReader", "UpdateSingerSongInReports", ex);
+            }
+
+            return updatedRows;
+        }
+
+        /// <summary>
+        /// Removes matching <c>(singerName, songTitle, artist)</c> performance rows from saved rotation CSV files
+        /// in <paramref name="reportsDirectory"/> so user-deleted history items are not re-imported on future syncs.
+        /// </summary>
+        public static int RemoveSingerSongFromReports(
+            string singerName,
+            string songTitle,
+            string artist,
+            string? reportsDirectory = null)
+        {
+            if (string.IsNullOrWhiteSpace(singerName) || string.IsNullOrWhiteSpace(songTitle))
+            {
+                return 0;
+            }
+
+            string dir = string.IsNullOrWhiteSpace(reportsDirectory) ? Globals.KSRotationReportsDir : reportsDirectory;
+            if (!Directory.Exists(dir))
+            {
+                return 0;
+            }
+
+            string cleanTargetSinger = NameFormatting.CleanSingerName(singerName);
+            string cleanTitle = NameFormatting.ProperCase(songTitle.Trim());
+            string cleanArtist = string.IsNullOrWhiteSpace(artist) ? string.Empty : NameFormatting.ProperCase(artist.Trim());
+            int removedRows = 0;
+
+            try
+            {
+                foreach (string csvPath in Directory.GetFiles(dir, "*.csv", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        DateTime originalWriteTime = File.GetLastWriteTime(csvPath);
+                        string[] lines = File.ReadAllLines(csvPath, Encoding.UTF8);
+                        if (lines.Length <= 1) continue;
+
+                        var keptLines = new List<string>(lines.Length) { lines[0] };
+                        bool fileModified = false;
+
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                            if (string.IsNullOrWhiteSpace(lines[i])) continue;
+                            List<string> fields = ParseCsvLine(lines[i]);
+                            if (fields.Count < 7)
+                            {
+                                keptLines.Add(lines[i]);
+                                continue;
+                            }
+
+                            string rowSinger = NameFormatting.CleanSingerName(UnescapeFormulaPrefix(GetField(fields, 0)));
+                            string rowTitle = NameFormatting.ProperCase(UnescapeFormulaPrefix(GetField(fields, 5)).Trim());
+                            string rowArtist = NameFormatting.ProperCase(UnescapeFormulaPrefix(GetField(fields, 6)).Trim());
+
+                            bool matches =
+                                string.Equals(rowSinger, cleanTargetSinger, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(rowTitle, cleanTitle, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(rowArtist, cleanArtist, StringComparison.OrdinalIgnoreCase);
+
+                            if (matches)
+                            {
+                                fileModified = true;
+                                removedRows++;
+                                continue;
+                            }
+
+                            keptLines.Add(lines[i]);
+                        }
+
+                        if (fileModified)
+                        {
+                            File.WriteAllLines(csvPath, keptLines, Encoding.UTF8);
+                            File.SetLastWriteTime(csvPath, originalWriteTime);
+                        }
+                    }
+                    catch
+                    {
+                        // Continue scanning other CSV files
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("SavedRotationReportReader", "RemoveSingerSongFromReports", ex);
+            }
+
+            return removedRows;
+        }
+
+        private static string FormatCsvRowFields(List<string> fields)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < fields.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                string val = fields[i] ?? string.Empty;
+                // Numeric columns 3 (Total Completed Songs) and 4 (Round) are unquoted when numeric
+                if ((i == 3 || i == 4) && (val.Length == 0 || int.TryParse(val, NumberStyles.Integer, CultureInfo.InvariantCulture, out _)))
+                {
+                    sb.Append(val);
+                }
+                else
+                {
+                    sb.Append('"').Append(EscapeCsvCell(val)).Append('"');
+                }
+            }
+            return sb.ToString();
         }
     }
 }

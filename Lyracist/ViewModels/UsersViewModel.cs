@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 20:15:00 -> Add singer AllowRecording opt-in and singer performance recordings list
+// Edited on Nov 14, 2026 @ 15:36:00 -> Sync singer profiles and audio settings with dedicated Data/singers.db database
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,14 +25,36 @@ namespace Lyracist.ViewModels
     {
         public int SingerHistoryId { get; set; }
         public string SingerName { get; set; } = string.Empty;
-        public string SongTitle { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        private string _songTitle = string.Empty;
+
+        [ObservableProperty]
+        private string _artist = string.Empty;
+
         public string Link { get; set; } = string.Empty;
         public string Source { get; set; } = "Local";
-        public string Key { get; set; } = "0";
-        public double Tempo { get; set; } = 1.0;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FormattedKeyTempo))]
+        private string _key = "0";
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FormattedKeyTempo))]
+        private double _tempo = 1.0;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayVenue))]
+        private string _venue = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FormattedTimesPerformed))]
+        private int _timesPerformed = 1;
+
         public DateTime Timestamp { get; set; }
 
+        public string DisplayVenue => string.IsNullOrWhiteSpace(Venue) ? "—" : Venue;
+        public string FormattedTimesPerformed => $"{Math.Max(1, TimesPerformed)}x";
         public string FormattedDate => Timestamp.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
         public string FormattedKeyTempo => $"Key: {Key} | Speed: {Tempo:0.0}x";
     }
@@ -60,6 +82,14 @@ namespace Lyracist.ViewModels
         private string _notes = string.Empty;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(VenuesSummary))]
+        [NotifyPropertyChangedFor(nameof(HasVenues))]
+        private string _venues = string.Empty;
+
+        [ObservableProperty]
+        private bool _isDistinctName;
+
+        [ObservableProperty]
         private int _score;
 
         [ObservableProperty]
@@ -79,6 +109,8 @@ namespace Lyracist.ViewModels
 
         public string LevelText { get => $"Lvl {SingerXpHelper.CalculateLevel(SingerXpHelper.CalculateXP(TotalSongsSung, Score))}"; set { } }
         public string SongsText { get => $"{TotalSongsSung} songs"; set { } }
+        public string VenuesSummary => string.IsNullOrWhiteSpace(Venues) ? "No venue recorded" : $"📍 {Venues}";
+        public bool HasVenues => !string.IsNullOrWhiteSpace(Venues);
     }
 
     public partial class UsersViewModel : BaseViewModel
@@ -135,6 +167,8 @@ namespace Lyracist.ViewModels
         [ObservableProperty] private string _editVocalRange = string.Empty;
         [ObservableProperty] private string _editCustomTitle = string.Empty;
         [ObservableProperty] private string _editNotes = string.Empty;
+        [ObservableProperty] private string _editVenues = string.Empty;
+        [ObservableProperty] private bool _editIsDistinctName;
         [ObservableProperty] private int _editScore;
         [ObservableProperty] private int _editTotalSongsSung;
         [ObservableProperty] private string _editAvatarType = "None";
@@ -153,6 +187,26 @@ namespace Lyracist.ViewModels
         [ObservableProperty] private double _editCompressor = 0.0;
         [ObservableProperty] private double _editLimiter = 0.0;
         [ObservableProperty] private string _editAudioNotes = string.Empty;
+
+        // Song Performance History row editor
+        [ObservableProperty]
+        private bool _isHistoryEditorOpen;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HistoryEditorTitle))]
+        private bool _isAddingNewHistorySong;
+
+        [ObservableProperty] private int _editingHistoryId;
+        [ObservableProperty] private string _editHistorySongTitle = string.Empty;
+        [ObservableProperty] private string _editHistoryArtist = string.Empty;
+        [ObservableProperty] private int _editHistoryTimesPerformed = 1;
+        [ObservableProperty] private string _editHistoryVenue = string.Empty;
+        [ObservableProperty] private string _editHistoryKey = "0";
+        [ObservableProperty] private double _editHistoryTempo = 1.0;
+
+        public string HistoryEditorTitle => IsAddingNewHistorySong
+            ? "Add Song to Performance History"
+            : "Edit Song Performance Record (Tip: Matching another song's Title & Artist merges them automatically)";
 
         // Status & feedback
         [ObservableProperty] private string _statusMessage = string.Empty;
@@ -203,10 +257,20 @@ namespace Lyracist.ViewModels
             _ = LoadSingersAsync();
         }
 
+        [RelayCommand]
+        private async Task RefreshSingersAsync()
+        {
+            SingerHistoryService.SyncFromSavedReportsAndCleanup();
+            await LoadSingersAsync();
+            ShowStatus("Performer list and saved rotation history refreshed.", true);
+        }
+
         public async Task LoadSingersAsync()
         {
             try
             {
+                LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase();
+
                 await using var context = new LyracistDbContext();
                 var dbSingers = await context.Singers
                     .Include(s => s.AudioSettings)
@@ -216,6 +280,11 @@ namespace Lyracist.ViewModels
                 AllSingers.Clear();
                 foreach (var s in dbSingers)
                 {
+                    if (!NameFormatting.IsQualifyingDatabaseSingerName(s.Name, s.IsDistinctName))
+                    {
+                        continue;
+                    }
+
                     var item = new SingerItem
                     {
                         SingerId = s.SingerId,
@@ -225,6 +294,8 @@ namespace Lyracist.ViewModels
                         VocalRange = string.IsNullOrWhiteSpace(s.VocalRange) ? "Any / Unspecified" : s.VocalRange,
                         CustomTitle = s.CustomTitle,
                         Notes = s.Notes,
+                        Venues = s.Venues ?? string.Empty,
+                        IsDistinctName = s.IsDistinctName,
                         Score = s.Score,
                         TotalSongsSung = s.TotalSongsSung,
                         AvatarType = s.AvatarType,
@@ -263,7 +334,8 @@ namespace Lyracist.ViewModels
                 if (string.IsNullOrWhiteSpace(query) ||
                     singer.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                     singer.Email.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    singer.CustomTitle.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    singer.CustomTitle.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    singer.Venues.Contains(query, StringComparison.OrdinalIgnoreCase))
                 {
                     FilteredSingers.Add(singer);
                 }
@@ -272,12 +344,15 @@ namespace Lyracist.ViewModels
 
         private void LoadSingerDetails(SingerItem singer)
         {
+            IsHistoryEditorOpen = false;
             EditName = singer.Name;
             EditEmail = singer.Email;
             EditPinCode = singer.PinCode;
             EditVocalRange = string.IsNullOrWhiteSpace(singer.VocalRange) ? "Any / Unspecified" : singer.VocalRange;
             EditCustomTitle = singer.CustomTitle;
             EditNotes = singer.Notes;
+            EditVenues = singer.Venues;
+            EditIsDistinctName = singer.IsDistinctName;
             EditScore = singer.Score;
             EditTotalSongsSung = singer.TotalSongsSung;
             EditAvatarType = singer.AvatarType;
@@ -305,12 +380,15 @@ namespace Lyracist.ViewModels
 
         private void ClearSingerDetails()
         {
+            IsHistoryEditorOpen = false;
             EditName = string.Empty;
             EditEmail = string.Empty;
             EditPinCode = string.Empty;
             EditVocalRange = "Any / Unspecified";
             EditCustomTitle = string.Empty;
             EditNotes = string.Empty;
+            EditVenues = string.Empty;
+            EditIsDistinctName = false;
             EditScore = 0;
             EditTotalSongsSung = 0;
             EditAllowRecording = false;
@@ -354,8 +432,28 @@ namespace Lyracist.ViewModels
                         Source = h.Source,
                         Key = h.Key,
                         Tempo = h.Tempo,
+                        Venue = h.Venue ?? string.Empty,
+                        TimesPerformed = Math.Max(1, h.TimesPerformed),
                         Timestamp = h.Timestamp
                     });
+                }
+
+                // If any history rows have venues not yet reflected on the singer profile, merge them into EditVenues
+                string mergedHistoryVenues = EditVenues;
+                foreach (var h in historyEntries)
+                {
+                    if (!string.IsNullOrWhiteSpace(h.Venue))
+                    {
+                        mergedHistoryVenues = DatabaseService.MergeVenueLists(mergedHistoryVenues, h.Venue);
+                    }
+                }
+                if (!string.Equals(mergedHistoryVenues, EditVenues, StringComparison.Ordinal))
+                {
+                    EditVenues = mergedHistoryVenues;
+                    if (SelectedSinger != null && string.Equals(SelectedSinger.Name, singerName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        SelectedSinger.Venues = mergedHistoryVenues;
+                    }
                 }
             }
             catch (Exception ex)
@@ -375,6 +473,12 @@ namespace Lyracist.ViewModels
             }
 
             string cleanName = NameFormatting.ProperCase(EditName.Trim());
+            if (!NameFormatting.IsQualifyingDatabaseSingerName(cleanName, EditIsDistinctName))
+            {
+                ShowStatus("Database singers must have a First & Last name (or multi-word nickname like 'Bar Mike'), or check 'Distinct Single Name'.", false);
+                return;
+            }
+
             string oldName = SelectedSinger.Name;
 
             try
@@ -404,6 +508,8 @@ namespace Lyracist.ViewModels
                 dbSinger.VocalRange = EditVocalRange == "Any / Unspecified" ? string.Empty : (EditVocalRange ?? string.Empty);
                 dbSinger.CustomTitle = EditCustomTitle?.Trim() ?? string.Empty;
                 dbSinger.Notes = EditNotes?.Trim() ?? string.Empty;
+                dbSinger.Venues = DatabaseService.MergeVenueLists(EditVenues, null);
+                dbSinger.IsDistinctName = EditIsDistinctName;
                 dbSinger.Score = EditScore;
                 dbSinger.TotalSongsSung = EditTotalSongsSung;
                 dbSinger.AvatarType = EditAvatarType;
@@ -426,12 +532,16 @@ namespace Lyracist.ViewModels
                     Notes = EditAudioNotes
                 };
                 _libraryService.SaveSingerSettings(cleanName, audioSettings);
+                LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase(mainDbIsAuthoritativeForProfiles: true);
 
                 // If name changed, migrate history and audio settings
                 if (!string.Equals(oldName, cleanName, StringComparison.OrdinalIgnoreCase))
                 {
                     SingerHistoryService.MergeHistory(oldName, cleanName);
                 }
+
+                EditName = cleanName;
+                EditVenues = dbSinger.Venues;
 
                 // Update in-memory item
                 SelectedSinger.Name = cleanName;
@@ -440,6 +550,8 @@ namespace Lyracist.ViewModels
                 SelectedSinger.VocalRange = dbSinger.VocalRange;
                 SelectedSinger.CustomTitle = dbSinger.CustomTitle;
                 SelectedSinger.Notes = dbSinger.Notes;
+                SelectedSinger.Venues = dbSinger.Venues;
+                SelectedSinger.IsDistinctName = dbSinger.IsDistinctName;
                 SelectedSinger.Score = dbSinger.Score;
                 SelectedSinger.TotalSongsSung = dbSinger.TotalSongsSung;
                 SelectedSinger.AvatarType = dbSinger.AvatarType;
@@ -459,36 +571,74 @@ namespace Lyracist.ViewModels
         [RelayCommand]
         private async Task AddNewSingerAsync()
         {
+            string? inputName = TextPromptDialog.Show(
+                "New Performer Profile",
+                "Enter the performer's First & Last Name (e.g., 'Sharon Roberts' or 'Bar Mike Gilmore'), or a distinct stage name:",
+                string.Empty,
+                "Create",
+                multiline: false,
+                width: 480,
+                height: 195);
+
+            if (string.IsNullOrWhiteSpace(inputName))
+                return;
+
+            string finalName = NameFormatting.ProperCase(inputName.Trim());
+            if (NameFormatting.IsReservedOrPlaceholderName(finalName))
+            {
+                ShowStatus("Please enter a valid performer name instead of a placeholder.", false);
+                return;
+            }
+
+            bool isDistinctSingle = NameFormatting.GetMeaningfulWordCount(finalName) < 2;
+            if (isDistinctSingle)
+            {
+                var confirmDistinct = System.Windows.MessageBox.Show(
+                    $"'{finalName}' is a single-word name.\n\nThe singer database normally requires a First & Last name (or multi-word identifier like 'Bar Mike').\n\nWould you like to mark '{finalName}' as a Distinct Stage Name so their songs and venues are tracked in the database?",
+                    "Distinct Single Name",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question);
+
+                if (confirmDistinct != System.Windows.MessageBoxResult.Yes)
+                {
+                    ShowStatus("Performer was not added. Please provide both First & Last name.", false);
+                    return;
+                }
+            }
+
             try
             {
-                string baseName = "New Singer";
-                string finalName = baseName;
-                int counter = 1;
-
                 await using var context = new LyracistDbContext();
-                while (await context.Singers.AnyAsync(s => s.Name.ToLower() == finalName.ToLower()))
+                if (await context.Singers.AnyAsync(s => s.Name.ToLower() == finalName.ToLower()))
                 {
-                    counter++;
-                    finalName = $"{baseName} {counter}";
+                    ShowStatus($"A performer named '{finalName}' already exists.", false);
+                    return;
                 }
+
+                string initialVenue = AppSettings.SelectedVenue?.Trim() ?? string.Empty;
 
                 var newSinger = new Singer
                 {
                     Name = finalName,
                     JoinDate = DateTime.UtcNow,
                     AvatarType = "None",
-                    AvatarSource = string.Empty
+                    AvatarSource = string.Empty,
+                    Venues = DatabaseService.MergeVenueLists(null, initialVenue),
+                    IsDistinctName = isDistinctSingle
                 };
 
                 context.Singers.Add(newSinger);
                 await context.SaveChangesAsync();
+                LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase(mainDbIsAuthoritativeForProfiles: true);
 
                 var item = new SingerItem
                 {
                     SingerId = newSinger.SingerId,
                     Name = newSinger.Name,
                     AvatarType = "None",
-                    AvatarSource = string.Empty
+                    AvatarSource = string.Empty,
+                    Venues = newSinger.Venues,
+                    IsDistinctName = newSinger.IsDistinctName
                 };
 
                 AllSingers.Add(item);
@@ -518,6 +668,7 @@ namespace Lyracist.ViewModels
                 {
                     context.Singers.Remove(dbSinger);
                     await context.SaveChangesAsync();
+                    LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase(mainDbIsAuthoritativeForProfiles: true);
                 }
 
                 AllSingers.Remove(SelectedSinger);
@@ -809,6 +960,7 @@ namespace Lyracist.ViewModels
                 bool merged = await dbService.MergeSingers(targetId, duplicateId);
                 if (merged)
                 {
+                    LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase(mainDbIsAuthoritativeForProfiles: true);
                     SingerHistoryService.MergeHistory(duplicateName, targetName);
                     IsMergePopupOpen = false;
                     await LoadSingersAsync();
@@ -854,20 +1006,148 @@ namespace Lyracist.ViewModels
         }
 
         [RelayCommand]
+        private void EditHistoricalSong(SingerPerformanceHistoryItem? item)
+        {
+            if (item == null) return;
+
+            EditingHistoryId = item.SingerHistoryId;
+            EditHistorySongTitle = item.SongTitle;
+            EditHistoryArtist = item.Artist;
+            EditHistoryTimesPerformed = Math.Max(1, item.TimesPerformed);
+            EditHistoryVenue = item.Venue ?? string.Empty;
+            EditHistoryKey = string.IsNullOrWhiteSpace(item.Key) ? "0" : item.Key;
+            EditHistoryTempo = item.Tempo <= 0 ? 1.0 : item.Tempo;
+            IsAddingNewHistorySong = false;
+            IsHistoryEditorOpen = true;
+        }
+
+        [RelayCommand]
+        private void StartAddHistoricalSong()
+        {
+            if (SelectedSinger == null) return;
+
+            EditingHistoryId = 0;
+            EditHistorySongTitle = string.Empty;
+            EditHistoryArtist = string.Empty;
+            EditHistoryTimesPerformed = 1;
+            EditHistoryVenue = EditVenues;
+            EditHistoryKey = "0";
+            EditHistoryTempo = 1.0;
+            IsAddingNewHistorySong = true;
+            IsHistoryEditorOpen = true;
+        }
+
+        [RelayCommand]
+        private void CancelHistoricalSongEdit()
+        {
+            IsHistoryEditorOpen = false;
+        }
+
+        [RelayCommand]
+        private void SaveHistoricalSong()
+        {
+            if (SelectedSinger == null) return;
+
+            if (string.IsNullOrWhiteSpace(EditHistorySongTitle))
+            {
+                ShowStatus("Song title cannot be empty.", false);
+                return;
+            }
+
+            bool ok;
+            string statusMsg;
+            if (IsAddingNewHistorySong || EditingHistoryId <= 0)
+            {
+                ok = SingerHistoryService.AddManualHistoryEntry(
+                    SelectedSinger.Name,
+                    EditHistorySongTitle,
+                    EditHistoryArtist,
+                    EditHistoryTimesPerformed,
+                    EditHistoryVenue,
+                    EditHistoryKey,
+                    EditHistoryTempo,
+                    out statusMsg);
+            }
+            else
+            {
+                ok = SingerHistoryService.UpdateHistoryEntry(
+                    EditingHistoryId,
+                    SelectedSinger.Name,
+                    EditHistorySongTitle,
+                    EditHistoryArtist,
+                    EditHistoryTimesPerformed,
+                    EditHistoryVenue,
+                    EditHistoryKey,
+                    EditHistoryTempo,
+                    out statusMsg);
+            }
+
+            if (ok)
+            {
+                IsHistoryEditorOpen = false;
+                LoadPerformanceHistory(SelectedSinger.Name);
+                EditTotalSongsSung = PerformanceHistory.Sum(h => Math.Max(1, h.TimesPerformed));
+                SelectedSinger.TotalSongsSung = EditTotalSongsSung;
+                ShowStatus(statusMsg, true);
+            }
+            else
+            {
+                ShowStatus(statusMsg, false);
+            }
+        }
+
+        [RelayCommand]
         private void DeleteHistoricalSong(SingerPerformanceHistoryItem item)
         {
             if (item == null) return;
 
             try
             {
-                SingerHistoryService.DeleteHistoryEntry(item.SingerHistoryId);
+                SingerHistoryService.DeleteHistoryEntry(item.SingerHistoryId, removeFromReports: true);
                 PerformanceHistory.Remove(item);
+                if (EditingHistoryId == item.SingerHistoryId)
+                {
+                    IsHistoryEditorOpen = false;
+                }
+                if (SelectedSinger != null)
+                {
+                    EditTotalSongsSung = PerformanceHistory.Sum(h => Math.Max(1, h.TimesPerformed));
+                    SelectedSinger.TotalSongsSung = EditTotalSongsSung;
+                }
                 ShowStatus($"Removed '{item.SongTitle}' from history.", true);
             }
             catch (Exception ex)
             {
                 AppLogger.LogError(ex, "UsersViewModel.DeleteHistoricalSong");
                 ShowStatus("Failed to remove song from history.", false);
+            }
+        }
+
+        [RelayCommand]
+        private void PrintSingerHistory()
+        {
+            if (SelectedSinger == null)
+            {
+                ShowStatus("Select a singer first to print their performance history.", false);
+                return;
+            }
+
+            var historyEntries = SingerHistoryService.GetHistory(SelectedSinger.Name);
+            bool printed = SingerHistoryPrinter.PrintSingerHistory(
+                SelectedSinger.Name,
+                !string.IsNullOrWhiteSpace(EditVenues) ? EditVenues : SelectedSinger.Venues,
+                !string.IsNullOrWhiteSpace(EditVocalRange) ? EditVocalRange : SelectedSinger.VocalRange,
+                !string.IsNullOrWhiteSpace(EditCustomTitle) ? EditCustomTitle : SelectedSinger.CustomTitle,
+                historyEntries,
+                out string statusMsg);
+
+            if (printed)
+            {
+                ShowStatus(statusMsg, true);
+            }
+            else if (!string.Equals(statusMsg, "Printing cancelled.", StringComparison.OrdinalIgnoreCase))
+            {
+                ShowStatus(statusMsg, false);
             }
         }
 

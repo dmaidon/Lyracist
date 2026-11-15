@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 10:44:00 -> Marshal OnLibraryUpdated and RefreshFilteredList to UI Dispatcher and refresh empty list on navigation
+// Edited on Nov 14, 2026 @ 10:16:40 -> Avoid incrementing TimesPerformed when saving audio defaults mid-song
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1498,7 +1498,9 @@ public partial class KaraokeViewModel : BaseViewModel
                     activeSinger.Source,
                     activeSinger.ExternalLink,
                     activeSinger.Key,
-                    activeSinger.Tempo);
+                    activeSinger.Tempo,
+                    AppSettings.SelectedVenue,
+                    incrementTimesPerformed: false);
             }
         }
 

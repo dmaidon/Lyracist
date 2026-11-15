@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:02:00 -> Add automatic database schema, migration, catalog, and FTS5 self-repair engine
+// Edited on Nov 14, 2026 @ 15:30:00 -> Add dedicated Data/singers.db database for Singers, SingerAudioSettings, and SingerHistory
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -34,6 +34,19 @@ namespace Lyracist.Data
             string dataDir = Lyracist.Shared.Globals.DataDir;
             System.IO.Directory.CreateDirectory(dataDir);
             return System.IO.Path.Combine(dataDir, "lyracist.db");
+        }
+
+        public static string GetSingersDatabaseFilePath()
+        {
+            string dataDir = Lyracist.Shared.Globals.DataDir;
+            System.IO.Directory.CreateDirectory(dataDir);
+            return System.IO.Path.Combine(dataDir, "singers.db");
+        }
+
+        public static string GetSingersConnectionString()
+        {
+            string dbPath = GetSingersDatabaseFilePath();
+            return $"Data Source={dbPath}";
         }
 
         public static string GetConnectionString()
@@ -322,7 +335,9 @@ namespace Lyracist.Data
                             ""AvatarSource"" TEXT NOT NULL DEFAULT '',
                             ""VocalRange"" TEXT NOT NULL DEFAULT '',
                             ""CustomTitle"" TEXT NOT NULL DEFAULT '',
-                            ""AllowRecording"" INTEGER NOT NULL DEFAULT 0
+                            ""AllowRecording"" INTEGER NOT NULL DEFAULT 0,
+                            ""Venues"" TEXT NOT NULL DEFAULT '',
+                            ""IsDistinctName"" INTEGER NOT NULL DEFAULT 0
                         );
 
                         CREATE TABLE IF NOT EXISTS ""Songs"" (
@@ -467,7 +482,9 @@ namespace Lyracist.Data
                             ""Source"" TEXT NOT NULL DEFAULT 'Local',
                             ""Timestamp"" TEXT NOT NULL DEFAULT '0001-01-01 00:00:00',
                             ""Key"" TEXT DEFAULT '0',
-                            ""Tempo"" REAL DEFAULT 1.0
+                            ""Tempo"" REAL DEFAULT 1.0,
+                            ""Venue"" TEXT NOT NULL DEFAULT '',
+                            ""TimesPerformed"" INTEGER NOT NULL DEFAULT 1
                         );
                     ";
                     cmd.ExecuteNonQuery();
@@ -508,14 +525,18 @@ namespace Lyracist.Data
                     ("AvatarSource", "TEXT NOT NULL DEFAULT ''"),
                     ("VocalRange", "TEXT NOT NULL DEFAULT ''"),
                     ("CustomTitle", "TEXT NOT NULL DEFAULT ''"),
-                    ("AllowRecording", "INTEGER NOT NULL DEFAULT 0")
+                    ("AllowRecording", "INTEGER NOT NULL DEFAULT 0"),
+                    ("Venues", "TEXT NOT NULL DEFAULT ''"),
+                    ("IsDistinctName", "INTEGER NOT NULL DEFAULT 0")
                 ]);
 
                 // Ensure all SingerHistory columns exist
                 EnsureTableColumns(connection, "SingerHistory",
                 [
                     ("Key", "TEXT DEFAULT '0'"),
-                    ("Tempo", "REAL DEFAULT 1.0")
+                    ("Tempo", "REAL DEFAULT 1.0"),
+                    ("Venue", "TEXT NOT NULL DEFAULT ''"),
+                    ("TimesPerformed", "INTEGER NOT NULL DEFAULT 1")
                 ]);
 
                 // Seed default OccasionCategories and record all applied migrations
@@ -568,6 +589,19 @@ namespace Lyracist.Data
                     ";
                     rebuildIdxCmd.ExecuteNonQuery();
                 }
+
+                // Ensure the dedicated Data/singers.db database exists and synchronize Singers / SingerAudioSettings / SingerHistory
+                // when operating on the main Data/lyracist.db database file (skip isolated temp/in-memory unit test databases).
+                if (connection is Microsoft.Data.Sqlite.SqliteConnection sqliteConn &&
+                    !string.IsNullOrWhiteSpace(sqliteConn.DataSource) &&
+                    !sqliteConn.DataSource.Contains(":memory:", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(
+                        System.IO.Path.GetFullPath(sqliteConn.DataSource),
+                        System.IO.Path.GetFullPath(GetDatabaseFilePath()),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    EnsureAndSyncDedicatedSingersDatabase(sqliteConn);
+                }
             }
             finally
             {
@@ -575,6 +609,314 @@ namespace Lyracist.Data
                 {
                     connection.Close();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Ensures the dedicated <c>Data/singers.db</c> database exists with <c>Singers</c>, <c>SingerAudioSettings</c>,
+        /// and <c>SingerHistory</c> tables, migrates any existing singer/history data into <c>singers.db</c>, and
+        /// automatically restores <c>Singers</c> and <c>SingerAudioSettings</c> into <c>lyracist.db</c> whenever
+        /// <c>lyracist.db</c> is deleted and rebuilt.
+        /// </summary>
+        public static void EnsureAndSyncDedicatedSingersDatabase(
+            Microsoft.Data.Sqlite.SqliteConnection? openMainConnection = null,
+            bool mainDbIsAuthoritativeForProfiles = false)
+        {
+            try
+            {
+                string singersDbPath = GetSingersDatabaseFilePath();
+                using (var singersConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={singersDbPath}"))
+                {
+                    singersConn.Open();
+                    using (var cmd = singersConn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            PRAGMA journal_mode=WAL;
+                            PRAGMA synchronous=NORMAL;
+
+                            CREATE TABLE IF NOT EXISTS ""Singers"" (
+                                ""SingerId"" INTEGER NOT NULL CONSTRAINT ""PK_Singers"" PRIMARY KEY AUTOINCREMENT,
+                                ""Name"" TEXT NOT NULL DEFAULT '',
+                                ""JoinDate"" TEXT NOT NULL DEFAULT '0001-01-01 00:00:00',
+                                ""LastSang"" TEXT NULL,
+                                ""TotalSongsSung"" INTEGER NOT NULL DEFAULT 0,
+                                ""Notes"" TEXT NOT NULL DEFAULT '',
+                                ""Score"" INTEGER NOT NULL DEFAULT 0,
+                                ""RatingPoints"" INTEGER NOT NULL DEFAULT 0,
+                                ""RatingCount"" INTEGER NOT NULL DEFAULT 0,
+                                ""AverageRating"" REAL NOT NULL DEFAULT 0.0,
+                                ""Email"" TEXT NOT NULL DEFAULT '',
+                                ""PinCode"" TEXT NOT NULL DEFAULT '',
+                                ""AvatarType"" TEXT NOT NULL DEFAULT 'None',
+                                ""AvatarSource"" TEXT NOT NULL DEFAULT '',
+                                ""VocalRange"" TEXT NOT NULL DEFAULT '',
+                                ""CustomTitle"" TEXT NOT NULL DEFAULT '',
+                                ""AllowRecording"" INTEGER NOT NULL DEFAULT 0,
+                                ""Venues"" TEXT NOT NULL DEFAULT '',
+                                ""IsDistinctName"" INTEGER NOT NULL DEFAULT 0
+                            );
+
+                            CREATE TABLE IF NOT EXISTS ""SingerAudioSettings"" (
+                                ""SingerAudioSettingsId"" INTEGER NOT NULL CONSTRAINT ""PK_SingerAudioSettings"" PRIMARY KEY AUTOINCREMENT,
+                                ""SingerId"" INTEGER NOT NULL,
+                                ""Treble"" REAL NOT NULL DEFAULT 0.0,
+                                ""Mid"" REAL NOT NULL DEFAULT 0.0,
+                                ""Bass"" REAL NOT NULL DEFAULT 0.0,
+                                ""Gain"" REAL NOT NULL DEFAULT 100.0,
+                                ""Key"" INTEGER NOT NULL DEFAULT 0,
+                                ""Tempo"" REAL NOT NULL DEFAULT 1.0,
+                                ""Compressor"" REAL NOT NULL DEFAULT 0.0,
+                                ""Limiter"" REAL NOT NULL DEFAULT 0.0,
+                                ""Notes"" TEXT NOT NULL DEFAULT '',
+                                CONSTRAINT ""FK_SingerAudioSettings_Singers_SingerId"" FOREIGN KEY (""SingerId"") REFERENCES ""Singers"" (""SingerId"") ON DELETE CASCADE
+                            );
+
+                            CREATE UNIQUE INDEX IF NOT EXISTS ""IX_SingerAudioSettings_SingerId"" ON ""SingerAudioSettings"" (""SingerId"");
+
+                            CREATE TABLE IF NOT EXISTS ""SingerHistory"" (
+                                ""SingerHistoryId"" INTEGER PRIMARY KEY AUTOINCREMENT,
+                                ""SingerName"" TEXT NOT NULL DEFAULT '',
+                                ""SongTitle"" TEXT NOT NULL DEFAULT '',
+                                ""Artist"" TEXT NOT NULL DEFAULT '',
+                                ""Link"" TEXT NULL,
+                                ""Source"" TEXT NOT NULL DEFAULT 'Local',
+                                ""Timestamp"" TEXT NOT NULL DEFAULT '0001-01-01 00:00:00',
+                                ""Key"" TEXT DEFAULT '0',
+                                ""Tempo"" REAL DEFAULT 1.0,
+                                ""Venue"" TEXT NOT NULL DEFAULT '',
+                                ""TimesPerformed"" INTEGER NOT NULL DEFAULT 1
+                            );
+
+                            CREATE INDEX IF NOT EXISTS ""IX_SingerHistory_SingerName"" ON ""SingerHistory"" (""SingerName"");
+                        ";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    EnsureTableColumns(singersConn, "Singers",
+                    [
+                        ("Score", "INTEGER NOT NULL DEFAULT 0"),
+                        ("RatingPoints", "INTEGER NOT NULL DEFAULT 0"),
+                        ("RatingCount", "INTEGER NOT NULL DEFAULT 0"),
+                        ("AverageRating", "REAL NOT NULL DEFAULT 0.0"),
+                        ("Email", "TEXT NOT NULL DEFAULT ''"),
+                        ("PinCode", "TEXT NOT NULL DEFAULT ''"),
+                        ("AvatarType", "TEXT NOT NULL DEFAULT 'None'"),
+                        ("AvatarSource", "TEXT NOT NULL DEFAULT ''"),
+                        ("VocalRange", "TEXT NOT NULL DEFAULT ''"),
+                        ("CustomTitle", "TEXT NOT NULL DEFAULT ''"),
+                        ("AllowRecording", "INTEGER NOT NULL DEFAULT 0"),
+                        ("Venues", "TEXT NOT NULL DEFAULT ''"),
+                        ("IsDistinctName", "INTEGER NOT NULL DEFAULT 0")
+                    ]);
+
+                    EnsureTableColumns(singersConn, "SingerHistory",
+                    [
+                        ("Key", "TEXT DEFAULT '0'"),
+                        ("Tempo", "REAL DEFAULT 1.0"),
+                        ("Venue", "TEXT NOT NULL DEFAULT ''"),
+                        ("TimesPerformed", "INTEGER NOT NULL DEFAULT 1")
+                    ]);
+                }
+
+                string mainDbPath = GetDatabaseFilePath();
+                if (!System.IO.File.Exists(mainDbPath))
+                {
+                    return;
+                }
+
+                bool disposeMain = false;
+                Microsoft.Data.Sqlite.SqliteConnection mainConn;
+                if (openMainConnection != null)
+                {
+                    mainConn = openMainConnection;
+                }
+                else
+                {
+                    mainConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={mainDbPath}");
+                    mainConn.Open();
+                    disposeMain = true;
+                }
+
+                try
+                {
+                    string escapedSingersPath = singersDbPath.Replace("'", "''", StringComparison.Ordinal);
+                    using (var attachCmd = mainConn.CreateCommand())
+                    {
+                        attachCmd.CommandText = $"ATTACH DATABASE '{escapedSingersPath}' AS singersdb;";
+                        attachCmd.ExecuteNonQuery();
+                    }
+
+                    try
+                    {
+                        long mainSingersCount;
+                        long singersDbSingersCount;
+                        long mainHistoryCount = 0;
+                        long singersDbHistoryCount;
+
+                        using (var countCmd = mainConn.CreateCommand())
+                        {
+                            countCmd.CommandText = "SELECT COUNT(*) FROM main.Singers;";
+                            mainSingersCount = Convert.ToInt64(countCmd.ExecuteScalar());
+                            countCmd.CommandText = "SELECT COUNT(*) FROM singersdb.Singers;";
+                            singersDbSingersCount = Convert.ToInt64(countCmd.ExecuteScalar());
+                            try
+                            {
+                                countCmd.CommandText = "SELECT COUNT(*) FROM main.SingerHistory;";
+                                mainHistoryCount = Convert.ToInt64(countCmd.ExecuteScalar());
+                            }
+                            catch
+                            {
+                                mainHistoryCount = 0;
+                            }
+                            countCmd.CommandText = "SELECT COUNT(*) FROM singersdb.SingerHistory;";
+                            singersDbHistoryCount = Convert.ToInt64(countCmd.ExecuteScalar());
+                        }
+
+                        // 1. One-time seed of SingerHistory from lyracist.db -> singers.db if singers.db has no history yet
+                        if (singersDbHistoryCount == 0 && mainHistoryCount > 0)
+                        {
+                            using var copyHistCmd = mainConn.CreateCommand();
+                            copyHistCmd.CommandText = @"
+                                INSERT INTO singersdb.SingerHistory (
+                                    SingerHistoryId, SingerName, SongTitle, Artist, Link, Source,
+                                    Timestamp, Key, Tempo, Venue, TimesPerformed
+                                )
+                                SELECT
+                                    SingerHistoryId, SingerName, SongTitle, Artist, Link, Source,
+                                    Timestamp, COALESCE(Key, '0'), COALESCE(Tempo, 1.0), COALESCE(Venue, ''), COALESCE(TimesPerformed, 1)
+                                FROM main.SingerHistory;
+                            ";
+                            copyHistCmd.ExecuteNonQuery();
+                        }
+
+                        // 2. If lyracist.db was deleted & recreated (0 singers in main, >0 in singers.db), restore into main!
+                        if (!mainDbIsAuthoritativeForProfiles && mainSingersCount == 0 && singersDbSingersCount > 0)
+                        {
+                            using var restoreCmd = mainConn.CreateCommand();
+                            restoreCmd.CommandText = @"
+                                INSERT OR IGNORE INTO main.Singers (
+                                    SingerId, Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                )
+                                SELECT
+                                    SingerId, Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                FROM singersdb.Singers;
+
+                                INSERT OR IGNORE INTO main.SingerAudioSettings (
+                                    SingerAudioSettingsId, SingerId, Treble, Mid, Bass, Gain, Key, Tempo, Compressor, Limiter, Notes
+                                )
+                                SELECT
+                                    SingerAudioSettingsId, SingerId, Treble, Mid, Bass, Gain, Key, Tempo, Compressor, Limiter, Notes
+                                FROM singersdb.SingerAudioSettings;
+                            ";
+                            restoreCmd.ExecuteNonQuery();
+                        }
+                        else if (mainDbIsAuthoritativeForProfiles || (singersDbSingersCount == 0 && mainSingersCount > 0))
+                        {
+                            using var backupCmd = mainConn.CreateCommand();
+                            backupCmd.CommandText = @"
+                                DELETE FROM singersdb.SingerAudioSettings;
+                                DELETE FROM singersdb.Singers;
+
+                                INSERT INTO singersdb.Singers (
+                                    SingerId, Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                )
+                                SELECT
+                                    SingerId, Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                FROM main.Singers;
+
+                                INSERT INTO singersdb.SingerAudioSettings (
+                                    SingerAudioSettingsId, SingerId, Treble, Mid, Bass, Gain, Key, Tempo, Compressor, Limiter, Notes
+                                )
+                                SELECT
+                                    SingerAudioSettingsId, SingerId, Treble, Mid, Bass, Gain, Key, Tempo, Compressor, Limiter, Notes
+                                FROM main.SingerAudioSettings;
+                            ";
+                            backupCmd.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            using var mergeCmd = mainConn.CreateCommand();
+                            mergeCmd.CommandText = @"
+                                INSERT INTO singersdb.Singers (
+                                    Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                )
+                                SELECT
+                                    Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                FROM main.Singers m
+                                WHERE NOT EXISTS (
+                                    SELECT 1 FROM singersdb.Singers s WHERE s.Name = m.Name COLLATE NOCASE
+                                );
+
+                                INSERT INTO main.Singers (
+                                    Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                )
+                                SELECT
+                                    Name, JoinDate, LastSang, TotalSongsSung, Notes, Score,
+                                    RatingPoints, RatingCount, AverageRating, Email, PinCode,
+                                    AvatarType, AvatarSource, VocalRange, CustomTitle, AllowRecording,
+                                    Venues, IsDistinctName
+                                FROM singersdb.Singers s
+                                WHERE NOT EXISTS (
+                                    SELECT 1 FROM main.Singers m WHERE m.Name = s.Name COLLATE NOCASE
+                                );
+
+                                UPDATE singersdb.Singers
+                                SET IsDistinctName = MAX(singersdb.Singers.IsDistinctName, COALESCE((SELECT m.IsDistinctName FROM main.Singers m WHERE m.Name = singersdb.Singers.Name COLLATE NOCASE LIMIT 1), 0))
+                                WHERE EXISTS (
+                                    SELECT 1 FROM main.Singers m WHERE m.Name = singersdb.Singers.Name COLLATE NOCASE
+                                );
+
+                                UPDATE main.Singers
+                                SET TotalSongsSung = COALESCE((SELECT s.TotalSongsSung FROM singersdb.Singers s WHERE s.Name = main.Singers.Name COLLATE NOCASE LIMIT 1), main.Singers.TotalSongsSung),
+                                    LastSang = COALESCE((SELECT s.LastSang FROM singersdb.Singers s WHERE s.Name = main.Singers.Name COLLATE NOCASE LIMIT 1), main.Singers.LastSang),
+                                    Venues = COALESCE((SELECT CASE WHEN s.Venues != '' THEN s.Venues ELSE NULL END FROM singersdb.Singers s WHERE s.Name = main.Singers.Name COLLATE NOCASE LIMIT 1), main.Singers.Venues),
+                                    IsDistinctName = MAX(main.Singers.IsDistinctName, COALESCE((SELECT s.IsDistinctName FROM singersdb.Singers s WHERE s.Name = main.Singers.Name COLLATE NOCASE LIMIT 1), 0))
+                                WHERE EXISTS (
+                                    SELECT 1 FROM singersdb.Singers s WHERE s.Name = main.Singers.Name COLLATE NOCASE
+                                );
+                            ";
+                            mergeCmd.ExecuteNonQuery();
+                        }
+                    }
+                    finally
+                    {
+                        using var detachCmd = mainConn.CreateCommand();
+                        detachCmd.CommandText = "DETACH DATABASE singersdb;";
+                        detachCmd.ExecuteNonQuery();
+                    }
+                }
+                finally
+                {
+                    if (disposeMain)
+                    {
+                        mainConn.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "EnsureAndSyncDedicatedSingersDatabase failed", ex);
             }
         }
 
@@ -933,6 +1275,7 @@ namespace Lyracist.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlite(GetConnectionString())

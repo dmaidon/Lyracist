@@ -1,4 +1,4 @@
-// Edited on Oct 31, 2026 @ 11:20:30 -> Exclude non-trivia databases (lyracist.db), verify Questions table existence, and ensure default trivia.db schema
+// Edited on Nov 14, 2026 @ 15:36:30 -> Exclude singers.db alongside lyracist.db from non-trivia databases in TriviaDataService
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,6 +48,7 @@ public class TriviaDataService : ITriviaDataService
         string fileName = Path.GetFileName(dbPath);
         return fileName.Equals("lyracist.db", StringComparison.OrdinalIgnoreCase) ||
                fileName.StartsWith("lyracist_", StringComparison.OrdinalIgnoreCase) ||
+               fileName.Equals("singers.db", StringComparison.OrdinalIgnoreCase) ||
                fileName.Equals("noartist.db", StringComparison.OrdinalIgnoreCase);
     }
 

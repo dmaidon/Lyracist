@@ -1,4 +1,4 @@
-<!-- Edited on Nov 13, 2026 @ 16:07:00 -> Add Save Rotation button to RotationPage queue toolbar -->
+<!-- Edited on Nov 14, 2026 @ 13:32:35 -> Add Buzz Singer's Phone button and context menu item to RotationPage -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -280,6 +280,7 @@
                                                 </MenuItem.Style>
                                             </MenuItem>
                                             <MenuItem Header="Move to Top of Rotation" Command="{Binding Path=PlacementTarget.Tag.MoveSingerToTopCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="📳 Buzz Singer's Phone" Command="{Binding Path=PlacementTarget.Tag.BuzzSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" ToolTip="Send an immediate pager buzz, chime, and stage-call banner to this singer's phone" />
                                             <MenuItem Header="Edit Singer..." Command="{Binding Path=PlacementTarget.Tag.EditSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                         </ContextMenu>
                                     </Border.ContextMenu>
@@ -470,6 +471,16 @@
                                                        Margin="0,0,2,0"
                                                        Padding="4"
                                                        ToolTip="Mark current song as completed (updates song request and advances active indicator)" />
+
+                                            <!-- Buzz Singer's Phone Button -->
+                                            <ui:Button Content="📳"
+                                                       Command="{Binding DataContext.BuzzSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Appearance="Caution"
+                                                       Margin="0,0,2,0"
+                                                       Padding="4,2"
+                                                       FontSize="12"
+                                                       ToolTip="Buzz Singer's Phone (send immediate stage-call / on-deck pager alert to their phone)" />
 
                                             <!-- Pause/Resume Button -->
                                             <ui:Button Command="{Binding DataContext.TogglePauseSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"

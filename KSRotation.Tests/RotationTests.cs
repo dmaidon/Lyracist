@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:28:15 -> Align DjCompleteRoundAction_DuringLastRound_NextHighlightSkipsSungSinger with last-round completion flagging
+// Edited on Nov 14, 2026 @ 15:37:00 -> Add unit test verifying dedicated Data/singers.db storage for SingerHistory and Singers
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2632,5 +2632,330 @@ public class DragReorderHelperTests
         Assert.Equal(expected, singers.Count);
         Assert.Equal(expected, singers.Select(s => s.Name).Distinct().Count());
         Assert.All(singers, s => Assert.False(string.IsNullOrWhiteSpace(s.Song)));
+    }
+}
+
+public class SingerDatabaseQualificationTests
+{
+    [Theory]
+    [InlineData("Sharon Roberts", false, true)]
+    [InlineData("Bar Mike", false, true)]
+    [InlineData("Bar Mike Gilmore", false, true)]
+    [InlineData("DJ Dave", false, true)]
+    [InlineData("Mike", false, false)]
+    [InlineData("Alice", false, false)]
+    [InlineData("Cher", false, false)]
+    [InlineData("Cher", true, true)]
+    [InlineData("New Singer", false, false)]
+    [InlineData("New Singer 2", false, false)]
+    [InlineData("Special Guest", false, false)]
+    [InlineData("Music Request", true, false)]
+    [InlineData("Guest", true, false)]
+    [InlineData("", true, false)]
+    public void IsQualifyingDatabaseSingerName_EnforcesFirstAndLastOrDistinctName(string name, bool isDistinct, bool expected)
+    {
+        Assert.Equal(expected, NameFormatting.IsQualifyingDatabaseSingerName(name, isDistinct));
+    }
+
+    [Fact]
+    public void MergeVenueLists_DeduplicatesAndPreservesOrder()
+    {
+        string merged = Lyracist.Data.Services.DatabaseService.MergeVenueLists("Shenanigans, The Rusty Anchor", "shenanigans, Neon Lounge");
+        Assert.Equal("Shenanigans, The Rusty Anchor, Neon Lounge", merged);
+    }
+
+    [Fact]
+    public void SingerHistoryService_TracksAndIncrementsTimesPerformedAndMergesHistory()
+    {
+        Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+        string suffix = Guid.NewGuid().ToString("N")[..6];
+        string barMike = $"Bar Mike {suffix}";
+        string barMikeGilmore = $"Bar Mike Gilmore {suffix}";
+
+        Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+            barMike, "Friends In Low Places", "Garth Brooks", "Shenanigans");
+        Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+            barMike, "Friends In Low Places", "Garth Brooks", "The Rusty Anchor");
+
+        var initialHistory = Lyracist.Services.Database.SingerHistoryService.GetHistory(barMike);
+        Assert.Single(initialHistory);
+        Assert.Equal(2, initialHistory[0].TimesPerformed);
+        Assert.Equal("Shenanigans, The Rusty Anchor", initialHistory[0].Venue);
+
+        Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+            barMikeGilmore, "Friends In Low Places", "Garth Brooks", "Neon Lounge");
+
+        Lyracist.Services.Database.SingerHistoryService.MergeHistory(barMike, barMikeGilmore);
+
+        var mergedHistory = Lyracist.Services.Database.SingerHistoryService.GetHistory(barMikeGilmore);
+        Assert.Single(mergedHistory);
+        Assert.Equal(3, mergedHistory[0].TimesPerformed);
+        Assert.Equal("Neon Lounge, Shenanigans, The Rusty Anchor", mergedHistory[0].Venue);
+
+        var (uniqueSongs, totalPerformances, consolidatedVenues) = SingerHistoryPrinter.CalculateSummaryStats("Shenanigans", mergedHistory);
+        Assert.Equal(1, uniqueSongs);
+        Assert.Equal(3, totalPerformances);
+        Assert.Equal("Shenanigans, Neon Lounge, The Rusty Anchor", consolidatedVenues);
+
+        Lyracist.Services.Database.SingerHistoryService.DeleteHistoryEntry(mergedHistory[0].SingerHistoryId);
+    }
+
+    [Fact]
+    public void SingerHistoryPrinter_BuildFlowDocument_UsesExplicitPixelColumnsAndFits25SongsOnOnePage()
+    {
+        Exception? threadEx = null;
+        int pageCount = 0;
+
+        var thread = new System.Threading.Thread(() =>
+        {
+            try
+            {
+                var entries = Enumerable.Range(1, 25).Select(i => new Lyracist.Services.Database.SingerHistoryEntry
+                {
+                    SingerHistoryId = i,
+                    SingerName = "Brenda Maidon",
+                    SongTitle = $"Sweet Caroline #{i}",
+                    Artist = "Neil Diamond",
+                    TimesPerformed = (i % 3) + 1,
+                    Venue = "Shenanigans, The Rusty Anchor",
+                    Key = "0",
+                    Tempo = 1.0,
+                    Timestamp = DateTime.UtcNow
+                }).ToList();
+
+                var fixedDoc = SingerHistoryPrinter.BuildFixedDocument(
+                    "Brenda Maidon",
+                    "Shenanigans",
+                    "Alto",
+                    "Queen of Karaoke",
+                    entries,
+                    816,
+                    1056);
+
+                Assert.Single(fixedDoc.Pages);
+
+                var doc = SingerHistoryPrinter.BuildFlowDocument(
+                    "Brenda Maidon",
+                    "Shenanigans",
+                    "Alto",
+                    "Queen of Karaoke",
+                    entries,
+                    816,
+                    1056);
+
+                Assert.False(double.IsInfinity(doc.ColumnWidth));
+                Assert.True(doc.ColumnWidth >= 700);
+
+                var table = doc.Blocks.OfType<System.Windows.Documents.Table>().Single();
+                Assert.Equal(7, table.Columns.Count);
+                foreach (var col in table.Columns)
+                {
+                    Assert.True(col.Width.IsAbsolute);
+                    Assert.True(col.Width.Value >= 30);
+                }
+
+                System.Windows.Documents.IDocumentPaginatorSource paginatorSource = doc;
+                paginatorSource.DocumentPaginator.PageSize = new System.Windows.Size(816, 1056);
+                paginatorSource.DocumentPaginator.ComputePageCount();
+                pageCount = paginatorSource.DocumentPaginator.PageCount;
+            }
+            catch (Exception ex)
+            {
+                threadEx = ex;
+            }
+        });
+        thread.SetApartmentState(System.Threading.ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (threadEx != null)
+        {
+            throw threadEx;
+        }
+
+        Assert.Equal(1, pageCount);
+    }
+
+    [Fact]
+    public void SavedRotationReportReader_LoadFromFile_ExtractsVenueFromCompanionPdfTitleForLegacyRotationFiles()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"KSRotation_PdfVenueTest_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            string csvPath = Path.Combine(tempDir, "Rotation_20261006_085246.csv");
+            string pdfPath = Path.Combine(tempDir, "Rotation_20261006_085246.pdf");
+
+            File.WriteAllLines(csvPath,
+            [
+                "Singer,Duet Partner,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp",
+                "\"Brenda Maidon\",\"\",\"Karaoke\",1,1,\"Green Door\",\"Shakin' Stevens\",\"2026-10-05 18:56:19\""
+            ]);
+
+            // Write a synthetic PDF tail containing SkiaSharp's /Title metadata entry
+            File.WriteAllText(pdfPath, "%PDF-1.4\n1 0 obj\n<<\n/Title (Karaoke Rotation Report - Plan B)\n>>\nendobj\n%%EOF", System.Text.Encoding.Latin1);
+
+            var report = SavedRotationReportReader.LoadFromFile(csvPath);
+            Assert.NotNull(report);
+            Assert.Equal("Plan B", report!.VenueName);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void SingerHistoryService_SyncAndEdit_ConsolidatesBlankArtistExtractsPdfVenueAndMergesEditedDuplicates()
+    {
+        Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+
+        string uniqueSuffix = Guid.NewGuid().ToString("N")[..6];
+        string singerName = $"Brenda Test{uniqueSuffix}";
+        string tempDir = Path.Combine(Path.GetTempPath(), $"KSRotation_HistoryEditTest_{uniqueSuffix}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            // Report 1: Legacy Rotation_*.csv + companion .pdf with /Title (Karaoke Rotation Report - Plan B)
+            string csv1 = Path.Combine(tempDir, "Rotation_20261006_085246.csv");
+            string pdf1 = Path.Combine(tempDir, "Rotation_20261006_085246.pdf");
+            File.WriteAllLines(csv1,
+            [
+                "Singer,Duet Partner,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp",
+                $"\"{singerName}\",\"\",\"Karaoke\",1,1,\"Green Door\",\"Shakin' Stevens\",\"2026-10-05 18:56:19\"",
+                $"\"{singerName}\",\"\",\"Karaoke\",1,2,\"Downtown\",\"Petula Clarke\",\"2026-10-05 19:30:00\""
+            ]);
+            File.WriteAllText(pdf1, "%PDF-1.4\n<<\n/Title (Karaoke Rotation Report - Plan B)\n>>\n%%EOF", System.Text.Encoding.Latin1);
+
+            // Report 2: Newer report where "Green Door" was logged WITHOUT an artist, and "Downtown" had "Petula Clark"
+            string csv2 = Path.Combine(tempDir, "Castaways - Oct2926.csv");
+            File.WriteAllLines(csv2,
+            [
+                "Singer,Duet Partner,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp",
+                $"\"{singerName}\",\"\",\"Karaoke\",1,1,\"Green Door\",\"\",\"2026-10-29 19:39:00\"",
+                $"\"{singerName}\",\"\",\"Karaoke\",1,2,\"Downtown\",\"Petula Clark\",\"2026-10-29 20:15:00\""
+            ]);
+
+            Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup(tempDir);
+
+            var history = Lyracist.Services.Database.SingerHistoryService.GetHistory(singerName);
+
+            // 1. "Green Door" (with "Shakin' Stevens" + blank "") must be consolidated into a SINGLE entry with 2x and both venues!
+            var greenDoorRows = history.Where(h => string.Equals(h.SongTitle, "Green Door", StringComparison.OrdinalIgnoreCase)).ToList();
+            Assert.Single(greenDoorRows);
+            Assert.Equal("Shakin' Stevens", greenDoorRows[0].Artist);
+            Assert.Equal(2, greenDoorRows[0].TimesPerformed);
+            Assert.Contains("Plan B", greenDoorRows[0].Venue, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Castaways", greenDoorRows[0].Venue, StringComparison.OrdinalIgnoreCase);
+
+            // 2. "Downtown" has two rows due to artist spelling ("Petula Clarke" vs "Petula Clark").
+            // Editing "Petula Clarke" -> "Petula Clark" via UpdateHistoryEntry must automatically merge the two rows into 1 row (2x) and update the CSV!
+            var downtownTypo = history.First(h => string.Equals(h.Artist, "Petula Clarke", StringComparison.OrdinalIgnoreCase));
+            bool updated = Lyracist.Services.Database.SingerHistoryService.UpdateHistoryEntry(
+                downtownTypo.SingerHistoryId,
+                singerName,
+                "Downtown",
+                "Petula Clark",
+                downtownTypo.TimesPerformed,
+                downtownTypo.Venue,
+                "0",
+                1.0,
+                out string statusMsg,
+                tempDir);
+
+            Assert.True(updated, statusMsg);
+
+            var updatedHistory = Lyracist.Services.Database.SingerHistoryService.GetHistory(singerName);
+            var downtownRows = updatedHistory.Where(h => string.Equals(h.SongTitle, "Downtown", StringComparison.OrdinalIgnoreCase)).ToList();
+            Assert.Single(downtownRows);
+            Assert.Equal("Petula Clark", downtownRows[0].Artist);
+            Assert.Equal(2, downtownRows[0].TimesPerformed);
+            Assert.Contains("Plan B", downtownRows[0].Venue, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Castaways", downtownRows[0].Venue, StringComparison.OrdinalIgnoreCase);
+
+            // Re-syncing from reports must NOT bring back "Petula Clarke" because the CSV was updated too!
+            Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup(tempDir);
+            var resyncedHistory = Lyracist.Services.Database.SingerHistoryService.GetHistory(singerName);
+            Assert.Single(resyncedHistory, h => string.Equals(h.SongTitle, "Downtown", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var row in resyncedHistory)
+            {
+                Lyracist.Services.Database.SingerHistoryService.DeleteHistoryEntry(row.SingerHistoryId);
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void SingersDatabase_IsStoredInDedicatedSingersDbFile()
+    {
+        Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+
+        string singersDbPath = Lyracist.Data.LyracistDbContext.GetSingersDatabaseFilePath();
+        Assert.EndsWith("singers.db", singersDbPath, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(singersDbPath));
+
+        string uniqueSuffix = Guid.NewGuid().ToString("N")[..6];
+        string singerName = $"Dedicated Db{uniqueSuffix}";
+
+        bool added = Lyracist.Services.Database.SingerHistoryService.AddManualHistoryEntry(
+            singerName,
+            "Separate Database Song",
+            "Test Artist",
+            3,
+            "Plan B, Castaways",
+            "+1",
+            1.0,
+            out string statusMsg);
+
+        Assert.True(added, statusMsg);
+
+        // Verify the row is physically stored inside Data/singers.db
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection(Lyracist.Data.LyracistDbContext.GetSingersConnectionString()))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT TimesPerformed, Venue FROM SingerHistory WHERE SingerName = $name COLLATE NOCASE AND SongTitle = 'Separate Database Song';";
+            cmd.Parameters.AddWithValue("$name", singerName);
+            using var reader = cmd.ExecuteReader();
+            Assert.True(reader.Read());
+            Assert.Equal(3, reader.GetInt32(0));
+            Assert.Contains("Plan B", reader.GetString(1), StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Clean up test row
+        var entries = Lyracist.Services.Database.SingerHistoryService.GetHistory(singerName);
+        foreach (var entry in entries)
+        {
+            Lyracist.Services.Database.SingerHistoryService.DeleteHistoryEntry(entry.SingerHistoryId);
+        }
+
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection(Lyracist.Data.LyracistDbContext.GetSingersConnectionString()))
+        {
+            conn.Open();
+            using var delCmd = conn.CreateCommand();
+            delCmd.CommandText = "DELETE FROM Singers WHERE Name = $name COLLATE NOCASE;";
+            delCmd.Parameters.AddWithValue("$name", singerName);
+            delCmd.ExecuteNonQuery();
+        }
+        using (var mainConn = new Microsoft.Data.Sqlite.SqliteConnection(Lyracist.Data.LyracistDbContext.GetConnectionString()))
+        {
+            mainConn.Open();
+            using var delMainCmd = mainConn.CreateCommand();
+            delMainCmd.CommandText = "DELETE FROM Singers WHERE Name = $name COLLATE NOCASE;";
+            delMainCmd.Parameters.AddWithValue("$name", singerName);
+            delMainCmd.ExecuteNonQuery();
+        }
     }
 }

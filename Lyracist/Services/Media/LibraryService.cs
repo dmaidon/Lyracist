@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:06:00 -> Add automatic EnsureSchemaAndRepair retry on library search and query failures
+// Edited on Nov 14, 2026 @ 09:20:00 -> Enforce first/last or distinct singer name check when saving singer audio settings
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -469,6 +469,10 @@ public class LibraryService : ILibraryService
 
             if (dbSinger == null)
             {
+                if (!Lyracist.Services.Database.SingerHistoryService.IsEligibleDatabaseSinger(singerName))
+                {
+                    return;
+                }
                 dbSinger = new Lyracist.Data.Models.Singer { Name = singerName };
                 context.Singers.Add(dbSinger);
                 context.SaveChanges(); // Generate SingerId

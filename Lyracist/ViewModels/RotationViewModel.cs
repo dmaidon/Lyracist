@@ -1,4 +1,4 @@
-// Edited on Nov 13, 2026 @ 16:06:30 -> Add SaveRotationCommand and SavedRotationSaved event to RotationViewModel
+// Edited on Nov 14, 2026 @ 13:32:30 -> Add BuzzSingerCommand and SingerPhoneBuzzed event for Patron Phone Turn Alerts
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -564,10 +564,11 @@ public partial class RotationViewModel : BaseViewModel
             return;
         }
 
-        // Save to singer song history database with key and tempo
+        // Save to singer song history database with key, tempo, and active venue (without incrementing completed count yet)
+        string activeVenue = AppSettings.SelectedVenue;
         System.Threading.Tasks.Task.Run(() =>
         {
-            Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink, key, tempo);
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink, key, tempo, activeVenue, incrementTimesPerformed: false);
         });
 
         int score = 0;
@@ -979,6 +980,7 @@ public partial class RotationViewModel : BaseViewModel
 
             string venueName = AppSettings.SelectedVenue;
             string csvPath = SavedRotationReportReader.SaveReportCsv(venueName, activeSingers, performances);
+            _ = System.Threading.Tasks.Task.Run(() => Lyracist.Services.Database.SingerHistoryService.SyncFromSavedReportsAndCleanup());
             SavedRotationReportCreated?.Invoke();
 
             System.Windows.MessageBox.Show(
@@ -1048,6 +1050,17 @@ public partial class RotationViewModel : BaseViewModel
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
+    }
+
+    public event Action<Singer>? SingerPhoneBuzzed;
+
+    [RelayCommand]
+    private void BuzzSinger(Singer? singer)
+    {
+        if (singer == null || singer.IsMusic || string.IsNullOrWhiteSpace(singer.Name))
+            return;
+
+        SingerPhoneBuzzed?.Invoke(singer);
     }
 
     [RelayCommand]
@@ -1591,22 +1604,34 @@ public partial class RotationViewModel : BaseViewModel
     private void SavePerformanceHistory(string name, string title, string artist, string key = "0", double tempo = 1.0, string source = "Local", string link = "")
     {
         if (string.IsNullOrEmpty(name)) return;
+        string activeVenue = AppSettings.SelectedVenue;
 
         System.Threading.Tasks.Task.Run(() =>
         {
             try
             {
-                // Persist to SingerHistory with Key and Tempo
-                Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, link, key, tempo);
+                // Persist to SingerHistory & Singers with Key, Tempo, and Venue (only for qualifying 1st & last or distinct names)
+                Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
+                    name,
+                    title,
+                    artist,
+                    activeVenue,
+                    key,
+                    tempo,
+                    source,
+                    link,
+                    incrementTotalSongs: true);
 
+                if (!Lyracist.Services.Database.SingerHistoryService.IsEligibleDatabaseSinger(name))
+                {
+                    return;
+                }
+
+                string cleanName = NameFormatting.CleanSingerName(name);
                 using var context = new Lyracist.Data.LyracistDbContext();
-                var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
+                var dbSinger = context.Singers.FirstOrDefault(s => s.Name.ToLower() == cleanName.ToLower());
                 if (dbSinger != null)
                 {
-                    dbSinger.TotalSongsSung += 1;
-                    dbSinger.LastSang = System.DateTime.UtcNow;
-                    context.Singers.Update(dbSinger);
-
                     // Find corresponding song to get SongId, or create a transient one
                     var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
                     if (dbSong == null && !string.IsNullOrEmpty(title))

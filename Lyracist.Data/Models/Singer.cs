@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:44:00 -> Add AllowRecording property for optional performance recording
+// Edited on Nov 14, 2026 @ 09:14:20 -> Add Venues and IsDistinctName properties to Singer model
 using System;
 using System.Collections.Generic;
 
@@ -24,6 +24,8 @@ namespace Lyracist.Data.Models
         public string VocalRange { get; set; } = string.Empty;
         public string CustomTitle { get; set; } = string.Empty;
         public bool AllowRecording { get; set; } = false;
+        public string Venues { get; set; } = string.Empty;
+        public bool IsDistinctName { get; set; } = false;
 
         // Navigation Properties
         public SingerAudioSettings? AudioSettings { get; set; }

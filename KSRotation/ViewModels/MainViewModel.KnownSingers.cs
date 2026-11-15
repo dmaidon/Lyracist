@@ -1,5 +1,6 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update singers database filename to ksrotation_singers.json with legacy singers_db.json fallback
+// Edited on Nov 14, 2026 @ 09:17:00 -> Filter KnownSingers database to only singers with first & last names or distinct names
 using KSRotation.Services;
+using Lyracist.Shared;
 
 namespace KSRotation.ViewModels
 {
@@ -15,9 +16,9 @@ namespace KSRotation.ViewModels
                     KnownSingers.Clear();
                     foreach (var s in list.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
                     {
-                        if (!string.IsNullOrWhiteSpace(s))
+                        if (!string.IsNullOrWhiteSpace(s) && NameFormatting.IsQualifyingDatabaseSingerName(s))
                         {
-                            KnownSingers.Add(s);
+                            KnownSingers.Add(NameFormatting.CleanSingerName(s));
                         }
                     }
                 }
@@ -28,11 +29,12 @@ namespace KSRotation.ViewModels
             }
         }
 
-        public void AddKnownSinger(string name)
+        public void AddKnownSinger(string name, bool isDistinctSingleName = false)
         {
             if (string.IsNullOrWhiteSpace(name)) return;
-            name = name.Trim();
-            if (string.Equals(name, "New Singer", StringComparison.OrdinalIgnoreCase)) return;
+            name = NameFormatting.CleanSingerName(name);
+            if (string.IsNullOrWhiteSpace(name)) return;
+            if (!NameFormatting.IsQualifyingDatabaseSingerName(name, isDistinctSingleName)) return;
             if (KnownSingers.Any(s => string.Equals(s, name, StringComparison.OrdinalIgnoreCase))) return;
 
             int insertAt = 0;

@@ -1,4 +1,62 @@
-// Edited on Nov 13, 2026 @ 16:14:00 -> Document Saved Rotations tab across KSRotation and Lyracist and 160x160 3D emoji upgrade
+// Edited on Nov 14, 2026 @ 15:39:00 -> Document dedicated Data/singers.db database for singer profiles, audio settings, and performance history
+
+KSRotation, KSRotation.Maui & Lyracist: Patron Phone Turn Alerts ("Buzz My Phone") & DJ Manual Stage Pager - (November 2026)
+
+Section: Patron Song Request Portal & Rotation Management / Patron Phone Turn Alerts ("Buzz My Phone")
+
+0. 2-Stage Automatic Phone Turn Alerts ('📳 Buzz My Phone When I'm Up'):
+   - Performers connected via the smartphone portal (PatronPortal.html in KSRotation / KSRotation.Maui and mobile.html in Lyracist) can toggle on '📳 Buzz My Phone When I'm Up' at the top of the screen, or tap the '🔔 Watch' button next to their name in the Rotation list.
+   - Stage 1 — On Deck (1 Performer Ahead / Up Next):
+     * Automatically triggers a medium double-pulse phone vibration, an ascending 5-note chime, and a full-screen flashing amber/navy pager alert ('🔔 YOU'RE UP NEXT, [NAME]! You are On Deck (1 performer ahead) — get ready!') with a '👍 Got It — I'm Ready!' dismiss button.
+   - Stage 2 — Your Turn Now (Stage Call / Now Singing):
+     * Automatically triggers a strong pager vibration pattern, a repeating 6-note fanfare chime, and a full-screen flashing green/gold pager alert ('🎤 IT'S YOUR TURN, [NAME]! Head to the stage now!') with a '🎤 On My Way!' dismiss button.
+   - Duet Partner Matching, Screen Wake Lock & Test Button:
+     * Alerts fire automatically whether the watched name matches the primary singer or their duet partner.
+     * Requests a browser Screen Wake Lock while active so the patron's phone screen stays awake at their table.
+     * Includes a '📳 Test' button so patrons can unlock audio/vibration permissions and preview how the pager alert looks and sounds.
+
+0A. DJ Master Toggle & Manual '📳 Buzz Singer's Phone' Action:
+   - Master Toggle ('Enable Patron Phone Turn Alerts (Buzz / Chime)'): Enabled by default in KSRotation (Settings -> Rotation Settings), KSRotation.Maui (top Rotation toolbar '📳 Turn Alerts'), and Lyracist (Settings -> Display -> Monitors & Screen Assignments). Unchecking hides the turn alert card on patron phones.
+   - Manual DJ Pager ('📳' Button & Context Menu): If a singer is slow coming to the stage, the DJ can click the '📳' (Buzz Singer's Phone) button on the singer's row (or right-click -> '📳 Buzz Singer's Phone') in KSRotation, KSRotation.Maui, Lyracist, or the Remote DJ portal (dj.html) to immediately re-trigger the flashing stage-call pager and chime on that performer's phone.
+
+KSRotation & Lyracist: Qualifying Singer & Performed Song Database with Venue Tracking, Per-Song Performance Counts & Singer History Printing - (November 2026)
+
+Section: Performer Directory & Users Management / Qualifying Singer Database, Performed Songs, # Sung Counts, Venues & Printing
+
+0. Dedicated 'Data/singers.db' Database & Qualifying Singer Rules (First & Last or Distinct Names Only):
+   - Dedicated 'Data/singers.db' Database: All singer profiles ('Singers'), per-singer vocal/EQ settings ('SingerAudioSettings'), and song performance history ('SingerHistory') are stored in their own dedicated SQLite database ('Data/singers.db'), completely separate from the karaoke song catalog database ('Data/lyracist.db'). Deleting and rebuilding 'Data/lyracist.db' never loses any singer profiles, vocal settings, or performance history edits.
+   - To keep the permanent singer and song history database ('Singers' and 'SingerHistory' in 'Data/singers.db') clean and meaningful across shows, only qualifying performers are saved to the database:
+     * Performers with a First & Last Name (e.g., 'Sharon Roberts', 'Bar Mike Gilmore').
+     * Performers with a Distinct Multi-Word Identifier (e.g., 'Bar Mike', 'Big Mike', 'DJ Dave').
+     * Performers with a single-word stage name whose profile has 'Distinct Single Name' explicitly checked.
+   - Generic single first names ('Mike', 'John', 'Sarah') and system placeholders ('New Singer', 'Special Guest', 'Music Request') can still be used in tonight's active rotation queue, but are automatically excluded from permanent database storage.
+
+0A. Per-Song Performance Counts ('# Sung') & Per-Singer/Per-Song Venue Tracking:
+   - Whenever a qualifying singer completes a song in KSRotation (checking a Round R1-R10 checkbox or clicking Done '✓') or Lyracist (completing a karaoke track or marking a singer finished), the database records:
+     * '# Sung' ('TimesPerformed'): Tracks how many times this singer has performed each specific song across all shows (displayed as '1x', '2x', '3x', etc. in the '# Sung' column of the 'Performance History' table).
+     * The singer's profile ('Venues Performed' list, displayed as a '📍 Venues' badge in the singer list and profile header).
+     * Each individual song performance row ('Venue' column in the 'Performance History' tab alongside Song Title, Artist, # Sung, Key, Speed, Source, and Date & Time).
+   - Search by Venue: Type any venue name in the Users tab search box to filter and view all regular singers who perform at that venue.
+
+0B. Printing a Specific Singer's Performance History ('🖨️ Print History'):
+   - Both KSRotation (Users tab) and Lyracist (Users & Singers page) include '🖨️ Print History' / 'Print Singer History' buttons on the performer profile header card and inside the 'Performance History' sub-tab.
+   - Clicking 'Print History' opens the standard Windows Print Dialog (supporting physical printers as well as 'Microsoft Print to PDF') and prints a formatted multi-page report displaying:
+     * Performer Name, Custom Title, and Vocal Range.
+     * Summary counts: Unique Songs, Total Performances (sum of all '# Sung' counts), Consolidated Venues Performed, and Printed Date/Time.
+     * Complete song table sorted alphabetically by Song Title with columns for '#', 'Song Title', 'Artist', '# Sung', 'Venue(s)', 'Key / Speed', and 'Last Sung'.
+
+0C. Editing & Adding Singer Performance History ('Edit' & '➕ Add Song') and Blank-Artist / PDF Venue Consolidation:
+   - In the 'Performance History' sub-tab of both KSRotation (Users tab) and Lyracist (Users & Singers page), click 'Edit' on any song row to open the Song Performance Record editor and modify:
+     * Song Title, Artist, '# Sung' (Times Performed), Venue(s), Key, and Speed.
+     * Click '➕ Add Song' in the Performance History header to manually add a song to a singer's history.
+     * Automatic Duplicate Merging on Edit: If you edit a song's Title or Artist so it matches another row for the same singer (for example, fixing an artist typo like 'Petula Clarke' -> 'Petula Clark'), both rows automatically merge into a single record, summing '# Sung' and combining their Venue(s), and updating the saved 'Reports/*.csv' files so the typo never returns on future syncs.
+   - Automatic Blank-Artist Consolidation & Legacy Report Venue Extraction:
+     * When a song was logged once with an Artist and once with a blank Artist (e.g., 'Green Door' with 'Shakin' Stevens' and 'Green Door' with no artist), the database automatically merges the blank-artist performance into the non-empty artist row and adds their '# Sung' counts and venues together.
+     * For older 'Rotation_yyyyMMdd_HHmmss.csv' report files where the venue name was not in the filename, the report reader automatically pulls the venue name from the companion '.pdf' file's '/Title (Karaoke Rotation Report - <Venue>)' metadata or '.eml' 'Subject:' header.
+
+0D. Automatic Saved Rotation Report Synchronization & Name Consolidation:
+   - On application startup, when saving a rotation report, or when clicking '🔄 Refresh' in the Users tab, KSRotation and Lyracist automatically scan all saved rotation reports ('Reports/*.csv') and import every qualifying singer, their performed songs, exact per-song performance counts, duet partners, and the show venue into 'lyracist.db'.
+   - Seamless Name Updates (e.g., 'Bar Mike' -> 'Bar Mike Gilmore'): When a singer known by a venue nickname later gives their last name, simply edit their 'Singer Name' in the Users tab and click 'Save Changes' (or use 'Merge Duplicate...' if both profiles exist). All of their performed songs, '# Sung' performance counts, venues, audio settings, and XP points automatically consolidate under the updated name.
 
 KSRotation & Lyracist: Saved Rotations Reader Tab & Rotation Report Browser - (November 2026)
 

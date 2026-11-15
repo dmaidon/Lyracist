@@ -1,4 +1,4 @@
-<!-- Edited on Nov 13, 2026 @ 17:46:30 -> Add Saved Rotations tab and update Help topic for Saved Rotations -->
+<!-- Edited on Nov 15, 2026 @ 00:16:30 -> Update Help tab documentation for Data/singers.db, Performance History editing/printing, and Buzz My Phone alerts -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -150,6 +150,10 @@
                         <MenuItem Header="Finish Current Song"
                                   Command="{Binding Path=PlacementTarget.Tag.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="📳 Buzz Singer's Phone"
+                                  Command="{Binding Path=PlacementTarget.Tag.BuzzSingerPhoneCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  ToolTip="Send an immediate pager buzz, chime, and stage-call banner to this singer's phone (if they have the Patron Portal open)" />
                         <MenuItem Header="↩ Clear 'Last Round Done' Status"
                                   Command="{Binding Path=PlacementTarget.Tag.ClearLastRoundDoneCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -1206,6 +1210,27 @@
                                                         </Button.Style>
                                                     </Button>
 
+                                                    <Button Content="📳"
+                                                            Command="{Binding DataContext.BuzzSingerPhoneCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="34"
+                                                            Margin="0,0,6,0"
+                                                            Padding="4,2"
+                                                            ToolTip="Buzz Singer's Phone (send immediate stage-call / on-deck pager alert to their phone)">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+
                                                     <Button Command="{Binding DataContext.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                             CommandParameter="{Binding}"
                                                             Margin="0,0,6,0"
@@ -2169,8 +2194,38 @@
                                                       RowHeight="34">
                                                 <DataGrid.Resources>
                                                     <Style TargetType="DataGridColumnHeader">
-                                                        <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                        <Setter Property="Background" Value="#FF1E293B" />
+                                                        <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                        <Setter Property="FontSize" Value="12.5" />
+                                                        <Setter Property="Padding" Value="10,7" />
+                                                        <Setter Property="BorderBrush" Value="#FF334155" />
+                                                        <Setter Property="BorderThickness" Value="0,0,1,1.5" />
+                                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="DataGridColumnHeader">
+                                                                    <Border Background="{TemplateBinding Background}"
+                                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                                            Padding="{TemplateBinding Padding}"
+                                                                            SnapsToDevicePixels="True">
+                                                                        <Border.Resources>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                                            </Style>
+                                                                        </Border.Resources>
+                                                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                                          RecognizesAccessKey="True"
+                                                                                          TextElement.Foreground="#FFFFFFFF"
+                                                                                          TextElement.FontWeight="Bold" />
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
                                                     </Style>
                                                     <Style TargetType="DataGridCell">
                                                         <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
@@ -2422,6 +2477,12 @@
                                          Style="{StaticResource ModernCheckBoxStyle}"
                                          Margin="0,0,0,4"
                                          ToolTip="When enabled, patrons cannot request a song via the patron portal that has already been performed or queued in the current session." />
+                                <CheckBox
+                                         Content="Enable Patron Phone Turn Alerts (Buzz / Chime)"
+                                         IsChecked="{Binding EnablePatronTurnAlerts}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,4,0,4"
+                                         ToolTip="When enabled, patrons with 'Buzz My Phone' turned on in the Patron Portal automatically receive a phone buzz, chime, and flashing pager screen when 1 performer ahead (On Deck) and when it is their turn." />
                             </StackPanel>
                         </GroupBox>
 
@@ -3555,7 +3616,7 @@
                                 <TextBlock Text="🎤" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0" />
                                 <StackPanel>
                                     <TextBlock Text="Singer Profiles &amp; User Accounts" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <TextBlock Text="Manage performer credentials, PINs, default vocal key &amp; audio profiles, duplicate account merging, and past song history."
+                                    <TextBlock Text="Database of performers with First &amp; Last or distinct names, their performed songs, venues, audio defaults, and duplicate merging."
                                                FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
                                 </StackPanel>
                             </StackPanel>
@@ -3601,7 +3662,7 @@
                                 <Grid Grid.Row="0" Margin="0,0,0,10">
                                     <TextBox Text="{Binding UserSearchText, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource ModernTextBoxStyle}"
-                                             materialDesign:HintAssist.Hint="Search singers by name, email, or title..."
+                                             materialDesign:HintAssist.Hint="Search singers by name, venue, email, or title..."
                                              Height="36"
                                              Padding="34,0,28,0" />
                                     <!-- Search Magnify Icon -->
@@ -3676,6 +3737,8 @@
                                                             <Run Text=" · " />
                                                             <Run Text="{Binding VocalRange, Mode=OneWay}" />
                                                         </TextBlock>
+                                                        <TextBlock Text="{Binding VenuesSummary}" FontSize="10.5"
+                                                                   Foreground="#38BDF8" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
                                                     </StackPanel>
 
                                                     <!-- Level Badge -->
@@ -3792,14 +3855,22 @@
                                                     <Border Background="#1E3A5F" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding SelectedUser.Score, StringFormat='{}{0} XP'}" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8" />
                                                     </Border>
-                                                    <Border Background="#1B382B" CornerRadius="4" Padding="6,2">
+                                                    <Border Background="#1B382B" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding SelectedUser.SongsText}" FontSize="11" FontWeight="SemiBold" Foreground="#34D399" />
+                                                    </Border>
+                                                    <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                                        <TextBlock Text="{Binding SelectedUser.VenuesSummary}" FontSize="11" FontWeight="SemiBold" Foreground="#E2E8F0" TextTrimming="CharacterEllipsis" MaxWidth="260" />
                                                     </Border>
                                                 </StackPanel>
                                             </StackPanel>
 
-                                            <!-- Merge Duplicate Button -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <!-- Print History & Merge Duplicate Buttons -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="🖨️ Print History"
+                                                        Command="{Binding PrintUserHistoryCommand}"
+                                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                        Height="34" Padding="12,0" Margin="0,0,8,0"
+                                                        ToolTip="Print this singer's complete song performance history with performance counts and venues" />
                                                 <Button Content="Merge Duplicate..."
                                                         Command="{Binding OpenUserMergePopupCommand}"
                                                         Style="{StaticResource ModernButtonStyle}"
@@ -3834,8 +3905,19 @@
                                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
                                                 <StackPanel MaxWidth="620" HorizontalAlignment="Left">
                                                     <!-- Performer Name -->
-                                                    <TextBlock Text="Singer Name" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                    <TextBlock Text="Singer Name (First &amp; Last or Distinct Identifier)" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
                                                     <TextBox Text="{Binding EditUserName, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,6" Height="36" />
+                                                    <CheckBox Content="Distinct Single Name (allow a single-word stage name in the permanent singer database)"
+                                                              IsChecked="{Binding EditUserIsDistinctName, Mode=TwoWay}"
+                                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                                              FontSize="12" Margin="0,0,0,12"
+                                                              ToolTip="Keep checked if this singer performs under a unique single-word stage name. Singers with First &amp; Last names (or multi-word identifiers like 'Bar Mike' or 'Bar Mike Gilmore') qualify automatically." />
+
+                                                    <!-- Venues Performed -->
+                                                    <TextBlock Text="Venues Performed" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                    <TextBox Text="{Binding EditUserVenues, UpdateSourceTrigger=PropertyChanged}"
+                                                             materialDesign:HintAssist.Hint="e.g. Shenanigans, The Rusty Anchor (automatically updated as songs are sung)"
                                                              Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" Height="36" />
 
                                                     <!-- PIN & Email -->
@@ -3870,7 +3952,7 @@
                                                             <TextBlock Text="Vocal Range" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
                                                             <ComboBox ItemsSource="{Binding VocalRangeOptions}"
                                                                       SelectedItem="{Binding EditUserVocalRange, Mode=TwoWay}"
-                                                                      Style="{StaticResource ModernComboBoxStyle}" Height="36" />
+                                                                      Style="{StaticResource ModernComboBoxStyle}" Height="48" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2">
                                                             <TextBlock Text="Custom Title / Nickname" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
@@ -4019,14 +4101,110 @@
                                             <Grid Margin="0,10,0,0">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
 
-                                                <TextBlock Grid.Row="0"
-                                                           Text="All songs performed by this singer, with recalled key and speed settings:"
-                                                           FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+                                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="All songs performed by this singer, including times performed, venue(s), key, and speed settings:"
+                                                               FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" />
+                                                    <Button Grid.Column="1"
+                                                            Content="➕ Add Song"
+                                                            Command="{Binding StartAddUserHistoricalSongCommand}"
+                                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                            Height="28" Padding="10,0" Margin="0,0,8,0"
+                                                            ToolTip="Manually add a song performance record to this singer's history" />
+                                                    <Button Grid.Column="2"
+                                                            Content="🖨️ Print Singer History"
+                                                            Command="{Binding PrintUserHistoryCommand}"
+                                                            Style="{StaticResource ModernButtonStyle}"
+                                                            Height="28" Padding="12,0"
+                                                            ToolTip="Print this singer's complete song performance history" />
+                                                </Grid>
 
-                                                <DataGrid Grid.Row="1"
+                                                <!-- Collapsible Song History Row Editor -->
+                                                <Border Grid.Row="1"
+                                                        Visibility="{Binding IsUserHistoryEditorOpen, Converter={StaticResource BoolToVis}}"
+                                                        Background="{DynamicResource MaterialDesignCardBackground}"
+                                                        BorderBrush="#0EA5E9"
+                                                        BorderThickness="1.5"
+                                                        CornerRadius="8"
+                                                        Padding="12,10"
+                                                        Margin="0,0,0,10">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding UserHistoryEditorTitle}"
+                                                                   FontWeight="Bold"
+                                                                   FontSize="12.5"
+                                                                   Foreground="#0EA5E9"
+                                                                   Margin="0,0,0,8" />
+                                                        <Grid Margin="0,0,0,8">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="2*" />
+                                                                <ColumnDefinition Width="8" />
+                                                                <ColumnDefinition Width="1.6*" />
+                                                                <ColumnDefinition Width="8" />
+                                                                <ColumnDefinition Width="70" />
+                                                                <ColumnDefinition Width="8" />
+                                                                <ColumnDefinition Width="1.4*" />
+                                                                <ColumnDefinition Width="8" />
+                                                                <ColumnDefinition Width="60" />
+                                                                <ColumnDefinition Width="8" />
+                                                                <ColumnDefinition Width="68" />
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <StackPanel Grid.Column="0">
+                                                                <TextBlock Text="Song Title" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistorySongTitle, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="2">
+                                                                <TextBlock Text="Artist" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistoryArtist, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="4">
+                                                                <TextBlock Text="# Sung" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistoryTimesPerformed, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="6">
+                                                                <TextBlock Text="Venue(s)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistoryVenue, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="8">
+                                                                <TextBlock Text="Key" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistoryKey, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="10">
+                                                                <TextBlock Text="Speed" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
+                                                                <TextBox Text="{Binding EditUserHistoryTempo, UpdateSourceTrigger=PropertyChanged}"
+                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                            </StackPanel>
+                                                        </Grid>
+
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <Button Content="Cancel"
+                                                                    Command="{Binding CancelUserHistoricalSongEditCommand}"
+                                                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                                    Height="28" Padding="12,0" Margin="0,0,8,0" />
+                                                            <Button Content="💾 Save Song"
+                                                                    Command="{Binding SaveUserHistoricalSongCommand}"
+                                                                    Style="{StaticResource ModernButtonStyle}"
+                                                                    FontWeight="SemiBold"
+                                                                    Height="28" Padding="14,0" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <DataGrid Grid.Row="2"
                                                           ItemsSource="{Binding UserPerformanceHistory}"
                                                           AutoGenerateColumns="False"
                                                           CanUserAddRows="False"
@@ -4041,8 +4219,38 @@
                                                           RowHeight="36">
                                                     <DataGrid.Resources>
                                                         <Style TargetType="DataGridColumnHeader">
-                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                                            <Setter Property="Background" Value="#FF1E293B" />
+                                                            <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                            <Setter Property="FontWeight" Value="Bold" />
+                                                            <Setter Property="FontSize" Value="12.5" />
+                                                            <Setter Property="Padding" Value="10,7" />
+                                                            <Setter Property="BorderBrush" Value="#FF334155" />
+                                                            <Setter Property="BorderThickness" Value="0,0,1,1.5" />
+                                                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                                                        <Border Background="{TemplateBinding Background}"
+                                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                Padding="{TemplateBinding Padding}"
+                                                                                SnapsToDevicePixels="True">
+                                                                            <Border.Resources>
+                                                                                <Style TargetType="TextBlock">
+                                                                                    <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                                                </Style>
+                                                                            </Border.Resources>
+                                                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                                              RecognizesAccessKey="True"
+                                                                                              TextElement.Foreground="#FFFFFFFF"
+                                                                                              TextElement.FontWeight="Bold" />
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
                                                         </Style>
                                                         <Style TargetType="DataGridCell">
                                                             <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
@@ -4053,22 +4261,31 @@
                                                     </DataGrid.Resources>
                                                     <DataGrid.Columns>
                                                         <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
-                                                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="150" />
-                                                        <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="60" />
-                                                        <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="70" />
-                                                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="80" />
-                                                        <DataGridTextColumn Header="Date &amp; Time" Binding="{Binding FormattedDate}" Width="160" />
-                                                        <DataGridTemplateColumn Header="Actions" Width="170">
+                                                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="130" />
+                                                        <DataGridTextColumn Header="# Sung" Binding="{Binding FormattedTimesPerformed}" Width="60" />
+                                                        <DataGridTextColumn Header="Venue" Binding="{Binding DisplayVenue}" Width="130" />
+                                                        <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="45" />
+                                                        <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="55" />
+                                                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="65" />
+                                                        <DataGridTextColumn Header="Date &amp; Time" Binding="{Binding FormattedDate}" Width="135" />
+                                                        <DataGridTemplateColumn Header="Actions" Width="210">
                                                             <DataGridTemplateColumn.CellTemplate>
                                                                 <DataTemplate>
                                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                                         <Button Content="Queue"
                                                                                 Style="{StaticResource ModernButtonStyle}"
                                                                                 Height="26" Padding="8,0"
-                                                                                Margin="0,0,6,0"
+                                                                                Margin="0,0,5,0"
                                                                                 Command="{Binding DataContext.QueueUserHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                                 CommandParameter="{Binding}"
                                                                                 ToolTip="Queue this song into the active rotation" />
+                                                                        <Button Content="Edit"
+                                                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                                                Height="26" Padding="8,0"
+                                                                                Margin="0,0,5,0"
+                                                                                Command="{Binding DataContext.EditUserHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                                CommandParameter="{Binding}"
+                                                                                ToolTip="Edit song title, artist, times performed, venue, key, or speed" />
                                                                         <Button Content="Remove"
                                                                                 Style="{StaticResource ModernSecondaryButtonStyle}"
                                                                                 Height="26" Padding="8,0"
@@ -5138,10 +5355,17 @@
                                     <TextBlock Text="Auto-accept incoming requests: Checkbox above the Incoming Requests list. When checked, patron requests skip the pending queue entirely and are added straight into the rotation the moment they come in. Also right-click any singer and select '🎃 Scaryoke: Set Category Manually...', click their '🎃 {Category}' badge, or use the 'Manual:' bar in Scaryoke Controller (and '📌 Set' on dj.html) to assign, change, or clear a category without spinning the wheel (each category uses a distinct color from the 12-color palette)." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
 
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="📳 Buzz Singer's Phone &amp; 2-Stage Patron Turn Alerts: Patrons can enable '📳 Buzz My Phone When I'm Up' on PatronPortal.html (or tap '🔔 Watch' on their row) to receive automatic phone vibration, Web Audio chime, and flashing pager alerts when they are On Deck (1 performer ahead) and when it is Their Turn Now. Click the '📳' button on any singer row (or right-click -> '📳 Buzz Singer's Phone') to manually page a performer's phone on demand." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="💾 Saving Reports &amp; Saved Rotations Tab" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="Clicking 'Save' writes a CSV and PDF report of the night's performance (`[Venue] - MMMddyy.csv` / `.pdf`) to the 'Reports' directory. Open the 'Saved Rotations' tab (right beside 'Rotation') to browse all past shows, search by venue/date/singer/song, inspect grouped singer cards &amp; round histories or the full CSV table, open companion PDF/CSV reports, or click '➕ Load Singers to Rotation' to re-import singers from a saved show into tonight's queue." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="💾 Saving Reports, Saved Rotations Tab &amp; Dedicated Singers Database (Data\singers.db)" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Clicking 'Save' writes a CSV and PDF report of the night's performance (`[Venue] - MMMddyy.csv` / `.pdf`) to the 'Reports' directory. Open the 'Saved Rotations' tab to browse all past shows, or open the 'Users' tab to manage performer profiles, vocal/EQ settings, and song performance history (stored in a dedicated `Data\singers.db` database separate from `lyracist.db`), including '# Sung' counts, Venues, 'Edit' / '➕ Add Song', and '🖨️ Print History'." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

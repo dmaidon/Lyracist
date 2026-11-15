@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:18:00 -> Broadcast EmojiReactionTheme updates to mobile portal clients
+// Edited on Nov 14, 2026 @ 13:35:00 -> Add patron phone turn alert settings, recent buzz events, and SignalR buzz broadcast
 using System;
 using System.IO;
 using System.Linq;
@@ -47,6 +47,17 @@ public class TabletLyricsServer(
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> _ratedTokens = new();
     private string _lastRatedPerformanceKey = string.Empty;
     private readonly SemaphoreSlim _ratingLock = new(1, 1);
+
+    public sealed record PatronBuzzEventDto(
+        string Id,
+        string SingerName,
+        string DuetPartnerName,
+        string Song,
+        string Artist,
+        string Level);
+
+    private readonly object _buzzEventsLock = new();
+    private readonly List<(DateTime CreatedUtc, PatronBuzzEventDto Event)> _recentBuzzEvents = [];
 
     private const string MobilePortalWritePolicy = "mobile-portal-write";
     private const string MobilePortalSearchPolicy = "mobile-portal-search";
@@ -178,10 +189,13 @@ public class TabletLyricsServer(
             _webApp.UseRateLimiter();
 
             _rotation.Rotation.CollectionChanged += OnRotationChanged;
+            _rotation.RotationStateChanged += OnRotationStateChanged;
+            _rotation.SingerPhoneBuzzed += OnSingerPhoneBuzzed;
             _karaoke.PropertyChanged += OnKaraokePropertyChanged;
             _scaryokeWindow.SpinStarted += OnScaryokeSpinStarted;
             _scaryokeWindow.SpinCompleted += OnScaryokeSpinCompleted;
             Lyracist.Core.Helpers.AppSettings.EmojiReactionThemeChanged += OnEmojiReactionThemeChanged;
+            Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlertsChanged += OnEnablePatronTurnAlertsChanged;
 
             _webApp.MapHub<LyricsHub>("/lyricsHub");
 
@@ -692,7 +706,9 @@ public class TabletLyricsServer(
         app.MapGet("/api/scaryoke/enabled", () => Results.Json(new
         {
             enabled = _karaoke.IsScaryokeMode,
-            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
+            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme,
+            enablePatronTurnAlerts = Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlerts,
+            recentBuzzEvents = GetRecentBuzzEventsSnapshot()
         }));
 
         app.MapGet("/api/scaryoke/categories", () =>
@@ -1004,17 +1020,23 @@ public class TabletLyricsServer(
             isPaused = s.IsPaused,
             isSkipped = s.IsSkipped,
             isSpecial = s.IsSpecial,
-            isInactive = s.IsInactive
+            isInactive = s.IsInactive,
+            isMusic = s.IsMusic,
+            completedCount = s.CompletedCount,
+            estimatedWaitMinutes = s.EstimatedWaitMinutes
         }).ToList();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         _rotation.Rotation.CollectionChanged -= OnRotationChanged;
+        _rotation.RotationStateChanged -= OnRotationStateChanged;
+        _rotation.SingerPhoneBuzzed -= OnSingerPhoneBuzzed;
         _karaoke.PropertyChanged -= OnKaraokePropertyChanged;
         _scaryokeWindow.SpinStarted -= OnScaryokeSpinStarted;
         _scaryokeWindow.SpinCompleted -= OnScaryokeSpinCompleted;
         Lyracist.Core.Helpers.AppSettings.EmojiReactionThemeChanged -= OnEmojiReactionThemeChanged;
+        Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlertsChanged -= OnEnablePatronTurnAlertsChanged;
 
         if (_cts != null)
         {
@@ -1098,6 +1120,93 @@ public class TabletLyricsServer(
         _ = BroadcastQueueAsync();
     }
 
+    private void OnRotationStateChanged()
+    {
+        _ = BroadcastQueueAsync();
+    }
+
+    private void OnSingerPhoneBuzzed(Singer singer)
+    {
+        RecordAndBroadcastSingerBuzz(singer);
+    }
+
+    private void OnEnablePatronTurnAlertsChanged(bool enabled)
+    {
+        _ = BroadcastTurnAlertsSettingAsync(enabled);
+    }
+
+    private PatronBuzzEventDto[] GetRecentBuzzEventsSnapshot()
+    {
+        if (!Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlerts)
+        {
+            return [];
+        }
+
+        var cutoff = DateTime.UtcNow.AddSeconds(-15);
+        lock (_buzzEventsLock)
+        {
+            _recentBuzzEvents.RemoveAll(x => x.CreatedUtc < cutoff);
+            return _recentBuzzEvents.Select(x => x.Event).ToArray();
+        }
+    }
+
+    private void RecordAndBroadcastSingerBuzz(Singer singer)
+    {
+        string level = singer.IsCurrent ? "now" : (singer.IsNext ? "next" : "call");
+        var buzzEvent = new PatronBuzzEventDto(
+            Guid.NewGuid().ToString("N"),
+            singer.Name ?? string.Empty,
+            singer.DuetPartnerName ?? string.Empty,
+            singer.SongTitle ?? string.Empty,
+            singer.Artist ?? string.Empty,
+            level);
+
+        var now = DateTime.UtcNow;
+        lock (_buzzEventsLock)
+        {
+            _recentBuzzEvents.RemoveAll(x => (now - x.CreatedUtc).TotalSeconds > 15);
+            _recentBuzzEvents.Add((now, buzzEvent));
+        }
+
+        _ = BroadcastSingerBuzzAsync(buzzEvent);
+    }
+
+    private async Task BroadcastSingerBuzzAsync(PatronBuzzEventDto buzzEvent)
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("PatronBuzzAlert", new
+            {
+                id = buzzEvent.Id,
+                singerName = buzzEvent.SingerName,
+                duetPartnerName = buzzEvent.DuetPartnerName,
+                song = buzzEvent.Song,
+                artist = buzzEvent.Artist,
+                level = buzzEvent.Level
+            });
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting patron buzz alert", ex);
+        }
+    }
+
+    private async Task BroadcastTurnAlertsSettingAsync(bool enabled)
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("PatronTurnAlertsSettingChanged", enabled);
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting turn alerts setting", ex);
+        }
+    }
+
     private void OnKaraokePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(KaraokeViewModel.NowSingingName) ||
@@ -1166,7 +1275,8 @@ public class TabletLyricsServer(
                 avgRating = avgRating,
                 isRatingSystemEnabled = Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled,
                 ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol,
-                emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
+                emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme,
+                enablePatronTurnAlerts = Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlerts
             });
         }
         catch (Exception ex)

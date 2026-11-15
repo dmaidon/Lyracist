@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:19:00 -> Add 7 performer vibe emoji sets and DJ Show Theme override to mobile portal -->
+<!-- Edited on Nov 14, 2026 @ 13:36:00 -> Add 2-stage Buzz My Phone turn alerts, pager modal, watch button, and chime/vibration -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -515,6 +515,238 @@
             .reaction-btn:active {
                 transform: scale(0.9);
             }
+
+        /* Turn Alert ("Buzz My Phone") Card & Full-Screen Pager Modal */
+        .turn-alert-card {
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: linear-gradient(145deg, rgba(14, 116, 144, 0.16), rgba(22, 22, 30, 0.95));
+            padding: 14px 16px;
+        }
+        .turn-alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .turn-alert-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .turn-alert-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .turn-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .turn-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .turn-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #2d2d3d;
+            transition: .25s;
+            border-radius: 999px;
+        }
+        .turn-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .25s;
+            border-radius: 50%;
+        }
+        .turn-switch input:checked + .turn-slider {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .turn-switch input:checked + .turn-slider:before {
+            transform: translateX(20px);
+        }
+        .turn-alert-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .turn-alert-controls input {
+            flex: 1;
+            padding: 9px 11px;
+            font-size: 13px;
+        }
+        .btn-turn-test {
+            width: auto;
+            padding: 9px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            background: rgba(2, 132, 199, 0.22);
+            color: #e0f2fe;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .turn-status-pill {
+            margin-top: 8px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid #22222f;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .watch-row-btn {
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #7dd3fc;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .watch-row-btn.watching {
+            background: rgba(16, 185, 129, 0.22);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        /* Full-Screen Flashing Turn Pager Modal */
+        .turn-pager-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+        .turn-pager-overlay.active {
+            display: flex;
+        }
+        .turn-pager-overlay.mode-next {
+            animation: pagerFlashAmber 1s infinite alternate;
+        }
+        .turn-pager-overlay.mode-now {
+            animation: pagerFlashGreen 0.75s infinite alternate;
+        }
+        @keyframes pagerFlashAmber {
+            0% { background: rgba(120, 53, 15, 0.94); }
+            100% { background: rgba(15, 23, 42, 0.96); }
+        }
+        @keyframes pagerFlashGreen {
+            0% { background: rgba(6, 95, 70, 0.95); }
+            100% { background: rgba(15, 23, 42, 0.96); }
+        }
+        .turn-pager-card {
+            width: 100%;
+            max-width: 390px;
+            background: #111827;
+            border: 3px solid #f59e0b;
+            border-radius: 22px;
+            padding: 28px 22px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+        }
+        .turn-pager-overlay.mode-now .turn-pager-card {
+            border-color: #10b981;
+        }
+        .turn-pager-icon {
+            font-size: 56px;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pagerBounce 0.6s infinite alternate;
+        }
+        @keyframes pagerBounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.18); }
+        }
+        .turn-pager-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(245, 158, 11, 0.22);
+            color: #fcd34d;
+            margin-bottom: 10px;
+        }
+        .turn-pager-overlay.mode-now .turn-pager-badge {
+            background: rgba(16, 185, 129, 0.25);
+            color: #6ee7b7;
+        }
+        .turn-pager-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .turn-pager-subtitle {
+            font-size: 14px;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        .turn-pager-songbox {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .turn-pager-song {
+            font-size: 16px;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+        .turn-pager-artist {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .turn-pager-dismiss {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 900;
+            color: #0f172a;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+        }
+        .turn-pager-overlay.mode-now .turn-pager-dismiss {
+            color: #ffffff;
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        }
     </style>
 </head>
 <body>
@@ -565,6 +797,29 @@
                     <span class="banner-label banner-label-next">Next Up</span>
                     <span id="next-name" class="banner-name">None</span>
                     <span id="next-song" class="banner-song">No Song Loaded</span>
+                </div>
+            </div>
+
+            <!-- Buzz My Phone Turn Alert Card -->
+            <div id="turn-alert-card" class="card turn-alert-card">
+                <div class="turn-alert-header">
+                    <div>
+                        <div class="turn-alert-title">📳 Buzz My Phone When I'm Up</div>
+                        <div class="turn-alert-sub">Alerts you when you're On Deck (1 ahead) &amp; when it's your turn!</div>
+                    </div>
+                    <label class="turn-switch" title="Enable or disable phone turn alerts">
+                        <input type="checkbox" id="turn-alert-toggle" onchange="onTurnAlertToggleChanged(this.checked)" />
+                        <span class="turn-slider"></span>
+                    </label>
+                </div>
+                <div id="turn-alert-body" style="display: none;">
+                    <div class="turn-alert-controls">
+                        <input type="text" id="turn-alert-name-input" placeholder="Singer name to watch..." oninput="onWatchedSingerInputChanged(this.value)" />
+                        <button type="button" class="btn-turn-test" onclick="testTurnAlert('next')">📳 Test</button>
+                    </div>
+                    <div id="turn-alert-status-pill" class="turn-status-pill">
+                        <span id="turn-alert-status-text">Watching rotation for your turn...</span>
+                    </div>
                 </div>
             </div>
 
@@ -731,6 +986,21 @@
         </div>
     </div>
 
+    <!-- Full-Screen Turn Alert Pager Modal -->
+    <div id="turn-pager-modal" class="turn-pager-overlay" onclick="dismissTurnPagerModal()">
+        <div class="turn-pager-card" onclick="event.stopPropagation()">
+            <div id="turn-pager-icon" class="turn-pager-icon">🔔</div>
+            <div id="turn-pager-badge" class="turn-pager-badge">ON DECK — 1 AHEAD</div>
+            <div id="turn-pager-title" class="turn-pager-title">YOU'RE UP NEXT!</div>
+            <div id="turn-pager-subtitle" class="turn-pager-subtitle">You are On Deck (1 performer ahead) — get ready!</div>
+            <div class="turn-pager-songbox">
+                <div id="turn-pager-song" class="turn-pager-song">Song Title</div>
+                <div id="turn-pager-artist" class="turn-pager-artist">Artist</div>
+            </div>
+            <button id="turn-pager-dismiss-btn" type="button" class="turn-pager-dismiss" onclick="dismissTurnPagerModal()">👍 Got It — I'm Ready!</button>
+        </div>
+    </div>
+
     <script>
         let singerName = "";
         let currentPerformerName = "None";
@@ -810,6 +1080,7 @@
             document.getElementById("dashboard-screen").style.display = "block";
             document.getElementById("display-name").textContent = singerName;
 
+            initTurnAlertsUi();
             renderReactionCard();
             checkScaryokeAvailability();
 
@@ -826,6 +1097,9 @@
                 connection.on("ActiveSingerUpdated", (active) => {
                     if (active && active.emojiReactionTheme) {
                         applyServerEmojiTheme(active.emojiReactionTheme);
+                    }
+                    if (active && typeof active.enablePatronTurnAlerts === 'boolean') {
+                        setServerTurnAlertsEnabled(active.enablePatronTurnAlerts);
                     }
                     const showRating = active.isRatingSystemEnabled && active.avgRating > 0;
                     const symbol = active.ratingSymbol || "⭐";
@@ -895,6 +1169,14 @@
                     applyServerEmojiTheme(themeKey);
                 });
 
+                connection.on("PatronBuzzAlert", (buzzEvent) => {
+                    handleIncomingBuzzEvent(buzzEvent);
+                });
+
+                connection.on("PatronTurnAlertsSettingChanged", (enabled) => {
+                    setServerTurnAlertsEnabled(enabled);
+                });
+
                 connection.start().then(() => {
                     console.log("SignalR connected!");
                 }).catch(err => {
@@ -921,6 +1203,12 @@
                     setScaryokeTabVisible(data.enabled);
                     if (data.emojiReactionTheme) {
                         applyServerEmojiTheme(data.emojiReactionTheme);
+                    }
+                    if (typeof data.enablePatronTurnAlerts === 'boolean') {
+                        setServerTurnAlertsEnabled(data.enablePatronTurnAlerts);
+                    }
+                    if (Array.isArray(data.recentBuzzEvents)) {
+                        data.recentBuzzEvents.forEach(ev => handleIncomingBuzzEvent(ev));
                     }
                 }
             } catch (err) {
@@ -1000,42 +1288,404 @@
             }
         }
 
+        let latestQueueSnapshot = [];
+        let serverTurnAlertsEnabled = true;
+        let patronTurnAlertsEnabled = false;
+        let watchedSingerName = "";
+        let lastTurnAlertState = "idle"; // "idle" | "next" | "now"
+        let lastTurnAlertPerfKey = "";
+        let turnAlertPollTimer = null;
+        let pagerRepeatTimer = null;
+        let turnAudioCtx = null;
+        let wakeLockSentinel = null;
+        const seenBuzzEventIds = new Set();
+
+        function initTurnAlertsUi() {
+            try {
+                const savedEnabled = localStorage.getItem("lyracist_turn_alert_enabled");
+                patronTurnAlertsEnabled = savedEnabled === null ? true : savedEnabled === "true";
+                const savedWatchName = localStorage.getItem("lyracist_watched_singer");
+                watchedSingerName = (savedWatchName && savedWatchName.trim()) ? savedWatchName.trim() : (singerName || "");
+            } catch (e) {
+                patronTurnAlertsEnabled = true;
+                watchedSingerName = singerName || "";
+            }
+            if (!watchedSingerName && singerName) {
+                watchedSingerName = singerName;
+            }
+            const toggleEl = document.getElementById("turn-alert-toggle");
+            if (toggleEl) toggleEl.checked = patronTurnAlertsEnabled;
+            const inputEl = document.getElementById("turn-alert-name-input");
+            if (inputEl) inputEl.value = watchedSingerName;
+
+            updateTurnAlertCardVisibility();
+            ensureTurnAlertPolling();
+        }
+
+        function setServerTurnAlertsEnabled(enabled) {
+            serverTurnAlertsEnabled = !!enabled;
+            updateTurnAlertCardVisibility();
+            if (!serverTurnAlertsEnabled) {
+                dismissTurnPagerModal();
+            }
+        }
+
+        function updateTurnAlertCardVisibility() {
+            const cardEl = document.getElementById("turn-alert-card");
+            const bodyEl = document.getElementById("turn-alert-body");
+            if (!cardEl || !bodyEl) return;
+            cardEl.style.display = serverTurnAlertsEnabled ? "block" : "none";
+            bodyEl.style.display = patronTurnAlertsEnabled ? "block" : "none";
+        }
+
+        function onTurnAlertToggleChanged(enabled) {
+            patronTurnAlertsEnabled = !!enabled;
+            try { localStorage.setItem("lyracist_turn_alert_enabled", patronTurnAlertsEnabled ? "true" : "false"); } catch (e) { }
+            if (patronTurnAlertsEnabled) {
+                if (!watchedSingerName && singerName) {
+                    watchedSingerName = singerName;
+                    const inputEl = document.getElementById("turn-alert-name-input");
+                    if (inputEl) inputEl.value = watchedSingerName;
+                }
+                unlockTurnAlertAudioAndWakeLock();
+                lastTurnAlertState = "idle";
+                evaluateTurnAlerts(latestQueueSnapshot);
+            } else {
+                releaseTurnWakeLock();
+                dismissTurnPagerModal();
+            }
+            updateTurnAlertCardVisibility();
+            ensureTurnAlertPolling();
+            if (latestQueueSnapshot.length > 0) renderQueue(latestQueueSnapshot);
+        }
+
+        function onWatchedSingerInputChanged(val) {
+            watchedSingerName = (val || "").trim();
+            try { localStorage.setItem("lyracist_watched_singer", watchedSingerName); } catch (e) { }
+            lastTurnAlertState = "idle";
+            evaluateTurnAlerts(latestQueueSnapshot);
+        }
+
+        function watchSingerFromRow(name) {
+            if (!name) return;
+            watchedSingerName = name.trim();
+            patronTurnAlertsEnabled = true;
+            try {
+                localStorage.setItem("lyracist_watched_singer", watchedSingerName);
+                localStorage.setItem("lyracist_turn_alert_enabled", "true");
+            } catch (e) { }
+            const toggleEl = document.getElementById("turn-alert-toggle");
+            if (toggleEl) toggleEl.checked = true;
+            const inputEl = document.getElementById("turn-alert-name-input");
+            if (inputEl) inputEl.value = watchedSingerName;
+
+            unlockTurnAlertAudioAndWakeLock();
+            updateTurnAlertCardVisibility();
+            ensureTurnAlertPolling();
+            lastTurnAlertState = "idle";
+            renderQueue(latestQueueSnapshot);
+        }
+
+        function ensureTurnAlertPolling() {
+            if (turnAlertPollTimer) {
+                clearInterval(turnAlertPollTimer);
+                turnAlertPollTimer = null;
+            }
+            if (patronTurnAlertsEnabled && serverTurnAlertsEnabled) {
+                turnAlertPollTimer = setInterval(() => {
+                    refreshQueue();
+                    checkScaryokeAvailability();
+                }, 4000);
+            }
+        }
+
+        async function unlockTurnAlertAudioAndWakeLock() {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    if (!turnAudioCtx) turnAudioCtx = new AudioContextClass();
+                    if (turnAudioCtx.state === "suspended") await turnAudioCtx.resume();
+                }
+            } catch (e) { }
+            try {
+                if ('wakeLock' in navigator && !wakeLockSentinel && patronTurnAlertsEnabled) {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+                }
+            } catch (e) { }
+        }
+
+        function releaseTurnWakeLock() {
+            if (wakeLockSentinel) {
+                try { wakeLockSentinel.release(); } catch (e) { }
+                wakeLockSentinel = null;
+            }
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible" && patronTurnAlertsEnabled) {
+                unlockTurnAlertAudioAndWakeLock();
+                refreshQueue();
+                checkScaryokeAvailability();
+            }
+        });
+
+        function playTurnChime(level) {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+                if (!turnAudioCtx) turnAudioCtx = new AudioContextClass();
+                if (turnAudioCtx.state === "suspended") turnAudioCtx.resume();
+
+                const notes = level === "now"
+                    ? [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50]
+                    : [440.00, 554.37, 659.25, 880.00, 659.25];
+                const step = level === "now" ? 0.14 : 0.15;
+                const now = turnAudioCtx.currentTime;
+
+                notes.forEach((freq, idx) => {
+                    const osc = turnAudioCtx.createOscillator();
+                    const gain = turnAudioCtx.createGain();
+                    osc.type = level === "now" ? "triangle" : "sine";
+                    osc.frequency.setValueAtTime(freq, now + idx * step);
+
+                    gain.gain.setValueAtTime(0.001, now + idx * step);
+                    gain.gain.exponentialRampToValueAtTime(0.32, now + idx * step + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * step + step * 0.95);
+
+                    osc.connect(gain);
+                    gain.connect(turnAudioCtx.destination);
+                    osc.start(now + idx * step);
+                    osc.stop(now + idx * step + step);
+                });
+            } catch (e) { }
+        }
+
+        function triggerTurnVibration(level) {
+            try {
+                if (navigator.vibrate) {
+                    if (level === "now") {
+                        navigator.vibrate([500, 150, 500, 150, 700, 200, 500]);
+                    } else {
+                        navigator.vibrate([300, 150, 300, 150, 300]);
+                    }
+                }
+            } catch (e) { }
+        }
+
+        function triggerTurnPagerModal(level, displayName, songTitle, artistName, isManualCall) {
+            if (!serverTurnAlertsEnabled || !patronTurnAlertsEnabled) return;
+
+            const modal = document.getElementById("turn-pager-modal");
+            const iconEl = document.getElementById("turn-pager-icon");
+            const badgeEl = document.getElementById("turn-pager-badge");
+            const titleEl = document.getElementById("turn-pager-title");
+            const subEl = document.getElementById("turn-pager-subtitle");
+            const songEl = document.getElementById("turn-pager-song");
+            const artistEl = document.getElementById("turn-pager-artist");
+            const dismissBtn = document.getElementById("turn-pager-dismiss-btn");
+            if (!modal) return;
+
+            const isNow = level === "now" || level === "call";
+            modal.classList.remove("mode-next", "mode-now");
+            modal.classList.add(isNow ? "mode-now" : "mode-next");
+
+            const who = (displayName || watchedSingerName || singerName || "Singer").toUpperCase();
+            if (isNow) {
+                iconEl.textContent = "🎤";
+                badgeEl.textContent = isManualCall ? "DJ STAGE CALL" : "STAGE CALL — NOW SINGING";
+                titleEl.textContent = `IT'S YOUR TURN, ${who}!`;
+                subEl.textContent = isManualCall
+                    ? "The DJ is paging you to the stage right now!"
+                    : "Head to the stage now — your song is up!";
+                dismissBtn.textContent = "🎤 On My Way!";
+            } else {
+                iconEl.textContent = "🔔";
+                badgeEl.textContent = "ON DECK — 1 PERFORMER AHEAD";
+                titleEl.textContent = `YOU'RE UP NEXT, ${who}!`;
+                subEl.textContent = "You are On Deck (1 performer ahead) — get ready!";
+                dismissBtn.textContent = "👍 Got It — I'm Ready!";
+            }
+
+            songEl.textContent = songTitle || "Song Selected at Stage";
+            artistEl.textContent = artistName || "Karaoke Rotation";
+
+            modal.classList.add("active");
+            triggerTurnVibration(isNow ? "now" : "next");
+            playTurnChime(isNow ? "now" : "next");
+
+            if (pagerRepeatTimer) {
+                clearInterval(pagerRepeatTimer);
+                pagerRepeatTimer = null;
+            }
+            if (isNow) {
+                let repeats = 0;
+                pagerRepeatTimer = setInterval(() => {
+                    repeats++;
+                    if (repeats >= 2 || !modal.classList.contains("active")) {
+                        clearInterval(pagerRepeatTimer);
+                        pagerRepeatTimer = null;
+                        return;
+                    }
+                    triggerTurnVibration("now");
+                    playTurnChime("now");
+                }, 4200);
+            }
+        }
+
+        function dismissTurnPagerModal() {
+            const modal = document.getElementById("turn-pager-modal");
+            if (modal) modal.classList.remove("active");
+            if (pagerRepeatTimer) {
+                clearInterval(pagerRepeatTimer);
+                pagerRepeatTimer = null;
+            }
+            try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) { }
+        }
+
+        function testTurnAlert(level) {
+            unlockTurnAlertAudioAndWakeLock();
+            const who = watchedSingerName || singerName || "Singer";
+            triggerTurnPagerModal(level || "next", who, "Don't Stop Believin'", "Journey (Test Alert)", false);
+        }
+
+        function matchesWatchedSinger(entry, targetName) {
+            if (!entry || !targetName) return false;
+            const normTarget = targetName.trim().toLowerCase();
+            if (!normTarget) return false;
+            const primary = (entry.name || "").trim().toLowerCase();
+            const partner = (entry.duetPartnerName || entry.partner || "").trim().toLowerCase();
+            return primary === normTarget || partner === normTarget;
+        }
+
+        function handleIncomingBuzzEvent(ev) {
+            if (!ev || !ev.id) return;
+            if (seenBuzzEventIds.has(ev.id)) return;
+            seenBuzzEventIds.add(ev.id);
+
+            if (!serverTurnAlertsEnabled || !patronTurnAlertsEnabled) return;
+            const target = (watchedSingerName || singerName || "").trim();
+            if (!target) return;
+
+            const fakeEntry = {
+                name: ev.singerName || "",
+                duetPartnerName: ev.duetPartnerName || ""
+            };
+            if (matchesWatchedSinger(fakeEntry, target)) {
+                triggerTurnPagerModal(
+                    ev.level === "next" ? "next" : "now",
+                    target,
+                    ev.song || "Your Requested Song",
+                    ev.artist || "DJ Stage Call",
+                    true);
+            }
+        }
+
+        function evaluateTurnAlerts(queue) {
+            const statusTextEl = document.getElementById("turn-alert-status-text");
+            if (!statusTextEl) return;
+
+            const target = (watchedSingerName || singerName || "").trim();
+            if (!target) {
+                statusTextEl.textContent = "Enter your name above to get buzzed when you're up.";
+                return;
+            }
+
+            if (!Array.isArray(queue) || queue.length === 0) {
+                statusTextEl.textContent = `Watching for "${target}" — rotation is currently empty.`;
+                lastTurnAlertState = "idle";
+                return;
+            }
+
+            const activeQueue = queue.filter(s => !s.isPaused && !s.isSkipped && !s.isInactive && !s.isMusic);
+            const currentIdx = activeQueue.findIndex(s => s.isCurrent);
+            const effectiveCurrentIdx = currentIdx >= 0 ? currentIdx : 0;
+
+            const matchIdx = activeQueue.findIndex(s => matchesWatchedSinger(s, target));
+            if (matchIdx === -1) {
+                statusTextEl.textContent = `Watching for "${target}" — not in active rotation yet.`;
+                lastTurnAlertState = "idle";
+                return;
+            }
+
+            const matchedEntry = activeQueue[matchIdx];
+            const songLabel = matchedEntry.songTitle || matchedEntry.song || "Song TBD";
+            const artistLabel = matchedEntry.artist || "";
+            const perfKey = `${matchedEntry.name || ""}:${songLabel}:${matchedEntry.completedCount || 0}`;
+
+            const isNow = !!matchedEntry.isCurrent || matchIdx === effectiveCurrentIdx;
+            const isNext = !isNow && (!!matchedEntry.isNext || matchIdx === effectiveCurrentIdx + 1);
+
+            if (isNow) {
+                statusTextEl.innerHTML = `<span style="color:#10b981;">🎤 IT'S YOUR TURN NOW! Head to the stage!</span>`;
+                if (lastTurnAlertState !== "now" || lastTurnAlertPerfKey !== perfKey) {
+                    lastTurnAlertState = "now";
+                    lastTurnAlertPerfKey = perfKey;
+                    triggerTurnPagerModal("now", target, songLabel, artistLabel, false);
+                }
+            } else if (isNext) {
+                statusTextEl.innerHTML = `<span style="color:#f59e0b;">🔔 YOU'RE UP NEXT (On Deck — 1 ahead)!</span>`;
+                if (lastTurnAlertState === "idle" || (lastTurnAlertState !== "next" && lastTurnAlertState !== "now") || lastTurnAlertPerfKey !== perfKey) {
+                    lastTurnAlertState = "next";
+                    lastTurnAlertPerfKey = perfKey;
+                    triggerTurnPagerModal("next", target, songLabel, artistLabel, false);
+                }
+            } else {
+                const ahead = matchIdx > effectiveCurrentIdx
+                    ? (matchIdx - effectiveCurrentIdx)
+                    : (activeQueue.length - effectiveCurrentIdx + matchIdx);
+                const waitSuffix = matchedEntry.estimatedWaitMinutes > 0 ? ` (~${matchedEntry.estimatedWaitMinutes}m wait)` : "";
+                statusTextEl.textContent = `Watching "${target}" — ${ahead} performer${ahead === 1 ? "" : "s"} ahead${waitSuffix}`;
+                lastTurnAlertState = "idle";
+            }
+        }
+
         function renderQueue(queue) {
-            const nowSinging = queue[0];
-            const nextUp = queue[1];
+            latestQueueSnapshot = Array.isArray(queue) ? queue : [];
+            const nowSinging = latestQueueSnapshot.find(x => x.isCurrent) || latestQueueSnapshot[0];
+            const nextUp = latestQueueSnapshot.find(x => x.isNext) || latestQueueSnapshot[1];
 
             document.getElementById("now-name").textContent = nowSinging ? nowSinging.name : "None";
-            document.getElementById("now-song").textContent = nowSinging ? `${nowSinging.artist} - ${nowSinging.songTitle}` : "No Song Loaded";
+            document.getElementById("now-song").textContent = nowSinging ? `${nowSinging.artist} - ${nowSinging.songTitle || nowSinging.song || ""}` : "No Song Loaded";
 
             currentPerformerName = nowSinging ? nowSinging.name : "None";
             updateScaryokeSpinPermission();
 
             document.getElementById("next-name").textContent = nextUp ? nextUp.name : "None";
-            document.getElementById("next-song").textContent = nextUp ? `${nextUp.artist} - ${nextUp.songTitle}` : "No Song Loaded";
+            document.getElementById("next-song").textContent = nextUp ? `${nextUp.artist} - ${nextUp.songTitle || nextUp.song || ""}` : "No Song Loaded";
+
+            evaluateTurnAlerts(latestQueueSnapshot);
 
             const container = document.getElementById("queue-list");
-            if (queue.length === 0) {
+            if (latestQueueSnapshot.length === 0) {
                 container.innerHTML = '<div class="no-data">No performers in queue yet. Be the first!</div>';
                 return;
             }
 
+            const targetWatch = (watchedSingerName || singerName || "").trim().toLowerCase();
             let html = "";
-            queue.forEach((item, idx) => {
+            latestQueueSnapshot.forEach((item, idx) => {
                 const badgeClass = `badge badge-${(item.source || "local").toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
                 const startBadge = item.isRotationStart ? `<span class="badge badge-1st" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>` : "";
                 const itemClass = item.isRotationStart ? "queue-item rotation-start" : "queue-item";
+                const isWatched = patronTurnAlertsEnabled && !!targetWatch && matchesWatchedSinger(item, targetWatch);
+                const watchBtnHtml = serverTurnAlertsEnabled
+                    ? `<button type="button" class="watch-row-btn${isWatched ? ' watching' : ''}" onclick="watchSingerFromRow(${JSON.stringify(item.name || '')})">${isWatched ? '🔔 Watching' : '🔔 Watch'}</button>`
+                    : "";
+                const partnerText = (item.duetPartnerName || item.partner) ? ` &amp; ${escapeHtml(item.duetPartnerName || item.partner)}` : "";
                 html += `
                             <div class="${itemClass}">
                                 <div style="display: flex; align-items: center; overflow: hidden; width: 100%;">
                                     <span class="queue-index">${idx + 1}</span>
                                     <div class="queue-details">
                                         <div class="queue-singer">
-                                            ${escapeHtml(item.name)}
+                                            ${escapeHtml(item.name)}${partnerText}
                                             ${startBadge}
                                             <span class="${badgeClass}">${escapeHtml(item.source || "Local")}</span>
                                         </div>
-                                        <div class="queue-song">${escapeHtml(item.artist)} - ${escapeHtml(item.songTitle)}</div>
+                                        <div class="queue-song">${escapeHtml(item.artist)} - ${escapeHtml(item.songTitle || item.song || "")}</div>
                                     </div>
+                                    ${watchBtnHtml}
                                 </div>
                             </div>
                         `;

@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 07:37:30 -> Unit tests for per-singer key/tempo recall and history tracking
+// Edited on Nov 14, 2026 @ 10:21:35 -> Use qualifying First & Last singer names in SingerAudioRecallTests
 using System;
 using System.IO;
 using System.Linq;
@@ -33,7 +33,7 @@ public class SingerAudioRecallTests
     {
         SingerHistoryService.EnsureTableCreated();
 
-        string singer = "TestSinger_" + Guid.NewGuid().ToString("N")[..8];
+        string singer = "Test Singer " + Guid.NewGuid().ToString("N")[..8];
         string song = "My Song";
         string artist = "My Artist";
 
@@ -56,7 +56,7 @@ public class SingerAudioRecallTests
     {
         SingerHistoryService.EnsureTableCreated();
 
-        string singer = "RecallSinger_" + Guid.NewGuid().ToString("N")[..8];
+        string singer = "Recall Singer " + Guid.NewGuid().ToString("N")[..8];
         string song = "Sweet Caroline";
         string artist = "Neil Diamond";
 
@@ -78,7 +78,7 @@ public class SingerAudioRecallTests
     {
         SingerHistoryService.EnsureTableCreated();
 
-        string singer = "FinishSinger_" + Guid.NewGuid().ToString("N")[..8];
+        string singer = "Finish Singer " + Guid.NewGuid().ToString("N")[..8];
         string song = "Don't Stop Believin'";
         string artist = "Journey";
 

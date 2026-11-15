@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:17:45 -> Validate emoji reactions against active Show Emoji Theme and include emojiReactionTheme in ActiveSingerUpdated
+// Edited on Nov 14, 2026 @ 13:33:15 -> Include duetPartnerName, completedCount, estimatedWaitMinutes, and enablePatronTurnAlerts in LyricsHub initial state
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Concurrent;
@@ -71,6 +71,9 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
         var queueList = _rotation.Rotation.Select(s => new
         {
             name = s.Name,
+            partner = s.DuetPartnerName,
+            duetPartnerName = s.DuetPartnerName,
+            song = s.SongTitle,
             songTitle = s.SongTitle,
             artist = s.Artist,
             key = s.Key,
@@ -81,7 +84,10 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
             isPaused = s.IsPaused,
             isSkipped = s.IsSkipped,
             isSpecial = s.IsSpecial,
-            isInactive = s.IsInactive
+            isInactive = s.IsInactive,
+            isMusic = s.IsMusic,
+            completedCount = s.CompletedCount,
+            estimatedWaitMinutes = s.EstimatedWaitMinutes
         }).ToList();
 
         await Clients.Caller.SendAsync("QueueUpdated", queueList);
@@ -97,7 +103,8 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
             avgRating = avgRating,
             isRatingSystemEnabled = Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled,
             ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol,
-            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme
+            emojiReactionTheme = Lyracist.Core.Helpers.AppSettings.EmojiReactionTheme,
+            enablePatronTurnAlerts = Lyracist.Core.Helpers.AppSettings.EnablePatronTurnAlerts
         });
 
         await Clients.Caller.SendAsync("NextSingerUpdated", new

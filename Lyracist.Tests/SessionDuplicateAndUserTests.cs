@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 09:01:00 -> Add unit tests for SessionScheduleHelper, session schedules, and last request cutoffs
+// Edited on Nov 14, 2026 @ 10:21:30 -> Use qualifying First & Last singer names in SingerHistoryService_MergeHistory test
 using System;
 using System.IO;
 using System.Linq;
@@ -77,8 +77,8 @@ public class SessionDuplicateAndUserTests
     {
         SingerHistoryService.EnsureTableCreated();
 
-        string sourceSinger = "DuplicateSinger_" + Guid.NewGuid().ToString("N")[..8];
-        string targetSinger = "TargetSinger_" + Guid.NewGuid().ToString("N")[..8];
+        string sourceSinger = "Duplicate Singer " + Guid.NewGuid().ToString("N")[..8];
+        string targetSinger = "Target Singer " + Guid.NewGuid().ToString("N")[..8];
 
         SingerHistoryService.SaveHistory(sourceSinger, "Song 1", "Artist A", "Local", "", key: "+1", tempo: 1.0);
         SingerHistoryService.SaveHistory(sourceSinger, "Song 2", "Artist B", "Local", "", key: "-2", tempo: 1.1);

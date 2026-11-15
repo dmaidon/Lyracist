@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:05:10 -> Add emojiReactionTheme and recentReactions to VenueInfoResponseDto
+// Edited on Nov 14, 2026 @ 13:20:30 -> Add enablePatronTurnAlerts and recentBuzzEvents to VenueInfoResponseDto
 namespace KSRotation.Models
 {
     /// <summary>
@@ -8,6 +8,19 @@ namespace KSRotation.Models
     {
         public long id { get; set; }
         public string emoji { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Serialized patron phone turn-alert / manual DJ buzz event for <c>PatronPortal.html</c>.
+    /// </summary>
+    public sealed class PatronBuzzEventDto
+    {
+        public long id { get; set; }
+        public string singerName { get; set; } = string.Empty;
+        public string duetPartnerName { get; set; } = string.Empty;
+        public string song { get; set; } = string.Empty;
+        public string artist { get; set; } = string.Empty;
+        public string level { get; set; } = "current";
     }
 
     /// <summary>
@@ -52,6 +65,9 @@ namespace KSRotation.Models
         public string[] scaryokeCategories { get; set; } = [];
         public string emojiReactionTheme { get; set; } = EmojiReactionThemes.PatronChoice;
         public ReactionEventDto[] recentReactions { get; set; } = [];
+        public bool enablePatronTurnAlerts { get; set; } = true;
+        public PatronBuzzEventDto[] recentBuzzEvents { get; set; } = [];
     }
 }
+
 

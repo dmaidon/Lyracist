@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:15:30 -> Add Crowd Emoji Reactions Show Theme selector to Remote DJ Board -->
+<!-- Edited on Nov 14, 2026 @ 13:26:45 -> Add Buzz Singer's Phone button to Remote DJ Board singer cards -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1878,6 +1878,10 @@
                                <button class="btn-text" style="background: #4C1D95; color: #E9D5FF; border: 1px solid #7C3AED; font-size: 0.72rem; padding: 3px 6px; border-radius: 4px;" title="Manually set or clear Scaryoke category for this singer" onclick="openManualScaryokeModal('${s.id}')">📌 Set</button>`
                             : '';
 
+                        const buzzBtnHtml = (!s.isInactive && !s.isMusic)
+                            ? `<button class="btn-circle" style="border-color: #F59E0B; color: #F59E0B;" title="Buzz Singer's Phone" onclick="sendAction('buzz-singer', '${s.id}')">📳</button>`
+                            : '';
+
                         const innerHTML = `
                                     <div class="singer-details">
                                         <div class="singer-info">
@@ -1891,6 +1895,7 @@
                                             </div>
                                             <div class="actions-container">
                                                 <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
+                                                ${buzzBtnHtml}
                                                 <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
                                                 <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                                                 <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>

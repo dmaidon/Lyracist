@@ -1,4 +1,4 @@
-// Edited on Oct 6, 2026 @ 10:46:00 -> Add CleanSingerName to strip placeholder text and sanitize singer names
+// Edited on Nov 14, 2026 @ 09:14:00 -> Add IsQualifyingDatabaseSingerName to filter singer database to first/last or distinct names
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +17,100 @@ namespace Lyracist.Shared
             "DJ", "MC", "TV", "CD", "DVD", "EP", "LP", "UK", "USA", "US",
             "II", "III", "IV", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"
         };
+
+        private static readonly HashSet<string> PlaceholderNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "New Singer",
+            "Special Guest",
+            "Guest Singer",
+            "Guest",
+            "Music Request",
+            "Music",
+            "Unknown",
+            "Unknown Singer",
+            "Anonymous",
+            "Test Singer",
+            "None"
+        };
+
+        /// <summary>
+        /// Returns true if the given name is empty or matches a reserved placeholder such as "New Singer", "Special Guest", or "Music Request".
+        /// </summary>
+        public static bool IsReservedOrPlaceholderName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return true;
+
+            string cleaned = CleanSingerName(name);
+            if (string.IsNullOrWhiteSpace(cleaned))
+                return true;
+
+            if (PlaceholderNames.Contains(cleaned))
+                return true;
+
+            return cleaned.StartsWith("New Singer ", StringComparison.OrdinalIgnoreCase) ||
+                   cleaned.StartsWith("Special Guest ", StringComparison.OrdinalIgnoreCase) ||
+                   cleaned.StartsWith("Music Request ", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Counts the number of meaningful word tokens (2+ characters containing letters) in a singer's name.
+        /// </summary>
+        public static int GetMeaningfulWordCount(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return 0;
+
+            string cleaned = CleanSingerName(name);
+            if (string.IsNullOrWhiteSpace(cleaned))
+                return 0;
+
+            string[] rawParts = cleaned.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            int meaningfulTokens = 0;
+
+            foreach (string rawPart in rawParts)
+            {
+                string part = rawPart.Trim('.', ',', '-', '_', '\'', '"', '(', ')', '[', ']');
+                if (string.IsNullOrWhiteSpace(part))
+                    continue;
+
+                bool hasLetter = false;
+                for (int i = 0; i < part.Length; i++)
+                {
+                    if (char.IsLetter(part[i]))
+                    {
+                        hasLetter = true;
+                        break;
+                    }
+                }
+
+                if (hasLetter && part.Length >= 2)
+                {
+                    meaningfulTokens++;
+                }
+            }
+
+            return meaningfulTokens;
+        }
+
+        /// <summary>
+        /// Determines whether a singer name qualifies for permanent storage in the Singer &amp; Song History database.
+        /// Qualifying singers must have a First &amp; Last name or a distinct multi-word identifier
+        /// (e.g. "John Smith", "Bar Mike", "Bar Mike Gilmore", "Big Mike", "DJ Dave"), or have an explicit
+        /// <paramref name="isDistinctSingleName"/> override enabled on their profile.
+        /// Generic single-word first names (e.g. "Mike", "John", "Sarah") and system placeholders ("New Singer") are excluded.
+        /// </summary>
+        public static bool IsQualifyingDatabaseSingerName(string? name, bool isDistinctSingleName = false)
+        {
+            if (IsReservedOrPlaceholderName(name))
+                return false;
+
+            int meaningfulTokens = GetMeaningfulWordCount(name);
+            if (meaningfulTokens >= 2)
+                return true;
+
+            return isDistinctSingleName && meaningfulTokens == 1;
+        }
 
         /// <summary>
         /// Cleans a singer name by removing any leftover placeholder text such as "New Singer".

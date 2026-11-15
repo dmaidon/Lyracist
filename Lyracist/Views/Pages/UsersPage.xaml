@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 08:52:30 -> Color-code UsersPage TabItem headers for dark venues -->
+<!-- Edited on Nov 14, 2026 @ 14:49:30 -> Fix DataGridColumnHeader high-contrast background and foreground on Performance History table -->
 <Page x:Class="Lyracist.Views.Pages.UsersPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -73,16 +73,23 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Users &amp; Singer Accounts" FontSize="26" FontWeight="Bold" Foreground="White" />
-                    <TextBlock Text="Manage singer accounts, set default vocal &amp; audio profiles, merge duplicate accounts, and inspect past performance logs."
+                    <TextBlock Text="Database of performers with First &amp; Last or distinct names, their performed songs, venues, audio defaults, and duplicate merging."
                                FontSize="13" Foreground="#F0F8FF" Margin="0,4,0,0" />
                 </StackPanel>
-                <ui:Button Grid.Column="1"
-                           Content="New Singer"
-                           Icon="{ui:SymbolIcon PersonAdd24}"
-                           Appearance="Secondary"
-                           Command="{Binding AddNewSingerCommand}"
-                           VerticalAlignment="Center"
-                           FontWeight="SemiBold" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:Button Content="Refresh"
+                               Icon="{ui:SymbolIcon ArrowSync24}"
+                               Appearance="Secondary"
+                               Command="{Binding RefreshSingersCommand}"
+                               Margin="0,0,8,0"
+                               FontWeight="SemiBold"
+                               ToolTip="Rescan saved rotation reports and refresh singer profiles" />
+                    <ui:Button Content="New Singer"
+                               Icon="{ui:SymbolIcon PersonAdd24}"
+                               Appearance="Secondary"
+                               Command="{Binding AddNewSingerCommand}"
+                               FontWeight="SemiBold" />
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -111,7 +118,7 @@
                     <!-- Search Box -->
                     <Grid Grid.Row="0" Margin="0,0,0,12">
                         <ui:TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                    PlaceholderText="Search singers by name or email..."
+                                    PlaceholderText="Search singers by name, venue, or email..."
                                     Icon="{ui:SymbolIcon Search24}" />
                     </Grid>
 
@@ -152,6 +159,8 @@
                                                 <Run Text=" · " />
                                                 <Run Text="{Binding VocalRange, Mode=OneWay}" />
                                             </TextBlock>
+                                            <TextBlock Text="{Binding VenuesSummary}" FontSize="10.5"
+                                                       Foreground="#38BDF8" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
                                         </StackPanel>
 
                                         <!-- Level Badge -->
@@ -262,14 +271,23 @@
                                         <Border Background="#1E3A5F" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding SelectedSinger.Score, StringFormat='{}{0} XP'}" FontSize="12" FontWeight="SemiBold" Foreground="#0EA5E9" />
                                         </Border>
-                                        <Border Background="#1B382B" CornerRadius="4" Padding="6,2">
+                                        <Border Background="#1B382B" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding SelectedSinger.SongsText}" FontSize="12" FontWeight="SemiBold" Foreground="#10B981" />
+                                        </Border>
+                                        <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                            <TextBlock Text="{Binding SelectedSinger.VenuesSummary}" FontSize="12" FontWeight="SemiBold" Foreground="#E2E8F0" TextTrimming="CharacterEllipsis" MaxWidth="260" />
                                         </Border>
                                     </StackPanel>
                                 </StackPanel>
 
-                                <!-- Merge Duplicate Button -->
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <!-- Print History & Merge Duplicate Buttons -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ui:Button Content="Print History"
+                                               Icon="{ui:SymbolIcon Print24}"
+                                               Appearance="Secondary"
+                                               Command="{Binding PrintSingerHistoryCommand}"
+                                               Margin="0,0,8,0"
+                                               ToolTip="Print this singer's complete song performance history with performance counts and venues" />
                                     <ui:Button Content="Merge Duplicate..."
                                                Icon="{ui:SymbolIcon People24}"
                                                Appearance="Primary"
@@ -305,8 +323,18 @@
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
                                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                                         <!-- Performer Name -->
-                                        <TextBlock Text="Singer Name" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,4" />
-                                        <ui:TextBox Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,14" />
+                                        <TextBlock Text="Singer Name (First &amp; Last or Distinct Identifier)" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,6" />
+                                        <CheckBox Content="Distinct Single Name (allow a single-word stage name in the permanent singer database)"
+                                                  IsChecked="{Binding EditIsDistinctName, Mode=TwoWay}"
+                                                  FontSize="12" Margin="0,0,0,12"
+                                                  ToolTip="Keep checked if this singer performs under a unique single-word stage name. Singers with First &amp; Last names (or multi-word identifiers like 'Bar Mike' or 'Bar Mike Gilmore') qualify automatically." />
+
+                                        <!-- Venues Performed -->
+                                        <TextBlock Text="Venues Performed" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding EditVenues, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="e.g. Shenanigans, The Rusty Anchor (automatically updated as songs are sung)"
+                                                    Margin="0,0,0,14" />
 
                                         <!-- PIN Code & Email -->
                                         <Grid Margin="0,0,0,14">
@@ -492,14 +520,108 @@
                                 <Grid Margin="0,10,0,0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0"
-                                               Text="Record of all songs performed by this singer, with recalled key and tempo settings:"
-                                               FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
+                                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Record of all songs performed by this singer, including times performed, venue(s), key, and tempo settings:"
+                                                   FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                        <ui:Button Grid.Column="1"
+                                                   Content="Add Song"
+                                                   Icon="{ui:SymbolIcon Add20}"
+                                                   Appearance="Secondary"
+                                                   Padding="10,4"
+                                                   Margin="0,0,8,0"
+                                                   Command="{Binding StartAddHistoricalSongCommand}"
+                                                   ToolTip="Manually add a song performance record to this singer's history" />
+                                        <ui:Button Grid.Column="2"
+                                                   Content="Print Singer History"
+                                                   Icon="{ui:SymbolIcon Print20}"
+                                                   Appearance="Primary"
+                                                   Padding="12,4"
+                                                   Command="{Binding PrintSingerHistoryCommand}"
+                                                   ToolTip="Print this singer's complete song performance history" />
+                                    </Grid>
 
-                                    <DataGrid Grid.Row="1"
+                                    <!-- Collapsible Song History Row Editor -->
+                                    <Border Grid.Row="1"
+                                            Visibility="{Binding IsHistoryEditorOpen, Converter={StaticResource BoolToVis}}"
+                                            Background="#1A2433"
+                                            BorderBrush="#FFA78BFA"
+                                            BorderThickness="1.5"
+                                            CornerRadius="8"
+                                            Padding="12,10"
+                                            Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding HistoryEditorTitle}"
+                                                       FontWeight="Bold"
+                                                       FontSize="12.5"
+                                                       Foreground="#FFA78BFA"
+                                                       Margin="0,0,0,8" />
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="1.6*" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="70" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="60" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="68" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Song Title" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistorySongTitle, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Artist" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistoryArtist, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4">
+                                                    <TextBlock Text="# Sung" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistoryTimesPerformed, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="6">
+                                                    <TextBlock Text="Venue(s)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistoryVenue, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="8">
+                                                    <TextBlock Text="Key" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistoryKey, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="10">
+                                                    <TextBlock Text="Speed" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                                    <ui:TextBox Text="{Binding EditHistoryTempo, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <ui:Button Content="Cancel"
+                                                           Appearance="Secondary"
+                                                           Padding="12,4"
+                                                           Margin="0,0,8,0"
+                                                           Command="{Binding CancelHistoricalSongEditCommand}" />
+                                                <ui:Button Content="Save Song"
+                                                           Icon="{ui:SymbolIcon Save20}"
+                                                           Appearance="Primary"
+                                                           Padding="14,4"
+                                                           Command="{Binding SaveHistoricalSongCommand}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <DataGrid Grid.Row="2"
                                               ItemsSource="{Binding PerformanceHistory}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
@@ -514,8 +636,38 @@
                                               RowHeight="36">
                                         <DataGrid.Resources>
                                             <Style TargetType="DataGridColumnHeader">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
-                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                <Setter Property="Background" Value="#FF1E293B" />
+                                                <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                                <Setter Property="FontSize" Value="12.5" />
+                                                <Setter Property="Padding" Value="10,7" />
+                                                <Setter Property="BorderBrush" Value="#FF334155" />
+                                                <Setter Property="BorderThickness" Value="0,0,1,1.5" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="DataGridColumnHeader">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    Padding="{TemplateBinding Padding}"
+                                                                    SnapsToDevicePixels="True">
+                                                                <Border.Resources>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                                    </Style>
+                                                                </Border.Resources>
+                                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                                  RecognizesAccessKey="True"
+                                                                                  TextElement.Foreground="#FFFFFFFF"
+                                                                                  TextElement.FontWeight="Bold" />
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
                                             </Style>
                                             <Style TargetType="DataGridCell">
                                                 <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
@@ -526,12 +678,14 @@
                                         </DataGrid.Resources>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
-                                            <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="150" />
-                                            <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="60" />
-                                            <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="70" />
-                                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="80" />
-                                            <DataGridTextColumn Header="Date &amp; Time" Binding="{Binding FormattedDate}" Width="160" />
-                                            <DataGridTemplateColumn Header="Actions" Width="170">
+                                            <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="130" />
+                                            <DataGridTextColumn Header="# Sung" Binding="{Binding FormattedTimesPerformed}" Width="60" />
+                                            <DataGridTextColumn Header="Venue" Binding="{Binding DisplayVenue}" Width="130" />
+                                            <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="45" />
+                                            <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="55" />
+                                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="65" />
+                                            <DataGridTextColumn Header="Date &amp; Time" Binding="{Binding FormattedDate}" Width="135" />
+                                            <DataGridTemplateColumn Header="Actions" Width="215">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -539,10 +693,18 @@
                                                                        Icon="{ui:SymbolIcon Play20}"
                                                                        Appearance="Primary"
                                                                        Padding="6,2"
-                                                                       Margin="0,0,6,0"
+                                                                       Margin="0,0,5,0"
                                                                        Command="{Binding DataContext.QueueHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                        CommandParameter="{Binding}"
                                                                        ToolTip="Queue this song into the active rotation" />
+                                                            <ui:Button Content="Edit"
+                                                                       Icon="{ui:SymbolIcon Edit20}"
+                                                                       Appearance="Secondary"
+                                                                       Padding="6,2"
+                                                                       Margin="0,0,5,0"
+                                                                       Command="{Binding DataContext.EditHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                       CommandParameter="{Binding}"
+                                                                       ToolTip="Edit song title, artist, times performed, venue, key, or speed" />
                                                             <ui:Button Content="Remove"
                                                                        Appearance="Danger"
                                                                        Icon="{ui:SymbolIcon Delete20}"

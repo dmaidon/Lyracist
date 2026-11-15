@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:17:00 -> Add EmojiReactionTheme and EmojiReactionThemeChanged to AppSettings
+// Edited on Nov 14, 2026 @ 13:31:15 -> Add EnablePatronTurnAlerts and EnablePatronTurnAlertsChanged to AppSettings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -894,6 +894,22 @@ public static class AppSettings
         set { _data.RecordingRetentionDays = Math.Max(0, value); Save(); }
     }
 
+    public static event Action<bool>? EnablePatronTurnAlertsChanged;
+
+    public static bool EnablePatronTurnAlerts
+    {
+        get => _data.EnablePatronTurnAlerts;
+        set
+        {
+            if (_data.EnablePatronTurnAlerts != value)
+            {
+                _data.EnablePatronTurnAlerts = value;
+                Save();
+                EnablePatronTurnAlertsChanged?.Invoke(value);
+            }
+        }
+    }
+
     // ─── CDG Video Backdrop Settings ──────────────────────────────────────────
 
     public static string CdgBackdropMode
@@ -1512,6 +1528,7 @@ public static class AppSettings
 
         public bool IsRatingSystemEnabled { get; set; } = true;
         public string EmojiReactionTheme { get; set; } = KSRotation.Models.EmojiReactionThemes.PatronChoice;
+        public bool EnablePatronTurnAlerts { get; set; } = true;
         public bool ShowQrCodeOnRotationScreen { get; set; } = true;
         public bool ShowQrCodeOnLyricsScreen { get; set; } = true;
         public string SelectedRatingIcon { get; set; } = "⭐ Star";

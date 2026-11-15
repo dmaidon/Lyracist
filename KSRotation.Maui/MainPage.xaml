@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:10:40 -> Add Emoji Theme picker to BillboardOverlay and CastDeviceOverlay in MainPage.xaml -->
+<!-- Edited on Nov 14, 2026 @ 13:25:45 -> Add Buzz Singer's Phone button, Turn Alerts toggle, and legend entry in MainPage.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -22,6 +22,10 @@
                         <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
                             <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
                             <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                            <CheckBox IsChecked="{Binding EnablePatronTurnAlerts}" Color="#10B981" Scale="0.8" VerticalOptions="Center" />
+                            <Label Text="📳 Turn Alerts" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
                         </HorizontalStackLayout>
 
                         <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" IsEnabled="{Binding CanLoadTestData}" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center">
@@ -273,6 +277,19 @@
 
                                             <!-- Complete current round -->
                                             <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}"  BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
+
+                                            <!-- Buzz Singer's Phone -->
+                                            <Button Text="📳" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=BuzzSingerPhoneCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#F59E0B" BorderWidth="1" TextColor="#F59E0B" FontSize="14" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Buzz Singer's Phone">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                        <Setter Property="Opacity" Value="0.4" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsMusic}" Value="True">
+                                                        <Setter Property="IsVisible" Value="False" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
 
                                             <!-- Edit Name/Song/Artist -->
                                             <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
@@ -887,6 +904,17 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
                                         <Label Text="Complete Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                                         <Label Text="Checks off round, logs history, and advances queue" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Buzz Singer's Phone -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#F59E0B" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="📳" TextColor="#F59E0B" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Buzz Singer's Phone" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Sends an immediate pager buzz, chime, and stage-call banner to their phone" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
                                     </VerticalStackLayout>
                                 </Grid>
 
