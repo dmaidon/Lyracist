@@ -1,4 +1,4 @@
-// Edited on Nov 13, 2026 @ 16:12:00 -> Use RecalculateEstimatedWaits and RecalculateRoundEstimation when loading saved singers into rotation
+// Edited on Nov 16, 2026 @ 08:43:00 -> Use IsSameSingerName and TryAddPerformer when queuing saved rotation songs or singers into rotation
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -272,6 +272,29 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
+        private void QueueSavedReportRow(SavedRotationRow? row)
+        {
+            if (row == null || string.IsNullOrWhiteSpace(row.SingerName))
+            {
+                return;
+            }
+
+            string cleanName = RotationHelpers.NormalizeForComparison(NameFormatting.CleanSingerName(row.SingerName));
+            var existingSinger = Singers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, cleanName));
+            bool hadExistingSinger = existingSinger != null;
+            bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.Song);
+
+            if (TryAddPerformer(row.SingerName, row.SongTitle, row.Artist, row.DuetPartnerName))
+            {
+                SavedReportStatusMessage = hadExistingSinger
+                    ? (hadActiveSong
+                        ? $"Added '{row.SongTitle}' to {cleanName}'s song queue in rotation."
+                        : $"Assigned '{row.SongTitle}' to {cleanName} in rotation.")
+                    : $"Added {cleanName} with '{row.SongTitle}' to rotation.";
+            }
+        }
+
+        [RelayCommand]
         private void LoadSavedReportSingersIntoRotation()
         {
             if (SelectedSavedReport == null)
@@ -297,21 +320,17 @@ namespace KSRotation.ViewModels
             foreach (var group in karaokeGroups)
             {
                 bool alreadyInQueue = Singers.Any(s =>
-                    !s.IsMusic && string.Equals(s.Name, group.SingerName, StringComparison.OrdinalIgnoreCase));
+                    !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, group.SingerName));
 
                 if (alreadyInQueue)
                 {
                     continue;
                 }
 
-                var entry = new SingerEntry
+                if (TryAddPerformer(group.SingerName, string.Empty, string.Empty))
                 {
-                    Name = group.SingerName,
-                    Song = string.Empty,
-                    Artist = string.Empty
-                };
-                Singers.Add(entry);
-                addedCount++;
+                    addedCount++;
+                }
             }
 
             if (addedCount > 0)

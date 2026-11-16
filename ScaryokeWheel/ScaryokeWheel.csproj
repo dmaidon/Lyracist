@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.11.14.275</AssemblyVersion>
-    <FileVersion>26.11.14.275</FileVersion>
+    <AssemblyVersion>26.11.16.276</AssemblyVersion>
+    <FileVersion>26.11.16.276</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

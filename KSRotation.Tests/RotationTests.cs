@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 15:37:00 -> Add unit test verifying dedicated Data/singers.db storage for SingerHistory and Singers
+// Edited on Nov 16, 2026 @ 08:45:00 -> Add unit tests verifying QueueUserHistoricalSong and QueueSavedReportRow add songs to existing rotation singers without duplicating
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2957,5 +2957,77 @@ public class SingerDatabaseQualificationTests
             delMainCmd.Parameters.AddWithValue("$name", singerName);
             delMainCmd.ExecuteNonQuery();
         }
+    }
+
+    [Fact]
+    public void QueueUserHistoricalSong_WhenSingerExistsInRotation_AddsSongToExistingSingerWithoutDuplicating()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        // Add singer to active rotation with an initial song
+        vm.TryAddPerformer("John Smith", "First Song", "First Artist");
+        Assert.Single(vm.Singers);
+
+        vm.SelectedUser = new KSRotation.ViewModels.SingerUserItem
+        {
+            SingerId = 1,
+            Name = "John Smith"
+        };
+
+        var historyItem1 = new KSRotation.ViewModels.SingerUserHistoryItem
+        {
+            SingerName = "John Smith",
+            SongTitle = "Second Song",
+            Artist = "Second Artist"
+        };
+
+        // Act 1: Click Queue on a song in Performance History while John Smith already has an active song
+        vm.QueueUserHistoricalSongCommand.Execute(historyItem1);
+
+        // Assert 1: John Smith is NOT duplicated in Singers; "Second Song" is added to his QueuedSongs
+        var singer = Assert.Single(vm.Singers);
+        Assert.Equal("John Smith", singer.Name);
+        Assert.Equal("First Song", singer.Song);
+        var queued = Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Second Song", queued.Song);
+        Assert.Equal("Second Artist", queued.Artist);
+
+        // Act 2: Clear current song and queued songs, then click Queue again when John Smith has no current song
+        singer.QueuedSongs.Clear();
+        singer.Song = string.Empty;
+        singer.Artist = string.Empty;
+
+        var historyItem2 = new KSRotation.ViewModels.SingerUserHistoryItem
+        {
+            SingerName = "John Smith",
+            SongTitle = "Third Song",
+            Artist = "Third Artist"
+        };
+        vm.QueueUserHistoricalSongCommand.Execute(historyItem2);
+
+        // Assert 2: Still a single John Smith in Singers, and "Third Song" is assigned directly to his active Song
+        Assert.Single(vm.Singers);
+        Assert.Equal("Third Song", singer.Song);
+        Assert.Equal("Third Artist", singer.Artist);
+        Assert.Empty(singer.QueuedSongs);
+
+        // Act 3: Click Queue for a singer who is NOT yet in the rotation
+        vm.SelectedUser = new KSRotation.ViewModels.SingerUserItem
+        {
+            SingerId = 2,
+            Name = "Sarah Connor"
+        };
+        var historyItem3 = new KSRotation.ViewModels.SingerUserHistoryItem
+        {
+            SingerName = "Sarah Connor",
+            SongTitle = "New Singer Song",
+            Artist = "New Singer Artist"
+        };
+        vm.QueueUserHistoricalSongCommand.Execute(historyItem3);
+
+        // Assert 3: Sarah Connor is added as a new singer in the rotation
+        Assert.Equal(2, vm.Singers.Count);
+        Assert.Contains(vm.Singers, s => s.Name == "Sarah Connor" && s.Song == "New Singer Song");
     }
 }

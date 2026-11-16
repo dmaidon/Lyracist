@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 13:32:30 -> Add BuzzSingerCommand and SingerPhoneBuzzed event for Patron Phone Turn Alerts
+// Edited on Nov 16, 2026 @ 08:50:00 -> Recalculate wait estimates when adding a new singer in RotationViewModel.AddSinger
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -593,57 +593,79 @@ public partial class RotationViewModel : BaseViewModel
         }
 
         // First, check if singer already exists in active rotation:
-        var existingSinger = Rotation.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        var existingSinger = Rotation.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, name));
         if (existingSinger != null)
         {
-            if (string.IsNullOrEmpty(existingSinger.SongTitle))
+            if (!string.IsNullOrWhiteSpace(duetPartner))
             {
-                existingSinger.SongTitle = title;
-                existingSinger.Artist = artist;
-                existingSinger.Key = key;
-                existingSinger.Tempo = tempo;
-                existingSinger.Notes = notes;
-                existingSinger.Source = source;
-                existingSinger.ExternalLink = externalLink;
                 existingSinger.DuetPartnerName = duetPartner;
-                existingSinger.Score = score;
-                existingSinger.AverageRating = avgRating;
-                existingSinger.RatingCount = ratingCount;
-                existingSinger.TotalSongsSung = totalSongsSung;
-                existingSinger.IsMusic = isMusic;
             }
-            else
+            if (isSpecial)
             {
-                // Buffer/queue the song request for this singer
-                if (!_pendingSingerSongs.TryGetValue(name, out var list))
-                {
-                    list = [];
-                    _pendingSingerSongs[name] = list;
-                }
-                list.Add(new PendingSong
-                {
-                    Title = title,
-                    Artist = artist,
-                    Key = key,
-                    Tempo = tempo,
-                    Notes = notes,
-                    Source = source,
-                    ExternalLink = externalLink,
-                    IsMusic = isMusic
-                });
+                existingSinger.IsSpecial = true;
+                RunRotationOrderChange(() =>
+                    Lyracist.Shared.RotationHelpers.PromoteSpecialSingerToCurrent(Rotation, existingSinger));
+            }
 
-                if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                if (string.IsNullOrWhiteSpace(existingSinger.SongTitle))
                 {
-                    RefreshSelectedSingerQueue();
+                    existingSinger.SongTitle = title;
+                    existingSinger.Artist = artist;
+                    existingSinger.Key = key;
+                    existingSinger.Tempo = tempo;
+                    existingSinger.Notes = notes;
+                    existingSinger.Source = source;
+                    existingSinger.ExternalLink = externalLink;
+                    existingSinger.Score = score;
+                    existingSinger.AverageRating = avgRating;
+                    existingSinger.RatingCount = ratingCount;
+                    existingSinger.TotalSongsSung = totalSongsSung;
+                    existingSinger.IsMusic = isMusic;
+                }
+                else
+                {
+                    // Buffer/queue the song request for this singer
+                    if (!_pendingSingerSongs.TryGetValue(existingSinger.Name, out var list))
+                    {
+                        list = [];
+                        _pendingSingerSongs[existingSinger.Name] = list;
+                    }
+
+                    bool alreadyHasSong = RotationHelpers.IsSameSong(existingSinger.SongTitle, existingSinger.Artist, title, artist)
+                        || list.Any(p => RotationHelpers.IsSameSong(p.Title, p.Artist, title, artist));
+                    if (!alreadyHasSong)
+                    {
+                        list.Add(new PendingSong
+                        {
+                            Title = title,
+                            Artist = artist,
+                            Key = key,
+                            Tempo = tempo,
+                            Notes = notes,
+                            Source = source,
+                            ExternalLink = externalLink,
+                            IsMusic = isMusic
+                        });
+                    }
+
+                    if (SelectedSinger != null && RotationHelpers.IsSameSingerName(SelectedSinger.Name, existingSinger.Name))
+                    {
+                        RefreshSelectedSingerQueue();
+                    }
                 }
             }
+
+            ResolveEstimatedPerformanceSeconds();
+            RecalculateAllWaitsAndEstimations();
             _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
             return;
         }
 
         // Second, check if singer is in the inactive list and reinstate them:
-        var inactiveSinger = InactiveSingers.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        var inactiveSinger = InactiveSingers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, name));
         if (inactiveSinger != null)
         {
             inactiveSinger.IsInactive = false;
@@ -660,13 +682,15 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.RatingCount = ratingCount;
             inactiveSinger.TotalSongsSung = totalSongsSung;
             inactiveSinger.IsMusic = isMusic;
-            
+            inactiveSinger.IsSpecial = isSpecial;
+
             InactiveSingers.Remove(inactiveSinger);
-            Rotation.Add(inactiveSinger);
+            RotationHelpers.InsertNewSinger(Rotation, inactiveSinger);
             Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
             RefreshLinkedPartnerNames();
             Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
             Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
+            ResolveEstimatedPerformanceSeconds();
             RecalculateAllWaitsAndEstimations();
 
             RotationStateChanged?.Invoke();
@@ -721,6 +745,8 @@ public partial class RotationViewModel : BaseViewModel
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
         RefreshLinkedPartnerNames();
+        ResolveEstimatedPerformanceSeconds();
+        RecalculateAllWaitsAndEstimations();
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -743,18 +769,14 @@ public partial class RotationViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(NewSingerName))
             return;
 
-        var newSinger = new Singer
-        {
-            Name = NameFormatting.ProperCase(NewSingerName),
-            DuetPartnerName = NameFormatting.ProperCase(NewDuetPartnerName),
-            Notes = NewSingerNotes,
-            Key = NewSingerKey,
-            IsSpecial = IsNewSingerSpecial
-        };
-        RotationHelpers.InsertNewSinger(Rotation, newSinger);
-        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
-        RefreshLinkedPartnerNames();
-        RecalculateAllWaitsAndEstimations();
+        AddSinger(
+            NewSingerName,
+            string.Empty,
+            string.Empty,
+            NewSingerKey,
+            NewSingerNotes,
+            duetPartner: NewDuetPartnerName,
+            isSpecial: IsNewSingerSpecial);
 
         // Reset input properties
         NewSingerName = string.Empty;
@@ -762,9 +784,6 @@ public partial class RotationViewModel : BaseViewModel
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
         IsNewSingerSpecial = false;
-
-        RotationStateChanged?.Invoke();
-        _display.UpdateRotation([.. Rotation]);
     }
 
 
@@ -1015,8 +1034,8 @@ public partial class RotationViewModel : BaseViewModel
 
     public Singer? GetCurrentSinger()
     {
-        return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation) 
-               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)) 
+        return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation)
+               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound))
                ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
     }
 

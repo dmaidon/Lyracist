@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 15:38:00 -> Document dedicated Data/singers.db database for singer profiles, audio settings, and performance history -->
+<!-- Edited on Nov 16, 2026 @ 08:46:00 -> Document existing-singer song queuing in Users Performance History and Saved Rotations -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), Scaryoke standalone roulette wheel module with dual-monitor audience projection (`ScaryokeWheel.exe`), integrated Scaryoke singer rotation challenge spins with tablet remote control in `KSRotation`, and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -8,6 +8,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ## Key Features
 
 ### 📳 Patron Phone Turn Alerts ("Buzz My Phone") & DJ Manual Stage Pager (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `PatronPortal.html`, `mobile.html`, `dj.html`)
+
 - **2-Stage Automatic Phone Turn Alerts (`On Deck` + `Your Turn Now`)**: Performers connected via the `KSRotation` / `KSRotation.Maui` Patron Portal (`PatronPortal.html`) or `Lyracist` Performer Portal (`mobile.html`) can enable **"📳 Buzz My Phone When I'm Up"** at the top of the portal (or tap **"🔔 Watch"** next to their name in the Rotation list):
   1. **Stage 1 — On Deck (1 Performer Ahead / `IsNext`)**: Fires a medium double-pulse hardware vibration (`navigator.vibrate([300, 150, 300, 150, 300])`), a 5-note ascending Web Audio chime, and a full-screen flashing amber/navy pager modal (*"🔔 YOU'RE UP NEXT, [NAME]! You are On Deck (1 performer ahead) — get ready!"*) with a **"👍 Got It — I'm Ready!"** dismiss button.
   2. **Stage 2 — Your Turn Now (Stage Call / `IsCurrent`)**: Fires a strong pager vibration pattern (`navigator.vibrate([500, 150, 500, 150, 700, 200, 500])`), a 6-note Web Audio fanfare chime (repeating while open), and a full-screen flashing green/gold pager modal (*"🎤 IT'S YOUR TURN, [NAME]! Head to the stage now!"*) with a **"🎤 On My Way!"** dismiss button.
@@ -15,17 +16,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **DJ Master Setting & Manual "📳 Buzz Singer's Phone" Action**: Hosts can toggle **`Enable Patron Phone Turn Alerts (Buzz / Chime)`** (`EnablePatronTurnAlerts`, default `true`) in Settings across `KSRotation`, `KSRotation.Maui`, and `Lyracist`, and manually re-page any singer's phone on demand using the **`📳`** row button or right-click **`📳 Buzz Singer's Phone`** context menu item in `KSRotation` (`MainWindow.xaml` & `dj.html`), `KSRotation.Maui` (`MainPage.xaml`), and `Lyracist` (`RotationPage.xaml`).
 
 ### 🎤 Qualifying Singer & Performed Song Database (`Data/singers.db`) with Venue Tracking, Performance Counts & History Printing (`KSRotation`, `Lyracist`, `Lyracist.Data`, `SingerHistoryService`, `SingerHistoryPrinter`)
+
 - **Dedicated `Data/singers.db` Database (`LyracistDbContext.GetSingersDatabaseFilePath()`, `EnsureAndSyncDedicatedSingersDatabase`)**: Performer accounts (`Singers`), per-singer vocal/EQ settings (`SingerAudioSettings`), and song performance history (`SingerHistory`) are stored in their own dedicated SQLite database **`Data/singers.db`**—separate from the 145,000-song karaoke catalog database **`Data/lyracist.db`**. If `Data/lyracist.db` is ever deleted and rebuilt, all singer profiles, vocal/EQ settings, and performance history edits remain completely intact in `Data/singers.db` and are automatically restored into `lyracist.db` on startup.
 - **First & Last Name or Distinct Name Qualification (`NameFormatting.IsQualifyingDatabaseSingerName`)**: The permanent singer and song history database (`Singers` and `SingerHistory` in `Data/singers.db`) only stores performers who have a **First & Last name** (e.g., `"Sharon Roberts"`, `"Bar Mike Gilmore"`), a **distinct multi-word identifier** (e.g., `"Bar Mike"`, `"Big Mike"`, `"DJ Dave"`), or a single-word stage name explicitly marked with **`Distinct Single Name`** (`IsDistinctName = true`) on their profile. Generic single first names (`"Mike"`, `"John"`, `"Sarah"`) and system placeholders (`"New Singer"`, `"Special Guest"`, `"Music Request"`) are automatically excluded from permanent database storage.
 - **Per-Song Performance Counts (`SingerHistory.TimesPerformed` / `# Sung` Column)**: Every time a singer completes a song, `SingerHistory.TimesPerformed` tracks how many times that singer has performed that specific song across shows (displayed as `1x`, `2x`, `3x`, etc. in the **`# Sung`** column of the **Performance History** table in both `KSRotation` and `Lyracist`). Saved rotation report synchronization (`SyncFromSavedReportsAndCleanup`) aggregates all occurrences of each `(Singer, Song, Artist)` across `Reports/*.csv` idempotently without double-counting on refresh, while account merges (`MergeHistory`) sum overlapping song counts.
 - **Per-Singer & Per-Song Venue Tracking (`Singers.Venues`, `SingerHistory.Venue`)**: Every completed performance records the active venue on both the song history entry (`SingerHistory.Venue`) and the performer's profile (`Singers.Venues`, deduplicated via `DatabaseService.MergeVenueLists`). The **Users** tab in both `KSRotation` and `Lyracist` displays a `📍 Venues` summary badge on each singer card and header, an editable **Venues Performed** field on the profile tab, and a dedicated **Venue** column in the **Performance History** table.
 - **Print Singer History (`Shared/SingerHistoryPrinter.cs`, `🖨️ Print History`)**: Both `KSRotation` and `Lyracist` include **`🖨️ Print History`** buttons on the performer profile header card and inside the **Performance History** tab. Clicking **Print History** opens the native Windows Print Dialog and generates a clean, multi-page `FixedDocument` report displaying the singer's name, custom title, vocal range, unique songs count, total performances count, consolidated venues performed, and a zebra-striped table sorted alphabetically by song title (`#`, `Song Title`, `Artist`, `# Sung`, `Venue(s)`, `Key / Speed`, and `Last Sung`).
-- **Edit & Add Singer Performance History (`UpdateHistoryEntry`, `AddManualHistoryEntry`, `✏️ Edit` & `➕ Add Song`)**: Both `KSRotation` (**Users** -> **Performance History** tab) and `Lyracist` (**Users** -> **Performance History** tab) provide an **`Edit`** button on every song row and an **`➕ Add Song`** button in the header to edit **Song Title**, **Artist**, **`# Sung` (`TimesPerformed`)**, **Venue(s)**, **Key**, and **Speed (`Tempo`)**. Editing a song's title or artist to match another row for the same singer automatically merges the two rows (summing `# Sung` and merging `Venue(s)`) and updates matching rows in `Reports/*.csv` so corrections persist across future syncs.
+- **Edit, Add & Queue Singer Performance History (`UpdateHistoryEntry`, `AddManualHistoryEntry`, `QueueUserHistoricalSongCommand` / `QueueHistoricalSongCommand`)**: Both `KSRotation` (**Users** -> **Performance History** tab) and `Lyracist` (**Users** -> **Performance History** tab) provide **`Queue`**, **`Edit`**, and **`Remove`** buttons on every song row plus an **`➕ Add Song`** button in the header to edit **Song Title**, **Artist**, **`# Sung` (`TimesPerformed`)**, **Venue(s)**, **Key**, and **Speed (`Tempo`)**. Clicking **`Queue`** checks if the singer already exists in the active rotation: if they do, the song is assigned to their current song slot (if blank) or added to their queued songs list (`QueuedSongs` / `_pendingSingerSongs`) without duplicating the singer in the rotation; if they are not yet in the rotation, a new singer entry is added. Editing a song's title or artist to match another row for the same singer automatically merges the two rows (summing `# Sung` and merging `Venue(s)`) and updates matching rows in `Reports/*.csv` so corrections persist across future syncs.
 - **Automatic Blank-Artist Consolidation & Legacy PDF/EML Venue Extraction (`SingerHistoryService`, `SavedRotationReportReader.ExtractVenueFromPdfOrEml`)**: When a singer has performed a song with a blank artist (`""`) and also has an entry for the same song title with a non-empty artist (e.g., `"Green Door"` with `""` and `"Green Door"` with `"Shakin' Stevens"`), `SingerHistoryService` automatically consolidates them into the single non-empty artist row (summing `TimesPerformed` and merging `Venue` lists). For legacy timestamped report files (`Rotation_yyyyMMdd_HHmmss.csv`) whose filename does not include the venue, `SavedRotationReportReader` automatically extracts the venue name from the companion `.pdf` `/Title (Karaoke Rotation Report - <Venue>)` metadata or `.eml` `Subject:` header.
 - **Automatic Live & Saved Rotation Report Sync (`SingerHistoryService.RecordCompletedPerformance`, `SyncFromSavedReportsAndCleanup`)**: Checking off a round in `KSRotation`, completing a song in `Lyracist`, saving a rotation report, or clicking `🔄 Refresh` in the **Users** tab automatically records the singer's performed song, artist, key, speed, duet partner, performance count, and venue into `lyracist.db`, while importing all qualifying singers, songs, counts, and venues from saved `Reports/*.csv` files.
 - **Seamless Name Consolidation (`SaveUser` / `SaveSinger` & `Merge Duplicate...`)**: When a singer with a distinct nickname later provides their full name (for example, renaming `"Bar Mike"` to `"Bar Mike Gilmore"` and clicking **Save Changes**, or merging accounts via **Merge Duplicate...**), all performed songs, performance counts, venues, audio settings, and XP points consolidate automatically under the updated name.
 
 ### 📋 Saved Rotations Tab & Nightly Report Reader (`KSRotation`, `Lyracist`, `Shared/SavedRotationReportReader.cs`)
+
 - **Master-Detail Saved Rotation Browser (`KSRotation` & `Lyracist`)**: Both `KSRotation` (**Saved Rotations** tab next to `Rotation`) and `Lyracist` (**Saved Rotations** top navigation tab) provide a dedicated workspace to browse, search, and inspect saved nightly rotation lists stored in the shared `Reports/` directory (`Globals.KSRotationReportsDir`), or open any `.csv` / `.pdf` rotation report from disk via `📂 Open File...`.
 - **Two Inspection Views (`Singers & Rounds` + `All Report Rows`)**: Selecting a saved rotation report displays its venue name, show date, total karaoke singers, active performers, total songs sung, and music request counts, along with an instant in-report filter bar and two sub-tabs:
   1. **Singers & Rounds**: Groups each performer's completed songs in rotation order (`R1`, `R2`, duet partners, and song counts, plus queued singers with 0 completed songs).
@@ -33,6 +36,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **One-Click Actions (`Load Singers to Rotation`, `Open PDF`, `Open CSV`, `Save Rotation`)**: Hosts can reload all karaoke singers from any past saved rotation directly into tonight's active rotation queue (`➕ Load Singers to Rotation`), launch the companion `.pdf` or `.csv` file in the system viewer, open the `Reports/` folder in Explorer, or save the current rotation list from either `KSRotation` or `Lyracist` (`RotationPage.xaml` -> `Save`).
 
 ### 🎭 Crowd Emoji Reactions: 7 Performer Vibe Sets & DJ Show Theme Override (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `PatronPortal.html`, `mobile.html`, `billboard.html`, `dj.html`)
+
 - **Live Smartphone Audience Reactions in `KSRotation` & `Lyracist` (160x160 HD 3D Shaded Multi-Color Graphics + 50% Larger Display Size)**: Patrons connected via the `KSRotation` Request Portal (`PatronPortal.html`) or the `Lyracist` Performer Portal (`mobile.html`) can tap emoji reactions that float across the live audience rotation screens (`SingerDisplayWindow`, `RotationWindow`, `LyricsWindow`, `KSRotation.Maui` `BillboardView`, and Chromecast/Smart TV `billboard.html`) using bundled **160x160 high-DPI 3D-shaded, multi-gradient PNG graphics** (with specular highlights, bevels, and 500–2,100+ color tones per icon) rendered at **130px** (50% larger for high visibility across the venue), soft color-matched radial glow halos, and smooth 5.5-second flight trajectories from all four screen edges (capped at 20 concurrent on-screen reactions). Both `KSRotation` and `Lyracist` also render the 3D shaded emoji icons inside the `Holiday Rotation Screens` and `Crowd Emoji Reactions (Show Theme)` GroupBox headers and dropdown selectors (`LeadingEmojiImageConverter` / `LeadingEmojiTextConverter`), while `PatronRequestServer` serves `/api/emoji/{key}.png` for web/Chromecast billboards.
 - **7 Curated Performer Vibe Sets (6 Emojis Each)**: Because one singer may be performing a country ballad and the next a hip-hop or rock anthem, patrons can switch between 7 genre/vibe sets directly on their phones:
   - **🌟 Classic**: `❤️ 🔥 👏 🙌 🎉 👑`
@@ -48,11 +52,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **🚫 Off**: Hides the reaction card on patron phones and disables incoming emoji reactions.
 
 ### 🔗 Linked Singers Rotation List Integrity (`Shared/RotationHelpers.cs`, `Lyracist`, `KSRotation`, `KSRotation.Maui`)
+
 - **Bidirectional Drag-and-Drop Pair Movement (`RotationHelpers.MoveSingerToIndex`)**: Dragging either half of a linked singer pair upward or downward in the rotation list moves both partners together to the target slot while preserving their relative order, while dropping one partner directly onto the other swaps their internal order (`[A, B]` $\leftrightarrow$ `[B, A]`). Dragging an unlinked singer into a linked pair steps cleanly past the pair without splitting them.
 - **Float-to-Top Partner Promotion (`RotationHelpers.SetCurrentSinger`)**: Manually promoting a linked singer to Current in `FloatCurrentSingerToTop` mode brings their active linked partner to index `1` (`IsNext`) so they still perform back-to-back.
 - **Paused Partner & Round Anchor Safeguards (`AdvanceRotationAfterFinished`, `EnforceLinkedAdjacency`, `InsertNewSinger`)**: When a linked singer finishes while their partner is paused or skipped, the paused/skipped partner rotates to join the finished singer at the bottom of the active queue rather than pulling the finished singer back ahead of the round anchor. When `IsRotationStart` sits on the trailing partner of an adjacent linked pair, `InsertNewSinger` inserts new signups ahead of the entire linked pair so they are never pushed into the next round.
 
 ### 🔍 Automatic Database Self-Repair, Music & Karaoke Library Search, Tab Layout & High-Speed Drive Rescan (`Lyracist`, `Lyracist.Data`, `LyracistDbEditor`)
+
 - **Automatic Database Schema, Migration Lock & FTS5 Self-Repair (`LyracistDbContext.EnsureSchemaAndRepair`)**:
   - Automatically heals legacy, partially migrated, or interrupted `lyracist.db` files on startup, during directory scans, and on search retry so operators never have to manually delete `lyracist.db` and rescan from scratch.
   - Cleans abandoned `__EFMigrationsLock` tables (`DROP TABLE IF EXISTS` before `writable_schema` catalog cleanup, `PRAGMA integrity_check(1)`, and `SqliteConnection.ClearAllPools()`), idempotently verifies and adds any missing tables (`Songs`, `Singers`, `PerformanceRecordings`, `SingerHistory`, etc.) and columns (`MixInMs`, `MixOutMs`, `NeedsRepair`, `MeasuredLoudnessLufs`, `Difficulty`, `Key`, `BPM`, `VocalPresence`, `Quality`, `AllowRecording`), and recovers from corrupt FTS5 shadow tables or corrupt WAL sidecar files.
@@ -69,6 +75,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **`LyracistDbEditor` Fixes & Enhancements**: Fixed the **Duplicate Detection** action buttons (`Remove Selected` and `Remove All But Suggested`) by moving `<Grid Grid.Row="6">` out of the `<ListBox.ItemTemplate>` so it binds to `MainViewModel`; added an editable `Genre` field, `Open Folder` (`explorer.exe /select`), and `Delete` button to the `Edit Track Details` card (and song right-click `ContextMenu`); added a `Backup DB` snapshot button (`VACUUM INTO`) in the top header bar and `Remove Selected` in **Orphaned File Audit**; updated `ScanSongMetadata` to clear `NeedsRepair = false` and remove resolved tracks from `NoArtistStore`; batched FTS5 (`RemoveSongsFromIndexBatch`) and `NoArtistStore` (`RemoveBatchAsync`) deletions during bulk duplicate/orphan cleanup; and offloaded `GenerateBook()` and `PickKeeper()` disk checks to background worker threads.
 
 ### 🎯 Trivia Suite Enhancements, Performance Optimizations & Bug Fixes (`Lyracist.Trivia.Core`, `Lyracist.Trivia`, `TriviaDbCreator`, `KnockoutTrivia`, `Lyracist`, `KSRotation`)
+
 - **Core Trivia Engine & Mobile Web Buzzer (`Lyracist.Trivia.Core`, `trivia.html`, `TriviaDisplayViewModel`)**:
   - **Eliminated Answer Validation & Live Countdown**: `TriviaGameEngine.SubmitAnswer` rejects out-of-range or already-eliminated answer indices (`EliminatedAnswerIndices`) and fires `LeaderboardUpdated` on every valid submission so the host's live response distribution and answered count update immediately. `GetSnapshot()` exposes `_eliminationCountdownSeconds` and `AnswerEliminationIntervalSeconds` during `EliminatingAnswers`, and `trivia.html` populates the question prompt, 4 option labels, and timer bar for players joining or refreshing mid-elimination while keeping `.btn-buzzer` buttons disabled when the game is paused.
   - **Zero-Point Void Rollback & Team Updates**: `VoidCurrentQuestion()` accurately rolls back `TotalCorrect` using `PlayerQuestionAnswer.IsCorrect` even when `LastPointsEarned == 0`, and `RegisterPlayer()` updates `TeamName` when rejoining with a new team name.
@@ -88,6 +95,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Guarded `UpdateSelectedPacksPreview` / `UpdateTriviaCategoryPreview` while a game is running so checking packs for the next game never overwrites the live TV category header; added pre-game countdown quick controls (`+1m`, `+5m`, `Reset`, `⏯`), dynamic `ProgressBar.Maximum` scaling (`MaxDistributionCount`), and `✓ CORRECT` badges on the 4 host option cards in `Lyracist` and `KSRotation`; debounced Trivia settings saves; live-restarted `TriviaWebServer` when the port changes; ensured clean UI-thread window and server teardown on exit (`ShutdownTrivia` / `App.OnExit`); and bound `AppVersion` dynamically to the executing assembly's build version (`Assembly.GetName().Version`) across `Lyracist.Trivia`, `TriviaDbCreator`, and `LyracistKeyGen`.
 
 ### 🎉 Holiday Rotation Screens, Color-Coded Venue Tabs & Enhanced MAUI Rotation Transmission (`KSRotation`, `KSRotation.Maui`, `Lyracist`)
+
 - **Enhanced MAUI Rotation Screen Transmission (`KSRotation.Maui`, `billboard.html`, `BillboardView.xaml`)**: `KSRotation.Maui` transmits rich audience rotation screens across Chromecast (`MauiCastingService`), Smart TV browsers (`billboard.html`), and wired HDMI / wireless secondary displays (`SecondaryDisplayService` + `BillboardView.xaml`), now including:
   - **Holiday Rotation Screens**: Floating seasonal characters with palette glow halos, vignette tint, ground fog, and `Auto (by date)` resolution controllable directly from the MAUI Billboard bar and Cast dialog.
   - **All 12 Themed Rotation Views**: Live View Mode switcher (`Normal List`, `Star Wars Crawl`, `Vegas Marquee`, `Vinyl Turntable`, `Disco Ball`, `Synthwave Grid`, `Concert Festival Lineup`, `Casino Slot Reels`, `Jukebox`, `Stadium Jumbotron`, `Movie Theater 'Now Showing'`, `Purple Velvet Curtain`) plus Scaryoke `🎃 {Category}` challenge badges on Current Performer, Up Next, and Upcoming Queue rows.
@@ -99,6 +107,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Scaryoke Curse Round, Fortune Readings & Lightning Reveal (`KSRotation`)**: Optional Curse mini-spin after category landing, Fortune-Teller readings on the audience wheel card, white lightning strobe + shake on DJ's Choice landings, and a pulsing red cursed frame around the rotation screen while a cursed performer sings.
 
 ### 🎃 Scaryoke Mode: Post-Spin Category Reveal, Auto-Clearing Badges, & Monitor Routing (`KSRotation`, `Lyracist`, `dj.html`)
+
 - **Strict Post-Spin Category Assignment & Live Reveal**: Categories are never pre-assigned to performers in advance. Challenge categories are assigned and revealed only AFTER the Scaryoke Wheel completes its spin animation and lands on a slice. While the wheel is in motion, all audience and stage displays show "SPINNING..." to build suspense.
 - **Category Badges Across All Rotation Screens & Themed Views (`KSRotation`, `Lyracist`)**: Once the wheel lands and assigns a challenge, the performer receives an eye-catching, color-coded `🎃 {Category}` badge across all rotation screens, queue rows, and venue projection displays in both KSRotation and Lyracist. Displayed for Current Singer and Next Singers across all 11 themed projection panels (Normal, Marquee, Curtain, Jumbotron, Vinyl, Disco, Synthwave, Festival, Slot Reels, Jukebox, Scoreboard), Star Wars 3D crawl perspective scroll, and host DJ consoles (Rotation Page and Karaoke Page queue rows).
 - **Performer Challenge Badge Auto-Clearing**: As each singer finishes their performance and is marked finished/done, their assigned Scaryoke category challenge badge and wheel color automatically clear until their next spin, keeping queue cards and billboard lists completely clean during wait periods.
@@ -112,6 +121,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Host Console & DJ Remote Tablet Integration**: Added target singer selection dropdowns, inline `🎃 Spin` row buttons, right-click context menu options ("Spin for Singer (Booth / Quiet)", "Spin & Project to Screen", "🎃 Scaryoke: Set Category Manually...", "✕ Clear Scaryoke Challenge", "✕ Clear All Scaryoke Challenges"), clickable `🎃 {Category}` badges, manual category assignment in `ScaryokeControlWindow`, `ScaryokeWheelPage` (MAUI), `EditSingerWindow` / `ScaryokeWindow` (`Lyracist`), and full remote DJ web portal synchronization via `dj.html` (`📌 Set` button, clickable badge modal, Add Performer optional challenge field, and Scaryoke Station manual category bar).
 
 ### 🎈 Active Special Event Banner Display on Rotation Screen (`KSRotation`, `Lyracist`)
+
 - **Universal Special Event Overlay Projection**: All active special event banners (Birthday, Wedding, Engagement, Anniversary, Last Song / Final Singer, Announcement, Connect Instructions, and Custom Events) automatically project as high-visibility full-screen overlays directly on the rotation display screen (`SingerDisplayWindow` in KSRotation, `RotationWindow` in Lyracist).
 - **Host Console Live Banner Preview & Full-Screen Viewer**: Added an interactive 'Active Banner Live Preview' card with thumbnail preview and single-click full-screen launcher (`👁️ Full Screen`) inside the DJ & Special Event Banners settings tab on the host computer, ensuring the host can visually verify active graphics without looking at the venue monitor.
 - **Instant Activation & Reversion**: When a special event is activated by the host on the laptop or remotely by the DJ on `dj.html`, the audience rotation screen transitions immediately to the event banner. Clearing the event or selecting "None" instantly dismisses the overlay and restores the live rotation billboard.
@@ -119,11 +129,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Automatic Asset Deployment & Placeholder Fallbacks**: Standard pre-packaged event banners under `Banners/EventBanners/` are automatically packaged with application builds, with automatic procedural fallback generation if any file is missing at runtime.
 
 ### 🎧 Single DJ Name Entry & "Guest DJ" Default Across Apps (`KSRotation`, `Lyracist`, `KSRotation.Maui`, `KnockoutTrivia`)
+
 - **Simplified Single DJ Name Entry in KSRotation**: Replaced the multi-DJ ListBox and Add/Remove buttons in the KSRotation Settings tab with a clean, single "DJ / Host Name" entry field (`TbDjName`). Streamlines the settings layout and eliminates redundant list management.
 - **Universal "Guest DJ" Fallback**: Across KSRotation (WPF & MAUI), Lyracist, and KnockoutTrivia, the DJ/Host name defaults to `"Guest DJ"` whenever none is entered or when the entry is cleared.
 - **Synchronized Display & Title Updates**: DJ/Host name changes update active TV billboards, crawler banners, rotation reports, and live window title indicators seamlessly.
 
 ### 🎃 Dedicated Scaryoke Settings Tab & Display Tab Column Scrolling (`Lyracist`)
+
 - **Dedicated Scaryoke Settings Tab**: Added a dedicated 'Scaryoke Settings' tab in the Settings page, isolating wheel configuration, custom styling, probability rules, and audience overlay monitor routing into a balanced, clean 3-column view.
 - **Removed Redundant Duplicate Boxes**: Removed duplicate 'Rotation & Queue Rules' and 'Wait Times & Durations' sections from the Scaryoke tab that duplicated controls on the Presentation and Display tabs.
 - **Target Audience Overlay Monitor**: Added target overlay monitor selector under Audience Display & Overlay. Allows KJs to choose which monitor displays the live Scaryoke roulette wheel overlay (Rotation Billboard screen, Lyrics screen, DJ Banner screen, or any specific connected display device) with live test launch button.
@@ -134,32 +146,38 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Independent Display Page Column Scrolling**: Converted all 4 columns on the `Display` settings tab into independently scrollable panels (`ScrollViewer` on columns 0, 2, 4, 6), resolving content truncation issues on laptop displays and standard 1920x1080 screens with Windows display scaling (125%/150%).
 
 ### ⚓ Skipped Rotation Anchor Performer Rollover Restoration & Queue Bottom Prevention (`KSRotation`, `Lyracist`)
+
 - **Round-Scoped Skip Reset**: When a performer is skipped (including the rotation anchor holding `IsRotationStart`), the skip is strictly scoped to the active round. When the rotation advances and the round completes (crossing or reaching the rotation anchor), all `IsSkipped` flags are automatically cleared before choosing the next performer or evaluating floating queue positions.
 - **Queue Bottom Prevention in Floating Mode**: In floating mode (`FloatCurrentSingerToTop`), an anchor singer who was skipped in the preceding round is restored to full active eligibility immediately when the final performer finishes. They are retained at index 0 and promoted to Current instead of being mistakenly treated as skipped and flushed to the bottom of the active queue.
 - **Accurate On-Deck and Wait-Time Calculations**: As the final singer of a round performs, `MarkNextSinger` and `RecalculateEstimatedWaits` recognize that reaching the anchor initiates the new round, accurately highlighting the anchor singer as Up Next (`IsNext`) across laptop, projection, remote DJ, and billboard screens.
 
 ### 🎡 Scaryoke Roulette Wheel Integration in KSRotation & Tablet Remote DJ (`KSRotation`)
+
 - **Direct Singer Rotation Integration**: KJs can launch the Scaryoke Wheel directly from the primary Rotation toolbar using `[🎃 Scaryoke]`. The wheel overlay on `SingerDisplayWindow` takes highest Z-index precedence over any other display screens, bringing the audience view forward and immediately displaying the spinning wheel for the current performer.
 - **DJ Booth Singer Spin Station (`dj.html`)**: When Scaryoke is active, the DJ tablet screen provides dedicated `🎲 Spin Wheel` controls and a high-energy booth modal with a giant "🎲 TAP TO SPIN! 🎃" button. Singers can walk right up to the DJ booth and spin the wheel themselves, and the live spinning wheel executes with full physics and audio on the host's laptop and the big audience projection screen without needing heavy canvas rendering on the DJ tablet.
 - **Synchronized Real-Time Physics**: Audience screens and the host control window animate their wheel rotation synchronously using identical cubic ease-out deceleration physics and audio cues.
 - **Consecutive Duplicate Prevention Across Shutdowns**: Includes a toggle across `ScaryokeWheel`, `KSRotation`, `Lyracist`, and `KSRotation.Maui` to ensure no two singers in a row land on the exact same challenge. Past spin results persist across wheel dismissals and app shutdowns, allowing duplicate prevention to stay active when the next singer steps up. Spin past history automatically clears when the rotation queue is cleared or nightly reports are saved.
 
 ### 🎡 Scaryoke Standalone Roulette Wheel & Audience Projection (`ScaryokeWheel`)
+
 - **DJ's Choice Sliver Toggle**: Added a toggle switch in Settings allowing KJs to enable or disable the two thin black "DJ's Choice" slivers independently from Singer's Choice. When turned off, custom categories and optional Singer's Choice distribute evenly across the 360° wheel without DJ's Choice interruptions.
 - **Dual-Monitor Audience Projection**: Full support for running the wheel in a dual-monitor live show environment. KJs can click `[📺 Audience Screen]` to open a synchronized, full-screen projection window on an external projector or secondary monitor while keeping the primary control window and Spin button right in front of them on their laptop.
 - **Synchronized Spin & Animation Engine**: When the host clicks Spin on their laptop, the audience projection window executes the exact same physics-based deceleration curve, flashing tick lights, segment highlights, and DJ's Choice reveal animations in frame-accurate real-time lockstep.
 - **Dynamic Monitor Detection**: Leverages `MonitorEnumerator` to automatically discover secondary monitors and projectors upon HDMI hot-plug, allowing seamless selection from the title bar or settings.
 
 ### 📄 Native SkiaSharp PDF Generation (`KSRotation`, `Lyracist`)
+
 - **SkiaSharp Vector PDF Engine**: Replaced PDFsharp across all production projects (`KSRotation`, `Lyracist.Data`, `KSRotation.Maui`) with SkiaSharp's native vector PDF generation API (`SKDocument.CreatePdf`). Completely avoids license traps, commercial verification exceptions, or third-party paywall transitions (`The loaded license is not valid` introduced in PDFsharp 6.5.0+). Both end-of-night rotation reports in `KSRotation` and printable song catalogs in `Lyracist` render with high-fidelity vector styling, custom borders, table formatting, and automatic pagination.
 
 ### 🖥️ Native Windows Display Settings Change Detection & Dynamic Monitor Refresh (Cross-App)
+
 - **Zero-Polling Windows Event Listener (`MonitorEnumerator`)**: Statically listens to native Win32/WPF `Microsoft.Win32.SystemEvents.DisplaySettingsChanged` notifications with an automatic 250ms debounce and UI dispatcher marshaling, completely eliminating periodic monitor polling overhead.
 - **Synchronized In-Memory Cache**: Monitor enumeration calls (`EnumDisplayMonitors`) are served from an in-memory cache that updates only when display topology, resolution, or cable connections change.
 - **Instant Hot-Plug Detection Across All Apps**: Connecting or disconnecting an HDMI cable, stage TV, or projector immediately updates the monitor dropdowns in `Lyracist` (`SettingsPage` and `KaraokePage`), `KSRotation`, `KnockoutTrivia`, `LyracistTrivia`, and `ScaryokeWheel` without restarting the app or manual refreshing.
 - **Event-Driven DJ Banner Monitor Cap**: Replaced 30-second timestamp cache polling in `DjBannerWindowViewModel` with event-driven invalidation.
 
 ### ⚙️ Settings Page 4-Column Balanced Layout & Scroll Elimination (`Lyracist`)
+
 - **Balanced 4-Column Distribution**: Rebalanced GroupBox cards across 4 columns in `Audio & Engine`, `Library & Ratings`, `Display`, and `Presentation & DJ` tabs so settings fit cleanly on screen without vertical scrolling on standard laptop and 1080p monitors.
 - **Audio & Engine**: Distributed GroupBoxes into dedicated columns (Col 0: `Audio & Equalizers`, Col 2: `Performance Recording`, Col 4: `Decoders & Layout`, Col 6: `APIs & Logins`), eliminating the single-column vertical pileup in Column 0.
 - **Library & Ratings**: Distributed GroupBoxes across columns (Col 0: `Music Library`, Col 2: `Tablet Server` & `KSRotation Sync`, Col 4: `Performer Ratings`, Col 6: `Test Mode`), ensuring music library maintenance and tablet server settings are immediately visible without scrolling.
@@ -167,11 +185,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Presentation & DJ**: Moved `Auto-Advance Countdown` to Column 4, leaving `DJ & Venue Management` in Column 2 and `Theme & Appearance` in Column 0.
 
 ### 🔀 Dynamic Drive & Folder Song Path Resolution (`Lyracist`)
+
 - **Dynamic Drive Letter & Subfolder Probing (`SongPathResolver`)**: Automatically probes all connected logical drives and subfolders (`Music/`, `Karaoke/`, etc.) when loading or playing tracks, seamlessly resolving songs even if the physical drive letter shifted (e.g. historical `E:\` scan mounted as `F:\Music\` or `F:\Karaoke\`).
 - **Selection Priority in Main Transport Play**: In `KaraokeViewModel.Play()`, user selection (`SelectedSong` in library or `Rotation.SelectedSinger` in rotation) takes absolute precedence over generic auto-play logic, allowing the host to select any song or performer and immediately start playback.
 - **Missing File User Diagnostics**: Replaced silent failures with explicit warning dialogs if a media file cannot be found across any drive, maintaining player state integrity.
 
 ### ⏯️ Playback Control, Progress Bar & Projection Screen Synchronization (`Lyracist`)
+
 - **EmptyStringToVisibilityConverter Resource Resolution**: Added `NotEmptyToVisibilityConverter` and `EmptyStringToVisibilityConverter` resource definitions in both [SettingsPage.xaml](file:///c:/VB26/Lyracist/Lyracist/Views/Pages/SettingsPage.xaml) and [App.xaml](file:///c:/VB26/Lyracist/Lyracist/App/App.xaml), eliminating the `XamlParseException` ("Cannot find resource named 'EmptyStringToVisibilityConverter'") when loading or opening Settings.
 - **RedSettingsGroupBoxStyle Resource Resolution**: Defined `RedSettingsGroupBoxStyle` and accompanying red theme header/body/border brushes in `SettingsPage.xaml` so navigation to or instantiation of Settings loads cleanly without `XamlParseException`.
 - **Progress Bar / Seek Slider Zero-Duration Handling**: Added `DurationSliderMaximum` (`Duration > 0 ? Duration : 1.0`) to `KaraokeViewModel` and bound the transport seek slider in `MainWindow.xaml` to it. Prevents the WPF slider from drawing 100% full when `Duration == 0` and `Value == 0`.
@@ -181,18 +201,21 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Filler Music Ducking on Playback**: Synchronized background music ducking (`_showFlow.OnKaraokeTrackStarted()`) across all playback pathways including direct transport play and performer request playback.
 
 ### 🎵 Music Track Rotation Assignment, Playback & Lockup Prevention (`Lyracist`)
+
 - **Lockup & Task Storm Prevention**: Prevented application freeze caused by infinite dispatcher task recursion during rotation music auto-advance (`AutoPlayRotationMusic` with 0s delay). Re-entrant triggers are safely guarded, the player checks current playback state, and current singer identity is strictly evaluated by object reference.
 - **Custom Performer Assignment for Music**: Music tracks can now be assigned to specific performer names (existing or new) rather than forcing an anonymous "Music Request" title. Assigning a music track to an existing rotation performer without a song populates their current turn with `IsMusic = true`; assigning to a performer who already has a song enqueues it to their pending song buffer, properly preserving `IsMusic` across turn completion. If no performer name is specified, it gracefully defaults to "Music Request".
 - **Music Library Direct Play & Transport Controls**: Each music track row in the Music Library provides a dedicated `Play` button and supports double-clicking to start playback immediately. Selecting a music track also primes the main transport controls, allowing the primary Play button to load and play the track.
 - **Rotation Queue Playback**: Performer entries in the rotation queue support double-clicking to load and play immediately (`LoadAndPlaySelectedPerformerCommand`), working seamlessly for both singers and music tracks.
 
 ### 🎛️ Filler Music Automix, Per-Track Loudness & Cue-Point Mixing (`Lyracist`)
+
 - **Per-Track Loudness Leveling**: Filler music playback now normalizes volume per track using EBU R128 integrated loudness metrics (`MeasuredLoudnessLufs`) based on the standard `normFactor = 10^((target - measured)/20)` clamped 0..200, matching the primary `MediaEngine` behavior. Adheres strictly to `NormalizeVolumeEnabled` and is safely bypassed in Hardware Mixer Mode. The applied gain is limited to roughly -16 dB..+10 dB so a mis-measured track can't blast or vanish.
 - **Configurable Crossfade & Max Track Duration Automix**: Hosts can set crossfade length from 1 to 15 seconds (default 5s) and configure maximum track play duration (`FillInMaxTrackSeconds`, e.g. 180s for 3-minute automixing) to keep background energy fresh without letting long tracks drag out. Short track guard protects tracks shorter than twice the crossfade duration from premature cutting.
 - **Cue-Point Aware Mixing**: Tracks with detected `MixInMs` and `MixOutMs` automatically start playback skipping leading silence and trigger crossfades into the next track at `MixOutMs - crossfade` rather than the physical file end. Cue points are read once per track (cached per playlist load), the mix-in is applied as a LibVLC start-time option, and implausible mix-out points (past the end or too early) are ignored. Elapsed-time automix has a 30-second floor so a mistyped value can't cycle tracks every few seconds.
 - **Smart Shuffle**: Automatically selects the next filler track matching the current song's BPM within ±8% tolerance (with half/double tempo folding), enforcing artist variety and preventing recent track fatigue.
 
 ### 🎚️ 16-Pad Sample & Jingle Soundboard (`Lyracist`)
+
 - **16-Pad Hardware-Accelerated Soundboard**: Built-in 4x4 matrix for sound effects, DJ drops, applause, and intro jingles using low-latency NAudio WASAPI output with multi-clip overlapping playback and master Stop All control.
 - **Low-Latency RAM Caching**: Audio clips are preloaded into memory as 32-bit floating-point PCM buffers for instantaneous playback without disk latency. Clips are capped at 60 seconds each so 16 pads can never exhaust RAM, decoding has a 30-second timeout, and the audio render path is allocation-free.
 - **Drag-and-Drop & Customization**: Drag audio files directly from Windows Explorer onto any pad to assign. Right-click pads to customize labels, button colors, and volume levels or clear assignments.
@@ -201,6 +224,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Configuration Persistence**: Pad assignments and colors are saved in `Settings/samplepad.json`.
 
 ### 🎙️ Gated Performance Recording & Singer Take Archive (`Lyracist`)
+
 - **USB Mixer & Windows Audio Input Capture**: Directly records master stereo mixes from USB mixers (such as Yamaha MG10XU) or dedicated recording inputs via shared NAudio `WasapiCapture` streaming to disk.
 - **Per-Singer Consent Gating**: Disabled by default. Only performers with the per-singer opt-in flag checked (`AllowRecording` in singer profiles) are recorded, ensuring singer consent and compliance with venue recording policies.
 - **Automated Lifecycle Synchronization**: Recording automatically arms and captures only during active karaoke performances driven by `MediaEngine` (ignoring filler music and sound effects).
@@ -209,11 +233,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **DJ Monitoring & Playback Controls**: Settings page features an audio input picker, real-time VU meter, 5-second test clip recorder, and singer profiles contain a dedicated "Recorded Performances" history list for playback, opening storage folders, and deletion. An on-screen "REC" indicator signals active recording. The VU meter understands the usual WASAPI float format as well as 16/24/32-bit PCM inputs.
 
 ### 🩺 Managed BPM Analysis & Cue Points in Library Health (`LyracistDbEditor`)
+
 - **Pure Managed BPM Audio Analysis**: High-performance onset-strength envelope and zero-mean normalized autocorrelation analyzer detecting track tempo folded into 70-180 BPM with peak confidence validation and noise rejection.
 - **Silence & Cue Detection**: FFmpeg `silencedetect` audit identifies leading silence (`MixInMs`) and trailing silence (`MixOutMs`) for seamless gapless automix transitions.
 - **Library Health Audit Integration**: Added "Missing Filler BPM" tracking and automated background analysis audit alongside existing loudness and duplicate diagnostics. BPM and cue-point analysis is limited to songs that are in the Opening, Fill-In, or End-of-Rotation playlists (analysis decodes audio, so it is not run across the whole library), tracks with no silence to cue on are marked so they are not re-decoded on every audit, and cancelling an audit stops the running ffmpeg process.
 
 ### 🛠️ LyracistDbEditor Library Maintenance & Safety (`LyracistDbEditor`)
+
 - **Library Folder Management**: Add, remove, and rescan library folders. Removing a folder removes only the songs that belong to it (case-insensitive; never a sibling folder sharing a prefix, and never songs still owned by another registered folder) and clears their search-index entries. This routine is shared with Lyracist (`Lyracist.Data/Services/LibraryMaintenanceService.cs`), so both apps behave identically.
 - **Automatic Safety Backups**: Before any bulk destructive operation (Remove Directory, Remove All Orphaned Entries, Remove All But Suggested duplicates, Rename Files), the database is snapshotted to `Data\Backups\lyracist_<timestamp>_<operation>.db` (newest 10 kept). Bulk deletes show the affected song count before asking for confirmation.
 - **Library Health Tab**: Duplicate detection with a suggested keeper per group (file exists, longest duration, largest file) plus one-click "Remove All But Suggested"; an orphaned-file audit that skips drives or shares that are not currently mounted so an unplugged external drive is never mistaken for deleted files; and a queue-readiness/loudness backlog audit.
@@ -224,10 +250,12 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Scan Reliability, Fast-Path Rescans & Standalone `noartist.db` (shared `ScanningService`)**: A library rescan never removes songs from unmounted drives, persists updates across every 200-file batch, and no longer overwrites tag-resolved or hand-edited artists with filename guesses. Lyracist's own scans now run one at a time (extra requests are queued) and are cancelled cleanly on exit. In addition, existing cataloged files and tracks flagged with `NeedsRepair` skip disk I/O, regex parsing, and companion `.cdg` checks, allowing newly added tracks to be indexed into large collections in seconds without re-probing known or tagless files. Tracks missing artist metadata are also mirrored into a separate `Data/noartist.db` SQLite database; even if `lyracist.db` is deleted or reset, cold scans read known unresolvable files from `noartist.db` and avoid wasteful TagLib / FFprobe re-probing.
 
 ### 🌟 New Singer Welcome Screen Trigger on Name Entry Lost Focus (`KSRotation`)
+
 - **Focus-Based Welcome Triggering**: Replaced the legacy 2.5-second settle timer after typing with immediate welcome screen activation triggered when the singer name text box loses focus (`LostFocus`).
 - **Typing Interruption Prevention**: Guarantees that the "Welcome to our new performer" screen only appears once the host has completely finished typing the performer's name and moved away (via Tab, Enter, or mouse click), preventing unwanted popups mid-keystroke.
 
 ### 🖱️ Mouse Drag-and-Drop Rotation Queue Reordering (`KSRotation`, `Lyracist`)
+
 - **Direct Drag-and-Drop Positioning**: Hosts can grab and move performers anywhere in the active rotation queue using the mouse to instantly reposition performers, accommodate singers temporarily stepping away, or adjust queue pacing. (Remote DJ screens retain standard button controls and do not require mouse dragging).
 - **Dedicated Drag Grip Handle (`⋮⋮`)**: Each performer row in both KSRotation and Lyracist features a dedicated drag grip handle on the left with a 4-way move cursor (`SizeAll`) and tooltip hint ("Drag to reorder singer in rotation").
 - **Protected Input Controls**: Textboxes (Name, Duet Partner, Song, Artist) and buttons/checkboxes remain protected for normal clicking, typing, and editing without accidental drag initiation. Dragging from the grip handle or row background smoothly initiates reordering.
@@ -236,6 +264,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Full Live Synchronization**: Dropping a performer immediately recalculates estimated wait times, updates next-performer highlights, refreshes audience billboard projection displays, updates rotation JSON caches for mobile devices, and saves changes to the database.
 
 ### 🧪 Test Mode Settings GroupBox & Performer Count Options (3, 5, 10, 15) (`KSRotation`, `Lyracist`, `KSRotation.Maui`)
+
 - **Dedicated Test Mode GroupBox (GBX)**: Test Mode settings are now segregated into their own GroupBox, separating testing workflows from operational session controls like duplicate song blocking.
 - **Configurable Performer Counts**: Select from 3, 5, 10, or 15 sample performers to match test scenarios (3 for quick audio checks, 5 for rotation handoffs, 10 for multi-round pacing, or 15 for full billboard capacity).
 - **Curated 18 Performer Pool**: Replaced legacy test names with 18 realistic performers: Brenda Bumps, James Smith, Raymond Carter, Sharon Roberts, Ami Anderson, Ali Davis, Randy Davis, Larry Strickland, Robert Roberts, Cynthis Nix, David Wayne, Danny Hinnant, Cerrina Culbert, Julia Stanton, Carol Henderson, Joe Bob Briggs, Craven Counts, and Dennis Starling.
@@ -243,22 +272,26 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Instant "Load Test Singers Now"**: Populate or refresh test queues with a single click at any time without restarting the application.
 
 ### 👤 New Singer Auto-Cleanup & Automatic Unused Row Removal (`KSRotation`, `Lyracist`)
+
 - **Automatic Orphan Row Pruning**: Clicking "New Singer" inserts a new performer with the default placeholder "New Singer" selected for typing. If the host shifts focus or clicks elsewhere without altering the placeholder or typing a name, the unused row is instantly and silently deleted from the rotation without requiring a confirmation dialog.
 - **Smart Placeholder Stripping**: If the user types a name without clearing the default text (e.g., typing "New Singertom", "New Singer Tom", or "Tom New Singer"), the application automatically removes the "New Singer" token and any surrounding delimiters, extracts the intended name ("Tom"), and applies intelligent proper-casing.
 - **Smooth Traversal & Keyboard Workflow**: Hitting the Enter key in the singer name text box commits the sanitized name and advances focus to the next field (e.g., song title).
 
 ### 🔒 Single-Instance Application Enforcement Across All Suite Apps (`Shared/SingleInstanceHelper.cs`)
+
 - **Strict Single-Instance Execution**: Every application across the suite (`Lyracist`, `KSRotation`, `KnockoutTrivia`, `Lyracist.Trivia`, `ScaryokeWheel`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`) enforces a single instance per Windows user session.
 - **Conflict Prevention**: Completely prevents duplicate processes, database locking collisions, audio device loopback contention, and web server port conflicts (such as port 8080 or tablet lyrics servers).
 - **Auto-Restore & Foreground Activation**: Launching a second instance never creates duplicate UI or processes; instead, it automatically locates the existing running window, un-minimizes/restores it if minimized, attaches thread inputs, and brings it directly to the front before exiting silently.
 
 ### 👥 Duet Partner Remote Sync & DJ Tablet Display (`KSRotation`, `dj.html`, `billboard.html`, `kiosk.html`, `PatronPortal.html`)
+
 - **Complete Duet Synchronization**: Duet partners added or edited on performers in KSRotation desktop immediately synchronize across the rotation cache, audience display screens, remote DJ tablets, and patron web portals.
 - **Dual-Property Compatibility**: `RotationItemDto` and JSON rotation cache feeds provide both `partner` and `duetPartnerName` fields, and web remotes evaluate `duetPartnerName || partner` (and `partner || duetPartnerName` on billboards) for rock-solid cross-compatibility.
 - **Instant Grid Invalidation**: Editing a duet partner in the desktop rotation grid immediately triggers cache rebuilding, database dirty state tracking, and live TV screen updates via `Singer_PropertyChanged`.
 - **Inter-App Lyrics Server & Service Sync**: `TabletLyricsServer` and `KSRotationSyncService` propagate duet partner names across live tablet lyrics and inter-application synchronization.
 
 ### ↩ Clear "Last Round Done" Flag & Restore Performer (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `dj.html`)
+
 - **Accidental Finish Recovery**: When managing the final round of the evening, a performer marked finished by mistake can now be instantly restored to the active queue without having to reset or recreate the entire round.
 - **Interactive Singer Badge**: The "DONE (LAST ROUND)" indicator is an interactive clickable button badge (`DONE (LAST ROUND) ✕`). Clicking or tapping it on any singer row clears the `HasSungInLastRound` flag immediately.
 - **Instant Rotation Recalculation**: Removing the flag immediately restores the singer's eligibility as the Next Performer (`IsNext`), recalculates cumulative wait times and round duration estimations, and refreshes the full-screen audience rotation billboard.
@@ -270,6 +303,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 
 ### 🌈 Lyrics Screen Audio Visualizer & "Adjust Synth Display" DJ Controls (`AudioSpectrumService.cs`, `AdjustSynthDisplayWindow.xaml/.cs`, `LyricsWindow.xaml`, `KaraokePage.xaml`, `SettingsPage.xaml`)
+
 - **Non-Audience DJ Controls ("Adjust Synth Display")**: Dedicated "🎛 Adjust Synth Display" buttons on the DJ's primary `KaraokePage` (on the top playback strip, above the Lyrics Preview Monitor, and under Multi-Monitor Display controls) open a modal settings dialog centered over Lyracist without ever interacting with or interrupting the audience-facing projection display during a live performance.
 - **Interactive Live Preview Dialog**: The popup window provides instant real-time adjustment of enable state, motion mode, 7 color themes, 4 bar widths, opacity slider with quick presets, and an animated live preview canvas showing simulated bars before saving.
 - **Persistent Recall**: All changes immediately update `appsettings.json` and persist across application restarts.
@@ -280,12 +314,14 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Opacity & Instant Context Menu**: Adjust visualizer opacity from 10% to 100% via the popup dialog, Settings tab, or right-clicking anywhere on the active Lyrics Projection Screen.
 
 ### 🎤 Song End Return to Karaoke Screen & DJ Manual Start (`AutoAdvanceManager.cs`, `KaraokeViewModel.cs`, `AppSettings.cs`)
+
 - **Return to Karaoke Screen on Song Completion**: When a song finishes playing, `MainWindow` automatically navigates back to the primary Karaoke control screen (`KaraokePage`), giving the DJ immediate access to performer queue controls, search, and audio settings without manual clicks.
 - **Audience Display Reset to Rotation Billboard**: The secondary projection window seamlessly hides the lyrics view and restores the full-screen Rotation Billboard, displaying the upcoming rotation queue and announcing the next performer to approach the stage.
 - **Manual DJ Next Song Start**: Instead of automatically launching the next song over an empty stage, rotation advances the previous performer to completed, prepares the new current performer in the queue, starts/unducks fill-in background music, and waits in `ReadyToStart`. The DJ initiates playback with "▶ Start Song" when the singer is situated on stage.
 - **Dispatcher Shutdown Guarding**: Fixed `System.Threading.Tasks.TaskCanceledException` crashes during library metadata scanning by safely checking `HasShutdownStarted` and catching `OperationCanceledException` during background probe reporting.
 
 ### 👋 New Performer Welcome Screen & Pre-Show Screen (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)
+
 - **Automatic welcome**: when a singer new to tonight's rotation is added, a full-screen "Welcome to our new performer: <name>" screen appears in one of six random designs. Several new singers in a row are welcomed in order.
 - **Dedicated Settings GroupBox**: organized in its own prominent "New Performer Welcome Screen" card on the Display tab for rapid discovery.
 - **DJ settings**: on/off, display time (default 15 seconds), which screen to use (the rotation and DJ Banner screens by default, or a specific monitor), style selector (choose a specific model—Spotlight, Neon Night, Sunset Stage, Confetti Party, Disco Rays, Red Velvet Curtain—or "All (Random)" to cycle through all designs without repeating), and a Preview button.
@@ -298,6 +334,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Banners are never overwritten**: the rotation, DJ Banner, Special Event and last-performer banners return exactly as they were when the welcome ends.
 
 ### 🥊 Knockout Trivia Core Fixes & Enhancements (`KnockoutTrivia`, `KnockoutWebServer.cs`, `knockout.html`)
+
 - **Real-Player Seeding & Disconnect Handling**: Removed hardcoded fake player initialization on launch; added a 20-second inactivity disconnect timeout in `IGameStateService.cs` so disconnected players do not block early reveal in Automatic mode, and rejoining players reconnect smoothly without duplicate roster entries.
 - **Snapshot Isolation & Socket Stability**: Replaced live collection reads with immutable thread-safe snapshots (`_snapshotLock`, `_cachedSnapshot`) for HTTP socket threads, eliminating 500 internal errors and cross-thread mutation exceptions.
 - **Super Streak Phone Screen & Asynchronous Fonts**: Added dedicated `screen-superstreak` UI to `knockout.html`, preloaded Google Fonts asynchronously with noscript fallback for offline venue Wi-Fi, added auto-rejoin recovery, and unlocked submit buttons on failure.
@@ -305,10 +342,12 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Bot Simulator & Config Protection**: Guarded bot simulator loop against stale questions, switched `IConfigService` to atomic JSON writes with `.corrupt.bak` backups, and cached pack question counts by file timestamp.
 
 ### 📺 TV Display Window Leak Fix & Engine Rebinding (`Shared/TriviaDisplayViewModel.cs`)
+
 - **Disposable Event Subscriptions**: Implemented `IDisposable` with named delegate unsubscriptions in `TriviaDisplayViewModel.cs`, eliminating 9 anonymous lambda memory leaks on TV window close/reopen.
 - **Live Host Engine Rebinding**: Added `RebindEngine(TriviaGameEngine)` allowing open TV displays to instantly re-synchronize when a host resets a trivia session in `Lyracist` or `KSRotation`.
 
 ### 🎯 Interactive Pub & Bar Trivia Pro Enhancements (`Lyracist.Trivia`, `Lyracist.Trivia.Core`)
+
 - **Question Revisit Protection (#11)**: Tracked answered question history (`_questionAnswers`) per player in `TriviaGameEngine.cs`. Navigating back via Previous Question, Go To Question, or dropdown preserves answered state, prevents re-answering and duplicate scoring, and protects answer streaks.
 - **Standby Timer Preservation on Pause/Resume (#12)**: Tracked `_wasTimerRunningBeforePause` in `PauseGame()` and `ResumeGame()`, preventing standby reading mode timers from auto-starting when DJ banners resume.
 - **Timer Drift Guard (#37)**: Added tick processing guard (`if (IsPaused || !_tickTimer.Enabled) return;`) in `ProcessTick()`.
@@ -335,6 +374,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Offloaded synchronous question pack database seeding in `Lyracist/ViewModels/TriviaViewModel.cs` to a background task so UI startup remains instantaneous.
 
 ### 🎯 Interactive Pub & Bar Trivia Pro Enhancements (`Lyracist.Trivia`, `Lyracist.Trivia.Core`)
+
 - **Leaderboard Auto-Advance Fix (#3)**: Round leaderboard interstitial display automatically advances to the subsequent question (`AdvanceToNextQuestion()`) upon the 8-second countdown expiration when `AutoAdvanceQuestions` is enabled, rather than restarting the previously answered question.
 - **Games-Played Counter & Multi-Run Support (#4)**: Explicitly resets the games-played counter on fresh manual game launches (`isAutoRestart: false` and `ResetGamesPlayedCount()`), preserving accurate game progression (`Game X of Y`) and preventing subsequent runs from immediately tripping the game cap on game 1.
 - **Stale Submission Prevention via Question ID Validation (#5)**: Added `QuestionId` validation to both the mobile client payload (`trivia.html`), the HTTP API server (`TriviaWebServer.cs`), and the game engine core (`TriviaGameEngine.cs`). In-flight answers submitted during question transitions cannot score against subsequent questions.
@@ -352,11 +392,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Uniform Viewbox TV Scaling**: Wrapped trivia display canvases in uniform `Viewbox` controls across all host apps, guaranteeing pristine, unclipped layouts at 125%, 150%, and 4K TV scaling.
 
 ### 📺 DJ Banner Target Monitor TV Overscan Guidance (`KSRotation`, `Lyracist`, `HelpViewModel.cs`)
+
 - **TV Hardware Overscan Prevention**: When outputting the dedicated DJ Banner window to external TVs (particularly older 720p/1080p hospitality or venue screens), television hardware frequently applies default overscan processing, cropping and zooming into the edges of the banner graphics.
 - **In-App Warning Tooltip**: Positioned directly beside the **Target Monitor** / **DJ Banner Screen** settings controls in both KSRotation and Lyracist, a help icon (``) provides DJs with instant reminder guidance on TV picture setup.
 - **Recommended TV Picture Settings**: Set TV aspect ratio / picture size to **"Just Scan"**, **"Screen Fit"**, **"1:1 Pixel Mapping"**, **"Full Pixel"**, or disable **"Overscan"** in the television's hardware menu to prevent edge cropping.
 
 ### 🔄 Seamless Bidirectional Device Switching & Live Session Handoff (`KSRotation`, `KSRotation.Maui`, Web Portal)
+
 - **Zero-Beat Event Handover**: Seamlessly transfer an active karaoke show between a Windows laptop running `KSRotation` and a mobile tablet running `KSRotation.Maui` (Android or Windows) when the host needs to leave with the laptop or return to the main DJ booth.
 - **Architectural Flow: Live Session Handoff & Remote DJ Takeover**:
 ```text
@@ -389,6 +431,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
       ═════════════════════════════════════════════════════╪═══════════════
       Seamless bi-directional synchronization over venue Wi-Fi!
 ```
+
 - **Automated In-App Remote DJ Transition**: When the desktop host pulls an active session from the DJ's tablet, `KSRotation.Maui` automatically transitions into a full-screen embedded in-app Remote DJ controller (`dj.html`), pre-authenticated with the host's credentials so the DJ never leaves the native app and can immediately continue queue management from the floor.
 - **Complete State Preservation**: Transmits the entire active queue, currently performing singer (`IsCurrent`), on-deck singer (`IsNext`), rotation start anchor (`IsRotationStart`), paused and inactive performers, queued tracks, linked duet pairs, completed round checkmarks (rounds 1–10), tonight's performance history with original timestamps, and pending patron requests.
 - **Dedicated Switch Device QR Code & Web Portal (`handoff.html`)**: Generates a dedicated high-resolution QR code (`/handoff`). Scanning with any camera opens a sleek mobile landing page showing live venue stats, current singer, active queue counts, and a 1-tap "Open in KSRotation MAUI" button.
@@ -398,11 +441,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Offline & Manual Resilience**: Supports manual IP/PIN entry, manual JSON push, robust socket stream flushing, and downloadable standalone `.ksr` session backup files for isolated venue networks.
 
 ### ⏳ Dynamic Estimated Wait Times on Reorder & Move (`KSRotation`, `Lyracist`, `Shared`)
+
 - **Instant Wait Time Recalculation**: Moving any performer up or down in the rotation (via desktop `▲`/`▼` buttons, context menu, tablet controls, or remote DJ web commands) immediately recalculates cumulative wait times based on the new queue position.
 - **Display Synchronization**: Immediately pushes updated wait times and position numbers to `SingerDisplayWindow` (Normal list, Vegas Marquee, Vinyl Turntable, and Star Wars Crawl) and audience billboard displays.
 - **Desktop Queue Badging**: Singer rows in the desktop console (`MainWindow.xaml`) feature an estimated wait badge (`⏳ {0}m`) with tooltips, allowing the DJ to inspect wait estimates directly in the primary host window.
 
 ### ⏱️ Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)
+
 - **End-of-Night Decision Support**: Instantly informs the host/DJ how much time is remaining in the active round and projects the exact completion clock time (ETA), answering the critical question: *"Is there time for another round before last call or venue closing?"*
 - **Remote DJ Status Notice (`dj.html`)**: Pinned color-accented status banner directly beneath the Last Round banner displaying performers left in the round, estimated minutes remaining, projected finish time (e.g. `ends ~11:42 PM`), and full round duration. Auto-refreshes every 15 seconds and updates in real time on any queue modifications.
 - **Desktop Karaoke Station (`KSRotation`)**: Pinned notice badge beside active singer counts in the main Rotation header toolbar: `⏱️ Round: 4 singers left • ~20m (ends ~11:42 PM) | Full round: ~25m (5 singers)`.
@@ -411,11 +456,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Smart Round Progression**: Accurately traces circular rotation from current performer to the rotation anchor (`IsRotationStart`), handles Last Round mode (`!HasSungInLastRound`), and excludes paused, skipped, inactive performers, and filler background music tracks.
 
 ### 🎤 Active Singer Count on Vegas Billboard & Vinyl Record Banners (`KSRotation`, `Lyracist`)
+
 - **Live Rotation Singer Count on Audience Projection Screens**: The Broadway / Vegas Marquee and Vinyl Turntable screens on the detached rotation display window (`SingerDisplayWindow.xaml` in `KSRotation` and `RotationWindow.xaml` in `Lyracist`) prominently show the current number of active singers in the rotation.
 - **Top Header & On-Deck Placement**: Displayed as a glowing golden badge pill (`🎤 X Singers in Rotation` or `🎤 1 Singer in Rotation`) both in the main header (alongside now-spinning and marquee title headers) and beside the "UP NEXT" / "ON DECK" section banners.
 - **Dynamic & Accurate**: Automatically counts eligible non-music performers currently in rotation, handles singular vs plural grammar (`1 Singer in Rotation` vs `{N} Singers in Rotation`), respects Last Round mode, and hides automatically when no active performers remain.
 
 ### ⭐ Special Singer (One-Time Performance) (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, Web UI)
+
 - **One-Time Guest Performance**: Accommodates guest performers, special dedications, or one-off singers who are called up to sing a single song without joining the permanent nightly rotation.
 - **Instant Top of Queue & Current Performer**: When added or designated, the special singer is immediately placed at the top of the queue (index 0) and promoted to current performer, perfectly catering to spur-of-the-moment guest performances.
 - **Instant Name Selection on Add**: Whenever a regular or special singer is added, the text in the performer name field is automatically selected so the host can immediately type the new name without clicking or dragging to highlight.
@@ -426,6 +473,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Round Anchor Immunity**: Smart round-anchor heuristics (`EnsureRotationStartFlag` and `HandleSingerRetiredOrRemoved`) ignore special performers so round boundaries are always anchored to regular performers.
 
 ### ⏭️ Singer Skip (Round-Scoped Rotation Bypass) (`Shared`, `Lyracist`, `KSRotation`, `dj.html`, `billboard.html`, `kiosk.html`, `PatronPortal.html`)
+
 - **Single-Round Bypass**: Allows the DJ to pass over a performer who needs to temporarily step away (e.g. stepping outside or grabbing a drink) without forfeiting their position in the rotation or dropping them to the back of the queue.
 - **Distinct from Inactive & Pause**:
   - `IsInactive`: Marks the performer as inactive/deleted, moves them out of active rotation to the end of the line, and excludes them from active counts.
@@ -437,6 +485,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Cross-Platform UI & Indicators**: Amber `⏭ SKIP` badges, row styling, and `Skip / Unskip` buttons across Lyracist, KSRotation desktop, remote DJ board (`dj.html`), audience billboard (`billboard.html`), kiosk (`kiosk.html`), and patron mobile portal (`PatronPortal.html`).
 
 ### 📍 Hybrid GPS & Wi-Fi Venue Auto-Location (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)
+
 - **Hybrid Ground-Truth Detection**: Uses high-precision GPS coordinates (Latitude/Longitude) with a 150-meter spherical Haversine radius (`GeoMath`) as the primary ground truth, with house Wi-Fi SSID as a secondary fallback.
 - **Travel Router Immunity**: Addresses the DJ mobile reality where portable travel routers are deployed at venues without Wi-Fi. SSIDs marked as travel routers in `KSRotation.Maui` or registered in `Settings/ksrotation_travel_routers.json` are excluded from Wi-Fi matching, preventing the system from falsely identifying new venues as old gig locations.
 - **Tablet-to-Host GPS Bridge**: Devices with real satellite GPS sensors (`KSRotation.Maui` on Android tablets) automatically query hardware coordinates and push them to the host laptop via `POST /api/venue/location`. The desktop host caches these coordinates in `WindowsLocationService`, giving laptop hosts access to satellite precision even without onboard GPS chips.
@@ -444,6 +493,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **One-Click Venue Tagging & Auto-Save**: "📍 Tag GPS" buttons across `KSRotation`, `Lyracist`, and `KSRotation.Maui` allow hosts to capture and save the current location to any new or existing venue with one click.
 
 ### 📡 KSRotation.Maui Chromecast Web-Casting & TV Billboard Layout (`KSRotation.Maui`, `billboard.html`, `BillboardView.xaml`)
+
 - **Direct Chromecast / Google TV Web-Casting**: Built-in DashCast web-receiver (`appId: 84912283`, `urn:x-cast:com.madmod.dashcast`) integration allows DJs running `KSRotation.Maui` on Android tablets, phones, or Windows laptops to cast the live audience billboard (`billboard.html`) directly to any Google Cast or Chromecast display on the local network.
 - **Dedicated Full-Height Rotation Column**: Redesigned the audience billboard so the Upcoming Rotation queue occupies a dedicated, full-height right-hand column. Singer names, song titles, and queue numbers remain completely visible and legible across the room on 720p, 1080p, and 4K TVs.
 - **Side-by-Side QR Code Arrangement**: Relocated the Song Requests and Wi-Fi Join QR code cards to the bottom-left area directly below Now Performing and Up Next, arranging them side-by-side with crisp contrast and generous scannable sizing.
@@ -451,6 +501,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Asynchronous Discovery & Android Multicast Lock**: Employs `ChromecastDiscoveryService` mDNS scanning with automatic Android `WifiManager.MulticastLock` handling, ensuring reliable device discovery and one-tap casting across all mobile Wi-Fi chipsets.
 
 ### 🖥️ 1080p Resolution Layout Optimization & Internal Search DataGrid Scrolling (`KaraokePage.xaml`)
+
 - **Full HD (1920x1080) Workspace Alignment**: Streamlined page margins (`16,10,16,12`) and TitleBlock padding to prevent UI clipping and vertical scrolling on 1080p laptop displays and monitors running at 100% or 125% Windows DPI scaling.
 - **Ultra-Compact Header Toolbar**: Reduced the top TitleBlock from ~102px down to a sleek ~40px toolbar with inline Venue & DJ branding and compact request indicator bulbs, recovering over 60px of vertical space for the song library, queue, and lyrics preview.
 - **Interactive QR Code Thumbnail & 1-Click Popout**: Scaled the inline QR code to a clean 30x30 thumbnail with Join URL; clicking the QR thumbnail instantly launches the enlarged, high-resolution QR modal (`KioskQrCodePopoutWindow`) for easy patron scanning or tablet kiosk configuration.
@@ -459,10 +510,12 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Compact Playback FooterBar & Anti-Impingement Layout (`MainWindow.xaml`)**: Reduced the bottom playback bar height from ~94px down to ~52px (`Padding="20,6"`). Implemented a strict 3-column `Grid` (`MaxWidth="180"` on performer, `*` on song title, both with `TextTrimming="CharacterEllipsis"` and golden song highlight), placing the seek bar on row 2 with dedicated right-margin breathing room (`Margin="0,0,28,0"`) so text and progress controls never impinge on the center Play/Pause/Stop controls.
 
 ### 📱 Android Multi-RID Deployment Pipeline (`KSRotation.Maui.csproj`)
+
 - **Self-Healing Multi-RID Packaging Target**: Integrated `EnsureOuterAssemblyForProcessAssemblies` before Android assembly processing and package signing. Automatically bridges RID-specific inner compiled assemblies (`android-arm64`, `android-x64`) into the outer intermediate directory (`obj\Debug\net10.0-android\`), preventing `XAPRAS7028` missing DLL errors during direct-to-device deployments.
 - **Direct Hardware Deployment**: Guarantees seamless one-click Visual Studio and CLI deployment directly to connected tablets (e.g., Lenovo TB373FU).
 
 ### 📱 Audience Lyrics Screen QR Code Toggle (`SettingsPage.xaml`, `LyricsPage.xaml`, `LyricsWindow.xaml`)
+
 - **Projection Screen Customization**: KJs can easily show or hide the patron mobile song request QR code badge displayed in the top-right corner of the lyrics projection window.
 - **Triple Access Points**:
   - **Settings**: Checkbox under **Monitors & Screen Assignments -> Lyrics Projection Screen**.
@@ -471,16 +524,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Persistent State**: Synced and persisted automatically via `AppSettings.ShowQrCodeOnLyricsScreen`.
 
 ### 🎵 Karaoke & Music Library Separation & Search Isolation (`ScanningService`, `SearchService`, `LibraryService`, `KaraokePage.xaml`)
+
 - **Companion CDG Detection**: `ScanningService.ParseStoreDownload` automatically detects accompanying `.cdg` graphics files (`Path.ChangeExtension(filePath, ".cdg")`), reliably classifying unzipped MP3+G / WAV+G tracks as `IsKaraoke = true, KaraokeType = "MP3G"` and preventing them from mistakenly being routed to the background music library.
 - **Expanded Audio Format Enumeration**: The file crawler now catalogs standard music files in `.mp3`, `.mp4`, `.zip`, `.wav`, `.m4a`, `.flac`, `.wma`, `.aac`, and `.ogg` formats.
 - **Dedicated Library Tabs & Live Match Badges**: The search results view clearly distinguishes **Karaoke Library** and **Music Library** tabs, each displaying dynamic match count badges (e.g. `Karaoke Library (12)` and `Music Library (3)`).
 - **SQLite FTS Search Query Isolation**: SQLite FTS search queries now evaluate the `IsKaraoke` filter directly in SQL (`AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)`), preventing voluminous karaoke results from starving out music tracks under the 150-match query limit.
 
 ### 🎨 Search Result Track Type Tinting (`KaraokePage.xaml`, `HelpViewModel.cs`)
+
 - **Instant Visual Distinction**: Search result rows feature subtle, semi-transparent row tinting to immediately distinguish track formats at a glance: emerald green (`#1522C55E`) for karaoke tracks (`IsKaraoke = true`) and warm gold (`#15F59E0B`) for standard background music tracks (`IsKaraoke = false`).
 - **Help Topic Integration**: Topic 1 in the in-app help system documents search result row tinting alongside direct database scan and compact DJ toolbars.
 
 ### 🔘 Special Event Banner Mutual Exclusion, Two-Way Sync & Quiet Updates (`KaraokePage.xaml`, `KaraokeViewModel.DjBanner.cs`, `KSRotation/MainWindow.xaml`, `PatronRequestServer.cs`, `KSRotationSyncService.cs`)
+
 - **Guaranteed Single Selection & Mutual Exclusion**: Added explicit `GroupName="SpecialEventBanner"` to the RadioButton template in Lyracist's KaraokePage and KSRotation, coupled with an active synchronization loop across SpecialEventOptions. Ensures only one special event banner can be selected at a time.
 - **Instant 'None' Selection Reset**: Selecting the "None" radio button immediately clears all active banner selections and restores standard DJ branding banners seamlessly.
 - **Two-Way Synchronization & Local Grace Window**: Added `POST /api/special-event/active` in `PatronRequestServer.cs` and wired `KSRotationSyncService.NotifyLocalSpecialEventChanged` to push DJ selections from Lyracist to KSRotation immediately, accompanied by a 5-second local selection grace window to prevent polling reversion races.
@@ -492,6 +548,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Dynamic Special Event Announcement Banner Studio**: DJs can select 'Announcement' from the Special Event Banner selector in either Lyracist or KSRotation to broadcast custom, dynamically generated 16:9 celebration announcements on venue TVs and projection screens (e.g., *"Welcome to Jill & Robert, 1st timers tonight"*). An interactive modal dialog on the host laptop allows entering any custom text with auto-scaling typography, dual gold borders, ambient radial glow, and corner celebration fireworks. The Web Remote DJ Board (`dj.html`) includes a full-screen modal allowing mobile DJs to author and launch announcements remotely from tablets and phones.
 
 ### 🔄 Rotation Invariants & Shared Logic Consolidation (`Shared/RotationHelpers`, `KSRotation`, `Lyracist`)
+
 - **Unified Song & Singer Matching (`Shared/RotationHelpers.cs`)**: Consolidated `NormalizeForComparison`, `IsSameSingerName`, `IsSameSong`, and `IsSameSongLenient` into shared routines across both `Lyracist` and `KSRotation`, eliminating cross-application logic divergence.
 - **Thread-Safe Collection Reads (`ReadWithConcurrentRetry`)**: Replaces hazardous background-thread UI dispatcher calls with lockless, non-deadlocking snapshot retries, preventing `InvalidOperationException` collection enumeration races between web request threads and the UI.
 - **Linked Singer Adjacency & Active Boundary Preservation**: Restored `EnforceLinkedAdjacency` post-invocations on singer pause/promote flows so duet partners remain strictly adjacent, and added active/inactive boundary guarding to remote singer moves (`MoveSingerUp`, `MoveSingerDown`).
@@ -499,16 +556,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Web Remote & Network Performance**: Cached WiFi SSID queries (30s) to eliminate recurring 1-second `netsh` stalls on patron polling, released singer-login locks before 429 rate-limit responses, and added dynamic byte inspection for patron avatar uploads.
 
 ### 🛡️ SQLite Migration Lock Self-Healing (`LyracistDbContext`, `App.xaml.cs`)
+
 - **Proactive Lock Table Cleanup**: Automatically drops abandoned `__EFMigrationsLock` tables on application startup via `LyracistDbContext.ClearAbandonedMigrationLocks()`, preventing SQLite Error 11 (`malformed database schema (__EFMigrationsLock) - table already exists`) caused by interrupted previous sessions or sudden process termination.
 - **Automated Migration Recovery & Setup Parity**: Startup automatically recovers from migration lock exceptions, ensuring post-migration setup (`ApplyPostMigrationSetup`: song deduplication, index rebuilds, and `SingerHistory` table creation) executes reliably on both normal and retry branches.
 
 ### 🎤 Karaoke Song Search & Compact Auto-Advance Toolbar (`KaraokePage`)
+
 - **Direct Database Search & Scan**: Clicking the "Scan" button right beside the search input or pressing <kbd>Enter</kbd> immediately executes a database query (`SearchDatabaseCommand`) against the local SQLite library for matching songs and artists, eliminating unintentional Windows File Explorer prompts.
 - **Dedicated Disk Folder Scan Button**: An independent folder icon button (`ScanFolderCommand`) provides direct access to disk folder scanning with clear tooltips.
 - **Ultra-Compact DJ Control Toolbar**: Streamlined Auto-Advance & DJ control strip compressed from ~80px down to a sleek ~32px horizontal toolbar, recovering over 50px of vertical workspace for the song library, singer queue, and player columns.
 - **Streamlined DJ Flow Actions**: Compact "▶ Start Song" and "⏭ Skip Singer" buttons provide rapid queue advancement with minimal screen footprint.
 
 ### 🛍️ Dedicated "Store" Tab & Licensed Track Import Pipeline (`Lyracist` ONLY)
+
 - **Store Tab Placement**:
   - Exclusively available in the Lyracist desktop application navigation bar. This tab is strictly isolated and does not appear in any other apps (KSRotation, Lyracist Trivia, Knockout Trivia, etc.).
 - **Store Notifications & Toast Alerts (`StoreNotificationService`, `ToastNotificationControl`)**:
@@ -592,6 +652,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Reusable React/TypeScript components (`storeTab.tsx`, `storeSearch.tsx`, `settingsStore.tsx`) and Node.js watcher (`purchasedWatcher.ts`, `importMetadata.ts`, `deepLink.ts`, `ffmpegUtils.ts`, `types.ts`) included under `Lyracist/WebModules/Store`.
 
 ### 👤 Dedicated "Users" Management Tab & Account Merging (`Lyracist` & `KSRotation`)
+
 - **Performer Directory & Account Browser**:
   - Dedicated primary "Users" navigation tab in both Lyracist (sidebar) and KSRotation (top navigation bar between Settings and Trivia).
   - 2-pane master-detail interface featuring a searchable list of registered singers, search filter by name, email, or custom title, level badges, XP points, and total song performance tallies.
@@ -612,6 +673,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Consolidates performance history, past requests, active rotation entries, audio profile defaults, and XP points into the primary account, then permanently deletes the duplicate account.
 
 ### 📸 Performer Webcam Capture, Selfie Uploads & Rotation Banner Displays (`Lyracist` & `KSRotation`)
+
 - **Live DJ Webcam Photo Capture**:
   - Dedicated "Take Photo" button on the "Users" tab in both Lyracist and KSRotation allowing DJs to snap a headshot of the performer on the spot using any connected USB or integrated webcam.
   - Powered by `FlashCap` with zero native dependency overhead.
@@ -626,6 +688,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - On the turntable rotation screen, the circular framed photo is showcased beside the "♪ NOW SPINNING" banner and singer title while the vinyl record spins.
 
 ### 🎨 DJ Banners & Special Event Display System (`Lyracist` & `KSRotation`)
+
 - **Independent DJ Banner Multi-Monitor Projection**:
   - Projects customized DJ promotional graphics and looping MP4 video animations (`Banners/DJBanners`) to any dedicated secondary monitor, stage TV, or patron display screen.
   - Supports automatic looping for animated video banners with soundless background playback (`BannerVideo_MediaEnded` rewind loop).
@@ -639,6 +702,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Selecting any standard DJ banner automatically clears prior special event states, ensuring the DJ's selection takes immediate effect on stage displays.
 
 ### 🎤 Per-Singer Key/Tempo Recall & Mic Level/EQ Recall (`Lyracist`)
+
 - **Dual-Tier Key & Playback Speed Memory**:
   - **Per-Song Performance Memory**: Whenever a performer sings a song, their exact key transposition semitone offset and playback tempo multiplier (e.g. 1.1x) are saved in the SQLite `SingerHistory` database table. Re-queuing that song in the future automatically recalls the performer's exact key and tempo.
   - **Performer Profile Defaults**: Global performer vocal preferences stored in `SingerAudioSettings` act as the initial baseline when a performer sings a track for the first time without prior history.
@@ -655,6 +719,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Re-adding songs from Singer History back into the rotation queue retains historical key and tempo settings automatically.
 
 ### 🚀 High-Output WASAPI Audio Engine, USB Mixer Output Boost & Tablet Touch Layout (`Lyracist`)
+
 - **Native Windows WASAPI mmdevice Audio Pipeline**:
   - `LibVlcVideoBackend` and `BackgroundMusicPlayer` now route all audio output directly through Windows Core Audio WASAPI (`mmdevice`) for both default and custom audio output devices, completely bypassing legacy DirectSound/WaveOut software mixer attenuation.
   - Expanded software volume headroom up to **200%** (+6 dB clean digital gain boost), ensuring playback loudness matches native media player levels without cranking volume controls to maximum.
@@ -676,17 +741,20 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Enforced a 360px minimum width on the search panel to prevent column squishing on compact screens.
 
 ### 🛑 Last Round Rotation Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `dj.html`)
+
 - **One-Click Host & Remote Activation**: Standout emerald green "Last Round" button positioned directly after the Clear button across host interfaces (`RotationPage.xaml`, `MainWindow.xaml`, `MainPage.xaml`) and on the Remote DJ Board (`dj.html`), immediately synchronizing across the rotation lifecycle, embedded servers, and display services.
 - **Audience Screen Announcement**: Bold crimson banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) displayed prominently on the Lyracist `RotationWindow`, KSRotation `SingerDisplayWindow` (across all display projection styles), KSRotation.Maui `BillboardView` (on-device attractor and external HDMI/Presentation displays), Remote DJ Board (`dj.html`), and the real-time web billboard (`billboard.html`).
 - **Dynamic Queue Pruning**: Once a performer has sung in the last round, they are automatically hidden from the audience rotation queue (now singing, next, on-deck), while remaining visible on host and remote DJ screens with a distinct `DONE (LAST ROUND)` indicator badge.
 
 ### 🔗 Linked Singers (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
+
 - **Two-Click DJ Linking**: Click the 🔗 button on one singer, then on another, to link them - no other singer can ever be inserted between them (a new signup, a drag/drop reorder, or a move up/down all respect the pairing). Clicking 🔗 on an already-linked singer unlinks it; linking a singer that's already linked elsewhere breaks the old link first. **The link stays in effect all night until the DJ unlinks it** - there's no auto-unlink.
 - **Perform Back-to-Back, Then Reunite for Next Time**: When the current half of a pair finishes and floats to the bottom (with "Float Current Singer to Top" on) while the other is promoted to sing next, they're *expected* to separate for that moment - adjacency enforcement steps aside while either half is the current singer, so the finished singer isn't dragged back up mid-handoff. Once neither half is current anymore (both have had their turn), they're automatically pulled back together for their next joint turn - the link never needs to be re-applied.
 - **Pause-Safe, Not Inactive-Safe**: A linked singer can be Paused without losing its place or its partner - it's simply skipped over, same as any paused singer. Marking one half Inactive ("out for the night") is different: the still-active partner isn't forced to follow it into the retired section.
 - **Shared Enforcement**: `RotationHelpers.LinkSingers()`/`UnlinkSinger()`/`EnforceLinkedAdjacency()` (`Shared/RotationHelpers.cs`) drive all three apps identically. Shows as a "🔗 [partner]" badge in Lyracist's `RotationPage`, KSRotation's `MainWindow` (list + right-click menu), and KSRotation.Maui's `MainPage`.
 
 ### ⏱ Estimated Wait Time on Rotation Screens (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
+
 - **Per-Singer Wait Badge**: Every waiting singer's name on the audience-facing rotation displays shows an estimated wait in minutes, e.g. `Dennis {5} Only Make Believe` - the cumulative estimated performance length of everyone ahead of them, using each song's actual known duration + 30 seconds where available, or a DJ-configurable default-length fallback otherwise.
 - **DJ Can Turn It Off Entirely**: A "Show Estimated Wait Time on Rotation Screens" toggle (Lyracist's Settings page, Display tab; KSRotation's Settings tab) hides the badge everywhere at the DJ's discretion - some DJs don't want the audience seeing wait estimates at all. On by default; takes effect immediately.
 - **`{N} = Estimated Wait Time` Legend on Every Display**: So patrons aren't left guessing what the number in braces means, a small explainer appears alongside the badge on every display it can show on - Lyracist's Normal List and Star Wars Crawl, KSRotation's Normal List, Star Wars Crawl, Vegas/Broadway Marquee, and Vinyl Record views, and KSRotation.Maui's Billboard view. On the Marquee/Vinyl/Normal-List views the section label itself ("UP NEXT"/"ON DECK") always stays visible - only the explainer suffix hides with the toggle. Patron-facing web pages (kiosk, DJ remote, billboard, patron portal, mobile tablet) don't currently show the badge at all, so there's nothing to gate there yet.
@@ -695,6 +763,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Wired Into Every Display Mode**: Lyracist's `RotationWindow` (queue list, Star Wars Crawl, scrolling marquee), KSRotation's `SingerDisplayWindow` (Normal List, Marquee, Vinyl), and KSRotation.Maui's `BillboardView`.
 
 ### ⚡ High-Performance In-Memory Library Metadata Probing
+
 - **Microsecond In-Memory Header Extraction**:
   - Embedded `TagLibSharp` in `Lyracist.Data` for direct in-memory audio/video duration and genre extraction (<0.1ms per track), eliminating external process spawning overhead (`ffprobe.exe`).
 - **Direct ZIP-CDG Stream Extraction (`StreamFileAbstraction`)**:
@@ -707,6 +776,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Scales background probing workers up to `Math.Max(8, Environment.ProcessorCount * 2)` (16–32 parallel workers) with batched SQLite transactions and FTS5 search index synchronization, reducing 50,000-song follow-up scan times from 3+ hours to under 1–2 minutes.
 
 ### 📁 Unified Solution Directory & Asset Consolidation
+
 - **Centralized Application Taxonomy**:
   - `Settings/`: Consolidated application configuration folder with distinct per-app naming (`lyracist_settings.json`, `ksrotation_settings.json`, `knockout_trivia_settings.json`, `lyracist_trivia_settings.json`, `scaryoke_settings.json`, `dbeditor_settings.json`, `keygen_settings.json`, `ksrotation_venues.json`, `ksrotation_djs.json`, `VenueGraphics/`).
   - `Data/`: Centralized database and persistence folder (`lyracist.db`, `trivia.db`, `ksrotation_night_db.json`, `ksrotation_singers.json`, `wifi_passwords.json`, `keygen.db`).
@@ -717,6 +787,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Transparent Legacy Migration**: All services across all applications automatically check for legacy configuration/data files in `%AppData%`, `%LocalAppData%`, or old subfolders on startup, transparently copying them forward to the consolidated directories without user intervention.
 
 ### 🥊 Knockout Trivia Standalone Game Module (`KnockoutTrivia`)
+
 - **Fast-Paced Bar-Friendly Elimination Game**:
   - Standalone MVVM WPF desktop app targeting .NET 10 with modern Fluent UI dark styling (`WPF-UI`).
   - Compatible with the shared `Data/trivia.db` SQLite database and `Packs/*.json` trivia packs.
@@ -763,6 +834,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Configurable points per answer, question limits, timers, token caps, super streak thresholds, and audio/visual toggles.
 
 ### 🔤 Intelligent Name & Artist Capitalization Engine (`All Applications`)
+
 - **Centralized Smart Proper-Casing (`Shared/NameFormatting.cs`)**:
   - Automatically capitalizes singer names, duet partners, artists, and song titles cleanly across all applications (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`).
 - **Mixed-Case Preservation**:
@@ -779,6 +851,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 
 ### 📟 Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)
+
 - **Split-Screen Venue Kiosk UI Across All Apps (`KSRotation`, `KSRotation.Maui`, `Lyracist`)**:
   - Designed specifically for venue-mounted landscape tablets, giving patrons a self-service kiosk to search songs and join rotation without disturbing the DJ.
   - **Attractor / Welcome Screen**: Fullscreen ambient welcome screen when idle with glowing microphone hero, animated pulsing *"TOUCH SCREEN TO JOIN THE ROTATION"* call-to-action, live stage snapshot (*Now Singing*, *Up Next*, *Queue Count*), and 4 visual step-by-step instructions.
@@ -795,6 +868,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - `ConnectQrOverlay` provides quick one-tap switching between `📱 Patron`, `📟 Kiosk`, and `🎧 DJ` QR codes and URLs.
 
 ### ⚡ Safe, DJ-Friendly Auto-Advance System
+
 - **Grace Period Timer & Fill-In Music**:
   - Automatically initiates a configurable grace period countdown (default 15s) when a song finishes.
   - Automatically spins up ducked fill-in background music between performers.
@@ -808,6 +882,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Safely falls back to `WaitingForSongSelection` if the upcoming singer has not chosen a track yet.
 
 ### 📝 Global Auto-Selection & Fast Input (`All Applications`)
+
 - **Global Select-All on Focus**:
   - Across every application in the suite (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, `ScaryokeWheel`), clicking or tabbing into any `TextBox`, `PasswordBox`, or numeric input box automatically highlights and selects all existing text.
   - Game masters, KJs, and hosts can immediately begin typing new values without having to backspace, clear, or double-click to select existing text.
@@ -816,6 +891,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - When adding a new performer to the rotation queue, the system automatically scrolls the list directly to the newly inserted row, focuses the singer name field, and highlights the default `"New Singer"` text so the host can instantly type the performer's actual name.
 
 ### 📱 Responsive Tablet Layout & Android Stability in `KSRotation.Maui`
+
 - **Vertical Mode (Portrait Orientation)**:
   - When the tablet is held vertically, the layout automatically reflows to place the **Active Rotation Queue at the top** of the screen across full width, and positions the **Patron Request Portal (QR code) and Incoming Requests side-by-side at the bottom** of the screen.
   - This eliminates wasted screen real estate on portrait tablets, maximizing vertical space for the performer list.
@@ -827,6 +903,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Embedded assembly packaging (`EmbedAssembliesIntoApk = true`) and platform OS guards ensure reliable, standalone deployment and launch on Android tablets without fast-deployment synchronization failures.
 
 ### 🎧 Remote DJ Web Board (`dj.html`)
+
 - **First-Button Finished Checkmark (`✓`)**:
   - Reordered performer card action buttons so the finished song checkmark (`✓`) is positioned as the first button in the actions bar, matching the ergonomics and muscle memory of the desktop and MAUI consoles.
 - **Modal Popup Performer Addition**:
@@ -834,6 +911,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Automatically focuses and selects the singer name field upon opening, submits on `Enter`, and dismisses on `Escape` or backdrop click for frictionless singer additions from anywhere in the venue.
 
 ### 🛠️ Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
+
 - **Visual Category & Question Authoring**: Standalone WPF MVVM desktop app using Fluent UI (`WPF-UI`) for creating, editing, and expanding trivia question databases.
 - **Left Sidebar Pack Explorer**: Auto-discovers and navigates all JSON question packs in `Packs/` with search filtering and question count indicators.
 - **Interactive Question Editor**: Real-time editor with colored option cards (▲ Purple, ◆ Cyan, ● Amber, ■ Rose), correct answer radio toggles, difficulty dropdown, and explanation notes.
@@ -842,6 +920,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Direct SQLite Seeding**: 1-click database synchronization updating `Data/trivia.db`.
 
 ### 🎤 Singer Rotation & Queue Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
+
 - **High-DPI Singer Box & Action Button Sizing**:
   - Singer display boxes in `KSRotation` feature expanded vertical padding (`Padding="2,6,2,10"`, `MinHeight="80"`), clean 30px outlined buttons, and bottom margins, ensuring the bottom border of the `"✓ Finish"`, `"▲"`, and `"▼"` buttons is crisp and completely visible on 1080p laptop displays under any DPI scaling.
 - **Smart End-of-Round Singer Insertion**:
@@ -864,6 +943,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Accessible via right-click ContextMenu across Lyracist and KSRotation, individual singer row buttons (upload arrow / `⤒`), toolbar buttons, and the Remote DJ web portal.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
+
 - **Manual Game Flow Controls for DJ / Game Master (`Lyracist.Trivia`)**:
   - **Interactive Host Pacing (Manual Mode)**: When `⚡ Auto-Run Game` is toggled off, questions load into a ready Reading/Standby state with the timer paused, giving the DJ full control to read the question over the venue microphone before initiating the countdown timer.
   - **Question Navigation & Direct Jump**: Seamlessly move backwards (`⏮ Prev`) or forwards (`Next ⏭`), or select any question index directly from the jump dropdown to review or present questions on demand.
@@ -970,6 +1050,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Game Master Host Console**: Complete control deck with monitor picker, auto-progression switch, question pack selector, manual/auto question triggers, timer controls, live answer graphs, and team score management.
 
 ### 🎙️ Performer & Rotation Queue
+
 - **4-in-1 Audience Billboard & Connect Screen System (`KSRotation.Maui` & `KSRotation`)**:
   - **Option 1 (Hardware HDMI & Secondary Display Presentation)**: Cross-platform `SecondaryDisplayService` integrating Android `DisplayManager` and `Android.App.Presentation` to automatically cast an independent audience billboard window to any connected USB-C to HDMI adapter or wireless display, preserving full DJ controls on the tablet. Also supports Windows multi-window secondary projection.
   - **Option 2 (Wi-Fi Web Billboard — `/billboard`)**: Serves an embedded 16:9 audience display over the DJ Travel Router (`http://<ip>:5005/billboard`) compatible with any Smart TV browser, Fire TV Stick Silk browser, Chromecast with Google TV, or mobile device. Displays live Now Performing stage spotlight, Up Next card, upcoming rotation queue, live ticking clock, and dynamic server-rendered QR codes (`/api/qr?text=...`) for both the Song Request Portal and Venue Wi-Fi auto-join.
@@ -996,6 +1077,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **Target Display Monitor Selection**: Directly select which connected display or TV to show the wheel on via dropdown in both the Title Bar and Settings tab. Supports full-screen presentation mode (`F11` or Title Bar button), centering on screen in windowed mode, and instant hot-plug monitor updates.
 
 ### 🖥️ Display & Projection Management
+
 - **Dedicated 4-Column Display Tab**: Structured into 4 equal columns (*Monitors & Screen Assignments*, *DJ & Event Banners*, *Star Wars Crawl & Spaceship*, *Connect & Request Instructions*) matching KsRotation.
 - **Screen Activation Checkboxes**: Explicit checkboxes for "Enable Lyrics Projection Screen", "Enable Singer Rotation Billboard Screen", and "Enable DJ Banner Screen".
 - **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection**, **Singer Rotation Billboard**, and **DJ Banner**.
@@ -1031,6 +1113,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Rear-Projection Mirroring**: Mirror the lyrics screen horizontally for custom projector arrangements.
 
 ### 🔊 Audio Configuration & Background Music (BGM)
+
 - **Advanced Audio Engine**: Master volume, latency compensation, and active output device selection.
 - **Active Performance Key Transposition**: Real-time pitch transposition from `-6` to `+6` semitones. Automatically hot-reloads the audio track and seeks back to the exact millisecond in under 150ms to apply FFmpeg-based pitch shifting (`asetrate` + `atempo`) during active playback.
 - **Audio Processing Controls**: Fully adjustable 3-band EQ (Bass, Mid, Treble) alongside integrated Compressor and Limiter.
@@ -1042,16 +1125,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Special Occasion Audio**: Add custom sound bites and clips (Birthdays, Holiday jingles) with individual tone (Bass/Treble) and gain overrides.
 
 ### 🎵 Song Library & Integrations
+
 - **Local Scanner & Rescan Maintenance**: Scans folders for `.mp3 + .cdg`, `.mp4` or `.zip` files and builds a local query database. Cleanly deletes obsolete database logs and search indexes for files that were renamed or deleted on the drive during rescans.
 - **Catalog Book Exporter**: Export the entire song library (Karaoke or Music) directly into professionally formatted, paginated PDF, plain text (.txt), or Word (.docx) documents with repeating table headers from the Database Manager.
 - **Streaming & Search Integration**: Includes search support for YouTube (direct URL stream linking and metadata lookups) and Spotify & Amazon Music links.
 - **Singer History DB**: Automatically saves matching song, artist, singer, and links for instant lookup in future sessions.
 
 ### 💾 Database Maintenance & Stability
+
 - **Live Online Backups**: Instantly back up settings, singer logs, playlists, and performer queue to an external SQLite `.db` file using live `VACUUM INTO` operations.
 - **Graceful Restore**: Restore data from backup files; the application closes database connections safely and shuts down for reboot validation automatically.
 
 ### 📱 Tablet Lyrics Web Server
+
 - **Local Web Server**: Serves a mobile-friendly web page (defaulting to port `5005`) over the local network.
 - **Singer Preview Monitor**: Allows singers to scan a local QR code and follow the live scrolling lyrics directly from their phone or tablet.
 - **"Scan to Join" QR Badges**: Auto-generated QR codes linking to the tablet portal appear as a badge on the Karaoke page header and as a floating overlay on the Lyrics projection window.
@@ -1064,6 +1150,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Scaryoke Access Control**: The Scaryoke tab and wheel spin are only available on singers' phones once the host enables Scaryoke Mode, and only the currently-performing singer can trigger a spin — everyone else watches it live.
 
 ### ❓ Split-Pane Help System
+
 - **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 12 detailed help categories covering every user-facing page and setting.
 - **Resizable Index Column**: Integrated a vertical `GridSplitter` allowing users to click and drag the column boundary to manually resize the index list width, preventing text truncation on different screen sizes.
 - **Rich Detail Panel**: Right-pane scroll-contained viewer displaying page guides, setting definitions, tone balancing parameters, decoders, and API settings, preventing excessive page scrolling.
@@ -1071,6 +1158,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
 
 ## Tech Stack
+
 - **Framework**: WPF (.NET 10.0-windows)
 - **Design System**: `Wpf.Ui` (harmonious dark/light theme management)
 - **Database**: SQLite backed by Entity Framework Core (EF Core)
@@ -1082,11 +1170,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ## Installation & Setup
 
 ### Requirements
+
 - **OS**: Windows 10 / 11
 - **Runtime**: .NET 10.0 SDK or Desktop Runtime
 - **External Dependencies**: FFmpeg (expected at `C:\ffmpeg\bin\ffmpeg.exe` and `ffprobe.exe`)
 
 ### Configuration
+
 1. Open **Settings** on the left menu.
 2. In **Service Logins & API Keys**, enter credentials for YouTube or Spotify if using streaming search.
 3. In **Theme & Appearance**, toggle **Test Mode** on to test queue workflows.

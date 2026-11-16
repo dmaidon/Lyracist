@@ -1,4 +1,4 @@
-// Edited on Nov 13, 2026 @ 16:12:05 -> Call RotationViewModel.AddSinger when loading saved rotation singers into queue
+// Edited on Nov 16, 2026 @ 08:43:45 -> Use IsSameSingerName and add QueueSavedReportRowCommand for saved rotation songs
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -257,6 +257,28 @@ public partial class SavedRotationsViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void QueueSavedReportRow(SavedRotationRow? row)
+    {
+        if (row == null || string.IsNullOrWhiteSpace(row.SingerName))
+        {
+            return;
+        }
+
+        var existingSinger = _rotationViewModel.Rotation.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, row.SingerName))
+            ?? _rotationViewModel.InactiveSingers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, row.SingerName));
+        bool hadExistingSinger = existingSinger != null;
+        bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.SongTitle);
+
+        _rotationViewModel.AddSinger(row.SingerName, row.SongTitle, row.Artist, "0", string.Empty, duetPartner: row.DuetPartnerName, isMusic: row.IsMusic);
+
+        StatusMessage = hadExistingSinger
+            ? (hadActiveSong
+                ? $"Added '{row.SongTitle}' to {row.SingerName}'s song queue in rotation."
+                : $"Assigned '{row.SongTitle}' to {row.SingerName} in rotation.")
+            : $"Added {row.SingerName} with '{row.SongTitle}' to rotation.";
+    }
+
+    [RelayCommand]
     private void LoadSavedReportSingersIntoRotation()
     {
         if (SelectedSavedReport == null)
@@ -282,9 +304,9 @@ public partial class SavedRotationsViewModel : BaseViewModel
         foreach (var group in karaokeGroups)
         {
             bool alreadyInQueue = _rotationViewModel.Rotation.Any(s =>
-                !s.IsMusic && string.Equals(s.Name, group.SingerName, StringComparison.OrdinalIgnoreCase)) ||
+                !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, group.SingerName)) ||
                 _rotationViewModel.InactiveSingers.Any(s =>
-                !s.IsMusic && string.Equals(s.Name, group.SingerName, StringComparison.OrdinalIgnoreCase));
+                !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, group.SingerName));
 
             if (alreadyInQueue)
             {

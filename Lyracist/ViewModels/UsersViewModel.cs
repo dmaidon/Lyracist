@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 15:36:00 -> Sync singer profiles and audio settings with dedicated Data/singers.db database
+// Edited on Nov 16, 2026 @ 08:43:35 -> Update QueueHistoricalSong to resolve singer name and display existing-singer vs new-singer queue status
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -538,6 +538,10 @@ namespace Lyracist.ViewModels
                 if (!string.Equals(oldName, cleanName, StringComparison.OrdinalIgnoreCase))
                 {
                     SingerHistoryService.MergeHistory(oldName, cleanName);
+                    foreach (var histItem in PerformanceHistory)
+                    {
+                        histItem.SingerName = cleanName;
+                    }
                 }
 
                 EditName = cleanName;
@@ -982,12 +986,22 @@ namespace Lyracist.ViewModels
         [RelayCommand]
         private void QueueHistoricalSong(SingerPerformanceHistoryItem item)
         {
-            if (item == null || SelectedSinger == null) return;
+            if (item == null) return;
+
+            string singerName = !string.IsNullOrWhiteSpace(item.SingerName)
+                ? item.SingerName
+                : (SelectedSinger?.Name ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(singerName)) return;
 
             try
             {
+                var existingSinger = _rotationViewModel.Rotation.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, singerName))
+                    ?? _rotationViewModel.InactiveSingers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, singerName));
+                bool hadExistingSinger = existingSinger != null;
+                bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.SongTitle);
+
                 _rotationViewModel.AddSinger(
-                    SelectedSinger.Name,
+                    singerName,
                     item.SongTitle,
                     item.Artist,
                     item.Key,
@@ -996,7 +1010,13 @@ namespace Lyracist.ViewModels
                     externalLink: item.Link,
                     tempo: item.Tempo);
 
-                ShowStatus($"Queued '{item.SongTitle}' for {SelectedSinger.Name} into rotation!", true);
+                ShowStatus(
+                    hadExistingSinger
+                        ? (hadActiveSong
+                            ? $"Added '{item.SongTitle}' to {singerName}'s song queue in rotation!"
+                            : $"Assigned '{item.SongTitle}' to {singerName} in rotation!")
+                        : $"Added {singerName} with '{item.SongTitle}' to rotation!",
+                    true);
             }
             catch (Exception ex)
             {

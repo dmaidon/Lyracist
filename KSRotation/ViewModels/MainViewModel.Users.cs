@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 15:35:00 -> Sync singer profiles and audio settings with dedicated Data/singers.db database
+// Edited on Nov 16, 2026 @ 08:42:00 -> Route QueueUserHistoricalSong through TryAddPerformer so existing singers get songs added to their entry instead of duplicating
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -676,6 +676,10 @@ namespace KSRotation.ViewModels
                 {
                     SingerHistoryService.MergeHistory(oldName, trimmedName);
                     AddKnownSinger(trimmedName);
+                    foreach (var histItem in UserPerformanceHistory)
+                    {
+                        histItem.SingerName = trimmedName;
+                    }
                 }
 
                 EditUserName = trimmedName;
@@ -1086,19 +1090,38 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         private void QueueUserHistoricalSong(SingerUserHistoryItem item)
         {
-            if (item == null || SelectedUser == null) return;
+            if (item == null) return;
+
+            string singerName = !string.IsNullOrWhiteSpace(item.SingerName)
+                ? item.SingerName
+                : (SelectedUser?.Name ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(singerName)) return;
 
             try
             {
-                AddActiveSinger(new SingerEntry
-                {
-                    Name = SelectedUser.Name,
-                    Song = item.SongTitle,
-                    Artist = item.Artist
-                });
+                string cleanName = RotationHelpers.NormalizeForComparison(NameFormatting.CleanSingerName(singerName));
+                var existingSinger = Singers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, cleanName));
+                bool hadExistingSinger = existingSinger != null;
+                bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.Song);
 
-                AddKnownSinger(SelectedUser.Name);
-                ShowUserStatus($"Queued '{item.SongTitle}' for {SelectedUser.Name} into rotation!", true);
+                if (!TryAddPerformer(singerName, item.SongTitle, item.Artist))
+                {
+                    ShowUserStatus("Failed to add song to rotation.", false);
+                    return;
+                }
+
+                if (hadExistingSinger)
+                {
+                    ShowUserStatus(
+                        hadActiveSong
+                            ? $"Added '{item.SongTitle}' to {cleanName}'s song queue in rotation!"
+                            : $"Assigned '{item.SongTitle}' to {cleanName} in rotation!",
+                        true);
+                }
+                else
+                {
+                    ShowUserStatus($"Added {cleanName} with '{item.SongTitle}' to rotation!", true);
+                }
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-<!-- Created on Nov 13, 2026 @ 16:08:30 -> SavedRotationsPage UI for browsing, filtering, and loading saved rotation lists in Lyracist -->
+<!-- Edited on Nov 16, 2026 @ 08:43:50 -> Add Queue action button column to All Report Rows DataGrid in SavedRotationsPage -->
 <Page x:Class="Lyracist.Views.Pages.SavedRotationsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -303,8 +303,22 @@
                                         <DataGridTextColumn Header="Type" Binding="{Binding EntryType}" Width="80" />
                                         <DataGridTextColumn Header="Round" Binding="{Binding RoundDisplay}" Width="85" />
                                         <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
-                                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="160" />
-                                        <DataGridTextColumn Header="Time" Binding="{Binding TimestampDisplay}" Width="90" />
+                                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="150" />
+                                        <DataGridTextColumn Header="Time" Binding="{Binding TimestampDisplay}" Width="85" />
+                                        <DataGridTemplateColumn Header="Actions" Width="90">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <ui:Button Content="Queue"
+                                                               Icon="{ui:SymbolIcon Play20}"
+                                                               Appearance="Primary"
+                                                               Padding="6,2"
+                                                               HorizontalAlignment="Center"
+                                                               Command="{Binding DataContext.QueueSavedReportRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                               CommandParameter="{Binding}"
+                                                               ToolTip="Queue this song into the active rotation (adds to existing singer if already in rotation)" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </TabItem>

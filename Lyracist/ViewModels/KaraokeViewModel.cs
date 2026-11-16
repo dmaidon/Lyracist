@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 10:16:40 -> Avoid incrementing TimesPerformed when saving audio defaults mid-song
+// Edited on Nov 16, 2026 @ 08:43:40 -> Use entry.SingerName fallback in AddHistorySongToRotation and AddToRotation
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1359,7 +1359,11 @@ public partial class KaraokeViewModel : BaseViewModel
         string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(targetSingerName))
         {
-            if (Rotation.SelectedSinger != null)
+            if (!string.IsNullOrWhiteSpace(entry.SingerName))
+            {
+                targetSingerName = entry.SingerName;
+            }
+            else if (Rotation.SelectedSinger != null)
             {
                 targetSingerName = Rotation.SelectedSinger.Name;
             }
@@ -1378,7 +1382,11 @@ public partial class KaraokeViewModel : BaseViewModel
         string targetSingerName = NameFormatting.ProperCase(NewSingerName?.Trim() ?? string.Empty);
         if (string.IsNullOrWhiteSpace(targetSingerName))
         {
-            if (Rotation.SelectedSinger != null)
+            if (SelectedHistoryEntry != null && !string.IsNullOrWhiteSpace(SelectedHistoryEntry.SingerName))
+            {
+                targetSingerName = SelectedHistoryEntry.SingerName;
+            }
+            else if (Rotation.SelectedSinger != null)
             {
                 targetSingerName = Rotation.SelectedSinger.Name;
             }

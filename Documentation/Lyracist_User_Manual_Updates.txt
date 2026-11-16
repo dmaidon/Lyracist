@@ -1,4 +1,13 @@
-// Edited on Nov 14, 2026 @ 15:39:00 -> Document dedicated Data/singers.db database for singer profiles, audio settings, and performance history
+// Edited on Nov 16, 2026 @ 10:14:35 -> Document Queue button in Performance History and Saved Rotations adding songs to existing rotation singers without duplicating
+
+KSRotation & Lyracist: Existing-Singer Song Queuing from Performance History & Saved Rotations - (November 2026)
+
+Section: Performer Directory & Users Management / Queuing Historical Songs Without Duplicating Singers
+
+0. Queuing Songs from Singer Performance History & Saved Rotations ('Queue' Button):
+   - In both KSRotation and Lyracist, clicking 'Queue' on any song row in 'Users -> Performance History' (or in 'Saved Rotations -> All Report Rows (CSV Table)') checks whether that singer already exists in tonight's active rotation:
+     * If the singer ALREADY EXISTS in the rotation: The song is added to that existing singer (assigned directly to their current song slot if empty, or appended to their queued songs list if they already have an active song, and reactivating them if they were inactive) — never duplicating the singer in the rotation.
+     * If the singer DOES NOT EXIST in the rotation yet: A new singer entry is added to the rotation with that song.
 
 KSRotation, KSRotation.Maui & Lyracist: Patron Phone Turn Alerts ("Buzz My Phone") & DJ Manual Stage Pager - (November 2026)
 
