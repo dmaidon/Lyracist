@@ -1,4 +1,4 @@
-// Edited on Nov 16, 2026 @ 08:43:35 -> Update QueueHistoricalSong to resolve singer name and display existing-singer vs new-singer queue status
+// Last Edited: 2026-11-18 18:48 – Add ExportAvatarVector command (SVG export of the performer photo)
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -805,6 +805,35 @@ namespace Lyracist.ViewModels
             {
                 AppLogger.LogError(ex, "UsersViewModel.RotateAvatar");
                 ShowStatus("Failed to rotate avatar.", false);
+            }
+        }
+
+        [RelayCommand]
+        private void ExportAvatarVector()
+        {
+            if (SelectedSinger == null || EditAvatarImage == null)
+            {
+                ShowStatus("No photo to export.", false);
+                return;
+            }
+
+            var dlg = new SaveFileDialog
+            {
+                Title = $"Export {SelectedSinger.Name} Photo as Vector",
+                Filter = "SVG Vector Image (*.svg)|*.svg",
+                FileName = $"{SelectedSinger.Name}.svg"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                VectorPhotoExporter.ExportToSvgFile(EditAvatarImage, dlg.FileName);
+                ShowStatus($"Exported vector photo to {Path.GetFileName(dlg.FileName)}.", true);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "UsersViewModel.ExportAvatarVector");
+                ShowStatus("Failed to export vector photo.", false);
             }
         }
 

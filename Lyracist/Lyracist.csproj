@@ -111,6 +111,7 @@
     <Compile Include="..\KSRotation\Models\EmojiReactionThemes.cs" Link="Models\EmojiReactionThemes.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
     <Compile Include="..\Shared\AvatarImageHelper.cs" Link="AvatarImageHelper.cs" />
+    <Compile Include="..\Shared\VectorPhotoExporter.cs" Link="VectorPhotoExporter.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
     <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />
