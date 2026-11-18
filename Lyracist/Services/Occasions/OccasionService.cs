@@ -1,3 +1,4 @@
+// Last Edited: 2026-11-18 12:00 – Added runtime-created top-level "Miscellaneous" occasion category
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,24 @@ public class OccasionService : IOccasionService
     public OccasionService()
     {
         EnsureHolidayDefaults();
+        EnsureMiscellaneousCategory();
+    }
+
+    // Top-level "Miscellaneous" category, inserted at runtime (no migration needed).
+    private static void EnsureMiscellaneousCategory()
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            if (context.OccasionCategories.Any(c => c.Name == "Miscellaneous" && c.ParentCategoryId == null)) return;
+
+            context.OccasionCategories.Add(new OccasionCategory { Name = "Miscellaneous" });
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Core.Helpers.AppLogger.LogError(ex, "OccasionService.EnsureMiscellaneousCategory");
+        }
     }
 
     private void EnsureHolidayDefaults()
