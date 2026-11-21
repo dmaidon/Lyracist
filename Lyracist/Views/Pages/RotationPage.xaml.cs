@@ -1,7 +1,9 @@
-// Edited on Nov 2, 2026 @ 10:30:00 -> Use linked-pair-aware MoveSingerToPosition for drag-and-drop reordering
+// Edited on Nov 21, 2026 @ 08:16:30 -> Attach right-click previously sung songs menu to Add Performer song entry fields
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Lyracist.Services.Database;
+using Lyracist.Shared;
 using Lyracist.ViewModels;
 using Point = System.Windows.Point;
 using Vector = System.Windows.Vector;
@@ -30,6 +32,26 @@ public partial class RotationPage : Page
         ViewModel = viewModel;
         DataContext = viewModel;
         InitializeComponent();
+
+        SingerHistoryContextMenuHelper.Attach(
+            NewSingerSongTitleTextBox,
+            () => ViewModel.NewSingerName,
+            ApplySelectedHistoricalSong);
+
+        SingerHistoryContextMenuHelper.Attach(
+            NewSingerNotesTextBox,
+            () => ViewModel.NewSingerName,
+            ApplySelectedHistoricalSong);
+    }
+
+    private void ApplySelectedHistoricalSong(SingerHistoryEntry selected)
+    {
+        ViewModel.NewSingerSongTitle = selected.SongTitle;
+        ViewModel.NewSingerArtist = selected.Artist;
+        if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+        {
+            ViewModel.NewSingerKey = selected.Key;
+        }
     }
 
     private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

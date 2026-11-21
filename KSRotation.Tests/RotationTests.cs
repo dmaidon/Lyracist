@@ -1,4 +1,4 @@
-// Edited on Nov 16, 2026 @ 08:45:00 -> Add unit tests verifying QueueUserHistoricalSong and QueueSavedReportRow add songs to existing rotation singers without duplicating
+// Edited on Nov 21, 2026 @ 08:21:00 -> Add unit tests for GetPreviouslySungSongsForSinger and SingerHistoryContextMenuHelper
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -3029,5 +3029,99 @@ public class SingerDatabaseQualificationTests
         // Assert 3: Sarah Connor is added as a new singer in the rotation
         Assert.Equal(2, vm.Singers.Count);
         Assert.Contains(vm.Singers, s => s.Name == "Sarah Connor" && s.Song == "New Singer Song");
+    }
+
+    [Fact]
+    public void GetPreviouslySungSongsForSinger_WhenSingerExistsInDatabase_ReturnsSortedPreviouslySungSongs()
+    {
+        string uniqueLast = "HistoryTest" + Guid.NewGuid().ToString("N")[..6];
+        string singerName = $"Elena {uniqueLast}";
+
+        try
+        {
+            // Arrange: save two songs out of alphabetical order for this singer
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(
+                singerName,
+                "Zombie",
+                "The Cranberries",
+                "Local",
+                "",
+                "-1",
+                1.0,
+                "Test Venue");
+
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(
+                singerName,
+                "Bohemian Rhapsody",
+                "Queen",
+                "Local",
+                "",
+                "0",
+                1.0,
+                "Test Venue");
+
+            // Increment Zombie performance count to 2x
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(
+                singerName,
+                "Zombie",
+                "The Cranberries",
+                "Local",
+                "",
+                "-1",
+                1.0,
+                "Test Venue");
+
+            // Act: query with extra whitespace and different casing
+            var songs = Lyracist.Services.Database.SingerHistoryService.GetPreviouslySungSongsForSinger(
+                $"  elena   {uniqueLast.ToLowerInvariant()}  ",
+                out string resolvedName,
+                out bool existsInDb);
+
+            // Assert
+            Assert.True(existsInDb);
+            Assert.Equal(singerName, resolvedName, ignoreCase: true);
+            Assert.Equal(2, songs.Count);
+
+            // Sorted alphabetically by SongTitle
+            Assert.Equal("Bohemian Rhapsody", songs[0].SongTitle);
+            Assert.Equal("Queen", songs[0].Artist);
+            Assert.Equal(1, songs[0].TimesPerformed);
+
+            Assert.Equal("Zombie", songs[1].SongTitle);
+            Assert.Equal("The Cranberries", songs[1].Artist);
+            Assert.Equal(2, songs[1].TimesPerformed);
+            Assert.Equal("-1", songs[1].Key);
+
+            // Verify menu item formatting
+            Assert.Equal("Bohemian Rhapsody — Queen (1x)", SingerHistoryContextMenuHelper.FormatSongMenuItemText(songs[0]));
+            Assert.Equal("Zombie — The Cranberries (2x) [Key: -1]", SingerHistoryContextMenuHelper.FormatSongMenuItemText(songs[1]));
+        }
+        finally
+        {
+            Lyracist.Services.Database.SingerHistoryService.DeleteSingerAndHistory(singerName);
+        }
+    }
+
+    [Fact]
+    public void GetPreviouslySungSongsForSinger_WhenSingerDoesNotExist_ReturnsFalseAndEmptyList()
+    {
+        string nonExistentName = "NonExistent Performer " + Guid.NewGuid().ToString("N")[..8];
+
+        var songs = Lyracist.Services.Database.SingerHistoryService.GetPreviouslySungSongsForSinger(
+            nonExistentName,
+            out string resolvedName,
+            out bool existsInDb);
+
+        Assert.False(existsInDb);
+        Assert.Equal(string.Empty, resolvedName);
+        Assert.Empty(songs);
+
+        // Reserved placeholder "New Singer" should also return false
+        var placeholderSongs = Lyracist.Services.Database.SingerHistoryService.GetPreviouslySungSongsForSinger(
+            "New Singer",
+            out _,
+            out bool placeholderExists);
+        Assert.False(placeholderExists);
+        Assert.Empty(placeholderSongs);
     }
 }

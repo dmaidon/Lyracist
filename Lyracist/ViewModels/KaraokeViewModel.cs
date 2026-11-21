@@ -1,4 +1,4 @@
-// Edited on Nov 16, 2026 @ 08:43:40 -> Use entry.SingerName fallback in AddHistorySongToRotation and AddToRotation
+// Edited on Nov 21, 2026 @ 08:18:00 -> Add NewSingerSongTitle and NewSingerArtist properties to Singer Assignment card for right-click song history menu
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -371,6 +371,12 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         });
     }
+
+    [ObservableProperty]
+    private string _newSingerSongTitle = string.Empty;
+
+    [ObservableProperty]
+    private string _newSingerArtist = string.Empty;
 
     [ObservableProperty]
     private string _newSingerNotes = string.Empty;
@@ -1400,7 +1406,11 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         }
 
-        if (SelectedSong != null)
+        else if (!string.IsNullOrWhiteSpace(NewSingerSongTitle))
+        {
+            Rotation.AddSinger(targetSingerName, NewSingerSongTitle, NewSingerArtist, NewSingerKey, NewSingerNotes, "Local", string.Empty, NewDuetPartnerName);
+        }
+        else if (SelectedSong != null)
         {
             Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath, NewDuetPartnerName, isMusic: !SelectedSong.IsKaraoke);
         }
@@ -1431,6 +1441,8 @@ public partial class KaraokeViewModel : BaseViewModel
 
         // Reset inputs
         NewSingerName = string.Empty;
+        NewSingerSongTitle = string.Empty;
+        NewSingerArtist = string.Empty;
         NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";

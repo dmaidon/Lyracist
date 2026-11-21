@@ -1,4 +1,19 @@
-// Edited on Nov 16, 2026 @ 10:14:35 -> Document Queue button in Performance History and Saved Rotations adding songs to existing rotation singers without duplicating
+// Edited on Nov 21, 2026 @ 08:25:45 -> Document right-click previously sung songs menu on performer song entry text boxes in KSRotation and Lyracist
+
+KSRotation & Lyracist: Right-Click Previously Sung Songs Context Menu on Performer Song Entry TextBoxes - (November 2026)
+
+Section: Singer Rotation Management / Right-Click Song Entry Box for Previously Sung Songs
+
+0. Viewing & Selecting Previously Sung Songs via Right-Click on Any Song Entry Text Box:
+   - In both KSRotation and Lyracist, wherever a song is entered in a text box for a performer, right-clicking that song entry text box checks if the performer exists in the singer database ('Data/singers.db').
+   - If the singer exists in the database:
+     * A scrollable right-click menu ('🎤 Previously Sung by [Singer Name] (N)') appears listing all songs that performer has previously sung, sorted alphabetically by Song Title and displaying the Artist, '# Sung' count ('(1x)', '(2x)', etc.), and Key transposition ('[Key: +2]') if non-zero, followed by standard Cut / Copy / Paste commands.
+     * Clicking any song in the right-click menu immediately fills in the Song Title and Artist (and Key where applicable) for that performer.
+   - If the singer does not exist in the database (or no singer name is entered yet):
+     * The text box displays its normal standard Cut / Copy / Paste context menu.
+   - Supported Song Entry Text Boxes:
+     * KSRotation: The 'Song' text box on every performer row in the main Rotation list, plus the 'Song Title' text box in 'Users -> Performance History'.
+     * Lyracist: The 'Song Title' and 'Notes / Song Request' boxes in the 'Edit Singer' dialog and 'Rotation Page -> Add Performer' card, the 'Search song or artist...', 'Custom Music Link Song Title', 'Singer Assignment Song Title / Notes', and 'Songs Queue for Selected Singer' Song column on the 'Karaoke Page', plus the 'Song Title' text box in 'Users -> Performance History'.
 
 KSRotation & Lyracist: Existing-Singer Song Queuing from Performance History & Saved Rotations - (November 2026)
 

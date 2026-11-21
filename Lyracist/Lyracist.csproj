@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 10:18:05 -> Link SingerHistoryPrinter into Lyracist -->
+<!-- Edited on Nov 21, 2026 @ 08:11:35 -> Link SingerHistoryContextMenuHelper into Lyracist -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -142,6 +142,7 @@
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Shared\SavedRotationReportReader.cs" Link="SavedRotationReportReader.cs" />
     <Compile Include="..\Shared\SingerHistoryPrinter.cs" Link="SingerHistoryPrinter.cs" />
+    <Compile Include="..\Shared\SingerHistoryContextMenuHelper.cs" Link="SingerHistoryContextMenuHelper.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />

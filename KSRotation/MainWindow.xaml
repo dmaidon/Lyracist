@@ -1,4 +1,4 @@
-<!-- Edited on Nov 16, 2026 @ 08:43:10 -> Add Queue button to Saved Rotations table and update Help documentation for queuing songs to existing singers -->
+<!-- Edited on Nov 21, 2026 @ 08:13:00 -> Add right-click previously sung songs menu to Song entry text boxes -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1095,7 +1095,10 @@
                                                     </TextBox.Style>
                                                 </TextBox>
 
-                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="4">
+                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}"
+                                                         Grid.Column="4"
+                                                         PreviewMouseRightButtonDown="SongTextBox_PreviewMouseRightButtonDown"
+                                                         ContextMenuOpening="SongTextBox_ContextMenuOpening">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -4174,7 +4177,10 @@
                                                             <StackPanel Grid.Column="0">
                                                                 <TextBlock Text="Song Title" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
                                                                 <TextBox Text="{Binding EditUserHistorySongTitle, UpdateSourceTrigger=PropertyChanged}"
-                                                                         Style="{StaticResource ModernTextBoxStyle}" Height="30" />
+                                                                         Style="{StaticResource ModernTextBoxStyle}"
+                                                                         Height="30"
+                                                                         PreviewMouseRightButtonDown="UserHistorySongTextBox_PreviewMouseRightButtonDown"
+                                                                         ContextMenuOpening="UserHistorySongTextBox_ContextMenuOpening" />
                                                             </StackPanel>
                                                             <StackPanel Grid.Column="2">
                                                                 <TextBlock Text="Artist" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,2" />
@@ -5377,8 +5383,8 @@
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="💾 Saving Reports, Saved Rotations Tab &amp; Dedicated Singers Database (Data\singers.db)" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="Clicking 'Save' writes a CSV and PDF report of the night's performance (`[Venue] - MMMddyy.csv` / `.pdf`) to the 'Reports' directory. Open the 'Saved Rotations' tab to browse all past shows (or click 'Queue' on any song row to queue it into tonight's rotation), or open the 'Users' tab to manage performer profiles, vocal/EQ settings, and song performance history (stored in a dedicated `Data\singers.db` database separate from `lyracist.db`), including '# Sung' counts, Venues, 'Queue' (adds the song to the existing singer if already in rotation, or adds a new singer if not), 'Edit' / '➕ Add Song', and '🖨️ Print History'." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="💾 Saving Reports, Saved Rotations Tab, Right-Click Previously Sung Songs &amp; Dedicated Singers Database (Data\singers.db)" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Clicking 'Save' writes a CSV and PDF report of the night's performance (`[Venue] - MMMddyy.csv` / `.pdf`) to the 'Reports' directory. When entering a song for a performer on the Rotation list, right-click the Song entry text box: if the singer exists in the database (`Data\singers.db`), a popup menu lists all of their previously sung songs (with artist, '# Sung' count, and key)—click any song to fill in the Song and Artist fields automatically. Open the 'Saved Rotations' tab to browse all past shows (or click 'Queue' on any song row to queue it into tonight's rotation), or open the 'Users' tab to manage performer profiles, vocal/EQ settings, and song performance history, including '# Sung' counts, Venues, 'Queue' (adds the song to the existing singer if already in rotation, or adds a new singer if not), 'Edit' / '➕ Add Song', and '🖨️ Print History'." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

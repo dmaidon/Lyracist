@@ -1,6 +1,10 @@
-// Edited on Oct 8, 2026 @ 11:42:00 -> Play music track on double-click in Music Library and play performer on rotation double-click
+// Edited on Nov 21, 2026 @ 08:18:30 -> Attach right-click previously sung songs menu to KaraokePage song entry text boxes
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using Lyracist.Models;
+using Lyracist.Services.Database;
+using Lyracist.Shared;
 using Lyracist.ViewModels;
 
 namespace Lyracist.Views.Pages;
@@ -15,6 +19,104 @@ public partial class KaraokePage : Page
         DataContext = viewModel;
         InitializeComponent();
         Loaded += (s, e) => ViewModel.OnNavigatedTo();
+
+        SingerHistoryContextMenuHelper.Attach(
+            SongSearchTextBox,
+            ResolveActiveSingerName,
+            selected =>
+            {
+                ViewModel.SearchQuery = selected.SongTitle;
+                ViewModel.NewSingerSongTitle = selected.SongTitle;
+                ViewModel.NewSingerArtist = selected.Artist;
+                if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+                {
+                    ViewModel.NewSingerKey = selected.Key;
+                }
+                ViewModel.SelectedHistoryEntry = selected;
+                ViewModel.SearchDatabase();
+            });
+
+        SingerHistoryContextMenuHelper.Attach(
+            CustomExternalTitleTextBox,
+            ResolveActiveSingerName,
+            selected =>
+            {
+                ViewModel.CustomExternalTitle = selected.SongTitle;
+                ViewModel.CustomExternalArtist = selected.Artist;
+                if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+                {
+                    ViewModel.NewSingerKey = selected.Key;
+                }
+            });
+
+        SingerHistoryContextMenuHelper.Attach(
+            NewSingerSongTitleTextBox,
+            ResolveActiveSingerName,
+            ApplySelectedHistoricalSongToAssignment);
+
+        SingerHistoryContextMenuHelper.Attach(
+            NewSingerNotesTextBox,
+            ResolveActiveSingerName,
+            ApplySelectedHistoricalSongToAssignment);
+    }
+
+    private string? ResolveActiveSingerName()
+    {
+        return !string.IsNullOrWhiteSpace(ViewModel.NewSingerName)
+            ? ViewModel.NewSingerName
+            : ViewModel.Rotation.SelectedSinger?.Name;
+    }
+
+    private void ApplySelectedHistoricalSongToAssignment(SingerHistoryEntry selected)
+    {
+        ViewModel.NewSingerSongTitle = selected.SongTitle;
+        ViewModel.NewSingerArtist = selected.Artist;
+        if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+        {
+            ViewModel.NewSingerKey = selected.Key;
+        }
+        ViewModel.SelectedHistoryEntry = selected;
+    }
+
+    private void PendingQueueSongTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBox textBox)
+        {
+            return;
+        }
+
+        SingerHistoryContextMenuHelper.HandlePreviewMouseRightButtonDown(
+            textBox,
+            () => ViewModel.Rotation.SelectedSinger?.Name,
+            selected => ApplySelectedHistoricalSongToPendingSong(textBox, selected));
+    }
+
+    private void PendingQueueSongTextBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBox textBox)
+        {
+            return;
+        }
+
+        SingerHistoryContextMenuHelper.HandleContextMenuOpening(
+            textBox,
+            e,
+            () => ViewModel.Rotation.SelectedSinger?.Name,
+            selected => ApplySelectedHistoricalSongToPendingSong(textBox, selected));
+    }
+
+    private static void ApplySelectedHistoricalSongToPendingSong(System.Windows.Controls.TextBox textBox, SingerHistoryEntry selected)
+    {
+        textBox.Text = selected.SongTitle;
+        if (textBox.DataContext is PendingSong pending)
+        {
+            pending.Title = selected.SongTitle;
+            pending.Artist = selected.Artist;
+            if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+            {
+                pending.Key = selected.Key;
+            }
+        }
     }
 
     private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

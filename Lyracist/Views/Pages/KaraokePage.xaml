@@ -1,4 +1,4 @@
-<!-- Edited on Oct 29, 2026 @ 08:53:00 -> Color-code KaraokePage TabItem headers for dark venues -->
+<!-- Edited on Nov 21, 2026 @ 08:18:15 -> Attach right-click previously sung songs menu to KaraokePage song entry text boxes -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -334,8 +334,9 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0" Margin="0,0,6,0">
-                            <ui:TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                    PlaceholderText="Search song or artist..."
+                            <ui:TextBox x:Name="SongSearchTextBox"
+                                    Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="Search song or artist (right-click for singer history)..."
                                     Icon="{ui:SymbolIcon Search24}"
                                     KeyDown="SearchBox_KeyDown" />
                             <ui:Button Command="{Binding ClearSearchQueryCommand}"
@@ -509,7 +510,7 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Grid.Column="0" Text="{Binding CustomExternalTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Song Title (Optional)..." Margin="0,0,4,0" FontSize="11" Height="35" />
+                                                <ui:TextBox x:Name="CustomExternalTitleTextBox" Grid.Column="0" Text="{Binding CustomExternalTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Song Title (Optional)..." Margin="0,0,4,0" FontSize="11" Height="35" />
                                                 <ui:TextBox Grid.Column="1" Text="{Binding CustomExternalArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist Name (Optional)..." Margin="4,0,0,0" FontSize="11" Height="35" />
                                             </Grid>
                                         </StackPanel>
@@ -670,6 +671,31 @@
                                     </StackPanel>
                                 </Grid>
 
+                                <!-- 2-Column: Song Title & Artist -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Song Title (Optional)" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,3" />
+                                        <ui:TextBox x:Name="NewSingerSongTitleTextBox"
+                                                    Text="{Binding NewSingerSongTitle, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="Right-click for singer history..."
+                                                    Height="32"
+                                                    Padding="6,4" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Artist (Optional)" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,3" />
+                                        <ui:TextBox x:Name="NewSingerArtistTextBox"
+                                                    Text="{Binding NewSingerArtist, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="Artist..."
+                                                    Height="32"
+                                                    Padding="6,4" />
+                                    </StackPanel>
+                                </Grid>
+
                                 <!-- 2-Column: Key Slider & Notes -->
                                 <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
@@ -686,7 +712,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Notes / Request" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,3" />
-                                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." Height="32" Padding="6,4" />
+                                        <ui:TextBox x:Name="NewSingerNotesTextBox" Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." Height="32" Padding="6,4" />
                                     </StackPanel>
                                 </Grid>
 
@@ -731,7 +757,14 @@
                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Song" Binding="{Binding Title, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
+                                        <DataGridTextColumn Header="Song" Binding="{Binding Title, Mode=TwoWay}" IsReadOnly="False" Width="1.2*">
+                                            <DataGridTextColumn.EditingElementStyle>
+                                                <Style TargetType="TextBox">
+                                                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="PendingQueueSongTextBox_PreviewMouseRightButtonDown" />
+                                                    <EventSetter Event="ContextMenuOpening" Handler="PendingQueueSongTextBox_ContextMenuOpening" />
+                                                </Style>
+                                            </DataGridTextColumn.EditingElementStyle>
+                                        </DataGridTextColumn>
                                         <DataGridTextColumn Header="Artist" Binding="{Binding Artist, Mode=TwoWay}" IsReadOnly="False" Width="*" />
                                         <DataGridTextColumn Header="Key" Binding="{Binding Key, Mode=TwoWay}" IsReadOnly="False" Width="36" />
                                         <DataGridTextColumn Header="Notes" Binding="{Binding Notes, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />

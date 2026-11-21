@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 10:18:00 -> Link SingerHistoryPrinter into KSRotation -->
+<!-- Edited on Nov 21, 2026 @ 08:11:30 -> Link SingerHistoryContextMenuHelper into KSRotation -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.11.16.832</AssemblyVersion>
-    <FileVersion>26.11.16.832</FileVersion>
+    <AssemblyVersion>26.11.21.833</AssemblyVersion>
+    <FileVersion>26.11.21.833</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -154,6 +154,7 @@
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Shared\SavedRotationReportReader.cs" Link="SavedRotationReportReader.cs" />
     <Compile Include="..\Shared\SingerHistoryPrinter.cs" Link="SingerHistoryPrinter.cs" />
+    <Compile Include="..\Shared\SingerHistoryContextMenuHelper.cs" Link="SingerHistoryContextMenuHelper.cs" />
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
     <Compile Include="..\Lyracist\Core\Helpers\SingerXpHelper.cs" Link="Helpers\SingerXpHelper.cs" />

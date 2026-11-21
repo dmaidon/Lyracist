@@ -1,4 +1,4 @@
-// Edited on Nov 16, 2026 @ 08:50:00 -> Recalculate wait estimates when adding a new singer in RotationViewModel.AddSinger
+// Edited on Nov 21, 2026 @ 08:16:00 -> Add NewSingerSongTitle and NewSingerArtist properties for Add Performer card and right-click history menu
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -285,6 +285,12 @@ public partial class RotationViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _newSingerName = string.Empty;
+
+    [ObservableProperty]
+    private string _newSingerSongTitle = string.Empty;
+
+    [ObservableProperty]
+    private string _newSingerArtist = string.Empty;
 
     [ObservableProperty]
     private string _newSingerNotes = string.Empty;
@@ -771,8 +777,8 @@ public partial class RotationViewModel : BaseViewModel
 
         AddSinger(
             NewSingerName,
-            string.Empty,
-            string.Empty,
+            NewSingerSongTitle,
+            NewSingerArtist,
             NewSingerKey,
             NewSingerNotes,
             duetPartner: NewDuetPartnerName,
@@ -780,6 +786,8 @@ public partial class RotationViewModel : BaseViewModel
 
         // Reset input properties
         NewSingerName = string.Empty;
+        NewSingerSongTitle = string.Empty;
+        NewSingerArtist = string.Empty;
         NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";

@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 06:13:00 -> Add manual Scaryoke category assignment dialog from context menu and badge click
+// Edited on Nov 21, 2026 @ 08:13:15 -> Add right-click previously sung songs context menu handlers for song entry text boxes
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -267,6 +267,119 @@ namespace KSRotation
                 }
                 listBox.SelectedItem = null;
             }
+        }
+
+        private string? ResolveAndCommitRowSingerName(WpfTextBox songTextBox, Models.SingerEntry entry)
+        {
+            if (entry.IsMusic)
+            {
+                return null;
+            }
+
+            if (VisualTreeHelper.GetParent(songTextBox) is WpfGrid rowGrid)
+            {
+                var nameBox = rowGrid.Children.OfType<WpfTextBox>().FirstOrDefault(tb => tb.Name == "SingerNameInput");
+                if (nameBox != null)
+                {
+                    string rawText = nameBox.Text?.Trim() ?? string.Empty;
+                    string cleaned = Lyracist.Shared.NameFormatting.CleanSingerName(rawText);
+                    if (!string.IsNullOrWhiteSpace(cleaned) &&
+                        !string.Equals(cleaned, "New Singer", StringComparison.OrdinalIgnoreCase))
+                    {
+                        entry.Name = cleaned;
+                        nameBox.Text = entry.Name;
+                        entry.IsNewPlaceholder = false;
+                    }
+                }
+            }
+
+            return entry.Name;
+        }
+
+        private void ApplySelectedHistorySongToRotationRow(WpfTextBox songTextBox, Models.SingerEntry entry, Lyracist.Services.Database.SingerHistoryEntry selected)
+        {
+            entry.Song = selected.SongTitle;
+            entry.Artist = selected.Artist;
+            songTextBox.Text = entry.Song;
+
+            if (VisualTreeHelper.GetParent(songTextBox) is WpfGrid rowGrid)
+            {
+                var artistBox = rowGrid.Children.OfType<WpfTextBox>().FirstOrDefault(tb => System.Windows.Controls.Grid.GetColumn(tb) == 5);
+                if (artistBox != null)
+                {
+                    artistBox.Text = entry.Artist;
+                }
+            }
+        }
+
+        private void SongTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not WpfTextBox songTextBox || songTextBox.DataContext is not Models.SingerEntry entry)
+            {
+                return;
+            }
+
+            Lyracist.Shared.SingerHistoryContextMenuHelper.HandlePreviewMouseRightButtonDown(
+                songTextBox,
+                () => ResolveAndCommitRowSingerName(songTextBox, entry),
+                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
+        }
+
+        private void SongTextBox_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+        {
+            if (sender is not WpfTextBox songTextBox || songTextBox.DataContext is not Models.SingerEntry entry)
+            {
+                return;
+            }
+
+            Lyracist.Shared.SingerHistoryContextMenuHelper.HandleContextMenuOpening(
+                songTextBox,
+                e,
+                () => ResolveAndCommitRowSingerName(songTextBox, entry),
+                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
+        }
+
+        private void UserHistorySongTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not WpfTextBox songTextBox || DataContext is not ViewModels.MainViewModel vm)
+            {
+                return;
+            }
+
+            Lyracist.Shared.SingerHistoryContextMenuHelper.HandlePreviewMouseRightButtonDown(
+                songTextBox,
+                () => !string.IsNullOrWhiteSpace(vm.EditUserName) ? vm.EditUserName : vm.SelectedUser?.Name,
+                selected =>
+                {
+                    vm.EditUserHistorySongTitle = selected.SongTitle;
+                    vm.EditUserHistoryArtist = selected.Artist;
+                    if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+                    {
+                        vm.EditUserHistoryKey = selected.Key;
+                    }
+                });
+        }
+
+        private void UserHistorySongTextBox_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+        {
+            if (sender is not WpfTextBox songTextBox || DataContext is not ViewModels.MainViewModel vm)
+            {
+                return;
+            }
+
+            Lyracist.Shared.SingerHistoryContextMenuHelper.HandleContextMenuOpening(
+                songTextBox,
+                e,
+                () => !string.IsNullOrWhiteSpace(vm.EditUserName) ? vm.EditUserName : vm.SelectedUser?.Name,
+                selected =>
+                {
+                    vm.EditUserHistorySongTitle = selected.SongTitle;
+                    vm.EditUserHistoryArtist = selected.Artist;
+                    if (!string.IsNullOrWhiteSpace(selected.Key) && selected.Key != "0")
+                    {
+                        vm.EditUserHistoryKey = selected.Key;
+                    }
+                });
         }
 
         private void SuggestionsList_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
