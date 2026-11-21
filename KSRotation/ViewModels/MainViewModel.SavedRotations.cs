@@ -284,6 +284,12 @@ namespace KSRotation.ViewModels
             bool hadExistingSinger = existingSinger != null;
             bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.Song);
 
+            if (existingSinger != null && SingerHasSong(existingSinger, row.SongTitle, row.Artist))
+            {
+                SavedReportStatusMessage = $"'{row.SongTitle}' is already in {cleanName}'s rotation queue.";
+                return;
+            }
+
             if (TryAddPerformer(row.SingerName, row.SongTitle, row.Artist, row.DuetPartnerName))
             {
                 SavedReportStatusMessage = hadExistingSinger

@@ -1,6 +1,7 @@
 // Edited on Nov 21, 2026 @ 08:22:00 -> Use explicit WPF type aliases in SingerHistoryContextMenuHelper to avoid WinForms ambiguity
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -31,6 +32,9 @@ namespace Lyracist.Shared
     /// </summary>
     public static class SingerHistoryContextMenuHelper
     {
+        /// <summary>Maximum songs rendered in the menu (most-performed first, then shown alphabetically) to keep menu creation fast.</summary>
+        public const int MaxMenuSongs = 100;
+
         private const string GeneratedMenuTag = "PreviouslySungSongsContextMenu";
 
         private static readonly SolidColorBrush MenuBackgroundBrush = CreateFrozenBrush(0x0F, 0x17, 0x2A);
@@ -93,18 +97,7 @@ namespace Lyracist.Shared
                 textBox.Focus();
             }
 
-            beforeLookup?.Invoke();
-
-            string? singerName = getSingerName();
-            var menu = BuildContextMenuIfSingerExists(textBox, singerName, onSongSelected);
-            if (menu != null)
-            {
-                textBox.ContextMenu = menu;
-            }
-            else if (textBox.ContextMenu != null && Equals(textBox.ContextMenu.Tag, GeneratedMenuTag))
-            {
-                textBox.ContextMenu = null;
-            }
+            // The lookup/menu build happens once, in ContextMenuOpening (avoids a duplicate DB query per right-click).
         }
 
         /// <summary>
@@ -190,6 +183,17 @@ namespace Lyracist.Shared
                 ? resolvedSingerName
                 : NameFormatting.CleanSingerName(singerName ?? string.Empty);
 
+            int totalSongs = songs.Count;
+            if (totalSongs > MaxMenuSongs)
+            {
+                songs = songs.OrderByDescending(x => x.TimesPerformed)
+                    .ThenBy(x => x.SongTitle, StringComparer.OrdinalIgnoreCase)
+                    .Take(MaxMenuSongs)
+                    .OrderBy(x => x.SongTitle, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(x => x.Artist, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+
             var menu = new WpfContextMenu
             {
                 Tag = GeneratedMenuTag,
@@ -207,7 +211,9 @@ namespace Lyracist.Shared
                 IsEnabled = false,
                 Header = new WpfTextBlock
                 {
-                    Text = $"🎤 Previously Sung by {displaySingerName} ({songs.Count})",
+                    Text = totalSongs > songs.Count
+                        ? $"🎤 Previously Sung by {displaySingerName} (top {songs.Count} of {totalSongs})"
+                        : $"🎤 Previously Sung by {displaySingerName} ({totalSongs})",
                     Foreground = HeaderForegroundBrush,
                     FontWeight = FontWeights.Bold,
                     FontSize = 13,

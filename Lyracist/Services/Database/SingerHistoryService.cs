@@ -560,9 +560,114 @@ namespace Lyracist.Services.Database
             return list;
         }
 
+        // ---- Previously-sung lookup: one-time schema check + stamp-validated cache --------------------------------
+        private static readonly object _lookupLock = new();
+        private static bool _lookupSchemaReady;
+        private static readonly Dictionary<string, (string Stamp, string Resolved, bool Exists, List<SingerHistoryEntry> Songs)> _lookupCache
+            = new(StringComparer.OrdinalIgnoreCase);
+
+        private static void EnsureLookupSchemaOnce()
+        {
+            string dbPath = Lyracist.Data.LyracistDbContext.GetSingersDatabaseFilePath();
+            if (_lookupSchemaReady && File.Exists(dbPath)) return;
+
+            EnsureTableCreated();
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+                using var cmd = connection.CreateCommand();
+                // Expression indexes so TRIM(...) COLLATE NOCASE lookups are not full table scans.
+                cmd.CommandText = @"
+                    CREATE INDEX IF NOT EXISTS IX_SingerHistory_SingerName_Trim ON SingerHistory (TRIM(SingerName) COLLATE NOCASE);
+                    CREATE INDEX IF NOT EXISTS IX_Singers_Name_Trim ON Singers (TRIM(Name) COLLATE NOCASE);";
+                cmd.ExecuteNonQuery();
+                _lookupSchemaReady = true;
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error creating singer lookup indexes", ex);
+            }
+        }
+
+        /// <summary>Changes whenever singers.db (or its WAL) is written, by any writer, so cached lookups never go stale.</summary>
+        private static string GetDatabaseStamp()
+        {
+            try
+            {
+                string path = Lyracist.Data.LyracistDbContext.GetSingersDatabaseFilePath();
+                long a = File.Exists(path) ? File.GetLastWriteTimeUtc(path).Ticks : 0;
+                long b = 0, c = 0;
+                if (File.Exists(path + "-wal"))
+                {
+                    b = File.GetLastWriteTimeUtc(path + "-wal").Ticks;
+                    c = new FileInfo(path + "-wal").Length;
+                }
+                return $"{a}|{b}|{c}";
+            }
+            catch
+            {
+                return Guid.NewGuid().ToString("N"); // never cache if the stamp cannot be read
+            }
+        }
+
+        private static List<SingerHistoryEntry> ReadHistoryRows(SqliteConnection connection, string singerName)
+        {
+            var rows = new List<SingerHistoryEntry>();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = @"
+                SELECT SingerHistoryId, SingerName, SongTitle, Artist, Link, Source, Timestamp, Key, Tempo, Venue, TimesPerformed
+                FROM SingerHistory
+                WHERE TRIM(SingerName) = $singerName COLLATE NOCASE
+                  AND SongTitle IS NOT NULL
+                  AND TRIM(SongTitle) != ''
+                ORDER BY SongTitle COLLATE NOCASE ASC, TimesPerformed DESC, Timestamp DESC;";
+            cmd.Parameters.AddWithValue("$singerName", singerName);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                rows.Add(new SingerHistoryEntry
+                {
+                    SingerHistoryId = reader.GetInt32(0),
+                    SingerName = reader.IsDBNull(1) ? singerName : reader.GetString(1).Trim(),
+                    SongTitle = reader.IsDBNull(2) ? string.Empty : reader.GetString(2).Trim(),
+                    Artist = reader.IsDBNull(3) ? string.Empty : reader.GetString(3).Trim(),
+                    Link = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    Source = reader.IsDBNull(5) ? "Local" : reader.GetString(5),
+                    Timestamp = !reader.IsDBNull(6) && DateTime.TryParse(reader.GetString(6), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dt) ? dt : DateTime.UtcNow,
+                    Key = reader.IsDBNull(7) ? "0" : reader.GetString(7),
+                    Tempo = reader.IsDBNull(8) ? 1.0 : reader.GetDouble(8),
+                    Venue = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                    TimesPerformed = reader.IsDBNull(10) ? 1 : Math.Max(1, reader.GetInt32(10))
+                });
+            }
+
+            return rows;
+        }
+
+        private static string? FindMatchingName(SqliteConnection connection, string sql, string cleanName)
+        {
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = sql;
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                if (reader.IsDBNull(0)) continue;
+                string candidate = reader.GetString(0).Trim();
+                if (RotationHelpers.IsSameSingerName(candidate, cleanName))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Checks whether <paramref name="singerName"/> exists in the singer database (<c>Singers</c> or <c>SingerHistory</c>)
         /// and returns all unique previously sung songs for that performer sorted alphabetically by song title.
+        /// Results are cached and revalidated against the database file's write stamp.
         /// </summary>
         public static List<SingerHistoryEntry> GetPreviouslySungSongsForSinger(
             string? singerName,
@@ -571,11 +676,10 @@ namespace Lyracist.Services.Database
         {
             resolvedSingerName = string.Empty;
             singerExistsInDatabase = false;
-            var results = new List<SingerHistoryEntry>();
 
             if (string.IsNullOrWhiteSpace(singerName))
             {
-                return results;
+                return [];
             }
 
             string cleanName = NameFormatting.CleanSingerName(singerName);
@@ -585,184 +689,124 @@ namespace Lyracist.Services.Database
                 string.Equals(cleanName, "Music", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(cleanName, "Special Guest", StringComparison.OrdinalIgnoreCase))
             {
-                return results;
+                return [];
             }
 
+            string cacheKey = RotationHelpers.NormalizeForComparison(cleanName);
             try
             {
-                EnsureTableCreated();
+                EnsureLookupSchemaOnce();
+                string stamp = GetDatabaseStamp();
+
+                lock (_lookupLock)
+                {
+                    if (_lookupCache.TryGetValue(cacheKey, out var hit) && hit.Stamp == stamp)
+                    {
+                        resolvedSingerName = hit.Resolved;
+                        singerExistsInDatabase = hit.Exists;
+                        return [.. hit.Songs];
+                    }
+                }
+
                 using var connection = new SqliteConnection(GetConnectionString());
                 connection.Open();
 
-                // 1. Check Singers table for direct case-insensitive match
+                string resolved = string.Empty;
+                bool exists = false;
+
+                // 1. Direct case-insensitive match in Singers (indexed)
                 using (var singerCmd = connection.CreateCommand())
                 {
                     singerCmd.CommandText = "SELECT Name FROM Singers WHERE TRIM(Name) = $name COLLATE NOCASE LIMIT 1;";
                     singerCmd.Parameters.AddWithValue("$name", cleanName);
-                    using var singerReader = singerCmd.ExecuteReader();
-                    if (singerReader.Read() && !singerReader.IsDBNull(0))
+                    using var r = singerCmd.ExecuteReader();
+                    if (r.Read() && !r.IsDBNull(0))
                     {
-                        resolvedSingerName = singerReader.GetString(0).Trim();
-                        singerExistsInDatabase = true;
+                        resolved = r.GetString(0).Trim();
+                        exists = true;
                     }
                 }
 
-                // 2. Fallback: normalized comparison against Singers table
-                if (!singerExistsInDatabase)
+                // 2. Fallback: normalized comparison against Singers
+                if (!exists)
                 {
-                    using var allSingersCmd = connection.CreateCommand();
-                    allSingersCmd.CommandText = "SELECT Name FROM Singers WHERE Name IS NOT NULL AND TRIM(Name) != '';";
-                    using var allSingersReader = allSingersCmd.ExecuteReader();
-                    while (allSingersReader.Read())
+                    string? match = FindMatchingName(connection, "SELECT Name FROM Singers WHERE Name IS NOT NULL AND TRIM(Name) != '';", cleanName);
+                    if (match != null)
                     {
-                        string dbName = allSingersReader.GetString(0).Trim();
-                        if (RotationHelpers.IsSameSingerName(dbName, cleanName))
-                        {
-                            resolvedSingerName = dbName;
-                            singerExistsInDatabase = true;
-                            break;
-                        }
+                        resolved = match;
+                        exists = true;
                     }
                 }
 
-                string queryTargetName = !string.IsNullOrWhiteSpace(resolvedSingerName) ? resolvedSingerName : cleanName;
+                // 3. History rows by resolved/clean name
+                var rawRows = ReadHistoryRows(connection, !string.IsNullOrWhiteSpace(resolved) ? resolved : cleanName);
 
-                // 3. Query SingerHistory for all songs sung by this performer
-                var rawRows = new List<SingerHistoryEntry>();
-                using (var histCmd = connection.CreateCommand())
-                {
-                    histCmd.CommandText = @"
-                        SELECT SingerHistoryId, SingerName, SongTitle, Artist, Link, Source, Timestamp, Key, Tempo, Venue, TimesPerformed
-                        FROM SingerHistory
-                        WHERE TRIM(SingerName) = $singerName COLLATE NOCASE
-                          AND SongTitle IS NOT NULL
-                          AND TRIM(SongTitle) != ''
-                        ORDER BY SongTitle COLLATE NOCASE ASC, TimesPerformed DESC, Timestamp DESC;
-                    ";
-                    histCmd.Parameters.AddWithValue("$singerName", queryTargetName);
-
-                    using var reader = histCmd.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        rawRows.Add(new SingerHistoryEntry
-                        {
-                            SingerHistoryId = reader.GetInt32(0),
-                            SingerName = reader.IsDBNull(1) ? queryTargetName : reader.GetString(1).Trim(),
-                            SongTitle = reader.IsDBNull(2) ? string.Empty : reader.GetString(2).Trim(),
-                            Artist = reader.IsDBNull(3) ? string.Empty : reader.GetString(3).Trim(),
-                            Link = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                            Source = reader.IsDBNull(5) ? "Local" : reader.GetString(5),
-                            Timestamp = !reader.IsDBNull(6) && DateTime.TryParse(reader.GetString(6), out var dt) ? dt : DateTime.UtcNow,
-                            Key = reader.IsDBNull(7) ? "0" : reader.GetString(7),
-                            Tempo = reader.IsDBNull(8) ? 1.0 : reader.GetDouble(8),
-                            Venue = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                            TimesPerformed = reader.IsDBNull(10) ? 1 : Math.Max(1, reader.GetInt32(10))
-                        });
-                    }
-                }
-
-                // 4. Fallback: if no history rows found by exact string, check distinct SingerName in SingerHistory via IsSamePerson
+                // 4. Fallback: normalized match against distinct history names
                 if (rawRows.Count == 0)
                 {
-                    string? matchedHistoryName = null;
-                    using (var distinctCmd = connection.CreateCommand())
-                    {
-                        distinctCmd.CommandText = "SELECT DISTINCT SingerName FROM SingerHistory WHERE SingerName IS NOT NULL AND TRIM(SingerName) != '';";
-                        using var distinctReader = distinctCmd.ExecuteReader();
-                        while (distinctReader.Read())
-                        {
-                            string candidate = distinctReader.GetString(0).Trim();
-                            if (RotationHelpers.IsSameSingerName(candidate, cleanName))
-                            {
-                                matchedHistoryName = candidate;
-                                break;
-                            }
-                        }
-                    }
-
+                    string? matchedHistoryName = FindMatchingName(connection,
+                        "SELECT DISTINCT SingerName FROM SingerHistory WHERE SingerName IS NOT NULL AND TRIM(SingerName) != '';", cleanName);
                     if (!string.IsNullOrWhiteSpace(matchedHistoryName))
                     {
-                        using var fallbackCmd = connection.CreateCommand();
-                        fallbackCmd.CommandText = @"
-                            SELECT SingerHistoryId, SingerName, SongTitle, Artist, Link, Source, Timestamp, Key, Tempo, Venue, TimesPerformed
-                            FROM SingerHistory
-                            WHERE TRIM(SingerName) = $singerName COLLATE NOCASE
-                              AND SongTitle IS NOT NULL
-                              AND TRIM(SongTitle) != ''
-                            ORDER BY SongTitle COLLATE NOCASE ASC, TimesPerformed DESC, Timestamp DESC;
-                        ";
-                        fallbackCmd.Parameters.AddWithValue("$singerName", matchedHistoryName);
-
-                        using var reader = fallbackCmd.ExecuteReader();
-                        while (reader.Read())
-                        {
-                            rawRows.Add(new SingerHistoryEntry
-                            {
-                                SingerHistoryId = reader.GetInt32(0),
-                                SingerName = reader.IsDBNull(1) ? matchedHistoryName : reader.GetString(1).Trim(),
-                                SongTitle = reader.IsDBNull(2) ? string.Empty : reader.GetString(2).Trim(),
-                                Artist = reader.IsDBNull(3) ? string.Empty : reader.GetString(3).Trim(),
-                                Link = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                                Source = reader.IsDBNull(5) ? "Local" : reader.GetString(5),
-                                Timestamp = !reader.IsDBNull(6) && DateTime.TryParse(reader.GetString(6), out var dt) ? dt : DateTime.UtcNow,
-                                Key = reader.IsDBNull(7) ? "0" : reader.GetString(7),
-                                Tempo = reader.IsDBNull(8) ? 1.0 : reader.GetDouble(8),
-                                Venue = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                                TimesPerformed = reader.IsDBNull(10) ? 1 : Math.Max(1, reader.GetInt32(10))
-                            });
-                        }
+                        rawRows = ReadHistoryRows(connection, matchedHistoryName);
                     }
                 }
 
                 if (rawRows.Count > 0)
                 {
-                    singerExistsInDatabase = true;
-                    if (string.IsNullOrWhiteSpace(resolvedSingerName))
+                    exists = true;
+                    if (string.IsNullOrWhiteSpace(resolved))
                     {
-                        resolvedSingerName = rawRows[0].SingerName;
+                        resolved = rawRows[0].SingerName;
                     }
                 }
 
-                // 5. Deduplicate by (SongTitle, Artist) and sort alphabetically by SongTitle, then Artist
+                // 5. Deduplicate by normalized (SongTitle, Artist)
                 var deduped = new Dictionary<string, SingerHistoryEntry>(StringComparer.OrdinalIgnoreCase);
                 foreach (var row in rawRows)
                 {
                     if (string.IsNullOrWhiteSpace(row.SongTitle)) continue;
 
-                    string titleKey = row.SongTitle.Trim();
-                    string artistKey = (row.Artist ?? string.Empty).Trim();
-                    string compositeKey = $"{titleKey}||{artistKey}";
-
+                    string compositeKey = $"{RotationHelpers.NormalizeForComparison(row.SongTitle)}||{RotationHelpers.NormalizeForComparison(row.Artist)}";
                     if (!deduped.TryGetValue(compositeKey, out var existing))
                     {
                         deduped[compositeKey] = row;
+                        continue;
                     }
-                    else
+
+                    existing.TimesPerformed += Math.Max(1, row.TimesPerformed);
+                    if (string.IsNullOrWhiteSpace(existing.Artist) && !string.IsNullOrWhiteSpace(row.Artist))
                     {
-                        existing.TimesPerformed += Math.Max(1, row.TimesPerformed);
-                        if (string.IsNullOrWhiteSpace(existing.Artist) && !string.IsNullOrWhiteSpace(row.Artist))
-                        {
-                            existing.Artist = row.Artist;
-                        }
-                        if ((string.IsNullOrWhiteSpace(existing.Key) || existing.Key == "0") &&
-                            !string.IsNullOrWhiteSpace(row.Key) && row.Key != "0")
-                        {
-                            existing.Key = row.Key;
-                        }
+                        existing.Artist = row.Artist;
+                    }
+                    if ((string.IsNullOrWhiteSpace(existing.Key) || existing.Key == "0") &&
+                        !string.IsNullOrWhiteSpace(row.Key) && row.Key != "0")
+                    {
+                        existing.Key = row.Key;
                     }
                 }
 
-                results = deduped.Values
+                var results = deduped.Values
                     .OrderBy(r => r.SongTitle, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(r => r.Artist, StringComparer.OrdinalIgnoreCase)
                     .ToList();
+
+                lock (_lookupLock)
+                {
+                    _lookupCache[cacheKey] = (stamp, resolved, exists, results);
+                }
+
+                resolvedSingerName = resolved;
+                singerExistsInDatabase = exists;
+                return [.. results];
             }
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "Error loading previously sung songs for singer", ex);
+                resolvedSingerName = string.Empty;
+                singerExistsInDatabase = false;
+                return [];
             }
-
-            return results;
         }
 
         public static (string Key, double Tempo)? GetSongHistory(string singerName, string songTitle, string artist)
@@ -911,6 +955,15 @@ namespace Lyracist.Services.Database
             }
         }
 
+        private static void ExecDelete(SqliteConnection connection, SqliteTransaction tx, string sql, string name)
+        {
+            using var cmd = connection.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("$name", name);
+            cmd.ExecuteNonQuery();
+        }
+
         /// <summary>
         /// Deletes a singer profile and all of their <c>SingerHistory</c> records from <c>Data/singers.db</c> (and <c>Data/lyracist.db</c> if present).
         /// </summary>
@@ -922,21 +975,21 @@ namespace Lyracist.Services.Database
 
             try
             {
-                using var connection = new SqliteConnection(GetConnectionString());
-                connection.Open();
-
-                using (var delHist = connection.CreateCommand())
+                EnsureTableCreated();
+                using (var connection = new SqliteConnection(GetConnectionString()))
                 {
-                    delHist.CommandText = "DELETE FROM SingerHistory WHERE TRIM(SingerName) = $name COLLATE NOCASE;";
-                    delHist.Parameters.AddWithValue("$name", cleanName);
-                    delHist.ExecuteNonQuery();
-                }
+                    connection.Open();
+                    using (var pragma = connection.CreateCommand())
+                    {
+                        pragma.CommandText = "PRAGMA foreign_keys=ON;"; // SQLite default is OFF per connection; needed for ON DELETE CASCADE
+                        pragma.ExecuteNonQuery();
+                    }
 
-                using (var delSinger = connection.CreateCommand())
-                {
-                    delSinger.CommandText = "DELETE FROM Singers WHERE TRIM(Name) = $name COLLATE NOCASE;";
-                    delSinger.Parameters.AddWithValue("$name", cleanName);
-                    delSinger.ExecuteNonQuery();
+                    using var tx = connection.BeginTransaction();
+                    ExecDelete(connection, tx, "DELETE FROM SingerHistory WHERE TRIM(SingerName) = $name COLLATE NOCASE;", cleanName);
+                    ExecDelete(connection, tx, "DELETE FROM SingerAudioSettings WHERE SingerId IN (SELECT SingerId FROM Singers WHERE TRIM(Name) = $name COLLATE NOCASE);", cleanName);
+                    ExecDelete(connection, tx, "DELETE FROM Singers WHERE TRIM(Name) = $name COLLATE NOCASE;", cleanName);
+                    tx.Commit();
                 }
 
                 string mainDbPath = Lyracist.Data.LyracistDbContext.GetDatabaseFilePath();
@@ -944,6 +997,9 @@ namespace Lyracist.Services.Database
                 {
                     using var mainConn = new SqliteConnection(Lyracist.Data.LyracistDbContext.GetConnectionString());
                     mainConn.Open();
+                    using var pragma = mainConn.CreateCommand();
+                    pragma.CommandText = "PRAGMA foreign_keys=ON;";
+                    pragma.ExecuteNonQuery();
                     using var delMainSinger = mainConn.CreateCommand();
                     delMainSinger.CommandText = "DELETE FROM Singers WHERE TRIM(Name) = $name COLLATE NOCASE;";
                     delMainSinger.Parameters.AddWithValue("$name", cleanName);

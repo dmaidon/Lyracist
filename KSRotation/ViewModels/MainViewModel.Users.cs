@@ -1104,6 +1104,12 @@ namespace KSRotation.ViewModels
                 bool hadExistingSinger = existingSinger != null;
                 bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.Song);
 
+                if (existingSinger != null && SingerHasSong(existingSinger, item.SongTitle, item.Artist))
+                {
+                    ShowUserStatus($"'{item.SongTitle}' is already in {cleanName}'s rotation queue.", false);
+                    return;
+                }
+
                 if (!TryAddPerformer(singerName, item.SongTitle, item.Artist))
                 {
                     ShowUserStatus("Failed to add song to rotation.", false);

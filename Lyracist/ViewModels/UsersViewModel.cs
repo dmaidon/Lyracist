@@ -1000,6 +1000,12 @@ namespace Lyracist.ViewModels
                 bool hadExistingSinger = existingSinger != null;
                 bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.SongTitle);
 
+                if (_rotationViewModel.SingerAlreadyHasSong(singerName, item.SongTitle, item.Artist))
+                {
+                    ShowStatus($"'{item.SongTitle}' is already in {singerName}'s rotation queue.", false);
+                    return;
+                }
+
                 _rotationViewModel.AddSinger(
                     singerName,
                     item.SongTitle,

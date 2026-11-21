@@ -269,47 +269,47 @@ namespace KSRotation
             }
         }
 
-        private string? ResolveAndCommitRowSingerName(WpfTextBox songTextBox, Models.SingerEntry entry)
+        /// <summary>
+        /// Returns the singer name for the row without mutating the model: uses the name box's pending (uncommitted)
+        /// text when valid, otherwise the entry's current name. Committing is left to the name box's normal LostFocus
+        /// path, so duplicate checks and AddKnownSinger are not bypassed by a right-click.
+        /// </summary>
+        private static string? ResolveRowSingerName(WpfTextBox songTextBox, Models.SingerEntry entry)
         {
             if (entry.IsMusic)
             {
                 return null;
             }
 
-            if (VisualTreeHelper.GetParent(songTextBox) is WpfGrid rowGrid)
+            var rowGrid = FindVisualParent<WpfGrid>(songTextBox);
+            var nameBox = rowGrid == null ? null : FindVisualChildByName<WpfTextBox>(rowGrid, "SingerNameInput");
+            string pending = Lyracist.Shared.NameFormatting.CleanSingerName(nameBox?.Text?.Trim() ?? string.Empty);
+            if (!string.IsNullOrWhiteSpace(pending) &&
+                !string.Equals(pending, "New Singer", StringComparison.OrdinalIgnoreCase))
             {
-                var nameBox = rowGrid.Children.OfType<WpfTextBox>().FirstOrDefault(tb => tb.Name == "SingerNameInput");
-                if (nameBox != null)
-                {
-                    string rawText = nameBox.Text?.Trim() ?? string.Empty;
-                    string cleaned = Lyracist.Shared.NameFormatting.CleanSingerName(rawText);
-                    if (!string.IsNullOrWhiteSpace(cleaned) &&
-                        !string.Equals(cleaned, "New Singer", StringComparison.OrdinalIgnoreCase))
-                    {
-                        entry.Name = cleaned;
-                        nameBox.Text = entry.Name;
-                        entry.IsNewPlaceholder = false;
-                    }
-                }
+                return pending;
             }
 
             return entry.Name;
         }
 
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            var current = VisualTreeHelper.GetParent(child);
+            while (current != null && current is not T)
+            {
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return current as T;
+        }
+
         private void ApplySelectedHistorySongToRotationRow(WpfTextBox songTextBox, Models.SingerEntry entry, Lyracist.Services.Database.SingerHistoryEntry selected)
         {
+            // Bound properties drive both the Song and Artist boxes; no need to poke sibling controls by column index.
             entry.Song = selected.SongTitle;
             entry.Artist = selected.Artist;
             songTextBox.Text = entry.Song;
-
-            if (VisualTreeHelper.GetParent(songTextBox) is WpfGrid rowGrid)
-            {
-                var artistBox = rowGrid.Children.OfType<WpfTextBox>().FirstOrDefault(tb => System.Windows.Controls.Grid.GetColumn(tb) == 5);
-                if (artistBox != null)
-                {
-                    artistBox.Text = entry.Artist;
-                }
-            }
         }
 
         private void SongTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -321,7 +321,7 @@ namespace KSRotation
 
             Lyracist.Shared.SingerHistoryContextMenuHelper.HandlePreviewMouseRightButtonDown(
                 songTextBox,
-                () => ResolveAndCommitRowSingerName(songTextBox, entry),
+                () => ResolveRowSingerName(songTextBox, entry),
                 selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
         }
 
@@ -335,7 +335,7 @@ namespace KSRotation
             Lyracist.Shared.SingerHistoryContextMenuHelper.HandleContextMenuOpening(
                 songTextBox,
                 e,
-                () => ResolveAndCommitRowSingerName(songTextBox, entry),
+                () => ResolveRowSingerName(songTextBox, entry),
                 selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
         }
 

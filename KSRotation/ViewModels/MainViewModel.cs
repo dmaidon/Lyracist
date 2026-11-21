@@ -2108,55 +2108,9 @@ namespace KSRotation.ViewModels
                 if (existingSinger != null)
                 {
                     LastInsertedSinger = existingSinger;
-                    bool wasInactive = existingSinger.IsInactive;
-                    existingSinger.IsInactive = false;
-                    if (newSinger.IsSpecial)
-                    {
-                        existingSinger.IsSpecial = true;
-                        RotationHelpers.PromoteSpecialSingerToCurrent(Singers, existingSinger);
-                        RotationHelpers.EnforceLinkedAdjacency(Singers);
-                        RefreshLinkedPartnerNames();
-                        UpdateNextSingerHighlight();
-                    }
-                    else if (wasInactive)
-                    {
-                        EnforceActiveInactiveOrder(existingSinger);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(newSinger.DuetPartnerName))
-                    {
-                        existingSinger.DuetPartnerName = newSinger.DuetPartnerName;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(newSinger.Song))
-                    {
-                        if (string.IsNullOrWhiteSpace(existingSinger.Song))
-                        {
-                            existingSinger.Song = newSinger.Song;
-                            existingSinger.Artist = newSinger.Artist;
-                        }
-                        else if (!SingerHasSong(existingSinger, newSinger.Song, newSinger.Artist))
-                        {
-                            existingSinger.QueuedSongs.Add(new QueuedSong(newSinger.Song, newSinger.Artist));
-                        }
-                    }
-
-                    foreach (var q in newSinger.QueuedSongs)
-                    {
-                        if (!string.IsNullOrWhiteSpace(q.Song) && !SingerHasSong(existingSinger, q.Song, q.Artist))
-                        {
-                            existingSinger.QueuedSongs.Add(q);
-                        }
-                    }
-
-                    RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
-                    RefreshBillboardState();
-                    RebuildRotationJsonCacheNow();
+                    MergeIntoExistingSinger(existingSinger, newSinger.Song, newSinger.Artist, newSinger.DuetPartnerName, newSinger.IsSpecial, newSinger.QueuedSongs);
+                    AddKnownSinger(existingSinger.Name);
                     QueueSaveDatabase();
-                    if (IsDisplayEnabled)
-                    {
-                        _displayWindowService.Update(Singers);
-                    }
                     return;
                 }
             }
@@ -2401,6 +2355,68 @@ namespace KSRotation.ViewModels
             return singer.QueuedSongs.Any(qs => RotationHelpers.IsSameSong(qs.Song, qs.Artist, song, artist));
         }
 
+        /// <summary>
+        /// Single place that merges a requested song/duet/special flag into a singer already in the rotation:
+        /// reactivates them, fills the empty current slot or appends to <c>QueuedSongs</c> (skipping duplicates),
+        /// then refreshes wait estimates, billboard, JSON cache and the display window.
+        /// </summary>
+        private void MergeIntoExistingSinger(SingerEntry existingSinger, string? song, string? artist, string? duetPartner, bool isSpecial, IEnumerable<QueuedSong>? extraQueuedSongs)
+        {
+            bool wasInactive = existingSinger.IsInactive;
+            existingSinger.IsInactive = false;
+            if (isSpecial)
+            {
+                existingSinger.IsSpecial = true;
+                RotationHelpers.PromoteSpecialSingerToCurrent(Singers, existingSinger);
+                RotationHelpers.EnforceLinkedAdjacency(Singers);
+                RefreshLinkedPartnerNames();
+                UpdateNextSingerHighlight();
+            }
+            else if (wasInactive)
+            {
+                EnforceActiveInactiveOrder(existingSinger);
+            }
+
+            if (!string.IsNullOrWhiteSpace(duetPartner))
+            {
+                existingSinger.DuetPartnerName = duetPartner.Trim();
+            }
+
+            string trimmedSong = song?.Trim() ?? string.Empty;
+            string trimmedArtist = artist?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(trimmedSong))
+            {
+                if (string.IsNullOrWhiteSpace(existingSinger.Song))
+                {
+                    existingSinger.Song = trimmedSong;
+                    existingSinger.Artist = trimmedArtist;
+                }
+                else if (!SingerHasSong(existingSinger, trimmedSong, trimmedArtist))
+                {
+                    existingSinger.QueuedSongs.Add(new QueuedSong(NameFormatting.ProperCase(trimmedSong), NameFormatting.ProperCase(trimmedArtist)));
+                }
+            }
+
+            if (extraQueuedSongs != null)
+            {
+                foreach (var q in extraQueuedSongs.ToList())
+                {
+                    if (!string.IsNullOrWhiteSpace(q.Song) && !SingerHasSong(existingSinger, q.Song, q.Artist))
+                    {
+                        existingSinger.QueuedSongs.Add(q);
+                    }
+                }
+            }
+
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
         public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "", bool isSpecial = false)
         {
             string trimmedName = NameFormatting.CleanSingerName(name);
@@ -2415,49 +2431,7 @@ namespace KSRotation.ViewModels
             var existingSinger = Singers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, trimmedName));
             if (existingSinger != null)
             {
-                bool wasInactive = existingSinger.IsInactive;
-                existingSinger.IsInactive = false;
-                if (isSpecial)
-                {
-                    existingSinger.IsSpecial = true;
-                    RotationHelpers.PromoteSpecialSingerToCurrent(Singers, existingSinger);
-                    RotationHelpers.EnforceLinkedAdjacency(Singers);
-                    RefreshLinkedPartnerNames();
-                    UpdateNextSingerHighlight();
-                }
-                else if (wasInactive)
-                {
-                    EnforceActiveInactiveOrder(existingSinger);
-                }
-
-                if (!string.IsNullOrWhiteSpace(duetPartner))
-                {
-                    existingSinger.DuetPartnerName = duetPartner.Trim();
-                }
-
-                string trimmedSong = song?.Trim() ?? string.Empty;
-                string trimmedArtist = artist?.Trim() ?? string.Empty;
-
-                if (!string.IsNullOrWhiteSpace(trimmedSong))
-                {
-                    if (string.IsNullOrWhiteSpace(existingSinger.Song))
-                    {
-                        existingSinger.Song = trimmedSong;
-                        existingSinger.Artist = trimmedArtist;
-                    }
-                    else if (!SingerHasSong(existingSinger, trimmedSong, trimmedArtist))
-                    {
-                        existingSinger.QueuedSongs.Add(new QueuedSong(NameFormatting.ProperCase(trimmedSong), NameFormatting.ProperCase(trimmedArtist)));
-                    }
-                }
-
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
-                RefreshBillboardState();
-                RebuildRotationJsonCacheNow();
-                if (IsDisplayEnabled)
-                {
-                    _displayWindowService.Update(Singers);
-                }
+                MergeIntoExistingSinger(existingSinger, song, artist, duetPartner, isSpecial, null);
             }
             else
             {

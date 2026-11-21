@@ -269,6 +269,12 @@ public partial class SavedRotationsViewModel : BaseViewModel
         bool hadExistingSinger = existingSinger != null;
         bool hadActiveSong = existingSinger != null && !string.IsNullOrWhiteSpace(existingSinger.SongTitle);
 
+        if (_rotationViewModel.SingerAlreadyHasSong(row.SingerName, row.SongTitle, row.Artist))
+        {
+            StatusMessage = $"'{row.SongTitle}' is already in {row.SingerName}'s rotation queue.";
+            return;
+        }
+
         _rotationViewModel.AddSinger(row.SingerName, row.SongTitle, row.Artist, "0", string.Empty, duetPartner: row.DuetPartnerName, isMusic: row.IsMusic);
 
         StatusMessage = hadExistingSinger

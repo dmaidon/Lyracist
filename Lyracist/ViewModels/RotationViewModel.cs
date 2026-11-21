@@ -492,6 +492,23 @@ public partial class RotationViewModel : BaseViewModel
         });
     }
 
+    /// <summary>
+    /// True when the singer (active or inactive) already has this exact song as their current song or in their pending queue.
+    /// Lets callers report "already queued" instead of claiming a duplicate was added.
+    /// </summary>
+    public bool SingerAlreadyHasSong(string? singerName, string? title, string? artist)
+    {
+        if (string.IsNullOrWhiteSpace(singerName) || string.IsNullOrWhiteSpace(title)) return false;
+
+        var singer = Rotation.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, singerName))
+            ?? InactiveSingers.FirstOrDefault(s => !s.IsMusic && RotationHelpers.IsSameSingerName(s.Name, singerName));
+        if (singer == null) return false;
+
+        return RotationHelpers.IsSameSong(singer.SongTitle, singer.Artist, title, artist)
+            || (_pendingSingerSongs.TryGetValue(singer.Name, out var list)
+                && list.Any(p => RotationHelpers.IsSameSong(p.Title, p.Artist, title, artist)));
+    }
+
     public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false, double tempo = 1.0, bool isSpecial = false)
     {
         string cleanedName = NameFormatting.CleanSingerName(name);
