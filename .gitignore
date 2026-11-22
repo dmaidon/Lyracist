@@ -415,3 +415,7 @@ Scaryoke.Unity/*.dll
 
 # Personal deploy script for the show laptop: never committed
 Deploy/Deploy-Lyracist.ps1
+
+# User manual builds (kept locally, not tracked)
+Documentation/Lyracist_User_Manual.docx
+Documentation/Lyracist_User_Manual.pdf
