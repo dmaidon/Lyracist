@@ -2355,6 +2355,14 @@ namespace KSRotation.ViewModels
             return singer.QueuedSongs.Any(qs => RotationHelpers.IsSameSong(qs.Song, qs.Artist, song, artist));
         }
 
+        /// <summary>Adds a song to an existing singer's queue (never replaces their current song); duplicates are ignored.</summary>
+        public void QueueSongForSinger(SingerEntry singer, string? song, string? artist)
+        {
+            if (singer == null || string.IsNullOrWhiteSpace(song)) return;
+            MergeIntoExistingSinger(singer, null, null, null, false, [new QueuedSong(NameFormatting.ProperCase(song.Trim()), NameFormatting.ProperCase(artist?.Trim() ?? string.Empty))]);
+            QueueSaveDatabase();
+        }
+
         /// <summary>
         /// Single place that merges a requested song/duet/special flag into a singer already in the rotation:
         /// reactivates them, fills the empty current slot or appends to <c>QueuedSongs</c> (skipping duplicates),

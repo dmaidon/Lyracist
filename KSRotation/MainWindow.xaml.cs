@@ -322,7 +322,9 @@ namespace KSRotation
             Lyracist.Shared.SingerHistoryContextMenuHelper.HandlePreviewMouseRightButtonDown(
                 songTextBox,
                 () => ResolveRowSingerName(songTextBox, entry),
-                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
+                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected),
+                hasCurrentSong: () => !string.IsNullOrWhiteSpace(entry.Song),
+                onSongQueued: selected => (DataContext as ViewModels.MainViewModel)?.QueueSongForSinger(entry, selected.SongTitle, selected.Artist));
         }
 
         private void SongTextBox_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
@@ -336,7 +338,9 @@ namespace KSRotation
                 songTextBox,
                 e,
                 () => ResolveRowSingerName(songTextBox, entry),
-                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected));
+                selected => ApplySelectedHistorySongToRotationRow(songTextBox, entry, selected),
+                hasCurrentSong: () => !string.IsNullOrWhiteSpace(entry.Song),
+                onSongQueued: selected => (DataContext as ViewModels.MainViewModel)?.QueueSongForSinger(entry, selected.SongTitle, selected.Artist));
         }
 
         private void UserHistorySongTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

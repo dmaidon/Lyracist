@@ -19,12 +19,25 @@ namespace Lyracist.Windows
             SingerHistoryContextMenuHelper.Attach(
                 SongTitleTextBox,
                 () => ViewModel.Name,
-                ApplySelectedHistoricalSong);
+                ApplySelectedHistoricalSong,
+                hasCurrentSong: () => !string.IsNullOrWhiteSpace(ViewModel.SongTitle),
+                onSongQueued: QueueSelectedHistoricalSong);
 
             SingerHistoryContextMenuHelper.Attach(
                 NotesTextBox,
                 () => ViewModel.Name,
                 ApplySelectedHistoricalSong);
+        }
+
+        private void QueueSelectedHistoricalSong(SingerHistoryEntry selected)
+        {
+            var rotation = App.AppHost.Services.GetService(typeof(Lyracist.ViewModels.RotationViewModel)) as Lyracist.ViewModels.RotationViewModel;
+            if (rotation == null || rotation.SingerAlreadyHasSong(ViewModel.Name, selected.SongTitle, selected.Artist))
+            {
+                return;
+            }
+
+            rotation.AddSinger(ViewModel.Name, selected.SongTitle, selected.Artist, selected.Key, string.Empty, tempo: selected.Tempo);
         }
 
         private void ApplySelectedHistoricalSong(SingerHistoryEntry selected)

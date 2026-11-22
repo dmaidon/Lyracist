@@ -35,6 +35,8 @@ namespace Lyracist.Shared
         /// <summary>Maximum songs rendered in the menu (most-performed first, then shown alphabetically) to keep menu creation fast.</summary>
         public const int MaxMenuSongs = 100;
 
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<WpfTextBox, WpfContextMenu> PrebuiltForGesture = new();
+
         private const string GeneratedMenuTag = "PreviouslySungSongsContextMenu";
 
         private static readonly SolidColorBrush MenuBackgroundBrush = CreateFrozenBrush(0x0F, 0x17, 0x2A);
@@ -62,7 +64,9 @@ namespace Lyracist.Shared
             WpfTextBox? textBox,
             Func<string?> getSingerName,
             Action<SingerHistoryEntry> onSongSelected,
-            Action? beforeLookup = null)
+            Action? beforeLookup = null,
+            Func<bool>? hasCurrentSong = null,
+            Action<SingerHistoryEntry>? onSongQueued = null)
         {
             if (textBox == null) return;
             ArgumentNullException.ThrowIfNull(getSingerName);
@@ -70,12 +74,12 @@ namespace Lyracist.Shared
 
             textBox.PreviewMouseRightButtonDown += (_, _) =>
             {
-                HandlePreviewMouseRightButtonDown(textBox, getSingerName, onSongSelected, beforeLookup);
+                HandlePreviewMouseRightButtonDown(textBox, getSingerName, onSongSelected, beforeLookup, hasCurrentSong, onSongQueued);
             };
 
             textBox.ContextMenuOpening += (_, e) =>
             {
-                HandleContextMenuOpening(textBox, e, getSingerName, onSongSelected, beforeLookup);
+                HandleContextMenuOpening(textBox, e, getSingerName, onSongSelected, beforeLookup, hasCurrentSong, onSongQueued);
             };
         }
 
@@ -88,7 +92,9 @@ namespace Lyracist.Shared
             WpfTextBox? textBox,
             Func<string?> getSingerName,
             Action<SingerHistoryEntry> onSongSelected,
-            Action? beforeLookup = null)
+            Action? beforeLookup = null,
+            Func<bool>? hasCurrentSong = null,
+            Action<SingerHistoryEntry>? onSongQueued = null)
         {
             if (textBox == null) return;
 
@@ -97,7 +103,24 @@ namespace Lyracist.Shared
                 textBox.Focus();
             }
 
-            // The lookup/menu build happens once, in ContextMenuOpening (avoids a duplicate DB query per right-click).
+            beforeLookup?.Invoke();
+
+            // Build and assign the menu now so WPF's normal right-click path opens it. The lookup is cached, and
+            // ContextMenuOpening skips rebuilding for this gesture.
+            var menu = BuildContextMenuIfSingerExists(textBox, getSingerName(), onSongSelected, hasCurrentSong, onSongQueued);
+            if (menu != null)
+            {
+                textBox.ContextMenu = menu;
+                PrebuiltForGesture.AddOrUpdate(textBox, menu);
+            }
+            else
+            {
+                PrebuiltForGesture.Remove(textBox);
+                if (textBox.ContextMenu != null && Equals(textBox.ContextMenu.Tag, GeneratedMenuTag))
+                {
+                    textBox.ContextMenu = null;
+                }
+            }
         }
 
         /// <summary>
@@ -110,14 +133,23 @@ namespace Lyracist.Shared
             WpfContextMenuEventArgs? e,
             Func<string?> getSingerName,
             Action<SingerHistoryEntry> onSongSelected,
-            Action? beforeLookup = null)
+            Action? beforeLookup = null,
+            Func<bool>? hasCurrentSong = null,
+            Action<SingerHistoryEntry>? onSongQueued = null)
         {
             if (textBox == null) return;
+
+            // Mouse right-click already built the menu in PreviewMouseRightButtonDown; let WPF open it.
+            if (PrebuiltForGesture.TryGetValue(textBox, out var prebuilt) && ReferenceEquals(textBox.ContextMenu, prebuilt))
+            {
+                PrebuiltForGesture.Remove(textBox);
+                return;
+            }
 
             beforeLookup?.Invoke();
 
             string? singerName = getSingerName();
-            var menu = BuildContextMenuIfSingerExists(textBox, singerName, onSongSelected);
+            var menu = BuildContextMenuIfSingerExists(textBox, singerName, onSongSelected, hasCurrentSong, onSongQueued);
             if (menu != null)
             {
                 textBox.ContextMenu = menu;
@@ -165,7 +197,9 @@ namespace Lyracist.Shared
         public static WpfContextMenu? BuildContextMenuIfSingerExists(
             WpfTextBox? targetTextBox,
             string? singerName,
-            Action<SingerHistoryEntry> onSongSelected)
+            Action<SingerHistoryEntry> onSongSelected,
+            Func<bool>? hasCurrentSong = null,
+            Action<SingerHistoryEntry>? onSongQueued = null)
         {
             ArgumentNullException.ThrowIfNull(onSongSelected);
 
@@ -221,6 +255,29 @@ namespace Lyracist.Shared
                 }
             };
             menu.Items.Add(headerItem);
+
+            // When the singer already has a current song, picking a song queues it by default;
+            // the checkable item below switches to replacing the current song.
+            bool queueMode = onSongQueued != null && hasCurrentSong?.Invoke() == true;
+            WpfMenuItem? replaceItem = null;
+            if (queueMode)
+            {
+                replaceItem = new WpfMenuItem
+                {
+                    IsCheckable = true,
+                    StaysOpenOnClick = true,
+                    Foreground = KeyBadgeBrush,
+                    Header = "Replace current song instead of adding to queue",
+                    ToolTip = "Unchecked (default): the clicked song is added to this singer's queue." + Environment.NewLine + "Checked: it replaces the current song."
+                };
+                menu.Items.Add(replaceItem);
+                menu.Items.Add(new WpfMenuItem
+                {
+                    IsEnabled = false,
+                    Header = new WpfTextBlock { Text = "Click a song below to add it to the queue", Foreground = MutedTextBrush, FontStyle = FontStyles.Italic, FontSize = 11.5 }
+                });
+            }
+
             menu.Items.Add(CreateStyledSeparator());
 
             // 2. Previously sung songs list
@@ -305,7 +362,14 @@ namespace Lyracist.Shared
 
                     songItem.Click += (_, _) =>
                     {
-                        onSongSelected(capturedSong);
+                        if (queueMode && replaceItem?.IsChecked != true)
+                        {
+                            onSongQueued!(capturedSong);
+                        }
+                        else
+                        {
+                            onSongSelected(capturedSong);
+                        }
                     };
 
                     menu.Items.Add(songItem);
