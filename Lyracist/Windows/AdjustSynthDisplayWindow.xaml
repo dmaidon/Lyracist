@@ -166,30 +166,39 @@
             </GroupBox>
 
             <!-- Background Shaders (PCDJ LYRX Style) -->
-            <GroupBox Header="Background Shaders (PCDJ LYRX Style)" Style="{StaticResource DialogGroupBoxStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="14" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+            <GroupBox Header="Background Shaders (PCDJ LYRX / ShaderToy)" Style="{StaticResource DialogGroupBoxStyle}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Lyrics Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
-                        <ComboBox x:Name="LyricsShaderComboBox"
-                                  SelectionChanged="OnShaderSettingChanged"
-                                  FontSize="11.5"
-                                  Height="32" />
-                    </StackPanel>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Lyrics Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                            <ComboBox x:Name="LyricsShaderComboBox"
+                                      SelectionChanged="OnShaderSettingChanged"
+                                      FontSize="11.5"
+                                      Height="32" />
+                        </StackPanel>
 
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Rotation Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
-                        <ComboBox x:Name="RotationShaderComboBox"
-                                  SelectionChanged="OnShaderSettingChanged"
-                                  FontSize="11.5"
-                                  Height="32" />
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Rotation Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                            <ComboBox x:Name="RotationShaderComboBox"
+                                      SelectionChanged="OnShaderSettingChanged"
+                                      FontSize="11.5"
+                                      Height="32" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="📥 Import ShaderToy File..." Style="{StaticResource PresetBtnStyle}" Margin="0,0,8,0" Click="OnImportShaderClick"
+                                ToolTip="Import a ShaderToy (.glsl, .frag, .sksl, .fs, .txt) file into the Shaders/ folder" />
+                        <Button Content="📂 Open Shaders Folder" Style="{StaticResource PresetBtnStyle}" Click="OnOpenShadersFolderClick"
+                                ToolTip="Open the Shaders/ folder in Windows Explorer" />
                     </StackPanel>
-                </Grid>
+                </StackPanel>
             </GroupBox>
 
             <!-- Opacity -->

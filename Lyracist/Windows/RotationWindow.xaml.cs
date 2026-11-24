@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:52:00 -> Wire RotationShaderHost BandProvider to IAudioSpectrumService
+// Edited on Nov 24, 2026 @ 10:47:00 -> Make themed panel backdrops semi-transparent when a background shader is active
 using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
@@ -296,6 +296,29 @@ public partial class RotationWindow : Window, ICaptureSource
             _vm.FullRotation.CollectionChanged += Rotation_CollectionChanged;
         }
         RefreshSignUpInvite();
+        UpdateShaderBackdropOpacity();
+    }
+
+    private void UpdateShaderBackdropOpacity()
+    {
+        bool shaderActive = !string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
+                            !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase);
+        double bgOpacity = shaderActive ? 0.32 : 1.0;
+
+        foreach (var panel in ProjectionPanels)
+        {
+            if (panel is System.Windows.Controls.Panel p && p.Background != null)
+            {
+                if (p.Background.IsFrozen)
+                {
+                    p.Background = p.Background.Clone();
+                }
+                p.Background.Opacity = bgOpacity;
+            }
+        }
+
+        CrawlBackdropRect?.Opacity = bgOpacity;
+        _welcomeHost.SetShaderBackdrop(shaderActive);
     }
 
     private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -315,6 +338,11 @@ public partial class RotationWindow : Window, ICaptureSource
 
             case nameof(RotationWindowViewModel.SelectedProjectionView):
                 ApplyProjectionViewMode();
+                UpdateShaderBackdropOpacity();
+                break;
+
+            case nameof(RotationWindowViewModel.RotationShaderPreset):
+                UpdateShaderBackdropOpacity();
                 break;
 
             case nameof(RotationWindowViewModel.CurrentSinger):

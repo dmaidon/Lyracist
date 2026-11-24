@@ -773,8 +773,14 @@
                                     <ComboBox ItemsSource="{Binding VisualizerBarWidths}" SelectedItem="{Binding LyricsVisualizerBarWidth, Mode=TwoWay}" Margin="0,0,0,10" />
 
                                     <TextBlock Text="Lyrics Screen Background Shader (PCDJ Style)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <ComboBox ItemsSource="{Binding ShaderPresets}" SelectedItem="{Binding LyricsShaderPreset, Mode=TwoWay}" Margin="0,0,0,10"
+                                    <ComboBox ItemsSource="{Binding ShaderPresets}" SelectedItem="{Binding LyricsShaderPreset, Mode=TwoWay}" Margin="0,0,0,6"
                                               ToolTip="Renders a real-time beat-reactive SkSL background shader on the Lyrics screen (during filler music, audio-only songs, or behind chroma-keyed CDG tracks)." />
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Button Content="📥 Import Shader..." Command="{Binding ImportShaderFileCommand}" Padding="8,3" FontSize="11" Margin="0,0,8,0"
+                                                ToolTip="Import a ShaderToy (.glsl, .frag, .sksl, .fs, .txt) file into the Shaders/ folder" />
+                                        <Button Content="📂 Shaders Folder" Command="{Binding OpenShadersFolderCommand}" Padding="8,3" FontSize="11"
+                                                ToolTip="Open the Shaders/ folder in Windows Explorer" />
+                                    </StackPanel>
 
                                     <TextBlock Text="Visualizer Opacity" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <Grid Margin="0,0,0,4">

@@ -1,7 +1,8 @@
-// Edited on Nov 24, 2026 @ 09:54:00 -> Add ShaderPresets, LyricsShaderPreset, and RotationShaderPreset to SettingsViewModel.Display
+// Edited on Nov 24, 2026 @ 10:25:00 -> Add ImportShaderFileCommand and OpenShadersFolderCommand to SettingsViewModel.Display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -347,6 +348,45 @@ public partial class SettingsViewModel
         }
     }
 
+    [RelayCommand]
+    private void ImportShaderFile()
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Import ShaderToy / SkSL Shader File",
+            Filter = "Shader Files (*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt)|*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt|All Files (*.*)|*.*"
+        };
+
+        if (dlg.ShowDialog() != true) return;
+
+        if (!AudioShaderPresets.TryImportShaderFile(dlg.FileName, out string importedName, out string? errorMsg))
+        {
+            System.Windows.MessageBox.Show($"Could not import shader:\n{errorMsg}", "Shader Import Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        OnPropertyChanged(nameof(ShaderPresets));
+        LyricsShaderPreset = importedName;
+    }
+
+    [RelayCommand]
+    private void OpenShadersFolder()
+    {
+        try
+        {
+            AudioShaderPresets.EnsureDefaultShaderFiles();
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AudioShaderPresets.CustomShadersDir,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            // Ignore explorer launch errors
+        }
+    }
+
     private void OnScreenAssignmentsChanged()
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
@@ -673,7 +713,8 @@ public partial class SettingsViewModel
         }
     }
 
-// Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when Debugger.IsAttached in VS IDE, but retain in the field
+    // Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when Debugger.IsAttached in VS IDE, but retain in the field
+
     private System.Windows.Threading.DispatcherTimer? _wifiRefreshTimerInstance;
 
     private System.Windows.Threading.DispatcherTimer _wifiRefreshTimer => _wifiRefreshTimerInstance ??= CreateWifiRefreshTimer();

@@ -1,5 +1,6 @@
-// Created on Nov 24, 2026 @ 09:57:00 -> Unit tests verifying compilation and rendering of all built-in AudioShaderPresets and ShaderToy mainImage wrappers
+// Edited on Nov 24, 2026 @ 10:25:30 -> Add unit tests for physical Shaders/ folder seeding, ShaderToy GLSL-to-SkSL translation, iChannel0 audio texture lookups, and TryImportShaderFile
 using System;
+using System.IO;
 using System.Linq;
 using Lyracist.Shared;
 using SkiaSharp;
@@ -9,6 +10,19 @@ namespace Lyracist.Tests;
 
 public class AudioShaderPresetsTests
 {
+    [Fact]
+    public void EnsureDefaultShaderFiles_WritesEditableGlslFilesToShadersFolder()
+    {
+        AudioShaderPresets.EnsureDefaultShaderFiles();
+        Assert.True(Directory.Exists(AudioShaderPresets.CustomShadersDir));
+
+        foreach (string preset in AudioShaderPresets.BuiltInNames.Where(p => p != AudioShaderPresets.Off))
+        {
+            string expectedPath = Path.Combine(AudioShaderPresets.CustomShadersDir, preset + ".glsl");
+            Assert.True(File.Exists(expectedPath), $"Expected shader file on disk: {expectedPath}");
+        }
+    }
+
     [Fact]
     public void BuiltInPresets_AllCompileWithoutErrors()
     {
@@ -46,10 +60,15 @@ public class AudioShaderPresetsTests
             {
                 ["iResolution"] = new float[] { 64f, 36f },
                 ["iTime"] = 1.25f,
+                ["iTimeDelta"] = 0.033f,
+                ["iFrame"] = 30,
                 ["iBass"] = 0.75f,
                 ["iMid"] = 0.50f,
                 ["iHigh"] = 0.40f,
-                ["iEnergy"] = 0.62f
+                ["iEnergy"] = 0.62f,
+                ["iMouse"] = new float[] { 32f, 18f, 0f, 0f },
+                ["iDate"] = new float[] { 2026f, 10f, 24f, 36000f },
+                ["iSampleRate"] = 48000f
             };
 
             using var shader = effect!.ToShader(uniforms);
@@ -63,7 +82,6 @@ public class AudioShaderPresetsTests
             using var pixmap = snapshot.PeekPixels();
             Assert.NotNull(pixmap);
 
-            // Verify at least one pixel has non-black RGB content
             bool anyLit = false;
             for (int y = 0; y < 36 && !anyLit; y++)
             {
@@ -78,6 +96,51 @@ public class AudioShaderPresetsTests
                 }
             }
             Assert.True(anyLit, $"Preset '{preset}' rendered an entirely black frame.");
+        }
+    }
+
+    [Fact]
+    public void TranslateShaderToyToSksl_SupportsStandardShaderToyAndIChannel0AudioLookups()
+    {
+        // Standard ShaderToy GLSL using mainImage, iResolution.xy, texture(iChannel0, ...), texelFetch(iChannel0, ...), and 1.0f suffixes
+        const string shaderToyGlsl = """
+            #version 300 es
+            precision highp float;
+
+            void mainImage(out vec4 fragColor, in vec2 fragCoord)
+            {
+                vec2 uv = fragCoord / iResolution.xy;
+                float fft = texture(iChannel0, vec2(uv.x, 0.25f)).x;
+                float wave = texelFetch(iChannel0, ivec2(int(uv.x * 512.0), 1), 0).x;
+                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4));
+                col *= (0.4 + 0.6 * (fft + wave));
+                fragColor = vec4(col, 1.0f);
+            }
+            """;
+
+        string tempFile = Path.Combine(Path.GetTempPath(), "TestShaderToyImport_" + Guid.NewGuid().ToString("N")[..8] + ".glsl");
+        string? importedDestPath = null;
+        try
+        {
+            File.WriteAllText(tempFile, shaderToyGlsl);
+
+            bool imported = AudioShaderPresets.TryImportShaderFile(tempFile, out string importedName, out string? errorMsg);
+            Assert.True(imported, $"Expected ShaderToy import to succeed, but got error: {errorMsg}");
+            Assert.False(string.IsNullOrWhiteSpace(importedName));
+
+            importedDestPath = Path.Combine(AudioShaderPresets.CustomShadersDir, importedName + ".glsl");
+            Assert.True(File.Exists(importedDestPath));
+            Assert.Contains(importedName, AudioShaderPresets.GetAvailableNames());
+
+            var effect = AudioShaderPresets.GetOrCompileEffect(importedName, out string? compileErr);
+            Assert.NotNull(effect);
+            Assert.Null(compileErr);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+            if (importedDestPath != null && File.Exists(importedDestPath)) File.Delete(importedDestPath);
+            AudioShaderPresets.ClearCache();
         }
     }
 

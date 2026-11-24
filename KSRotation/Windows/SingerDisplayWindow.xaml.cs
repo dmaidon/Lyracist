@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:55:00 -> Wire RotationShaderHost BandProvider to LineInSpectrumService
+// Edited on Nov 24, 2026 @ 10:47:00 -> Make themed panel backdrops semi-transparent when a background shader is active
 using KSRotation.Models;
 using KSRotation.Services;
 using KSRotation.ViewModels;
@@ -238,6 +238,47 @@ namespace KSRotation.Windows
             }
             RefreshSignUpInvite();
             UpdateCursedFrameAnimation();
+            UpdateShaderBackdropOpacity();
+        }
+
+        private static readonly SolidColorBrush ShaderStageBackdropBrush = CreateFrozenBrush(0x07, 0x07, 0x0C);
+
+        private static SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
+        {
+            var brush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
+        private void UpdateShaderBackdropOpacity()
+        {
+            bool shaderActive = !string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
+                                !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase);
+            double bgOpacity = shaderActive ? 0.32 : 1.0;
+
+            if (shaderActive)
+            {
+                Background = ShaderStageBackdropBrush;
+            }
+            else
+            {
+                SetResourceReference(BackgroundProperty, "MaterialDesignPaper");
+            }
+
+            foreach (var panel in ProjectionPanels)
+            {
+                if (panel is System.Windows.Controls.Panel p && p.Background != null)
+                {
+                    if (p.Background.IsFrozen)
+                    {
+                        p.Background = p.Background.Clone();
+                    }
+                    p.Background.Opacity = bgOpacity;
+                }
+            }
+
+            CrawlBackdropRect?.Opacity = bgOpacity;
+            _welcomeHost.SetShaderBackdrop(shaderActive);
         }
 
         private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -257,6 +298,11 @@ namespace KSRotation.Windows
 
                 case nameof(DisplayViewModel.SelectedProjectionView):
                     ApplyProjectionViewMode();
+                    UpdateShaderBackdropOpacity();
+                    break;
+
+                case nameof(DisplayViewModel.RotationShaderPreset):
+                    UpdateShaderBackdropOpacity();
                     break;
 
                 case nameof(DisplayViewModel.MarqueeSpeed):

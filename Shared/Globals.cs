@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Consolidated global directory structure (Settings, Data, Banners, Logs, Packs) and per-app log naming
+// Edited on Nov 24, 2026 @ 10:22:00 -> Add Globals.ShadersDir for shared ShaderToy .glsl / .sksl files
 using System;
 using System.IO;
 
@@ -52,6 +52,9 @@ namespace Lyracist.Shared
 
         // 7. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
         public static string AvatarsDir => Path.Combine(StartupPath, "Avatars");
+
+        // 8. Shaders directory (in Startup Path) - a folder for default and imported ShaderToy (.glsl, .sksl, .frag, .fs, .txt) shaders.
+        public static string ShadersDir => Path.Combine(StartupPath, "Shaders");
 
         private static string SanitizeAppName(string appName)
         {

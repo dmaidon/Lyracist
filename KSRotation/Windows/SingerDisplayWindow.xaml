@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 09:55:00 -> Add AudioShaderHost beat-reactive shader backdrop to SingerDisplayWindow -->
+<!-- Edited on Nov 24, 2026 @ 10:47:00 -> Name CrawlBackdropRect so active shaders blend across all projection views -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -166,7 +166,7 @@
                  Wrapping it in a 0x0 clipped grid keeps layout and render passes active. -->
 
             <!-- Solid near-black backdrop behind the stars and 3D crawl. -->
-            <Rectangle Fill="#FF04060B" />
+            <Rectangle x:Name="CrawlBackdropRect" Fill="#FF04060B" />
 
             <!-- Stars added by code render above the black fill. -->
             <Canvas x:Name="CrawlStarCanvas" SizeChanged="CrawlStarCanvas_SizeChanged" Panel.ZIndex="2" />

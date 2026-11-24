@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:56:30 -> Add ShaderPresets and RotationShaderPreset to KSRotation MainViewModel
+// Edited on Nov 24, 2026 @ 10:47:00 -> Sync RotationShaderPreset when enabling SingerDisplayWindow and add ShaderToy import commands
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -358,6 +358,7 @@ namespace KSRotation.ViewModels
                         _displayWindowService.SelectedDevice = SelectedChromecast;
                         _displayWindowService.Show(Singers);
                         _displayWindowService.SetProjectionView(SelectedProjectionView);
+                        _displayWindowService.SetRotationShader(RotationShaderPreset);
                         _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
                         _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
                     }
@@ -837,6 +838,49 @@ namespace KSRotation.ViewModels
         public partial string RotationShaderPreset { get; set; } = AudioShaderPresets.Off;
 
         partial void OnRotationShaderPresetChanged(string value) => OnSpectrumSettingChanged();
+
+        [RelayCommand]
+        private void ImportShaderFile()
+        {
+#if !MAUI
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Import ShaderToy / SkSL Shader File",
+                Filter = "Shader Files (*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt)|*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt|All Files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            if (!AudioShaderPresets.TryImportShaderFile(dlg.FileName, out string importedName, out string? errorMsg))
+            {
+                System.Windows.MessageBox.Show($"Could not import shader:\n{errorMsg}", "Shader Import Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            OnPropertyChanged(nameof(ShaderPresets));
+            RotationShaderPreset = importedName;
+#endif
+        }
+
+        [RelayCommand]
+        private void OpenShadersFolder()
+        {
+#if !MAUI
+            try
+            {
+                AudioShaderPresets.EnsureDefaultShaderFiles();
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = AudioShaderPresets.CustomShadersDir,
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
+                // Ignore explorer launch errors
+            }
+#endif
+        }
 
         /// <summary>Plain-language capture state shown under the device picker.</summary>
         [ObservableProperty]

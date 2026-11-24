@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:08:30 -> Update user manuals for PCDJ LYRX-style beat-reactive SkSL background shaders
+// Edited on Nov 24, 2026 @ 10:54:15 -> Update user manuals for Shaders folder, ShaderToy GLSL import, and all-view shader blending
 using System;
 using System.IO;
 using Xunit;
@@ -7044,6 +7044,140 @@ Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ 
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " BeatReactiveBackgroundShaders";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForShaderToyImporterAndAllViewBlending()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"KSRotation & Lyracist: Shaders Folder, ShaderToy Importer & All-View Shader Blending - (November 2026)
+
+Section: Display & Projection Settings / Shaders Folder & ShaderToy GLSL Importer
+
+1. Physical 'Shaders/' Folder & ShaderToy Importer ('Import Shader...' & 'Shaders Folder'):
+   - All 8 built-in shaders (Neon Tunnel, Plasma Waves, Cyber Grid, Audio Rings, Star Warp, Laser Nebula, Electric Kaleidoscope, Firestorm Pulse) are stored as editable ShaderToy '.glsl' files in the 'Shaders/' folder.
+   - Click 'Import Shader...' (in 'Adjust Synth Display', 'Settings -> Display', or 'KSRotation -> Display -> Synth Bars') or drop any single-pass ShaderToy file ('.glsl', '.frag', '.sksl', '.fs', '.shader', '.txt') into the 'Shaders/' folder.
+   - Automatically translates ShaderToy 'mainImage(out vec4 fragColor, in vec2 fragCoord)', 'iResolution.xy', 'iTime', 'iTimeDelta', 'iFrame', 'iMouse', 'iDate', and 'texture(iChannel0..3, uv)' / 'texelFetch(iChannel0..3, ...)' audio spectrum and waveform lookups into SkSL.
+
+2. All-View Shader Backdrop Blending Across All 12 Projection Views & Pre-Show Screen:
+   - Selecting any active background shader on the Singer Rotation screen in KSRotation ('Enable Display' checked) or Lyracist automatically makes the backdrop of all 12 projection views (Normal List, Star Wars Crawl, Vegas Marquee, Purple Velvet Curtain, Vinyl Turntable, Disco Ball, Synthwave Grid, Concert Festival Lineup, Casino Slot Reels, Jukebox, Stadium Jumbotron, and Movie Theater 'Now Showing') as well as the Pre-Show / empty-rotation Sign-Up screen semi-transparent (0.32 opacity) so the live shader shines through behind all foreground text and cards.";
+
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Shaders Folder, ShaderToy Importer & All-View Shader Blending"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Shaders Folder, ShaderToy Importer & All-View Shader Blending")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("ShaderToyImporterAllViewBlending"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Shaders Folder, ShaderToy Importer & All-View Shader Blending", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ShaderToyImporterAllViewBlending";
                                 doc.Save(pdfPath);
                             }
                         }

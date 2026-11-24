@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 09:52:00 -> Add AudioShaderHost beat-reactive shader backdrop to RotationWindow -->
+<!-- Edited on Nov 24, 2026 @ 10:47:00 -> Name CrawlBackdropRect so active shaders blend across all projection views -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -390,7 +390,7 @@
 
         <!-- Star Wars crawl panel (replaces list when SelectedProjectionView='Star Wars Crawl') -->
         <Grid Grid.Row="2" x:Name="CrawlPanel" Background="#FF04060B" Visibility="Collapsed">
-            <Rectangle Fill="#FF04060B" />
+            <Rectangle x:Name="CrawlBackdropRect" Fill="#FF04060B" />
             <Canvas x:Name="CrawlStarCanvas" SizeChanged="CrawlStarCanvas_SizeChanged" Panel.ZIndex="2" />
             <Viewport3D x:Name="CrawlViewport" Panel.ZIndex="3">
                 <Viewport3D.Camera>

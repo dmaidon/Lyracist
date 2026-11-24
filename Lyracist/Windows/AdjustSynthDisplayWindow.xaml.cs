@@ -1,15 +1,16 @@
-// Edited on Nov 24, 2026 @ 09:54:00 -> Add LyricsShaderComboBox and RotationShaderComboBox support to AdjustSynthDisplayWindow
+// Edited on Nov 24, 2026 @ 10:25:00 -> Add Import ShaderToy File and Open Shaders Folder actions to AdjustSynthDisplayWindow
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Rectangle = System.Windows.Shapes.Rectangle;
 using Lyracist.Core.Helpers;
 using Lyracist.Shared;
 using Lyracist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace Lyracist.Windows;
 
@@ -93,6 +94,51 @@ public partial class AdjustSynthDisplayWindow : Window
         AppSettings.LyricsShaderPreset = LyricsShaderComboBox.SelectedItem as string ?? AudioShaderPresets.Off;
         AppSettings.RotationShaderPreset = RotationShaderComboBox.SelectedItem as string ?? AudioShaderPresets.Off;
         NotifyLyricsWindow();
+    }
+
+    private void OnImportShaderClick(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Import ShaderToy / SkSL Shader File",
+            Filter = "Shader Files (*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt)|*.glsl;*.frag;*.sksl;*.fs;*.shader;*.txt|All Files (*.*)|*.*"
+        };
+
+        if (dlg.ShowDialog(this) != true) return;
+
+        if (!AudioShaderPresets.TryImportShaderFile(dlg.FileName, out string importedName, out string? errorMsg))
+        {
+            System.Windows.MessageBox.Show(this, $"Could not import shader:\n{errorMsg}", "Shader Import Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var shaders = AudioShaderPresets.GetAvailableNames();
+        _initialized = false;
+        LyricsShaderComboBox.ItemsSource = shaders;
+        RotationShaderComboBox.ItemsSource = shaders;
+        LyricsShaderComboBox.SelectedItem = importedName;
+        RotationShaderComboBox.SelectedItem = AppSettings.RotationShaderPreset;
+        _initialized = true;
+
+        AppSettings.LyricsShaderPreset = importedName;
+        NotifyLyricsWindow();
+    }
+
+    private void OnOpenShadersFolderClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            AudioShaderPresets.EnsureDefaultShaderFiles();
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AudioShaderPresets.CustomShadersDir,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            // Ignore explorer launch errors
+        }
     }
 
     private void OnSettingChanged(object? sender, RoutedEventArgs e)

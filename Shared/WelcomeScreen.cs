@@ -1,4 +1,4 @@
-// Edited on Oct 4, 2026 @ 09:52:00 -> Suppress welcome screens while Pre-Show Screen is active and show in sequence on close
+// Edited on Nov 24, 2026 @ 10:47:00 -> Support semi-transparent shader backdrop on WelcomeOverlayHost sign-up invite
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -350,11 +350,23 @@ public sealed class WelcomeOverlayHost
     private string? _inviteWifiSsid;
     private string? _inviteWifiPassword;
     private bool _inviteShowPassword = true;
+    private bool _shaderBackdropActive;
     private Action? _lastInviteCall;
     private int _generation;
     private int _inviteGeneration;
 
     private WelcomeOverlayHost(Window window) => _window = window;
+
+    /// <summary>
+    /// Makes the sign-up invite screen's backdrop semi-transparent while a background shader is active
+    /// so the live SkSL shader shines through behind the sign-up cards and text.
+    /// </summary>
+    public void SetShaderBackdrop(bool active)
+    {
+        if (_shaderBackdropActive == active) return;
+        _shaderBackdropActive = active;
+        _inviteVisual?.SetShaderBackdrop(active);
+    }
 
     public static WelcomeOverlayHost Attach(Window window)
     {
@@ -448,6 +460,7 @@ public sealed class WelcomeOverlayHost
         _inviteWifiPassword = wifiPassword;
         _inviteShowPassword = WelcomeScreenService.Instance.ShowWifiPassword;
         _inviteVisual = WelcomeScreenDesigns.BuildSignUpInvite(qr, url, wifiQr, wifiSsid, wifiPassword);
+        _inviteVisual.SetShaderBackdrop(_shaderBackdropActive);
         _inviteLayer.Children.Add(_inviteVisual.Root);
         _inviteLayer.Visibility = Visibility.Visible;
         _inviteLayer.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(500)));
@@ -607,11 +620,27 @@ internal sealed class WelcomeMonitorWindowHost
 }
 
 /// <summary>A built welcome design plus the animations to stop when it is removed.</summary>
-public sealed class WelcomeVisual(FrameworkElement root) : IDisposable
+public sealed class WelcomeVisual(FrameworkElement root, Grid? hostGrid = null, Panel? canvasPanel = null) : IDisposable
 {
     private readonly List<(IAnimatable Target, DependencyProperty Property)> _animations = [];
 
     public FrameworkElement Root { get; } = root;
+
+    public void SetShaderBackdrop(bool active)
+    {
+        if (hostGrid != null)
+        {
+            hostGrid.Background = active ? Brushes.Transparent : Brushes.Black;
+        }
+        if (canvasPanel?.Background != null)
+        {
+            if (canvasPanel.Background.IsFrozen)
+            {
+                canvasPanel.Background = canvasPanel.Background.Clone();
+            }
+            canvasPanel.Background.Opacity = active ? 0.35 : 1.0;
+        }
+    }
 
     public void Animate(IAnimatable target, DependencyProperty property, AnimationTimeline animation)
     {
@@ -885,7 +914,7 @@ public static class WelcomeScreenDesigns
             90);
         var host = new Grid { Background = Brushes.Black };
         host.Children.Add(new Viewbox { Stretch = Stretch.Uniform, Child = canvas });
-        var visual = new WelcomeVisual(host);
+        var visual = new WelcomeVisual(host, host, canvas);
 
         // Music notes drifting up the screen.
         var notes = new Canvas { Width = W, Height = H, IsHitTestVisible = false };
