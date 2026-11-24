@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 10:47:00 -> Name CrawlBackdropRect so active shaders blend across all projection views -->
+<!-- Edited on Nov 24, 2026 @ 11:22:30 -> Name RotationContentGrid for Shader Only mode visibility toggle -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -67,7 +67,7 @@
                     ToolTip="Close Rotation Screen" />
         </StackPanel>
 
-        <Grid Margin="60">
+        <Grid x:Name="RotationContentGrid" Margin="60">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

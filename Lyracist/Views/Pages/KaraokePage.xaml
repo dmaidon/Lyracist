@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 09:53:00 -> Add Lyrics and Rotation beat-reactive Shader preset dropdowns to Display Projection controls -->
+<!-- Edited on Nov 24, 2026 @ 11:25:30 -> Add Shader Only (Hide Rotation) checkbox to Rotation Queue Screen controls -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -1518,6 +1518,7 @@
                                                 </StackPanel>
                                             </wpf:ToggleButton>
                                             <CheckBox Content="Pre-Show Mode (Hold Screen)" IsChecked="{Binding IsPreShowModeActive, Mode=TwoWay}" FontSize="11" Margin="0,6,0,0" ToolTip="Hold the Pre-Show / Sign-Up &amp; Wi-Fi screen on the rotation display until turned off, even with singers queued" />
+                                            <CheckBox Content="Shader Only (Hide Rotation)" IsChecked="{Binding IsRotationShaderOnlyModeActive, Mode=TwoWay}" FontSize="11" Margin="0,4,0,0" ToolTip="Hide the singer rotation and show only the full-screen beat-reactive shader during a DJ music break" />
                                             <TextBlock Text="Rotation Screen Shader (PCDJ Style)" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,6,0,3" />
                                             <ComboBox ItemsSource="{Binding ShaderPresets}"
                                                       SelectedItem="{Binding RotationShaderPreset, Mode=TwoWay}"

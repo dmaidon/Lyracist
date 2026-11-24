@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:47:00 -> Make themed panel backdrops semi-transparent when a background shader is active
+// Edited on Nov 24, 2026 @ 11:21:00 -> Support IsShaderOnlyModeActive to hide rotation and show full-screen shader during music breaks
 using KSRotation.Models;
 using KSRotation.Services;
 using KSRotation.ViewModels;
@@ -108,7 +108,9 @@ namespace KSRotation.Windows
         // Last Song banner, which has to stay visible even when the rotation is empty.
         private void RefreshSignUpInvite()
         {
-            bool show = (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) && LastSongBannerOverlay.Visibility != Visibility.Visible;
+            bool show = _vm?.IsShaderOnlyModeActive != true &&
+                        (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) &&
+                        LastSongBannerOverlay.Visibility != Visibility.Visible;
             bool showQr = _vm?.ShowQrCode == true;
             _welcomeHost.SetSignUpInvite(
                 show,
@@ -252,9 +254,14 @@ namespace KSRotation.Windows
 
         private void UpdateShaderBackdropOpacity()
         {
-            bool shaderActive = !string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
-                                !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase);
+            bool shaderOnly = _vm?.IsShaderOnlyModeActive == true;
+            bool shaderActive = shaderOnly ||
+                                (!string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
+                                 !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase));
             double bgOpacity = shaderActive ? 0.32 : 1.0;
+
+            TopBannerPanel?.Visibility = shaderOnly ? Visibility.Collapsed : Visibility.Visible;
+            RotationShaderHost?.Opacity = shaderOnly ? 1.0 : 0.75;
 
             if (shaderActive)
             {
@@ -303,6 +310,12 @@ namespace KSRotation.Windows
 
                 case nameof(DisplayViewModel.RotationShaderPreset):
                     UpdateShaderBackdropOpacity();
+                    break;
+
+                case nameof(DisplayViewModel.IsShaderOnlyModeActive):
+                    UpdateShaderBackdropOpacity();
+                    RefreshSignUpInvite();
+                    ApplyProjectionViewMode();
                     break;
 
                 case nameof(DisplayViewModel.MarqueeSpeed):
@@ -595,6 +608,12 @@ namespace KSRotation.Windows
                 panel.BeginAnimation(OpacityProperty, null);
                 panel.Opacity = 1;
                 panel.Visibility = Visibility.Collapsed;
+            }
+
+            if (_vm?.IsShaderOnlyModeActive == true)
+            {
+                _displayedProjectionView = null;
+                return;
             }
 
             switch (view)

@@ -1,4 +1,4 @@
-// Edited on Oct 29, 2026 @ 05:36:00 -> Add SetHolidayTheme to IDisplayService
+// Edited on Nov 24, 2026 @ 11:28:30 -> Add IsShaderOnlyModeActive to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,6 +22,7 @@ public interface IDisplayService
     bool IsRotationActive { get; set; }
     bool IsDjBannerActive { get; set; }
     bool IsPreShowModeActive { get; set; }
+    bool IsShaderOnlyModeActive { get; set; }
 
     void TogglePreShowMode();
 

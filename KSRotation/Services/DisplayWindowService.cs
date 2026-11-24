@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:55:00 -> Add SetRotationShader to DisplayWindowService
+// Edited on Nov 24, 2026 @ 11:21:00 -> Add SetShaderOnlyMode to DisplayWindowService
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -206,6 +206,11 @@ namespace KSRotation.Services
         public void SetRotationShader(string? shaderName)
         {
             _viewModel.RotationShaderPreset = AudioShaderPresets.Normalize(shaderName);
+        }
+
+        public void SetShaderOnlyMode(bool active)
+        {
+            _viewModel.IsShaderOnlyModeActive = active;
         }
 
         public void SetSpecialEventBanner(string? path)
@@ -581,6 +586,9 @@ namespace KSRotation.Services
         /// <summary>Raised when the singer display closes while pre-show was on, so the host can clear its toggle.</summary>
         public event Action? PreShowReset;
 
+        /// <summary>Raised when the singer display closes while shader-only mode was on, so the host can clear its toggle.</summary>
+        public event Action? ShaderOnlyReset;
+
         private void OnWindowClosed(object? sender, EventArgs e)
         {
             if (_holidayAutoTimer != null)
@@ -594,6 +602,11 @@ namespace KSRotation.Services
             {
                 SetPreShowMode(false);
                 PreShowReset?.Invoke();
+            }
+            if (_viewModel.IsShaderOnlyModeActive)
+            {
+                SetShaderOnlyMode(false);
+                ShaderOnlyReset?.Invoke();
             }
             _window?.Closed -= OnWindowClosed;
             _window = null;

@@ -1,17 +1,17 @@
-// Edited on Oct 29, 2026 @ 05:36:00 -> Wire SetHolidayTheme and 15-minute Auto show-date timer in DisplayService
+// Edited on Nov 24, 2026 @ 11:25:30 -> Add IsShaderOnlyModeActive to DisplayService to hide rotation during music breaks
+using System;
+using System.Collections.Generic;
+using System.Drawing; // For Screen bounds if needed, or fallback
+using System.Threading.Tasks;
+using System.Windows;
 using KSRotation.Models;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
+using Lyracist.Shared;
+using Lyracist.Trivia.Core.Services;
 using Lyracist.ViewModels;
 using Lyracist.Windows;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
-using System.Drawing; // For Screen bounds if needed, or fallback
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Lyracist.Shared;
-using Lyracist.Trivia.Core.Services;
 
 namespace Lyracist.Services.Display;
 
@@ -112,6 +112,7 @@ public class DisplayService : IDisplayService
                 // Pre-show lives on the rotation screen; leaving it on after the screen is hidden would
                 // keep welcome screens suppressed and queued indefinitely.
                 if (!value && IsPreShowModeActive) IsPreShowModeActive = false;
+                if (!value && IsShaderOnlyModeActive) IsShaderOnlyModeActive = false;
                 DisplayPreferencesStore.Save(_preferences);
                 UpdateWindowVisibilities();
                 ScreenAssignmentsChanged?.Invoke();
@@ -162,6 +163,31 @@ public class DisplayService : IDisplayService
     }
 
     public void TogglePreShowMode() => IsPreShowModeActive = !IsPreShowModeActive;
+
+    public bool IsShaderOnlyModeActive
+    {
+        get
+        {
+            var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+            return vm?.IsShaderOnlyModeActive ?? false;
+        }
+        set
+        {
+            var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+            if (vm != null && vm.IsShaderOnlyModeActive != value)
+            {
+                vm.IsShaderOnlyModeActive = value;
+                if (value)
+                {
+                    if (!AudioShaderPresets.IsActive(Lyracist.Core.Helpers.AppSettings.RotationShaderPreset))
+                    {
+                        Lyracist.Core.Helpers.AppSettings.RotationShaderPreset = "Neon Tunnel";
+                    }
+                    ShowRotationWindow();
+                }
+            }
+        }
+    }
 
     public void HideLyricsWindow() => IsLyricsActive = false;
     public void HideRotationWindow() => IsRotationActive = false;
@@ -269,7 +295,8 @@ public class DisplayService : IDisplayService
     }
 
     private string? ResolveActiveSpecialEventBannerPath()
-    
+
+
     {
         return DjBannerFileManager.ResolveSpecialEventBannerPath(_preferences.SelectedSpecialEvent, Lyracist.Core.Helpers.AppSettings.SpecialEvents, Globals.EventBannersDir);
     }
@@ -794,7 +821,8 @@ public class DisplayService : IDisplayService
         {
             _rotationWindow = _serviceProvider.GetRequiredService<RotationWindow>();
         }
-        
+
+
         var window = _rotationWindow!;
         window.WindowStartupLocation = WindowStartupLocation.Manual;
         window.Left = -20000;
@@ -823,7 +851,8 @@ public class DisplayService : IDisplayService
     public async Task StopRotationCasting()
     {
         await _casting.StopCastingAsync();
-        
+
+
         _preferences.RotationTarget = DisplayTarget.Monitor;
         DisplayPreferencesStore.Save(_preferences);
 

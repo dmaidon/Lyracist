@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:47:00 -> Sync RotationShaderPreset when enabling SingerDisplayWindow and add ShaderToy import commands
+// Edited on Nov 24, 2026 @ 11:21:00 -> Add IsShaderOnlyModeActive to MainViewModel to hide rotation and show full-screen shader during DJ music breaks
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -359,11 +359,16 @@ namespace KSRotation.ViewModels
                         _displayWindowService.Show(Singers);
                         _displayWindowService.SetProjectionView(SelectedProjectionView);
                         _displayWindowService.SetRotationShader(RotationShaderPreset);
+                        _displayWindowService.SetShaderOnlyMode(IsShaderOnlyModeActive);
                         _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
                         _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
                     }
                     else
                     {
+                        if (IsShaderOnlyModeActive)
+                        {
+                            IsShaderOnlyModeActive = false;
+                        }
                         _displayWindowService.Hide();
                         CheckRestoreDjBanner();
                     }
@@ -834,10 +839,46 @@ namespace KSRotation.ViewModels
 
         public IReadOnlyList<string> ShaderPresets => AudioShaderPresets.GetAvailableNames();
 
+        private string _lastActiveShaderPreset = "Neon Tunnel";
+
         [ObservableProperty]
         public partial string RotationShaderPreset { get; set; } = AudioShaderPresets.Off;
 
-        partial void OnRotationShaderPresetChanged(string value) => OnSpectrumSettingChanged();
+        partial void OnRotationShaderPresetChanged(string value)
+        {
+            if (AudioShaderPresets.IsActive(value))
+            {
+                _lastActiveShaderPreset = value;
+            }
+            else if (IsShaderOnlyModeActive)
+            {
+                IsShaderOnlyModeActive = false;
+            }
+            OnSpectrumSettingChanged();
+        }
+
+        /// <summary>When true, blocks/hides the singer rotation and displays only the full-screen beat-reactive shader during DJ music breaks.</summary>
+        [ObservableProperty]
+        public partial bool IsShaderOnlyModeActive { get; set; } = false;
+
+        partial void OnIsShaderOnlyModeActiveChanged(bool value)
+        {
+            if (value)
+            {
+                if (!AudioShaderPresets.IsActive(RotationShaderPreset))
+                {
+                    RotationShaderPreset = AudioShaderPresets.IsActive(_lastActiveShaderPreset)
+                        ? _lastActiveShaderPreset
+                        : "Neon Tunnel";
+                }
+                if (!IsDisplayEnabled && !_isInitializing)
+                {
+                    IsDisplayEnabled = true;
+                }
+            }
+            _displayWindowService.SetShaderOnlyMode(value);
+            ApplySpectrumSettings();
+        }
 
         [RelayCommand]
         private void ImportShaderFile()
@@ -1873,6 +1914,18 @@ namespace KSRotation.ViewModels
             RefreshAvailableMonitors();
 #if !MAUI
             MonitorEnumerator.MonitorsChanged += (s, e) => RefreshAvailableMonitors();
+            AudioShaderPresets.AvailableShadersChanged += () =>
+            {
+                var disp = System.Windows.Application.Current?.Dispatcher;
+                if (disp != null)
+                {
+                    disp.BeginInvoke(() => OnPropertyChanged(nameof(ShaderPresets)));
+                }
+                else
+                {
+                    OnPropertyChanged(nameof(ShaderPresets));
+                }
+            };
 #endif
 
             // Restores which target "Cast Rotation" will use next, but must NOT start casting

@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 10:47:00 -> Name CrawlBackdropRect so active shaders blend across all projection views -->
+<!-- Edited on Nov 24, 2026 @ 11:21:00 -> Name TopBannerPanel for Shader Only mode visibility toggle -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -48,7 +48,7 @@
                                 ReducedQuality="{Binding ReducedEffects}" />
 
         <!-- Row 0: Scrolling marquee and Last Round banner -->
-        <StackPanel Grid.Row="0">
+        <StackPanel Grid.Row="0" x:Name="TopBannerPanel">
             <Border x:Name="BannerBorder"
                     Background="#222"
                     Padding="8"

@@ -419,3 +419,14 @@ Deploy/Deploy-Lyracist.ps1
 # User manual builds (kept locally, not tracked)
 Documentation/Lyracist_User_Manual.docx
 Documentation/Lyracist_User_Manual.pdf
+
+# User-imported shaders in Shaders/ (only the 8 built-in .glsl presets are tracked in git)
+Shaders/*
+!Shaders/Audio Rings.glsl
+!Shaders/Cyber Grid.glsl
+!Shaders/Electric Kaleidoscope.glsl
+!Shaders/Firestorm Pulse.glsl
+!Shaders/Laser Nebula.glsl
+!Shaders/Neon Tunnel.glsl
+!Shaders/Plasma Waves.glsl
+!Shaders/Star Warp.glsl

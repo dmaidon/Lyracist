@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 10:54:15 -> Update Help tab documentation for Background Shaders and ShaderToy import -->
+<!-- Edited on Nov 24, 2026 @ 11:21:00 -> Add Shader Only checkbox to KSRotation Rotation toolbar and Display tab -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -801,7 +801,7 @@
                             VerticalAlignment="Center" />
                             <ComboBox
                             Width="170"
-                            Margin="0,0,24,0"
+                            Margin="0,0,16,0"
                             materialDesign:HintAssist.Hint="Background Shader"
                             ToolTip="Beat-reactive SkSL background shader on the Singer Rotation projection screen (PCDJ LYRX style)"
                             Style="{StaticResource ModernComboBoxStyle}"
@@ -809,6 +809,13 @@
                             SelectedItem="{Binding RotationShaderPreset}"
                             FontSize="14"
                             VerticalAlignment="Center" />
+                            <CheckBox
+                            Content="Shader Only"
+                            IsChecked="{Binding IsShaderOnlyModeActive, Mode=TwoWay}"
+                            Style="{StaticResource ModernCheckBoxStyle}"
+                            FontSize="16"
+                            Margin="0,0,24,0"
+                            ToolTip="Hide the singer rotation and show only the full-screen beat-reactive shader while mixing in music." />
                             <TextBlock
                             Text="Singers in Rotation:"
                             FontSize="16"
@@ -3339,6 +3346,11 @@
                                               Style="{StaticResource ModernComboBoxStyle}"
                                               Margin="0,0,0,6"
                                               ToolTip="Renders a real-time beat-reactive SkSL background shader on the Singer Rotation projection screen." />
+                                    <CheckBox Content="Shader Only (Hide Rotation During Music Breaks)"
+                                              IsChecked="{Binding IsShaderOnlyModeActive, Mode=TwoWay}"
+                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                              Margin="0,0,0,6"
+                                              ToolTip="Block/hide the singer rotation list and banners so only the full-screen beat-reactive shader is displayed while music is playing." />
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                         <Button Content="📥 Import Shader..."
                                                 Command="{Binding ImportShaderFileCommand}"
@@ -5595,7 +5607,7 @@
                                         <TextBlock Text="• Marquee Speed: Adjust the slider in the Appearance group in Settings to control how fast the ticker scrolls at the top of the display." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Banner Template: Type custom text in Settings. Use '{venue}' and '{dj}' in the text to automatically substitute the selected venue and DJ names." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Holiday Rotation Screens: Under Display -> Holiday Rotation Screens, choose Auto (by date) or any holiday (Halloween, Christmas, Thanksgiving, New Year's, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Labor Day, Veterans Day, or Brenda's Birthday) to add a seasonal vignette, drifting fog, and full-color floating characters over the rotation display. Auto mode keeps the evening's holiday active through 6:00 AM for late-night shows." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                        <TextBlock Text="• Beat-Reactive Background Shaders (PCDJ LYRX Style): With 'Enable Display' checked, use the 'Background Shader' dropdown on the main Rotation toolbar (or under Display -> Synth Bars) to enable real-time SkiaSharp SkSL audio-reactive shaders ('Neon Tunnel', 'Plasma Waves', 'Cyber Grid', 'Audio Rings', 'Star Warp', 'Laser Nebula', 'Electric Kaleidoscope', 'Firestorm Pulse') that pulse to the music across all 12 projection views and the Pre-Show sign-up screen. Click '📥 Import Shader...' or '📂 Shaders Folder' under Display -> Synth Bars to import custom ShaderToy (.glsl, .frag, .sksl, .fs, .txt) shaders." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Beat-Reactive Background Shaders (PCDJ LYRX Style) &amp; 'Shader Only' Mode: With 'Enable Display' checked, use the 'Background Shader' dropdown on the main Rotation toolbar (or under Display -> Synth Bars) to enable real-time SkiaSharp SkSL audio-reactive shaders ('Neon Tunnel', 'Plasma Waves', 'Cyber Grid', 'Audio Rings', 'Star Warp', 'Laser Nebula', 'Electric Kaleidoscope', 'Firestorm Pulse') that pulse to the music across all 12 projection views and the Pre-Show sign-up screen. Check 'Shader Only' next to the Background Shader dropdown whenever you mix in a song and want to hide the rotation list and banners so only the full-screen shader is displayed while the music plays; uncheck 'Shader Only' to restore the rotation. Click '📥 Import Shader...' or '📂 Shaders Folder' under Display -> Synth Bars to import custom ShaderToy (.glsl, .frag, .sksl, .fs, .txt) shaders." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Crowd Emoji Reactions &amp; DJ Show Theme: Patrons on their smartphones can send live floating emoji reactions across the rotation display and web billboard using 7 performer vibe sets (🌟 Classic, 🤠 Country, 🎸 Rock, 🎤 Hip-Hop/Rap, 🕯️ Ballad, 🕺 Party, 🏆 Superstar). Under Settings -> Web Server &amp; Patron Requests (or from dj.html), the DJ can leave '🎭 Patron's Choice (All 7 Sets)' enabled, lock the entire crowd to one specific show theme for the evening, or select 'Off' to disable reactions." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>

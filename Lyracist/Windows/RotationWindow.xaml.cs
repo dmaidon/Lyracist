@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:47:00 -> Make themed panel backdrops semi-transparent when a background shader is active
+// Edited on Nov 24, 2026 @ 11:22:30 -> Support IsShaderOnlyModeActive to hide rotation and show full-screen shader during music breaks
 using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
@@ -133,7 +133,9 @@ public partial class RotationWindow : Window, ICaptureSource
     // Last Song banner, which has to stay visible even when the last singer has left the queue.
     private void RefreshSignUpInvite()
     {
-        bool show = (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) && LastSongBannerOverlay.Visibility != Visibility.Visible;
+        bool show = _vm?.IsShaderOnlyModeActive != true &&
+                    (_vm?.IsRotationEmpty == true || _vm?.IsPreShowModeActive == true) &&
+                    LastSongBannerOverlay.Visibility != Visibility.Visible;
         bool showQr = _vm?.ShowQrCodeOnRotationScreen == true;
         _welcomeHost.SetSignUpInvite(
             show,
@@ -301,9 +303,14 @@ public partial class RotationWindow : Window, ICaptureSource
 
     private void UpdateShaderBackdropOpacity()
     {
-        bool shaderActive = !string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
-                            !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase);
+        bool shaderOnly = _vm?.IsShaderOnlyModeActive == true;
+        bool shaderActive = shaderOnly ||
+                            (!string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
+                             !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase));
         double bgOpacity = shaderActive ? 0.32 : 1.0;
+
+        RotationContentGrid?.Visibility = shaderOnly ? Visibility.Collapsed : Visibility.Visible;
+        RotationShaderHost?.Opacity = shaderOnly ? 1.0 : 0.75;
 
         foreach (var panel in ProjectionPanels)
         {
@@ -343,6 +350,12 @@ public partial class RotationWindow : Window, ICaptureSource
 
             case nameof(RotationWindowViewModel.RotationShaderPreset):
                 UpdateShaderBackdropOpacity();
+                break;
+
+            case nameof(RotationWindowViewModel.IsShaderOnlyModeActive):
+                UpdateShaderBackdropOpacity();
+                RefreshSignUpInvite();
+                ApplyProjectionViewMode();
                 break;
 
             case nameof(RotationWindowViewModel.CurrentSinger):
@@ -550,6 +563,12 @@ public partial class RotationWindow : Window, ICaptureSource
             panel.BeginAnimation(OpacityProperty, null);
             panel.Opacity = 1;
             panel.Visibility = Visibility.Collapsed;
+        }
+
+        if (_vm?.IsShaderOnlyModeActive == true)
+        {
+            _displayedProjectionView = null;
+            return;
         }
 
         switch (view)

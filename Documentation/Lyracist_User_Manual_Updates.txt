@@ -1,5 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:53:30 -> Document Shaders folder, ShaderToy GLSL import, and semi-transparent shader backdrop across all 12 projection views
-
+// Edited on Nov 24, 2026 @ 11:59:00 -> Document PCDJ LYRX ANGLE-HLSL .frag support and Shader Only music-break mode
 KSRotation & Lyracist: Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style) - (November 2026)
 
 Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ LYRX Style)
@@ -16,10 +15,10 @@ Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ 
      * Laser Nebula
      * Electric Kaleidoscope
      * Firestorm Pulse
-   - Physical 'Shaders/' Folder & ShaderToy File Importer ('📥 Import Shader...' & '📂 Shaders Folder'):
-     * All 8 built-in shaders are stored as editable ShaderToy '.glsl' files inside the 'Shaders/' folder.
-     * Click '📥 Import Shader...' (in 'Adjust Synth Display', 'Settings -> Display', or 'KSRotation -> Settings -> Synth Bars') or drop any single-pass ShaderToy file ('.glsl', '.frag', '.sksl', '.fs', '.shader', '.txt') into the 'Shaders/' folder.
-     * Supports standard ShaderToy 'mainImage(out vec4 fragColor, in vec2 fragCoord)', 'iResolution.xy', 'iTime', 'iTimeDelta', 'iFrame', 'iMouse', 'iDate', and 'texture(iChannel0, uv)' / 'texelFetch(iChannel0, ...)' audio spectrum and waveform channel lookups.
+   - Physical 'Shaders/' Folder & ShaderToy / PCDJ LYRX '.frag' File Importer ('📥 Import Shader...' & '📂 Shaders Folder'):
+     * All 8 built-in shaders are stored as editable ShaderToy '.glsl' files inside the 'Shaders/' folder (while user-imported shader files are excluded from Git via '.gitignore').
+     * Click '📥 Import Shader...' (in 'Adjust Synth Display', 'Settings -> Display', or 'KSRotation -> Display -> Synth Bars') or copy any single-pass ShaderToy file ('.glsl', '.frag', '.sksl', '.fs', '.shader', '.txt') or PCDJ LYRX / DEX 3 ANGLE-transpiled Direct3D HLSL '.frag' file into the 'Shaders/' folder (monitored live by a FileSystemWatcher).
+     * Supports both standard ShaderToy 'mainImage(out vec4 fragColor, in vec2 fragCoord)' GLSL and PCDJ LYRX ANGLE-HLSL '.frag' files ('BEGIN COMPILER 0 OBJ CODE', 'f_mainImage_float4', 'gl_main', '_iResolution', '_iTime', 'cbuffer DriverConstants', and '_iChannel0' audio spectrum lookups).
 
 0A. Using Shaders on Both the Lyrics Screen and Rotation Screen:
    - Lyrics Projection Screen (Lyracist):
@@ -29,6 +28,10 @@ Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ 
      * Renders an animated beat-reactive backdrop behind the singer rotation queue across all 12 projection views (Normal List, Star Wars Crawl, Vegas Marquee, Purple Velvet Curtain, Vinyl Turntable, Disco Ball, Synthwave Grid, Concert Festival Lineup, Casino Slot Reels, Jukebox, Stadium Jumbotron, and Movie Theater 'Now Showing') as well as the Pre-Show / empty-rotation Sign-Up screen by automatically making the view's backdrop semi-transparent while a shader is active.
      * In Lyracist: Select via the 'Rotation Screen Shader (PCDJ Style)' dropdown on the Karaoke Page, inside '🎛 Adjust Synth Display', or in 'Settings -> Display -> Monitors & Screen Assignments'.
      * In KSRotation: Ensure 'Enable Display' is checked, then select a shader via the 'Background Shader' dropdown on the main Rotation tab toolbar (next to 'Projection View') or in 'Display -> Synth Bars (Live Audio Input)'.
+     * 'Shader Only' Mode (Hide Rotation During DJ Music Breaks):
+       - When the DJ mixes in a song occasionally and wants to block/hide the singer rotation and display only the full-screen beat-reactive shader while the music plays, check the 'Shader Only' checkbox (right next to the 'Background Shader' dropdown on KSRotation's top Rotation toolbar, under 'Display -> Synth Bars', or 'Shader Only (Hide Rotation)' under 'Rotation Queue Screen' on Lyracist's Karaoke Page).
+       - Checking 'Shader Only' automatically hides the rotation list, themed panels, scrolling banners, and sign-up screen (and auto-opens the display window and selects a shader if 'None' was active) so only the full-screen beat-reactive shader is shown.
+       - Uncheck 'Shader Only' when the song ends to immediately restore the singer rotation display.
 
 KSRotation & Lyracist: Right-Click Previously Sung Songs Context Menu on Performer Song Entry TextBoxes - (November 2026)
 

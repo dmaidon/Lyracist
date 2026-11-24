@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:55:00 -> Add RotationShaderPreset to DisplayViewModel
+// Edited on Nov 24, 2026 @ 11:21:00 -> Add IsShaderOnlyModeActive to DisplayViewModel to hide rotation and show full-screen shader during music breaks
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -113,6 +113,10 @@ namespace KSRotation.ViewModels
         /// <summary>Active beat-reactive SkSL background shader preset on the rotation display.</summary>
         [ObservableProperty]
         public partial string RotationShaderPreset { get; set; } = Lyracist.Shared.AudioShaderPresets.Off;
+
+        /// <summary>When true, hides the rotation list, banners, and sign-up screen to display only the full-screen beat-reactive shader during DJ music breaks.</summary>
+        [ObservableProperty]
+        public partial bool IsShaderOnlyModeActive { get; set; } = false;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasCurrentSingerScaryoke))]

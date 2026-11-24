@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:53:00 -> Add ShaderPresets, LyricsShaderPreset, and RotationShaderPreset to KaraokeViewModel
+// Edited on Nov 24, 2026 @ 11:22:30 -> Add IsRotationShaderOnlyModeActive to KaraokeViewModel
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -74,6 +74,21 @@ public partial class KaraokeViewModel
             {
                 _displayService.IsPreShowModeActive = value;
                 OnPropertyChanged(nameof(IsPreShowModeActive));
+                OnPropertyChanged(nameof(IsRotationActive));
+            }
+        }
+    }
+
+    public bool IsRotationShaderOnlyModeActive
+    {
+        get => _displayService.IsShaderOnlyModeActive;
+        set
+        {
+            if (_displayService.IsShaderOnlyModeActive != value)
+            {
+                _displayService.IsShaderOnlyModeActive = value;
+                OnPropertyChanged(nameof(IsRotationShaderOnlyModeActive));
+                OnPropertyChanged(nameof(RotationShaderPreset));
                 OnPropertyChanged(nameof(IsRotationActive));
             }
         }
@@ -225,6 +240,10 @@ public partial class KaraokeViewModel
             if (AppSettings.RotationShaderPreset != value)
             {
                 AppSettings.RotationShaderPreset = value;
+                if (!AudioShaderPresets.IsActive(value) && IsRotationShaderOnlyModeActive)
+                {
+                    IsRotationShaderOnlyModeActive = false;
+                }
                 OnPropertyChanged();
             }
         }

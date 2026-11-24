@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:22:00 -> Store shaders as editable .glsl files in Shaders/ folder, add ShaderToy GLSL-to-SkSL compatibility translator & file importer
+// Edited on Nov 24, 2026 @ 11:42:30 -> Add PCDJ LYRX ANGLE-HLSL .frag to SkSL translator in AudioShaderPresets
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,6 +47,56 @@ public static class AudioShaderPresets
     private static readonly Dictionary<string, SKRuntimeEffect?> _compiledEffects = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, DateTime> _compiledTimestamps = new(StringComparer.OrdinalIgnoreCase);
     private static bool _seededDefaults;
+    private static FileSystemWatcher? _folderWatcher;
+
+    /// <summary>Known PCDJ LYRX / DEX 3 shader IDs mapped to their friendly display names from <c>shaders.xml</c>.</summary>
+    public static readonly IReadOnlyDictionary<string, string> KnownLyrxShaderNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["st-ldscRB"] = "3D Kali",
+        ["st-XdtBR2"] = "Dancing Sinus",
+        ["st-XdByzy"] = "Dancing Stick Figures",
+        ["st-MdjyRm"] = "Shaderlamp",
+        ["st-ldXBRj"] = "Simple Bar Audio",
+        ["st-ls3BDH"] = "SoundEclipse",
+        ["st-4lSXzh"] = "Traced Minkowski Tube",
+        ["st-ld2yDD"] = "Twitchy Fractal"
+    };
+
+    /// <summary>Raised whenever shader files are added, modified, or removed in <see cref="CustomShadersDir"/>.</summary>
+    public static event Action? AvailableShadersChanged;
+
+    private static void EnsureFolderWatcher()
+    {
+        if (_folderWatcher != null || !Directory.Exists(CustomShadersDir)) return;
+        try
+        {
+            var watcher = new FileSystemWatcher(CustomShadersDir)
+            {
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
+                IncludeSubdirectories = false,
+                EnableRaisingEvents = true
+            };
+            FileSystemEventHandler onChanged = (_, _) =>
+            {
+                ClearCache();
+                AvailableShadersChanged?.Invoke();
+            };
+            RenamedEventHandler onRenamed = (_, _) =>
+            {
+                ClearCache();
+                AvailableShadersChanged?.Invoke();
+            };
+            watcher.Created += onChanged;
+            watcher.Deleted += onChanged;
+            watcher.Changed += onChanged;
+            watcher.Renamed += onRenamed;
+            _folderWatcher = watcher;
+        }
+        catch
+        {
+            // Ignore watcher errors on read-only paths
+        }
+    }
 
     /// <summary>
     /// Ensures the <c>Shaders/</c> directory exists and writes all 8 built-in shaders as editable
@@ -54,7 +104,11 @@ public static class AudioShaderPresets
     /// </summary>
     public static void EnsureDefaultShaderFiles()
     {
-        if (_seededDefaults && Directory.Exists(CustomShadersDir)) return;
+        if (_seededDefaults && Directory.Exists(CustomShadersDir))
+        {
+            EnsureFolderWatcher();
+            return;
+        }
 
         try
         {
@@ -74,6 +128,7 @@ public static class AudioShaderPresets
                 }
             }
             _seededDefaults = true;
+            EnsureFolderWatcher();
         }
         catch
         {
@@ -147,12 +202,22 @@ public static class AudioShaderPresets
 
             EnsureDefaultShaderFiles();
             string baseName = Path.GetFileNameWithoutExtension(sourceFilePath).Trim();
+            if (KnownLyrxShaderNames.TryGetValue(baseName, out string? friendlyLyrxName))
+            {
+                baseName = friendlyLyrxName;
+            }
             if (string.IsNullOrWhiteSpace(baseName) || string.Equals(baseName, Off, StringComparison.OrdinalIgnoreCase))
             {
                 baseName = "Custom Shader";
             }
 
-            string destPath = Path.Combine(CustomShadersDir, baseName + ".glsl");
+            string ext = Path.GetExtension(sourceFilePath);
+            if (string.IsNullOrWhiteSpace(ext) || !AllowedExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            {
+                ext = ".glsl";
+            }
+
+            string destPath = Path.Combine(CustomShadersDir, baseName + ext);
             if (!string.Equals(Path.GetFullPath(sourceFilePath), Path.GetFullPath(destPath), StringComparison.OrdinalIgnoreCase))
             {
                 File.Copy(sourceFilePath, destPath, overwrite: true);
@@ -160,6 +225,7 @@ public static class AudioShaderPresets
 
             ClearCache();
             importedShaderName = baseName;
+            AvailableShadersChanged?.Invoke();
             return true;
         }
         catch (Exception ex)
@@ -282,10 +348,17 @@ public static class AudioShaderPresets
     /// <summary>
     /// Translates standard ShaderToy GLSL syntax (such as <c>mainImage(out vec4 fragColor, in vec2 fragCoord)</c>,
     /// <c>iResolution.xy</c>, <c>iTimeDelta</c>, <c>iFrame</c>, <c>iMouse</c>, <c>texture(iChannel0, uv)</c>,
-    /// <c>texelFetch(iChannel0, ...)</c>, <c>atan(y, x)</c>, and <c>mod(vec, float)</c>) into SkiaSharp SkSL.
+    /// <c>texelFetch(iChannel0, ...)</c>) as well as PCDJ LYRX / DEX 3 ANGLE-transpiled HLSL <c>.frag</c> files
+    /// (<c>BEGIN COMPILER 0 OBJ CODE</c>, <c>f_mainImage_float4</c>, <c>gl_main</c>, <c>_iResolution</c>, <c>_iTime</c>)
+    /// into SkiaSharp SkSL.
     /// </summary>
     public static string TranslateShaderToyToSksl(string body)
     {
+        if (IsAngleHlslShader(body))
+        {
+            return TranslateAngleHlslToSksl(body);
+        }
+
         const string header = """
             uniform float2 iResolution;
             uniform float iTime;
@@ -353,6 +426,172 @@ public static class AudioShaderPresets
         }
 
         return header + "\n" + code;
+    }
+
+    /// <summary>Detects PCDJ LYRX / DEX 3 ANGLE-transpiled Direct3D HLSL <c>.frag</c> shaders.</summary>
+    public static bool IsAngleHlslShader(string source)
+    {
+        if (string.IsNullOrWhiteSpace(source)) return false;
+        return source.Contains("BEGIN COMPILER 0 OBJ CODE", StringComparison.Ordinal) ||
+               source.Contains("f_mainImage_float4", StringComparison.Ordinal) ||
+               source.Contains("cbuffer DriverConstants", StringComparison.Ordinal) ||
+               source.Contains("gl_main2(VOut", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Translates a PCDJ LYRX / DEX 3 ANGLE-transpiled HLSL <c>.frag</c> shader into SkiaSharp SkSL.
+    /// </summary>
+    private static string TranslateAngleHlslToSksl(string raw)
+    {
+        const string angleHeader = """
+            uniform float2 iResolution;
+            uniform float iTime;
+            uniform float iBass;
+            uniform float iMid;
+            uniform float iHigh;
+            uniform float iEnergy;
+            uniform float iTimeDelta;
+            uniform int iFrame;
+            uniform float4 iMouse;
+            uniform float4 iDate;
+            uniform float iSampleRate;
+
+            vec4 _agySampleAudioChannel(vec2 uv) {
+                float x = clamp(uv.x, 0.0, 1.0);
+                float band = (x < 0.25) ? mix(iBass, iMid, x * 4.0)
+                           : (x < 0.65) ? mix(iMid, iHigh, (x - 0.25) * 2.5)
+                           : mix(iHigh, iEnergy * 0.7, (x - 0.65) * 2.85);
+                float wave = 0.5 + 0.35 * sin(uv.x * 24.0 + iTime * 6.0) * iEnergy;
+                float val = (uv.y < 0.5) ? clamp(band, 0.0, 1.0) : clamp(wave, 0.0, 1.0);
+                return vec4(val, band, wave, 1.0);
+            }
+            float4 _agy_gl_texture2D(int samplerIndex, float2 t) { return _agySampleAudioChannel(t); }
+            float4 _agy_gl_texture2DLod0(int samplerIndex, float2 t) { return _agySampleAudioChannel(t); }
+            float2 mul(float2 a, float2x2 b) { return a * b; }
+            float2 mul(float2x2 a, float2 b) { return a * b; }
+            float2x2 mul(float2x2 a, float2x2 b) { return a * b; }
+            float3 mul(float3 a, float3x3 b) { return a * b; }
+            float3 mul(float3x3 a, float3 b) { return a * b; }
+            float3x3 mul(float3x3 a, float3x3 b) { return a * b; }
+            float4 mul(float4 a, float4x4 b) { return a * b; }
+            float4 mul(float4x4 a, float4 b) { return a * b; }
+            float4x4 mul(float4x4 a, float4x4 b) { return a * b; }
+            float2x2 _agyTranspose(float2x2 m) { return float2x2(m[0][0], m[1][0], m[0][1], m[1][1]); }
+            float3x3 _agyTranspose(float3x3 m) {
+                return float3x3(m[0][0], m[1][0], m[2][0],
+                                m[0][1], m[1][1], m[2][1],
+                                m[0][2], m[1][2], m[2][2]);
+            }
+            float4 _agy_gl_Color_0 = float4(0.0, 0.0, 0.0, 1.0);
+            float4 _agy_gl_FragCoord = float4(0.0, 0.0, 0.0, 1.0);
+            """;
+
+        string code = raw;
+
+        // 1. Extract the ANGLE OBJ CODE section if markers are present
+        const string beginMarker = "//// BEGIN COMPILER 0 OBJ CODE ////";
+        const string endMarker = "//// END COMPILER 0 OBJ CODE ////";
+        int startIdx = code.IndexOf(beginMarker, StringComparison.Ordinal);
+        if (startIdx >= 0)
+        {
+            startIdx += beginMarker.Length;
+            int endIdx = code.IndexOf(endMarker, startIdx, StringComparison.Ordinal);
+            code = endIdx >= 0 ? code[startIdx..endIdx] : code[startIdx..];
+        }
+        else
+        {
+            // Strip any D3D11 VOut / gl_main2 suffix if markers were stripped manually
+            int voutIdx = code.IndexOf("struct VOut", StringComparison.Ordinal);
+            if (voutIdx >= 0) code = code[..voutIdx];
+        }
+
+        // 2. Strip preprocessor directives (#pragma, #ifdef, #else, #endif, #define)
+        code = Regex.Replace(code, @"^\s*#\s*(pragma|ifdef|ifndef|else|elif|endif|define)\b.*$", "", RegexOptions.Multiline);
+
+        // 3. Strip cbuffer DriverConstants blocks (which may contain nested struct SamplerMetadata)
+        code = Regex.Replace(code, @"\bcbuffer\s+\w+[^{]*\{(?:[^{}]|\{[^{}]*\})*\}\s*;", "", RegexOptions.Singleline);
+
+        // 4. Strip HLSL uniform register declarations and static gl_Color / gl_FragCoord declarations
+        code = Regex.Replace(code, @"^\s*uniform\s+[^;]+:\s*register\s*\([^)]+\)\s*;\s*$", "", RegexOptions.Multiline);
+        code = Regex.Replace(code, @"\bstatic\s+float4\s+gl_Color\s*\[\s*1\s*\]\s*=\s*\{[^}]*\}\s*;", "", RegexOptions.Singleline);
+        code = Regex.Replace(code, @"\bstatic\s+float4\s+gl_FragCoord\s*=[^;]+;", "");
+
+        // 5. Strip ANGLE's D3D11 gl_texture2D / gl_texture2DLod0 definitions (provided by angleHeader)
+        code = Regex.Replace(code, @"\bfloat4\s+gl_texture2D(?:Lod0)?\s*\([^{]+\{[^}]*\}", "", RegexOptions.Singleline);
+
+        // 6. Replace gl_Color[0] with _agy_gl_Color_0, rename reserved gl_* identifiers to _agy_gl_*, uint -> int, strip 'static' and LOOP/FLATTEN
+        code = code.Replace("gl_Color[0]", "_agy_gl_Color_0", StringComparison.Ordinal);
+        code = Regex.Replace(code, @"\bgl_", "_agy_gl_");
+        code = Regex.Replace(code, @"\buint\b", "int");
+        code = Regex.Replace(code, @"\bstatic\s+", "");
+        code = Regex.Replace(code, @"\b(LOOP|FLATTEN)\b", "");
+
+        // 7. Strip standalone empty semicolon lines (';') that ANGLE emits around prototypes
+        code = Regex.Replace(code, @"^\s*;\s*$", "", RegexOptions.Multiline);
+
+        // 8. Map HLSL intrinsics to SkSL equivalents
+        code = Regex.Replace(code, @"\bfrac\s*\(", "fract(");
+        code = Regex.Replace(code, @"\blerp\s*\(", "mix(");
+        code = Regex.Replace(code, @"\batan2\s*\(", "atan(");
+        code = Regex.Replace(code, @"\brsqrt\s*\(", "inversesqrt(");
+        code = Regex.Replace(code, @"\btranspose\s*\(", "_agyTranspose(");
+
+        // 9. Replace HLSL brace initializers: `float3 _p = {0, 0, 0}` or `float _m = {0}` or `int _i = {0}`
+        code = Regex.Replace(
+            code,
+            @"\b(float[234]?|int[234]?|bool[234]?|half[234]?|vec[234]|ivec[234]|bvec[234])\s+([A-Za-z_]\w*)\s*=\s*\{([^{};]*)\}",
+            match =>
+            {
+                string type = match.Groups[1].Value;
+                string varName = match.Groups[2].Value;
+                string args = match.Groups[3].Value.Trim();
+                bool isFloatType = type.StartsWith("float", StringComparison.Ordinal) ||
+                                   type.StartsWith("half", StringComparison.Ordinal) ||
+                                   type.StartsWith("vec", StringComparison.Ordinal);
+                if (isFloatType)
+                {
+                    var parts = args.Split(',').Select(p =>
+                    {
+                        string t = p.Trim();
+                        if (Regex.IsMatch(t, @"^-?\d+$")) return t + ".0";
+                        return t;
+                    });
+                    args = string.Join(", ", parts);
+                }
+                return $"{type} {varName} = {type}({args})";
+            });
+
+        // 10. Convert comma-chained parenthesized assignments (e.g. in st-4lSXzh.frag) into semicolon statements
+        code = Regex.Replace(
+            code,
+            @"\(\(\(\(\(_v\.x\s*=\s*([^)]+\))\),\s*\(_v\.y\s*=\s*([^)]+\))\)\),\s*\(_v\.z\s*=\s*([^;]+)\)\),\s*\(_v\.w\s*=\s*([^;]+)\)\);",
+            "_v.x = $1; _v.y = $2; _v.z = $3; _v.w = $4;");
+
+        // 11. Convert float loop induction variables (e.g. `for(float _f = float(0.0); (_f <= 0.25); (_f += 0.0099999998))` in st-XdByzy.frag)
+        // into integer loop induction variables required by SkSL ES2 runtime effects
+        code = Regex.Replace(
+            code,
+            @"for\s*\(\s*float\s+([A-Za-z_]\w*)\s*=\s*(?:float\()?(0(?:\.0+)?)\)?\s*;\s*\(?\1\s*<=\s*0\.25\)?\s*;\s*\(?\1\s*\+=\s*0\.0099999998\)?\s*\)\s*\{",
+            "for (int _agyLoopI = 0; _agyLoopI <= 25; _agyLoopI++) { float $1 = float(_agyLoopI) * 0.01;");
+
+        // 12. Fix int-to-float implicit conversion in `if(x == 0 && y == 0) x = 1;` inside ANGLE's atan_emu
+        code = Regex.Replace(code, @"if\s*\(\s*x\s*==\s*0\s*&&\s*y\s*==\s*0\s*\)\s*x\s*=\s*1\s*;", "if (x == 0.0 && y == 0.0) x = 1.0;");
+
+        // 13. Replace `_iResolution` and `_iTime` with SkSL uniforms (adding subtle bass reactivity to `_iTime`)
+        code = Regex.Replace(code, @"\b_iResolution\b", "vec3(iResolution, 1.0)");
+        code = Regex.Replace(code, @"\b_iTime\b", "(iTime + iBass * 0.25)");
+
+        // 14. Append SkSL main(float2 fragCoord) entry point calling _agy_gl_main()
+        code += """
+
+            half4 main(float2 fragCoord) {
+                _agy_gl_FragCoord = float4(fragCoord.x, iResolution.y - fragCoord.y, 0.0, 1.0);
+                _agy_gl_main();
+                return half4(_agy_gl_Color_0);
+            }
+            """;
+
+        return angleHeader + "\n" + code;
     }
 
     /// <summary>Loads the shader source from <c>Shaders/&lt;name&gt;.glsl</c> on disk first, falling back to the embedded source.</summary>

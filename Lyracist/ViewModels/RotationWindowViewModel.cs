@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:52:00 -> Expose RotationShaderPreset on RotationWindowViewModel
+// Edited on Nov 24, 2026 @ 11:22:30 -> Add IsShaderOnlyModeActive to RotationWindowViewModel to hide rotation during music breaks
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -36,6 +36,9 @@ public partial class RotationWindowViewModel : BaseViewModel
     {
         WelcomeScreenService.Instance.IsPreShowActive = value;
     }
+
+    [ObservableProperty]
+    private bool _isShaderOnlyModeActive = false;
 
     [ObservableProperty]
     private string _currentSinger = string.Empty;

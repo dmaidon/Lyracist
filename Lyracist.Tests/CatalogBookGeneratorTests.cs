@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:54:15 -> Update user manuals for Shaders folder, ShaderToy GLSL import, and all-view shader blending
+// Edited on Nov 24, 2026 @ 11:59:00 -> Update user manuals for PCDJ LYRX ANGLE-HLSL .frag support and Shader Only music-break mode
 using System;
 using System.IO;
 using Xunit;
@@ -7178,6 +7178,145 @@ Section: Display & Projection Settings / Shaders Folder & ShaderToy GLSL Importe
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " ShaderToyImporterAllViewBlending";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForShaderOnlyMusicBreakMode()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"KSRotation & Lyracist: 'Shader Only' Mode & PCDJ LYRX '.frag' Shader Support - (November 2026)
+
+Section: Display & Projection Settings / 'Shader Only' Music-Break Mode & PCDJ LYRX '.frag' Translator
+
+1. Displaying Full-Screen Shaders Without the Singer Rotation ('Shader Only' Checkbox):
+   - When the DJ mixes in a song between singers and wants to block/hide the singer rotation list and show only the beat-reactive background shader while the music is playing:
+     * In KSRotation: Check the 'Shader Only' checkbox on the top Rotation toolbar (right next to the 'Background Shader' dropdown) or 'Shader Only (Hide Rotation During Music Breaks)' under 'Display -> Synth Bars (Live Audio Input)'.
+     * In Lyracist: Check 'Shader Only (Hide Rotation)' under 'Rotation Queue Screen' on the Karaoke Page.
+   - What 'Shader Only' Does:
+     * Hides the singer rotation list, themed projection view panels, top marquee/last-round/auto-advance banners, and the Pre-Show / Empty-Rotation sign-up screen so only the full-screen beat-reactive shader (at 100% opacity, plus optional synth bars) is displayed.
+     * Automatically turns on 'Enable Display Window' and selects a shader (such as 'Neon Tunnel' or the last active shader) if 'None' was selected.
+     * Unchecking 'Shader Only' when the song ends immediately restores the singer rotation and previously selected Projection View.
+
+2. Native PCDJ LYRX / DEX 3 ANGLE-HLSL '.frag' File Support & Live Folder Watcher:
+   - Directly supports importing or copying PCDJ LYRX's ANGLE-transpiled Direct3D 11 HLSL '.frag' shader files ('BEGIN COMPILER 0 OBJ CODE', 'f_mainImage_float4', 'gl_main', '_iResolution', '_iTime', 'cbuffer DriverConstants') into the 'Shaders/' folder.
+   - Automatically maps known LYRX shader filenames ('st-ldscRB.frag' -> '3D Kali', 'st-XdtBR2.frag' -> 'Dancing Sinus', 'st-XdByzy.frag' -> 'Dancing Stick Figures', 'st-MdjyRm.frag' -> 'Shaderlamp', 'st-ldXBRj.frag' -> 'Simple Bar Audio', 'st-ls3BDH.frag' -> 'SoundEclipse', 'st-4lSXzh.frag' -> 'Traced Minkowski Tube', 'st-ld2yDD.frag' -> 'Twitchy Fractal') and refreshes the shader dropdowns live via FileSystemWatcher.";
+
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("'Shader Only' Mode (Hide Rotation During DJ Music Breaks)"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: 'Shader Only' Mode (Hide Rotation During DJ Music Breaks)")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("ShaderOnlyMusicBreakMode"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("'Shader Only' Mode (Hide Rotation During DJ Music Breaks)", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ShaderOnlyMusicBreakMode";
                                 doc.Save(pdfPath);
                             }
                         }

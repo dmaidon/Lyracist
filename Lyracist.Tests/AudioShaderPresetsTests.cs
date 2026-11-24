@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:25:30 -> Add unit tests for physical Shaders/ folder seeding, ShaderToy GLSL-to-SkSL translation, iChannel0 audio texture lookups, and TryImportShaderFile
+// Edited on Nov 24, 2026 @ 11:42:30 -> Add unit test verifying all 8 PCDJ LYRX ANGLE-HLSL .frag shaders compile and render in SkiaSharp
 using System;
 using System.IO;
 using System.Linq;
@@ -152,5 +152,42 @@ public class AudioShaderPresetsTests
         Assert.Equal(AudioShaderPresets.Off, AudioShaderPresets.Normalize("NonExistentShader123"));
         Assert.Equal("Neon Tunnel", AudioShaderPresets.Normalize("neon tunnel"));
         Assert.Equal("Cyber Grid", AudioShaderPresets.Normalize("CYBER GRID"));
+    }
+
+    [Fact]
+    public void TranslateShaderToyToSksl_CompilesAllPcdjLyrxAngleHlslFragFiles()
+    {
+        foreach (string shaderName in AudioShaderPresets.GetAvailableNames().Where(n => n != AudioShaderPresets.Off))
+        {
+            var effect = AudioShaderPresets.GetOrCompileEffect(shaderName, out string? errorText);
+            Assert.True(effect != null, $"Shader '{shaderName}' in Shaders/ failed to compile:\n{errorText}");
+        }
+
+        const string lyrxDir = @"C:\Program Files\PCDJ\LYRX\shaders\hlsl";
+        if (Directory.Exists(lyrxDir))
+        {
+            foreach (string fragFile in Directory.GetFiles(lyrxDir, "*.frag"))
+            {
+                string? importedDestPath = null;
+                try
+                {
+                    bool imported = AudioShaderPresets.TryImportShaderFile(fragFile, out string importedName, out string? importError);
+                    Assert.True(imported, $"TryImportShaderFile failed for LYRX shader '{Path.GetFileName(fragFile)}':\n{importError}");
+                    Assert.False(string.IsNullOrWhiteSpace(importedName));
+
+                    importedDestPath = Path.Combine(AudioShaderPresets.CustomShadersDir, importedName + Path.GetExtension(fragFile));
+                    var effect = AudioShaderPresets.GetOrCompileEffect(importedName, out string? compileErrors);
+                    Assert.True(effect != null, $"Imported LYRX shader '{importedName}' failed to compile:\n{compileErrors}");
+                }
+                finally
+                {
+                    if (importedDestPath != null && File.Exists(importedDestPath))
+                    {
+                        File.Delete(importedDestPath);
+                    }
+                    AudioShaderPresets.ClearCache();
+                }
+            }
+        }
     }
 }
