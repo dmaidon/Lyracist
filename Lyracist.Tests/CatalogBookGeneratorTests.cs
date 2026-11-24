@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 12:12:00 -> Update user manuals for automatic database and FTS5 search self-repair engine
+// Edited on Nov 24, 2026 @ 10:08:30 -> Update user manuals for PCDJ LYRX-style beat-reactive SkSL background shaders
 using System;
 using System.IO;
 using Xunit;
@@ -6911,6 +6911,148 @@ Section: Music & Karaoke Library / Search, Drive Scanning & Automatic Database S
                         return new PdfSharp.Fonts.FontResolverInfo("Arial");
                 }
                 return null!;
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForBeatReactiveBackgroundShaders()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"KSRotation & Lyracist: Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style) - (November 2026)
+
+Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ LYRX Style)
+
+1. Overview of Beat-Reactive Background Shaders:
+   - Lyracist and KSRotation include real-time, audio-reactive SkiaSharp SkSL background shaders (similar to PCDJ LYRX) that pulse and move to the beat of the music (bass, midrange, highs, and overall energy).
+   - Built-In Shader Presets (selectable from a dropdown):
+     * None (Off), Neon Tunnel, Plasma Waves, Cyber Grid, Audio Rings, Star Warp, Laser Nebula, Electric Kaleidoscope, Firestorm Pulse.
+   - Custom ShaderToy Scripts ('Shaders/' Folder):
+     * Hosts can also drop custom '.sksl', '.glsl', or '.frag' ShaderToy fragment shader files into the 'Shaders/' folder in the application directory to have them automatically listed in the shader dropdowns.
+
+2. Using Shaders on Both the Lyrics Screen and Rotation Screen:
+   - Lyrics Projection Screen (Lyracist):
+     * Displays animated motion graphics during filler music (dead air between singers), behind audio-only tracks, and behind chroma-keyed CDG lyrics.
+     * Select via the 'Lyrics Screen Shader (PCDJ Style)' dropdown on the Karaoke Page (Display Projection card), inside the 'Adjust Synth Display' dialog, in 'Settings -> Display -> Lyrics Screen Audio Visualizer', or by right-clicking the Lyrics window ('Audio Visualizer -> Background Shader').
+   - Singer Rotation Screen (Lyracist & KSRotation):
+     * Renders an animated beat-reactive backdrop behind the singer rotation queue.
+     * In Lyracist: Select via the 'Rotation Screen Shader (PCDJ Style)' dropdown on the Karaoke Page, inside 'Adjust Synth Display', or in 'Settings -> Display -> Monitors & Screen Assignments'.
+     * In KSRotation: Select via the 'Background Shader' dropdown on the main Rotation tab toolbar (next to 'Projection View') or in 'Settings -> Display & Projection -> Synth Bars (Live Audio Input)'.";
+
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style)"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("KSRotation & Lyracist: Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style)")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("KSRotation & Lyracist:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("BeatReactiveBackgroundShaders"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style)", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " BeatReactiveBackgroundShaders";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
             }
         }
     }

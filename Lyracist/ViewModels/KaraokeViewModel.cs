@@ -678,6 +678,16 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         };
 
+        AppSettings.ShaderSettingsChanged += () =>
+        {
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+            {
+                OnPropertyChanged(nameof(LyricsShaderPreset));
+                OnPropertyChanged(nameof(RotationShaderPreset));
+                OnPropertyChanged(nameof(ShaderPresets));
+            });
+        };
+
         // Apply starting defaults
         _mediaEngine.Volume = 100.0;
         _mediaEngine.Speed = 1.0;

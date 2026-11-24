@@ -1,4 +1,4 @@
-<!-- Edited on Nov 21, 2026 @ 08:13:00 -> Add right-click previously sung songs menu to Song entry text boxes -->
+<!-- Edited on Nov 24, 2026 @ 10:14:30 -> Document PCDJ LYRX-style beat-reactive SkSL background shaders in KSRotation Help -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -792,11 +792,21 @@
                             ToolTip="Hold the Pre-Show / Sign-Up &amp; Wi-Fi screen on the rotation display until turned off, even with singers in rotation." />
                             <ComboBox
                             Width="180"
-                            Margin="0,0,24,0"
+                            Margin="0,0,16,0"
                             materialDesign:HintAssist.Hint="Projection View"
                             Style="{StaticResource ModernComboBoxStyle}"
                             ItemsSource="{Binding ProjectionViews}"
                             SelectedItem="{Binding SelectedProjectionView}"
+                            FontSize="14"
+                            VerticalAlignment="Center" />
+                            <ComboBox
+                            Width="170"
+                            Margin="0,0,24,0"
+                            materialDesign:HintAssist.Hint="Background Shader"
+                            ToolTip="Beat-reactive SkSL background shader on the Singer Rotation projection screen (PCDJ LYRX style)"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                            ItemsSource="{Binding ShaderPresets}"
+                            SelectedItem="{Binding RotationShaderPreset}"
                             FontSize="14"
                             VerticalAlignment="Center" />
                             <TextBlock
@@ -3323,6 +3333,13 @@
                                               Margin="0,0,0,10"
                                               ToolTip="Same color themes as Lyracist's lyrics screen. Changes apply to open screens right away." />
 
+                                    <TextBlock Text="Background Shader (PCDJ LYRX Style):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding ShaderPresets}"
+                                              SelectedItem="{Binding RotationShaderPreset, Mode=TwoWay}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              Margin="0,0,0,10"
+                                              ToolTip="Renders a real-time beat-reactive SkSL background shader on the Singer Rotation projection screen." />
+
                                     <Grid Margin="0,0,0,6">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -5566,6 +5583,7 @@
                                         <TextBlock Text="• Marquee Speed: Adjust the slider in the Appearance group in Settings to control how fast the ticker scrolls at the top of the display." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Banner Template: Type custom text in Settings. Use '{venue}' and '{dj}' in the text to automatically substitute the selected venue and DJ names." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Holiday Rotation Screens: Under Display -> Holiday Rotation Screens, choose Auto (by date) or any holiday (Halloween, Christmas, Thanksgiving, New Year's, Valentine's Day, St. Patrick's Day, Easter, Mother's Day, Father's Day, Independence Day, Memorial Day, Labor Day, Veterans Day, or Brenda's Birthday) to add a seasonal vignette, drifting fog, and full-color floating characters over the rotation display. Auto mode keeps the evening's holiday active through 6:00 AM for late-night shows." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Beat-Reactive Background Shaders (PCDJ LYRX Style): Use the 'Background Shader' dropdown on the main Rotation toolbar (or under Display -> Synth Bars) to enable real-time SkiaSharp SkSL audio-reactive shaders ('Neon Tunnel', 'Plasma Waves', 'Cyber Grid', 'Audio Rings', 'Star Warp', 'Laser Nebula', 'Electric Kaleidoscope', 'Firestorm Pulse', or custom '.sksl'/'.glsl' files placed in 'Shaders/') that pulse to the music on the rotation display." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Crowd Emoji Reactions &amp; DJ Show Theme: Patrons on their smartphones can send live floating emoji reactions across the rotation display and web billboard using 7 performer vibe sets (🌟 Classic, 🤠 Country, 🎸 Rock, 🎤 Hip-Hop/Rap, 🕯️ Ballad, 🕺 Party, 🏆 Superstar). Under Settings -> Web Server &amp; Patron Requests (or from dj.html), the DJ can leave '🎭 Patron's Choice (All 7 Sets)' enabled, lock the entire crowd to one specific show theme for the evening, or select 'Off' to disable reactions." Margin="0,2" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>

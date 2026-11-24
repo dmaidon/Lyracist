@@ -1,5 +1,6 @@
-// Edited on Nov 9, 2026 @ 09:06:40 -> Add ShowReaction to SingerDisplayWindow using shared ReactionBurstEffect
+// Edited on Nov 24, 2026 @ 09:55:00 -> Wire RotationShaderHost BandProvider to LineInSpectrumService
 using KSRotation.Models;
+using KSRotation.Services;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
 using System;
@@ -71,6 +72,8 @@ namespace KSRotation.Windows
         {
             InitializeComponent();
             _welcomeHost = Lyracist.Shared.WelcomeOverlayHost.Attach(this);
+
+            RotationShaderHost.BandProvider = count => LineInSpectrumService.Instance.GetBands(count);
 
             _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
             _curtainBulbChase = new CurtainMarqueeBulbChase(CurtainBulbCanvas);

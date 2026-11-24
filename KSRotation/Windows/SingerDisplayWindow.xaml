@@ -1,4 +1,4 @@
-<!-- Edited on Nov 9, 2026 @ 09:06:30 -> Add ReactionsCanvas overlay to SingerDisplayWindow for crowd emoji reactions -->
+<!-- Edited on Nov 24, 2026 @ 09:55:00 -> Add AudioShaderHost beat-reactive shader backdrop to SingerDisplayWindow -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,6 +8,7 @@
     xmlns:vm="clr-namespace:KSRotation.ViewModels"
     xmlns:conv="clr-namespace:KSRotation.Converters"
     xmlns:ctrl="clr-namespace:KSRotation.Controls"
+    xmlns:shared="clr-namespace:Lyracist.Shared"
     mc:Ignorable="d"
     Title="Singer Display"
     Width="450"
@@ -37,6 +38,14 @@
             <RowDefinition Height="*" />
             <!-- content: normal list OR crawl -->
         </Grid.RowDefinitions>
+
+        <!-- Beat-Reactive SkSL Shader Backdrop (PCDJ LYRX Style) -->
+        <shared:AudioShaderHost x:Name="RotationShaderHost"
+                                Grid.RowSpan="2"
+                                Panel.ZIndex="-1"
+                                Opacity="0.75"
+                                ShaderName="{Binding RotationShaderPreset}"
+                                ReducedQuality="{Binding ReducedEffects}" />
 
         <!-- Row 0: Scrolling marquee and Last Round banner -->
         <StackPanel Grid.Row="0">

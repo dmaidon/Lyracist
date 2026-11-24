@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:07:00 -> Add ShowReaction to DisplayWindowService shim for MAUI
+// Edited on Nov 24, 2026 @ 09:55:00 -> Add SetRotationShader to DisplayWindowService shim for MAUI
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -185,6 +185,7 @@ namespace KSRotation.Services
         public void SetPreShowMode(bool active) { }
         public event Action? PreShowReset { add { } remove { } }
         public void SetShowSpectrum(bool show) { }
+        public void SetRotationShader(string? shaderName) { }
         public void ShowReaction(string emoji) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
@@ -212,6 +213,7 @@ namespace KSRotation.Services
         public void Hide() { }
         public void Shutdown() { }
         public void SetShowSpectrum(bool show) { }
+        public void SetRotationShader(string? shaderName) { }
         public void ShowReaction(string emoji) { }
         public void RepositionWindow() { }
     }

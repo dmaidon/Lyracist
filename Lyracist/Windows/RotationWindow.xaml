@@ -1,10 +1,11 @@
-<!-- Edited on Oct 29, 2026 @ 05:35:00 -> Add HolidayLayer overlay for seasonal holiday rotation themes -->
+<!-- Edited on Nov 24, 2026 @ 09:52:00 -> Add AudioShaderHost beat-reactive shader backdrop to RotationWindow -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
         xmlns:ctrl="clr-namespace:Lyracist.Controls"
+        xmlns:shared="clr-namespace:Lyracist.Shared"
         Title="Singer Rotation Screen" Height="600" Width="1000"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -23,6 +24,13 @@
          scaling only offers ~720-864 DIPs of height, which truncated the tall themed panels (esp. Slot Machine). -->
     <Viewbox Stretch="Uniform">
     <Grid Width="1920" Height="1080" ClipToBounds="True">
+        <!-- Beat-Reactive SkSL Shader Backdrop (PCDJ LYRX Style) -->
+        <shared:AudioShaderHost x:Name="RotationShaderHost"
+                                Panel.ZIndex="-1"
+                                Opacity="0.75"
+                                ShaderName="{Binding RotationShaderPreset}"
+                                ReducedQuality="{Binding ReducedEffects}" />
+
         <!-- Window chrome overlay: fades in when the mouse is over the window. -->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"

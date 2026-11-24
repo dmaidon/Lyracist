@@ -1,4 +1,4 @@
-// Edited on Nov 16, 2026 @ 08:42:05 -> Prevent duplicate singers in AddActiveSinger and TryAddPerformer when queuing songs for existing rotation singers
+// Edited on Nov 24, 2026 @ 09:56:30 -> Add ShaderPresets and RotationShaderPreset to KSRotation MainViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -831,6 +831,13 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool SpectrumOnSpecialEvents { get; set; }
 
+        public IReadOnlyList<string> ShaderPresets => AudioShaderPresets.GetAvailableNames();
+
+        [ObservableProperty]
+        public partial string RotationShaderPreset { get; set; } = AudioShaderPresets.Off;
+
+        partial void OnRotationShaderPresetChanged(string value) => OnSpectrumSettingChanged();
+
         /// <summary>Plain-language capture state shown under the device picker.</summary>
         [ObservableProperty]
         public partial string SpectrumStatus { get; set; } = "Synth bars are off.";
@@ -871,14 +878,16 @@ namespace KSRotation.ViewModels
             spectrum.Sensitivity = (float)SpectrumSensitivity;
             spectrum.Style = SpectrumStyle;
 
-            bool anyScreen = SpectrumOnRotation || SpectrumOnDjBanners || SpectrumOnSpecialEvents;
+            bool anyShader = AudioShaderPresets.IsActive(RotationShaderPreset);
+            bool anyScreen = SpectrumOnRotation || SpectrumOnDjBanners || SpectrumOnSpecialEvents || anyShader;
             spectrum.Configure(anyScreen, SpectrumInputDeviceId);
 
             _displayWindowService.SetShowSpectrum(SpectrumOnRotation);
+            _displayWindowService.SetRotationShader(RotationShaderPreset);
             _djBannerWindowService.SetShowSpectrum(IsSpecialEventActive ? SpectrumOnSpecialEvents : SpectrumOnDjBanners);
 
             SpectrumStatus = !anyScreen
-                ? "Synth bars are off. Tick a screen above to turn them on."
+                ? "Synth bars and shaders are off. Tick a screen or select a shader above to turn them on."
                 : spectrum.IsCapturing
                     ? "Listening to the selected input."
                     : $"Can't open the input: {spectrum.LastError ?? "unknown error"}. Check the device and Windows microphone privacy settings.";
@@ -1787,6 +1796,7 @@ namespace KSRotation.ViewModels
             SpectrumOnRotation = settings.SpectrumOnRotation;
             SpectrumOnDjBanners = settings.SpectrumOnDjBanners;
             SpectrumOnSpecialEvents = settings.SpectrumOnSpecialEvents;
+            RotationShaderPreset = AudioShaderPresets.Normalize(settings.RotationShaderPreset);
             ApplySpectrumSettings();
             AutoRotateDurationSeconds = settings.AutoRotateDurationSeconds > 0 ? settings.AutoRotateDurationSeconds : 180;
             LoadProjectionRotationSchedule(settings.ProjectionRotationSchedule);
@@ -3843,6 +3853,7 @@ namespace KSRotation.ViewModels
                 SpectrumOnRotation = SpectrumOnRotation,
                 SpectrumOnDjBanners = SpectrumOnDjBanners,
                 SpectrumOnSpecialEvents = SpectrumOnSpecialEvents,
+                RotationShaderPreset = AudioShaderPresets.Normalize(RotationShaderPreset),
                 AutoRotateDurationSeconds = AutoRotateDurationSeconds > 0 ? AutoRotateDurationSeconds : 180,
                 ProjectionRotationSchedule = [.. ProjectionRotationSchedule],
                 HolidayTheme = HolidayThemeChoice,

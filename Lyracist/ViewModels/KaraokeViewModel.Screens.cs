@@ -1,9 +1,11 @@
-// Edited on Oct 22, 2026 @ 08:06:00 -> Re-populate AvailableScreens on screen change events
+// Edited on Nov 24, 2026 @ 09:53:00 -> Add ShaderPresets, LyricsShaderPreset, and RotationShaderPreset to KaraokeViewModel
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Lyracist.Core.Helpers;
 using Lyracist.Services.Display;
+using Lyracist.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lyracist.ViewModels;
@@ -198,5 +200,33 @@ public partial class KaraokeViewModel
     public void RaiseSelectedProjectionViewChanged()
     {
         OnPropertyChanged(nameof(SelectedProjectionView));
+    }
+
+    public IReadOnlyList<string> ShaderPresets => AudioShaderPresets.GetAvailableNames();
+
+    public string LyricsShaderPreset
+    {
+        get => AppSettings.LyricsShaderPreset;
+        set
+        {
+            if (AppSettings.LyricsShaderPreset != value)
+            {
+                AppSettings.LyricsShaderPreset = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string RotationShaderPreset
+    {
+        get => AppSettings.RotationShaderPreset;
+        set
+        {
+            if (AppSettings.RotationShaderPreset != value)
+            {
+                AppSettings.RotationShaderPreset = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

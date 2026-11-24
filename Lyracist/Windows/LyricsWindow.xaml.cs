@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 11:54:40 -> Delegate OnReactionReceived to ReactionBurstEffect.Spawn for full-color Twemoji reaction bursts and glow halos
+// Edited on Nov 24, 2026 @ 09:51:00 -> Wire LyricsShaderHost BandProvider to live IAudioSpectrumService
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -28,6 +28,13 @@ public partial class LyricsWindow : Window
         _vm = vm;
         DataContext = vm;
         _spectrumService = spectrumService ?? App.AppHost.Services.GetService<IAudioSpectrumService>();
+
+        LyricsShaderHost.BandProvider = count =>
+        {
+            if (_spectrumService == null) return [];
+            if (!_spectrumService.IsCapturing) _spectrumService.Start();
+            return _spectrumService.GetFrequencyBands(count);
+        };
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
         System.Windows.Media.CompositionTarget.Rendering += OnCompositionTargetRendering;
@@ -139,13 +146,14 @@ public partial class LyricsWindow : Window
         if (!IsVisible || VisualizerCanvas == null) return;
 
         bool isVisualizerEnabled = Lyracist.Core.Helpers.AppSettings.EnableLyricsVisualizer;
+        bool isShaderActive = Lyracist.Shared.AudioShaderPresets.IsActive(Lyracist.Core.Helpers.AppSettings.LyricsShaderPreset);
         if (!isVisualizerEnabled)
         {
             if (VisualizerCanvas.Visibility != Visibility.Collapsed)
             {
                 VisualizerCanvas.Visibility = Visibility.Collapsed;
             }
-            if (!Lyracist.Controls.SpectrumBarsOverlay.AnyActive) _spectrumService?.Stop();
+            if (!isShaderActive && !Lyracist.Controls.SpectrumBarsOverlay.AnyActive) _spectrumService?.Stop();
             return;
         }
 

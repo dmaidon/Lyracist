@@ -1,4 +1,4 @@
-// Created on Oct 3, 2026 @ 12:43:00 -> Code-behind for AdjustSynthDisplayWindow dialog with live preview and instant setting persistence
+// Edited on Nov 24, 2026 @ 09:54:00 -> Add LyricsShaderComboBox and RotationShaderComboBox support to AdjustSynthDisplayWindow
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Lyracist.Core.Helpers;
+using Lyracist.Shared;
 using Lyracist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -44,6 +45,16 @@ public partial class AdjustSynthDisplayWindow : Window
         StyleComboBox.ItemsSource = Styles;
         BarWidthComboBox.ItemsSource = BarWidths;
 
+        var shaders = AudioShaderPresets.GetAvailableNames();
+        LyricsShaderComboBox.ItemsSource = shaders;
+        RotationShaderComboBox.ItemsSource = shaders;
+
+        LyricsShaderComboBox.SelectedItem = AppSettings.LyricsShaderPreset;
+        if (LyricsShaderComboBox.SelectedIndex < 0) LyricsShaderComboBox.SelectedIndex = 0;
+
+        RotationShaderComboBox.SelectedItem = AppSettings.RotationShaderPreset;
+        if (RotationShaderComboBox.SelectedIndex < 0) RotationShaderComboBox.SelectedIndex = 0;
+
         // Load persisted settings
         EnableVisualizerCheckBox.IsChecked = AppSettings.EnableLyricsVisualizer;
         ShowOnRotationCheckBox.IsChecked = AppSettings.ShowVisualizerOnRotation;
@@ -74,6 +85,14 @@ public partial class AdjustSynthDisplayWindow : Window
         if (!_initialized) return;
         AppSettings.ShowVisualizerOnRotation = ShowOnRotationCheckBox.IsChecked == true;
         AppSettings.ShowVisualizerOnDjBanners = ShowOnDjBannersCheckBox.IsChecked == true;
+    }
+
+    private void OnShaderSettingChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_initialized) return;
+        AppSettings.LyricsShaderPreset = LyricsShaderComboBox.SelectedItem as string ?? AudioShaderPresets.Off;
+        AppSettings.RotationShaderPreset = RotationShaderComboBox.SelectedItem as string ?? AudioShaderPresets.Off;
+        NotifyLyricsWindow();
     }
 
     private void OnSettingChanged(object? sender, RoutedEventArgs e)

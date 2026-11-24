@@ -1,4 +1,32 @@
-// Edited on Nov 21, 2026 @ 08:25:45 -> Document right-click previously sung songs menu on performer song entry text boxes in KSRotation and Lyracist
+// Edited on Nov 24, 2026 @ 10:07:30 -> Document PCDJ LYRX-style beat-reactive SkSL background shaders in Lyracist and KSRotation
+
+KSRotation & Lyracist: Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style) - (November 2026)
+
+Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ LYRX Style)
+
+0. Overview of Beat-Reactive Background Shaders:
+   - Lyracist and KSRotation include real-time, audio-reactive SkiaSharp SkSL background shaders (similar to PCDJ LYRX) that pulse and move to the beat of the music (bass, midrange, highs, and overall energy).
+   - Built-In Shader Presets (selectable from a dropdown):
+     * None (Off)
+     * Neon Tunnel
+     * Plasma Waves
+     * Cyber Grid
+     * Audio Rings
+     * Star Warp
+     * Laser Nebula
+     * Electric Kaleidoscope
+     * Firestorm Pulse
+   - Custom ShaderToy Scripts ('Shaders/' Folder):
+     * Hosts can also drop custom '.sksl', '.glsl', or '.frag' ShaderToy fragment shader files into the 'Shaders/' folder in the application directory to have them automatically listed in the shader dropdowns.
+
+0A. Using Shaders on Both the Lyrics Screen and Rotation Screen:
+   - Lyrics Projection Screen (Lyracist):
+     * Displays animated motion graphics during filler music ("dead air" between singers), behind audio-only tracks, and behind chroma-keyed CDG lyrics.
+     * Select via the 'Lyrics Screen Shader (PCDJ Style)' dropdown on the Karaoke Page (Display Projection card), inside the '🎛 Adjust Synth Display' dialog, in 'Settings -> Display -> Lyrics Screen Audio Visualizer', or by right-clicking the Lyrics window ('Audio Visualizer -> Background Shader').
+   - Singer Rotation Screen (Lyracist & KSRotation):
+     * Renders an animated beat-reactive backdrop behind the singer rotation queue.
+     * In Lyracist: Select via the 'Rotation Screen Shader (PCDJ Style)' dropdown on the Karaoke Page, inside '🎛 Adjust Synth Display', or in 'Settings -> Display -> Monitors & Screen Assignments'.
+     * In KSRotation: Select via the 'Background Shader' dropdown on the main Rotation tab toolbar (next to 'Projection View') or in 'Settings -> Display & Projection -> Synth Bars (Live Audio Input)'.
 
 KSRotation & Lyracist: Right-Click Previously Sung Songs Context Menu on Performer Song Entry TextBoxes - (November 2026)
 

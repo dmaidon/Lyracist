@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 12:15:00 -> Add ScaryokeCategory, ScaryokeBrush and properties to RotationWindowViewModel and NextSingerDisplay
+// Edited on Nov 24, 2026 @ 09:52:00 -> Expose RotationShaderPreset on RotationWindowViewModel
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -124,11 +124,16 @@ public partial class RotationWindowViewModel : BaseViewModel
     /// <summary>True while synth bars are drawn on the rotation screen, so themed views can lift their Up Next list.</summary>
     public bool ShowSpectrumOnRotation => Lyracist.Core.Helpers.AppSettings.ShowVisualizerOnRotation;
 
+    /// <summary>Active SkSL background shader preset on the rotation screen.</summary>
+    public string RotationShaderPreset => Lyracist.Core.Helpers.AppSettings.RotationShaderPreset;
+
     public RotationWindowViewModel()
     {
         WelcomeScreenService.Instance.ShowWifiPassword = AppSettings.ShowWifiPasswordOnScreen;
         Lyracist.Core.Helpers.AppSettings.VisualizerScreensChanged += () =>
             System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(ShowSpectrumOnRotation)));
+        Lyracist.Core.Helpers.AppSettings.ShaderSettingsChanged += () =>
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(RotationShaderPreset)));
         RefreshQrCode();
 
         // The timer and event subscription below are never stopped/unsubscribed:

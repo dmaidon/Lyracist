@@ -1,4 +1,4 @@
-<!-- Edited on Nov 21, 2026 @ 08:11:35 -> Link SingerHistoryContextMenuHelper into Lyracist -->
+<!-- Edited on Nov 24, 2026 @ 09:48:00 -> Link AudioShaderEngine into Lyracist -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.11.16.623</AssemblyVersion>
-    <FileVersion>26.11.16.623</FileVersion>
+    <AssemblyVersion>26.11.24.626</AssemblyVersion>
+    <FileVersion>26.11.24.626</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -104,6 +104,7 @@
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
     <Compile Include="..\Shared\SpectrumAnalyzer.cs" Link="SpectrumAnalyzer.cs" />
     <Compile Include="..\Shared\SpectrumBarStyles.cs" Link="SpectrumBarStyles.cs" />
+    <Compile Include="..\Shared\AudioShaderEngine.cs" Link="AudioShaderEngine.cs" />
     <Compile Include="..\Shared\MonoSampleConverter.cs" Link="MonoSampleConverter.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />

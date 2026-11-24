@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:17:15 -> Add EmojiReactionThemeOptions and EmojiReactionThemeChoice to SettingsViewModel.Display
+// Edited on Nov 24, 2026 @ 09:54:00 -> Add ShaderPresets, LyricsShaderPreset, and RotationShaderPreset to SettingsViewModel.Display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -317,6 +317,35 @@ public partial class SettingsViewModel
         "Wide",
         "Extra Wide"
     ];
+
+    public IReadOnlyList<string> ShaderPresets => AudioShaderPresets.GetAvailableNames();
+
+    public string LyricsShaderPreset
+    {
+        get => AppSettings.LyricsShaderPreset;
+        set
+        {
+            if (AppSettings.LyricsShaderPreset != value)
+            {
+                AppSettings.LyricsShaderPreset = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public string RotationShaderPreset
+    {
+        get => AppSettings.RotationShaderPreset;
+        set
+        {
+            if (AppSettings.RotationShaderPreset != value)
+            {
+                AppSettings.RotationShaderPreset = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     private void OnScreenAssignmentsChanged()
     {

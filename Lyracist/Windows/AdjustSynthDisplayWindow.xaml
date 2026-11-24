@@ -1,4 +1,4 @@
-<!-- Created on Oct 3, 2026 @ 12:42:00 -> Modal dialog for adjusting Lyrics screen audio visualizer settings from the DJ Karaoke screen -->
+<!-- Edited on Nov 24, 2026 @ 09:54:00 -> Add Background Shaders (PCDJ Style) dropdowns for Lyrics and Rotation screens -->
 <Window x:Class="Lyracist.Windows.AdjustSynthDisplayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -159,6 +159,33 @@
                         <TextBlock Text="Bar Width" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
                         <ComboBox x:Name="BarWidthComboBox"
                                   SelectionChanged="OnSettingChanged"
+                                  FontSize="11.5"
+                                  Height="32" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <!-- Background Shaders (PCDJ LYRX Style) -->
+            <GroupBox Header="Background Shaders (PCDJ LYRX Style)" Style="{StaticResource DialogGroupBoxStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Lyrics Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                        <ComboBox x:Name="LyricsShaderComboBox"
+                                  SelectionChanged="OnShaderSettingChanged"
+                                  FontSize="11.5"
+                                  Height="32" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Rotation Screen Shader" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                        <ComboBox x:Name="RotationShaderComboBox"
+                                  SelectionChanged="OnShaderSettingChanged"
                                   FontSize="11.5"
                                   Height="32" />
                     </StackPanel>

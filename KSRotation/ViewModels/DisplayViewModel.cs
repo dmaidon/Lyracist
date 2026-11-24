@@ -1,4 +1,4 @@
-// Edited on Oct 27, 2026 @ 10:55:00 -> Add ScaryokeTargetSingerName and HasScaryokeTargetSinger properties
+// Edited on Nov 24, 2026 @ 09:55:00 -> Add RotationShaderPreset to DisplayViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -109,6 +109,10 @@ namespace KSRotation.ViewModels
         /// <summary>Whether the live synth bars (line-in spectrum) show on the rotation screen.</summary>
         [ObservableProperty]
         public partial bool ShowSpectrum { get; set; }
+
+        /// <summary>Active beat-reactive SkSL background shader preset on the rotation display.</summary>
+        [ObservableProperty]
+        public partial string RotationShaderPreset { get; set; } = Lyracist.Shared.AudioShaderPresets.Off;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasCurrentSingerScaryoke))]

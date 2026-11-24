@@ -1,9 +1,11 @@
-// Edited on Nov 9, 2026 @ 11:54:30 -> Delegate OnReactionReceived to ReactionBurstEffect.Spawn for full-color Twemoji reaction bursts and glow halos
+// Edited on Nov 24, 2026 @ 09:52:00 -> Wire RotationShaderHost BandProvider to IAudioSpectrumService
 using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
+using Lyracist.Services.Media;
 using Lyracist.Shared;
 using Lyracist.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -106,6 +108,14 @@ public partial class RotationWindow : Window, ICaptureSource
             () => ReducedEffects, () => IsHolidayObscured);
 
         DataContext = viewModel;
+
+        RotationShaderHost.BandProvider = count =>
+        {
+            var svc = App.AppHost?.Services?.GetService<IAudioSpectrumService>();
+            if (svc == null) return [];
+            if (!svc.IsCapturing) svc.Start();
+            return svc.GetFrequencyBands(count);
+        };
 
         Loaded += OnLoaded;
         Closed += OnClosed;

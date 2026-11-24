@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 13:31:15 -> Add EnablePatronTurnAlerts and EnablePatronTurnAlertsChanged to AppSettings
+// Edited on Nov 24, 2026 @ 09:49:00 -> Add LyricsShaderPreset, RotationShaderPreset, and ShaderSettingsChanged to AppSettings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -967,6 +967,39 @@ public static class AppSettings
         set { _data.LyricsVisualizerBarWidth = value ?? "Normal"; Save(); }
     }
 
+    /// <summary>Raised when LyricsShaderPreset or RotationShaderPreset changes so active projection screens update immediately.</summary>
+    public static event Action? ShaderSettingsChanged;
+
+    public static string LyricsShaderPreset
+    {
+        get => Lyracist.Shared.AudioShaderPresets.Normalize(_data.LyricsShaderPreset);
+        set
+        {
+            string norm = Lyracist.Shared.AudioShaderPresets.Normalize(value);
+            if (_data.LyricsShaderPreset != norm)
+            {
+                _data.LyricsShaderPreset = norm;
+                Save();
+                ShaderSettingsChanged?.Invoke();
+            }
+        }
+    }
+
+    public static string RotationShaderPreset
+    {
+        get => Lyracist.Shared.AudioShaderPresets.Normalize(_data.RotationShaderPreset);
+        set
+        {
+            string norm = Lyracist.Shared.AudioShaderPresets.Normalize(value);
+            if (_data.RotationShaderPreset != norm)
+            {
+                _data.RotationShaderPreset = norm;
+                Save();
+                ShaderSettingsChanged?.Invoke();
+            }
+        }
+    }
+
     // ─── Library Scan Directories ──────────────────────────────────────────
 
     public static IReadOnlyList<string> LibraryDirectories
@@ -1541,6 +1574,8 @@ public static class AppSettings
         public string LyricsVisualizerStyle { get; set; } = "Neon Sunset";
         public double LyricsVisualizerOpacity { get; set; } = 0.8;
         public string LyricsVisualizerBarWidth { get; set; } = "Normal";
+        public string LyricsShaderPreset { get; set; } = Lyracist.Shared.AudioShaderPresets.Off;
+        public string RotationShaderPreset { get; set; } = Lyracist.Shared.AudioShaderPresets.Off;
         public int FillInDelaySeconds { get; set; } = 5;
         public int FillInCrossfadeSeconds { get; set; } = 5;
         public int FillInMaxTrackSeconds { get; set; } = 0;

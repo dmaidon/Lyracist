@@ -1,4 +1,4 @@
-<!-- Edited on Nov 21, 2026 @ 08:18:15 -> Attach right-click previously sung songs menu to KaraokePage song entry text boxes -->
+<!-- Edited on Nov 24, 2026 @ 09:53:00 -> Add Lyrics and Rotation beat-reactive Shader preset dropdowns to Display Projection controls -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -1497,7 +1497,14 @@
                                                        Height="26"
                                                        FontSize="10.5"
                                                        Margin="0,4,0,0"
-                                                       ToolTip="Configure visualizer mode, theme, and opacity" />
+                                                       ToolTip="Configure visualizer mode, theme, shaders, and opacity" />
+                                            <TextBlock Text="Lyrics Screen Shader (PCDJ Style)" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,6,0,3" />
+                                            <ComboBox ItemsSource="{Binding ShaderPresets}"
+                                                      SelectedItem="{Binding LyricsShaderPreset, Mode=TwoWay}"
+                                                      HorizontalAlignment="Stretch"
+                                                      FontSize="11"
+                                                      Height="30"
+                                                      ToolTip="Select a beat-reactive SkSL background shader for the Lyrics projection screen (fills dead air, audio-only songs, and chroma-keyed CDG backdrops)." />
                                         </StackPanel>
 
                                         <!-- Rotation Monitor -->
@@ -1511,6 +1518,13 @@
                                                 </StackPanel>
                                             </wpf:ToggleButton>
                                             <CheckBox Content="Pre-Show Mode (Hold Screen)" IsChecked="{Binding IsPreShowModeActive, Mode=TwoWay}" FontSize="11" Margin="0,6,0,0" ToolTip="Hold the Pre-Show / Sign-Up &amp; Wi-Fi screen on the rotation display until turned off, even with singers queued" />
+                                            <TextBlock Text="Rotation Screen Shader (PCDJ Style)" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,6,0,3" />
+                                            <ComboBox ItemsSource="{Binding ShaderPresets}"
+                                                      SelectedItem="{Binding RotationShaderPreset, Mode=TwoWay}"
+                                                      HorizontalAlignment="Stretch"
+                                                      FontSize="11"
+                                                      Height="30"
+                                                      ToolTip="Select a beat-reactive SkSL background shader for the Singer Rotation projection screen." />
                                         </StackPanel>
 
                                         <!-- DJ Banner Monitor -->

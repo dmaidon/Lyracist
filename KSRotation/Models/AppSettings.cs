@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 13:20:40 -> Add EnablePatronTurnAlerts setting to AppSettings
+// Edited on Nov 24, 2026 @ 09:56:30 -> Add RotationShaderPreset to KSRotation AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -177,6 +177,9 @@ namespace KSRotation.Models
 
         /// <summary>Crowd emoji reaction theme ("PatronChoice", "Off", or an EmojiReactionThemes set key).</summary>
         public string EmojiReactionTheme { get; init; } = EmojiReactionThemes.PatronChoice;
+
+        /// <summary>Beat-reactive SkSL background shader preset shown on the rotation display ("None (Off)" or preset name).</summary>
+        public string RotationShaderPreset { get; init; } = AudioShaderPresets.Off;
     }
 }
 

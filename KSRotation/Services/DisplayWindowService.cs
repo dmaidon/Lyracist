@@ -1,4 +1,4 @@
-// Edited on Nov 9, 2026 @ 09:06:50 -> Add ShowReaction to DisplayWindowService for crowd emoji reactions
+// Edited on Nov 24, 2026 @ 09:55:00 -> Add SetRotationShader to DisplayWindowService
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -201,6 +201,11 @@ namespace KSRotation.Services
         public void SetShowSpectrum(bool show)
         {
             _viewModel.ShowSpectrum = show;
+        }
+
+        public void SetRotationShader(string? shaderName)
+        {
+            _viewModel.RotationShaderPreset = AudioShaderPresets.Normalize(shaderName);
         }
 
         public void SetSpecialEventBanner(string? path)

@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 12:47:00 -> Make SlideshowImagePath nullable to prevent ImageSourceConverter conversion warning
+// Edited on Nov 24, 2026 @ 09:50:00 -> Add LyricsShaderPreset and AvailableShaders support to LyricsWindowViewModel
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
@@ -20,6 +20,8 @@ public partial class LyricsWindowViewModel : BaseViewModel
     {
         _display = display;
         IsMirrored = display.GetPreferences().IsLyricsMirrored;
+        Lyracist.Core.Helpers.AppSettings.ShaderSettingsChanged += () =>
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(LyricsShaderPreset)));
         RefreshQrCode();
         StartSlideshow();
     }
@@ -261,6 +263,30 @@ public partial class LyricsWindowViewModel : BaseViewModel
     public bool IsWaveformVisible => CdgBackdropMode == "Neon Waveform";
     public bool IsSynthwaveVisible => CdgBackdropMode == "Retro Synthwave";
     public bool IsSpaceVisible => CdgBackdropMode == "Space Starfield";
+
+    public System.Collections.Generic.IReadOnlyList<string> AvailableShaders => Lyracist.Shared.AudioShaderPresets.GetAvailableNames();
+
+    public string LyricsShaderPreset
+    {
+        get => Lyracist.Core.Helpers.AppSettings.LyricsShaderPreset;
+        set
+        {
+            if (Lyracist.Core.Helpers.AppSettings.LyricsShaderPreset != value)
+            {
+                Lyracist.Core.Helpers.AppSettings.LyricsShaderPreset = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    [RelayCommand]
+    public void SetLyricsShaderPreset(string? preset)
+    {
+        if (!string.IsNullOrWhiteSpace(preset))
+        {
+            LyricsShaderPreset = preset;
+        }
+    }
 
     public bool EnableLyricsVisualizer
     {
@@ -506,6 +532,8 @@ public partial class LyricsWindowViewModel : BaseViewModel
         OnPropertyChanged(nameof(VisualizerMode));
         OnPropertyChanged(nameof(IsModeLiveFft));
         OnPropertyChanged(nameof(IsModeSimulated));
+        OnPropertyChanged(nameof(LyricsShaderPreset));
+        OnPropertyChanged(nameof(AvailableShaders));
         NotifyStyleFlagsChanged();
         NotifyBarWidthFlagsChanged();
         NotifyOpacityFlagsChanged();
