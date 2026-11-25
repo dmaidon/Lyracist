@@ -48,6 +48,12 @@ public static class AudioShaderPresets
     private static readonly Dictionary<string, DateTime> _compiledTimestamps = new(StringComparer.OrdinalIgnoreCase);
     private static bool _seededDefaults;
     private static FileSystemWatcher? _folderWatcher;
+    private static System.Threading.Timer? _debounceTimer;
+    private static readonly Dictionary<string, (DateTime Stamp, string? Error)> _failedCompiles = new(StringComparer.OrdinalIgnoreCase);
+    private static int _cacheVersion;
+
+    /// <summary>Increments whenever the cache is cleared; hosts re-resolve their effect only when this changes.</summary>
+    public static int CacheVersion => System.Threading.Volatile.Read(ref _cacheVersion);
 
     /// <summary>Known PCDJ LYRX / DEX 3 shader IDs mapped to their friendly display names from <c>shaders.xml</c>.</summary>
     public static readonly IReadOnlyDictionary<string, string> KnownLyrxShaderNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -76,16 +82,14 @@ public static class AudioShaderPresets
                 IncludeSubdirectories = false,
                 EnableRaisingEvents = true
             };
-            FileSystemEventHandler onChanged = (_, _) =>
+            // A single save raises several events and may leave the file half-written, so debounce.
+            _debounceTimer ??= new System.Threading.Timer(_ =>
             {
                 ClearCache();
                 AvailableShadersChanged?.Invoke();
-            };
-            RenamedEventHandler onRenamed = (_, _) =>
-            {
-                ClearCache();
-                AvailableShadersChanged?.Invoke();
-            };
+            });
+            FileSystemEventHandler onChanged = (_, _) => _debounceTimer.Change(300, System.Threading.Timeout.Infinite);
+            RenamedEventHandler onRenamed = (_, _) => _debounceTimer.Change(300, System.Threading.Timeout.Infinite);
             watcher.Created += onChanged;
             watcher.Deleted += onChanged;
             watcher.Changed += onChanged;
@@ -217,6 +221,15 @@ public static class AudioShaderPresets
                 ext = ".glsl";
             }
 
+            // If a shader of this name exists under a different extension it would shadow the import, so pick a unique name.
+            string? existing = FindShaderFilePath(baseName);
+            if (existing != null && !string.Equals(Path.GetExtension(existing), ext, StringComparison.OrdinalIgnoreCase))
+            {
+                string candidate = baseName;
+                for (int n = 2; FindShaderFilePath(candidate) != null; n++) candidate = $"{baseName} ({n})";
+                baseName = candidate;
+            }
+
             string destPath = Path.Combine(CustomShadersDir, baseName + ext);
             if (!string.Equals(Path.GetFullPath(sourceFilePath), Path.GetFullPath(destPath), StringComparison.OrdinalIgnoreCase))
             {
@@ -272,6 +285,13 @@ public static class AudioShaderPresets
                 return cached;
             }
 
+            // Don't re-translate/re-compile a shader that already failed for this file version.
+            if (_failedCompiles.TryGetValue(normalized, out var failed) && failed.Stamp == diskWriteUtc)
+            {
+                errorText = failed.Error;
+                return null;
+            }
+
             string? source = GetShaderSource(normalized);
             if (string.IsNullOrWhiteSpace(source))
             {
@@ -293,15 +313,14 @@ public static class AudioShaderPresets
                 if (effect == null)
                 {
                     errorText = errors;
+                    _failedCompiles[normalized] = (diskWriteUtc, errors);
                     Debug.WriteLine($"[AudioShaderPresets] Failed to compile shader '{normalized}': {errors}");
                     return null;
                 }
             }
 
-            if (cached != null)
-            {
-                cached.Dispose();
-            }
+            // Old effects are intentionally not disposed: a render may still be using one. The GC finalizer frees them.
+            _failedCompiles.Remove(normalized);
             _compiledEffects[normalized] = effect;
             _compiledTimestamps[normalized] = diskWriteUtc;
             return effect;
@@ -313,12 +332,11 @@ public static class AudioShaderPresets
     {
         lock (_cacheLock)
         {
-            foreach (var effect in _compiledEffects.Values)
-            {
-                effect?.Dispose();
-            }
+            // Not disposed here (may be mid-render on the UI thread); the GC finalizer releases them.
             _compiledEffects.Clear();
             _compiledTimestamps.Clear();
+            _failedCompiles.Clear();
+            System.Threading.Interlocked.Increment(ref _cacheVersion);
         }
     }
 
@@ -948,6 +966,16 @@ public sealed class AudioShaderHost : Border
     private int _frameCount;
     private bool _hooked;
 
+    private string? _resolvedName;
+    private int _resolvedVersion = -1;
+    private SKRuntimeEffect? _effect;
+    private SKRuntimeEffectUniforms? _uniforms;
+    private HashSet<string>? _uniformNames;
+    private readonly float[] _resVec = new float[2];
+    private readonly float[] _mouseVec = new float[4];
+    private readonly float[] _dateVec = new float[4];
+    private readonly SKPaint _paint = new() { BlendMode = SKBlendMode.Src };
+
     // Smoothed audio uniform state
     private float _bass;
     private float _mid;
@@ -1024,8 +1052,23 @@ public sealed class AudioShaderHost : Border
         _lastFrameSeconds = now;
         _frameCount++;
 
-        var effect = AudioShaderPresets.GetOrCompileEffect(ShaderName, out _);
-        if (effect == null) return;
+        // Resolve the effect only when the shader name or cache changes (no per-frame disk I/O or retry of failures).
+        string shaderName = ShaderName;
+        int version = AudioShaderPresets.CacheVersion;
+        if (shaderName != _resolvedName || version != _resolvedVersion)
+        {
+            _resolvedName = shaderName;
+            _resolvedVersion = version;
+            _effect = AudioShaderPresets.GetOrCompileEffect(shaderName, out _);
+            _uniforms = null;
+            _uniformNames = _effect == null
+                ? null
+                : new HashSet<string>(_effect.Uniforms, StringComparer.Ordinal);
+            if (_effect != null) _uniforms = new SKRuntimeEffectUniforms(_effect);
+        }
+        var effect = _effect;
+        var uniforms = _uniforms;
+        if (effect == null || uniforms == null || _uniformNames == null) return;
 
         int targetW = ReducedQuality ? ReducedRenderWidth : StandardRenderWidth;
         int targetH = ReducedQuality ? ReducedRenderHeight : StandardRenderHeight;
@@ -1039,18 +1082,21 @@ public sealed class AudioShaderHost : Border
         UpdateAudioUniforms((float)now);
 
         var nowDate = DateTime.Now;
-        var uniforms = new SKRuntimeEffectUniforms(effect);
-        SetUniformIfPresent(effect, uniforms, "iResolution", new float[] { targetW, targetH });
-        SetUniformIfPresent(effect, uniforms, "iTime", (float)now);
-        SetUniformIfPresent(effect, uniforms, "iTimeDelta", (float)delta);
-        SetUniformIfPresent(effect, uniforms, "iFrame", _frameCount);
-        SetUniformIfPresent(effect, uniforms, "iBass", _bass);
-        SetUniformIfPresent(effect, uniforms, "iMid", _mid);
-        SetUniformIfPresent(effect, uniforms, "iHigh", _high);
-        SetUniformIfPresent(effect, uniforms, "iEnergy", _energy);
-        SetUniformIfPresent(effect, uniforms, "iMouse", new float[] { targetW * 0.5f, targetH * 0.5f, 0f, 0f });
-        SetUniformIfPresent(effect, uniforms, "iDate", new float[] { nowDate.Year, nowDate.Month - 1, nowDate.Day, (float)nowDate.TimeOfDay.TotalSeconds });
-        SetUniformIfPresent(effect, uniforms, "iSampleRate", 48000f);
+        var names = _uniformNames;
+        _resVec[0] = targetW; _resVec[1] = targetH;
+        _mouseVec[0] = targetW * 0.5f; _mouseVec[1] = targetH * 0.5f;
+        _dateVec[0] = nowDate.Year; _dateVec[1] = nowDate.Month - 1; _dateVec[2] = nowDate.Day; _dateVec[3] = (float)nowDate.TimeOfDay.TotalSeconds;
+        if (names.Contains("iResolution")) uniforms["iResolution"] = _resVec;
+        if (names.Contains("iTime")) uniforms["iTime"] = (float)now;
+        if (names.Contains("iTimeDelta")) uniforms["iTimeDelta"] = (float)delta;
+        if (names.Contains("iFrame")) uniforms["iFrame"] = _frameCount;
+        if (names.Contains("iBass")) uniforms["iBass"] = _bass;
+        if (names.Contains("iMid")) uniforms["iMid"] = _mid;
+        if (names.Contains("iHigh")) uniforms["iHigh"] = _high;
+        if (names.Contains("iEnergy")) uniforms["iEnergy"] = _energy;
+        if (names.Contains("iMouse")) uniforms["iMouse"] = _mouseVec;
+        if (names.Contains("iDate")) uniforms["iDate"] = _dateVec;
+        if (names.Contains("iSampleRate")) uniforms["iSampleRate"] = 48000f;
 
         using var shader = effect.ToShader(uniforms);
         if (shader == null) return;
@@ -1062,12 +1108,9 @@ public sealed class AudioShaderHost : Border
             using var surface = SKSurface.Create(info, _bitmap.BackBuffer, _bitmap.BackBufferStride);
             if (surface != null)
             {
-                using var paint = new SKPaint
-                {
-                    Shader = shader,
-                    BlendMode = SKBlendMode.Src
-                };
-                surface.Canvas.DrawRect(0, 0, targetW, targetH, paint);
+                _paint.Shader = shader;
+                surface.Canvas.DrawRect(0, 0, targetW, targetH, _paint);
+                _paint.Shader = null;
             }
             _bitmap.AddDirtyRect(new Int32Rect(0, 0, targetW, targetH));
         }
