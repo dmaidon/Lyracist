@@ -11,6 +11,37 @@ namespace Lyracist.Tests;
 public class AudioShaderPresetsTests
 {
     [Fact]
+    public void FailedCompile_IsCachedUntilFileChanges()
+    {
+        AudioShaderPresets.EnsureDefaultShaderFiles();
+        string name = "ZzFailedCompileTest" + Guid.NewGuid().ToString("N")[..6];
+        string path = Path.Combine(AudioShaderPresets.CustomShadersDir, name + ".glsl");
+        try
+        {
+            File.WriteAllText(path, "void mainImage(out vec4 c, in vec2 p) { c = this_is_not_valid; }");
+            AudioShaderPresets.ClearCache();
+
+            Assert.Null(AudioShaderPresets.GetOrCompileEffect(name, out string? err1));
+            Assert.False(string.IsNullOrWhiteSpace(err1));
+
+            int version = AudioShaderPresets.CacheVersion;
+            Assert.Null(AudioShaderPresets.GetOrCompileEffect(name, out string? err2));
+            Assert.Equal(err1, err2);
+            Assert.Equal(version, AudioShaderPresets.CacheVersion);
+
+            // Fixing the file (new timestamp) must clear the cached failure.
+            File.WriteAllText(path, "void mainImage(out vec4 c, in vec2 p) { c = vec4(1.0); }");
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddMinutes(1));
+            Assert.NotNull(AudioShaderPresets.GetOrCompileEffect(name, out _));
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+            AudioShaderPresets.ClearCache();
+        }
+    }
+
+    [Fact]
     public void EnsureDefaultShaderFiles_WritesEditableGlslFilesToShadersFolder()
     {
         AudioShaderPresets.EnsureDefaultShaderFiles();
