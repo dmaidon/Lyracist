@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 11:22:30 -> Support IsShaderOnlyModeActive to hide rotation and show full-screen shader during music breaks
+﻿// Edited on Nov 24, 2026 @ 11:22:30 -> Support IsShaderOnlyModeActive to hide rotation and show full-screen shader during music breaks
 using KSRotation.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
@@ -301,6 +301,8 @@ public partial class RotationWindow : Window, ICaptureSource
         UpdateShaderBackdropOpacity();
     }
 
+    private readonly HashSet<System.Windows.Controls.Panel> _ownedBackgrounds = [];
+
     private void UpdateShaderBackdropOpacity()
     {
         bool shaderOnly = _vm?.IsShaderOnlyModeActive == true;
@@ -316,7 +318,8 @@ public partial class RotationWindow : Window, ICaptureSource
         {
             if (panel is System.Windows.Controls.Panel p && p.Background != null)
             {
-                if (p.Background.IsFrozen)
+                // Own a private copy so a brush shared via resources is never mutated for other users.
+                if (_ownedBackgrounds.Add(p) || p.Background.IsFrozen)
                 {
                     p.Background = p.Background.Clone();
                 }

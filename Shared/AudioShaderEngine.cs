@@ -52,6 +52,26 @@ public static class AudioShaderPresets
     private static readonly Dictionary<string, (DateTime Stamp, string? Error)> _failedCompiles = new(StringComparer.OrdinalIgnoreCase);
     private static int _cacheVersion;
 
+    static AudioShaderPresets()
+    {
+        // The ANGLE translator uses more distinct patterns than the default static Regex cache (15).
+        Regex.CacheSize = Math.Max(Regex.CacheSize, 128);
+    }
+
+    /// <summary>Raised (on the calling thread) when a selected shader fails to compile, with the compiler error text.</summary>
+    public static event Action<string, string?>? CompileFailed;
+
+    internal static void RaiseCompileFailed(string name, string? error) => CompileFailed?.Invoke(name, error);
+
+    /// <summary>Returns the cached compiler error for a shader that failed to compile, or null.</summary>
+    public static string? LastCompileError(string? name)
+    {
+        lock (_cacheLock)
+        {
+            return name != null && _failedCompiles.TryGetValue(name, out var f) ? f.Error : null;
+        }
+    }
+
     /// <summary>Increments whenever the cache is cleared; hosts re-resolve their effect only when this changes.</summary>
     public static int CacheVersion => System.Threading.Volatile.Read(ref _cacheVersion);
 
@@ -965,6 +985,8 @@ public sealed class AudioShaderHost : Border
     private double _lastFrameSeconds = -1;
     private int _frameCount;
     private bool _hooked;
+    private bool _autoReduced;
+    private int _slowFrames;
 
     private string? _resolvedName;
     private int _resolvedVersion = -1;
@@ -1061,6 +1083,13 @@ public sealed class AudioShaderHost : Border
             _resolvedVersion = version;
             _effect = AudioShaderPresets.GetOrCompileEffect(shaderName, out _);
             _uniforms = null;
+            _bass = _mid = _high = _energy = 0f;
+            _autoReduced = false;
+            _slowFrames = 0;
+            if (_effect == null)
+            {
+                AudioShaderPresets.RaiseCompileFailed(shaderName, AudioShaderPresets.LastCompileError(shaderName));
+            }
             _uniformNames = _effect == null
                 ? null
                 : new HashSet<string>(_effect.Uniforms, StringComparer.Ordinal);
@@ -1070,8 +1099,10 @@ public sealed class AudioShaderHost : Border
         var uniforms = _uniforms;
         if (effect == null || uniforms == null || _uniformNames == null) return;
 
-        int targetW = ReducedQuality ? ReducedRenderWidth : StandardRenderWidth;
-        int targetH = ReducedQuality ? ReducedRenderHeight : StandardRenderHeight;
+        long renderStart = Stopwatch.GetTimestamp();
+        bool reduced = ReducedQuality || _autoReduced;
+        int targetW = reduced ? ReducedRenderWidth : StandardRenderWidth;
+        int targetH = reduced ? ReducedRenderHeight : StandardRenderHeight;
 
         if (_bitmap == null || _bitmap.PixelWidth != targetW || _bitmap.PixelHeight != targetH)
         {
@@ -1118,21 +1149,14 @@ public sealed class AudioShaderHost : Border
         {
             _bitmap.Unlock();
         }
-    }
 
-    private static void SetUniformIfPresent(SKRuntimeEffect effect, SKRuntimeEffectUniforms uniforms, string name, float value)
-    {
-        if (effect.Uniforms.Contains(name)) uniforms[name] = value;
-    }
-
-    private static void SetUniformIfPresent(SKRuntimeEffect effect, SKRuntimeEffectUniforms uniforms, string name, int value)
-    {
-        if (effect.Uniforms.Contains(name)) uniforms[name] = value;
-    }
-
-    private static void SetUniformIfPresent(SKRuntimeEffect effect, SKRuntimeEffectUniforms uniforms, string name, float[] values)
-    {
-        if (effect.Uniforms.Contains(name)) uniforms[name] = values;
+        // Adaptive quality: if frames keep taking longer than ~28 ms, drop to the reduced resolution.
+        if (!reduced)
+        {
+            double ms = (Stopwatch.GetTimestamp() - renderStart) * 1000.0 / Stopwatch.Frequency;
+            _slowFrames = ms > 28.0 ? _slowFrames + 1 : Math.Max(0, _slowFrames - 1);
+            if (_slowFrames >= 45) _autoReduced = true;
+        }
     }
 
     private void UpdateAudioUniforms(float time)
