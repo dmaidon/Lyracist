@@ -7,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.11.25.373</AssemblyVersion>
-    <FileVersion>26.11.25.373</FileVersion>
+    <AssemblyVersion>26.11.25.374</AssemblyVersion>
+    <FileVersion>26.11.25.374</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
