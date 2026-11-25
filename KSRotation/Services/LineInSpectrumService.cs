@@ -159,6 +159,9 @@ namespace KSRotation.Services
             if (e.Exception != null) LastError = e.Exception.Message;
         }
 
+        /// <summary>Sample rate (Hz) of the active capture device.</summary>
+        public int SampleRate => _sampleRate;
+
         public float[] GetBands(int count) => _analyzer.GetBands(count, _sampleRate);
 
         public void Dispose()

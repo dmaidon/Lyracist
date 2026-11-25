@@ -13,6 +13,8 @@ public interface IAudioSpectrumService : IDisposable
     void Start();
     void Stop();
     float[] GetFrequencyBands(int count);
+    /// <summary>Sample rate (Hz) of the active capture device.</summary>
+    int SampleRate { get; }
 }
 
 public sealed class AudioSpectrumService : IAudioSpectrumService
@@ -108,6 +110,8 @@ public sealed class AudioSpectrumService : IAudioSpectrumService
             _analyzer.Reset();
         }
     }
+
+    public int SampleRate => _sampleRate;
 
     public float[] GetFrequencyBands(int count) => _analyzer.GetBands(count, _sampleRate);
 

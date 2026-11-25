@@ -36,6 +36,8 @@ public partial class LyricsWindow : Window
             return _spectrumService.GetFrequencyBands(count);
         };
 
+        LyricsShaderHost.SampleRateProvider = () => _spectrumService?.SampleRate ?? 48000;
+
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
         System.Windows.Media.CompositionTarget.Rendering += OnCompositionTargetRendering;
         Closed += OnWindowClosed;

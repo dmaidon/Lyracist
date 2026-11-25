@@ -963,6 +963,9 @@ internal sealed class SharedShaderRenderer
     private double _lastFrameSeconds = -1;
     private int _frameCount;
     private float _bass, _mid, _high, _energy;
+    private float _mouseX, _mouseY, _clickX, _clickY;
+    private bool _mouseDown;
+    private bool _mouseTouched;
 
     public int Width { get; }
     public int Height { get; }
@@ -1006,10 +1009,26 @@ internal sealed class SharedShaderRenderer
     }
 
     /// <summary>
+    /// Feeds pointer state (render-space pixels, origin bottom-left) using the ShaderToy <c>iMouse</c> convention:
+    /// xy follow the pointer while the button is down, zw hold the click position (negated after release).
+    /// </summary>
+    public void SubmitMouse(float x, float y, bool down)
+    {
+        _mouseTouched = true;
+        if (down)
+        {
+            if (!_mouseDown) { _clickX = x; _clickY = y; }
+            _mouseX = x;
+            _mouseY = y;
+        }
+        _mouseDown = down;
+    }
+
+    /// <summary>
     /// Renders a frame unless one was already produced in this interval (by another host sharing this renderer).
     /// Returns the render time in milliseconds, or -1 when nothing was rendered.
     /// </summary>
-    public double RenderIfDue(Func<int, float[]>? bandProvider)
+    public double RenderIfDue(Func<int, float[]>? bandProvider, int sampleRate)
     {
         if (_effect == null || _uniforms == null || _uniformNames == null || Bitmap == null) return -1;
 
@@ -1026,7 +1045,16 @@ internal sealed class SharedShaderRenderer
         var names = _uniformNames;
         var uniforms = _uniforms;
         _resVec[0] = Width; _resVec[1] = Height;
-        _mouseVec[0] = Width * 0.5f; _mouseVec[1] = Height * 0.5f;
+        if (_mouseTouched)
+        {
+            _mouseVec[0] = _mouseX; _mouseVec[1] = _mouseY;
+            _mouseVec[2] = _mouseDown ? _clickX : -_clickX;
+            _mouseVec[3] = _mouseDown ? _clickY : -_clickY;
+        }
+        else
+        {
+            _mouseVec[0] = Width * 0.5f; _mouseVec[1] = Height * 0.5f; _mouseVec[2] = 0f; _mouseVec[3] = 0f;
+        }
         _dateVec[0] = nowDate.Year; _dateVec[1] = nowDate.Month - 1; _dateVec[2] = nowDate.Day; _dateVec[3] = (float)nowDate.TimeOfDay.TotalSeconds;
         if (names.Contains("iResolution")) uniforms["iResolution"] = _resVec;
         if (names.Contains("iTime")) uniforms["iTime"] = (float)now;
@@ -1038,7 +1066,7 @@ internal sealed class SharedShaderRenderer
         if (names.Contains("iEnergy")) uniforms["iEnergy"] = _energy;
         if (names.Contains("iMouse")) uniforms["iMouse"] = _mouseVec;
         if (names.Contains("iDate")) uniforms["iDate"] = _dateVec;
-        if (names.Contains("iSampleRate")) uniforms["iSampleRate"] = 48000f;
+        if (names.Contains("iSampleRate")) uniforms["iSampleRate"] = (float)sampleRate;
 
         using var shader = _effect.ToShader(uniforms);
         if (shader == null) return -1;
@@ -1134,6 +1162,9 @@ public sealed class AudioShaderHost : Border
 
     /// <summary>Optional delegate returning live normalized FFT frequency bands (0..1).</summary>
     public Func<int, float[]>? BandProvider { get; set; }
+
+    /// <summary>Optional delegate returning the capture device sample rate in Hz (defaults to 48000).</summary>
+    public Func<int>? SampleRateProvider { get; set; }
 
     private readonly System.Windows.Controls.Image _image;
     private bool _hooked;
@@ -1238,7 +1269,22 @@ public sealed class AudioShaderHost : Border
             _image.Source = _renderer.Bitmap;
         }
 
-        double ms = _renderer?.RenderIfDue(BandProvider) ?? -1;
+        if (_renderer != null && ActualWidth > 0 && ActualHeight > 0)
+        {
+            // Pointer works even though the host is not hit-testable (read from the global mouse state).
+            var pos = System.Windows.Input.Mouse.GetPosition(this);
+            if (pos.X >= 0 && pos.Y >= 0 && pos.X <= ActualWidth && pos.Y <= ActualHeight)
+            {
+                bool down = System.Windows.Input.Mouse.LeftButton == System.Windows.Input.MouseButtonState.Pressed;
+                _renderer.SubmitMouse(
+                    (float)(pos.X / ActualWidth * _renderer.Width),
+                    (float)((1.0 - pos.Y / ActualHeight) * _renderer.Height),
+                    down);
+            }
+        }
+
+        int sampleRate = SampleRateProvider?.Invoke() ?? 48000;
+        double ms = _renderer?.RenderIfDue(BandProvider, sampleRate > 0 ? sampleRate : 48000) ?? -1;
 
         // Adaptive quality: sustained frames over ~28 ms drop this host to the reduced resolution.
         if (ms >= 0 && !reduced)

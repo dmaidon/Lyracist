@@ -117,6 +117,9 @@ public partial class RotationWindow : Window, ICaptureSource
             return svc.GetFrequencyBands(count);
         };
 
+        RotationShaderHost.SampleRateProvider = () =>
+            App.AppHost?.Services?.GetService<IAudioSpectrumService>()?.SampleRate ?? 48000;
+
         Loaded += OnLoaded;
         Closed += OnClosed;
         DataContextChanged += OnDataContextChanged;

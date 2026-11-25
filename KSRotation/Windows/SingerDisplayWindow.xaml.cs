@@ -74,6 +74,7 @@ namespace KSRotation.Windows
             _welcomeHost = Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
             RotationShaderHost.BandProvider = count => LineInSpectrumService.Instance.GetBands(count);
+            RotationShaderHost.SampleRateProvider = () => LineInSpectrumService.Instance.SampleRate;
 
             _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
             _curtainBulbChase = new CurtainMarqueeBulbChase(CurtainBulbCanvas);
