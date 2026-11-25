@@ -1294,4 +1294,59 @@ public sealed class AudioShaderHost : Border
         }
     }
 }
+
+/// <summary>
+/// Shared "shader behind the rotation views" logic for the venue display windows: decides whether a shader is
+/// showing, makes the projection panels semi-transparent over it, and hides the rotation chrome in Shader Only mode.
+/// </summary>
+public sealed class ShaderBackdropController
+{
+    /// <summary>Opacity applied to projection panel backgrounds while a shader is active.</summary>
+    public const double ShaderBackdropOpacity = 0.32;
+
+    // Panels whose background brush has already been replaced with a private (cloneable) copy.
+    private readonly HashSet<System.Windows.Controls.Panel> _ownedBackgrounds = [];
+
+    /// <summary>True when a shader is selected or Shader Only mode is on.</summary>
+    public static bool IsShaderActive(bool shaderOnly, string? shaderPreset) =>
+        shaderOnly || AudioShaderPresets.IsActive(shaderPreset);
+
+    /// <summary>
+    /// Applies the backdrop state. Returns whether a shader is active so the caller can adjust window-specific
+    /// chrome (e.g. the window background).
+    /// </summary>
+    /// <param name="topChrome">Banner / content area hidden in Shader Only mode.</param>
+    public bool Apply(
+        bool shaderOnly,
+        string? shaderPreset,
+        IEnumerable<FrameworkElement> projectionPanels,
+        UIElement? topChrome,
+        AudioShaderHost? shaderHost,
+        UIElement? crawlBackdrop,
+        WelcomeOverlayHost? welcomeHost)
+    {
+        bool shaderActive = IsShaderActive(shaderOnly, shaderPreset);
+        double bgOpacity = shaderActive ? ShaderBackdropOpacity : 1.0;
+
+        topChrome?.Visibility = shaderOnly ? Visibility.Collapsed : Visibility.Visible;
+        shaderHost?.Opacity = shaderOnly ? 1.0 : 0.75;
+
+        foreach (var element in projectionPanels)
+        {
+            if (element is System.Windows.Controls.Panel p && p.Background != null)
+            {
+                // Own a private copy so a brush shared via resources is never mutated for other users.
+                if (_ownedBackgrounds.Add(p) || p.Background.IsFrozen)
+                {
+                    p.Background = p.Background.Clone();
+                }
+                p.Background.Opacity = bgOpacity;
+            }
+        }
+
+        crawlBackdrop?.Opacity = bgOpacity;
+        welcomeHost?.SetShaderBackdrop(shaderActive);
+        return shaderActive;
+    }
+}
 #endif

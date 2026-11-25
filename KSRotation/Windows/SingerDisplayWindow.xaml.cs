@@ -253,18 +253,18 @@ namespace KSRotation.Windows
             return brush;
         }
 
-        private readonly HashSet<System.Windows.Controls.Panel> _ownedBackgrounds = [];
+        private readonly Lyracist.Shared.ShaderBackdropController _shaderBackdrop = new();
 
         private void UpdateShaderBackdropOpacity()
         {
-            bool shaderOnly = _vm?.IsShaderOnlyModeActive == true;
-            bool shaderActive = shaderOnly ||
-                                (!string.IsNullOrWhiteSpace(_vm?.RotationShaderPreset) &&
-                                 !string.Equals(_vm.RotationShaderPreset, AudioShaderPresets.Off, StringComparison.OrdinalIgnoreCase));
-            double bgOpacity = shaderActive ? 0.32 : 1.0;
-
-            TopBannerPanel?.Visibility = shaderOnly ? Visibility.Collapsed : Visibility.Visible;
-            RotationShaderHost?.Opacity = shaderOnly ? 1.0 : 0.75;
+            bool shaderActive = _shaderBackdrop.Apply(
+                _vm?.IsShaderOnlyModeActive == true,
+                _vm?.RotationShaderPreset,
+                ProjectionPanels,
+                TopBannerPanel,
+                RotationShaderHost,
+                CrawlBackdropRect,
+                _welcomeHost);
 
             if (shaderActive)
             {
@@ -274,22 +274,6 @@ namespace KSRotation.Windows
             {
                 SetResourceReference(BackgroundProperty, "MaterialDesignPaper");
             }
-
-            foreach (var panel in ProjectionPanels)
-            {
-                if (panel is System.Windows.Controls.Panel p && p.Background != null)
-                {
-                    // Own a private copy so a brush shared via resources is never mutated for other users.
-                    if (_ownedBackgrounds.Add(p) || p.Background.IsFrozen)
-                    {
-                        p.Background = p.Background.Clone();
-                    }
-                    p.Background.Opacity = bgOpacity;
-                }
-            }
-
-            CrawlBackdropRect?.Opacity = bgOpacity;
-            _welcomeHost.SetShaderBackdrop(shaderActive);
         }
 
         private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
