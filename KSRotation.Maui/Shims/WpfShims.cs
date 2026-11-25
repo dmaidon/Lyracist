@@ -186,6 +186,7 @@ namespace KSRotation.Services
         public event Action? PreShowReset { add { } remove { } }
         public void SetShowSpectrum(bool show) { }
         public void SetRotationShader(string? shaderName) { }
+        public void SetShaderOnlyMode(bool active) { }
         public void ShowReaction(string emoji) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);

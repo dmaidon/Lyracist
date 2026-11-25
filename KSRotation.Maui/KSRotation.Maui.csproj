@@ -175,6 +175,7 @@
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
 		<Compile Include="..\Shared\SavedRotationReportReader.cs" Link="SavedRotationReportReader.cs" />
+		<Compile Include="..\Lyracist\Core\Helpers\SingerXpHelper.cs" Link="Helpers\SingerXpHelper.cs" />
 		<Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
 		<Compile Include="..\Shared\VenueLocation.cs" Link="VenueLocation.cs" />
 		<Compile Include="..\Shared\GeoMath.cs" Link="GeoMath.cs" />

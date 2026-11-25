@@ -12,8 +12,8 @@
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.11.24.141</AssemblyVersion>
-    <FileVersion>26.11.24.141</FileVersion>
+    <AssemblyVersion>26.11.25.142</AssemblyVersion>
+    <FileVersion>26.11.25.142</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

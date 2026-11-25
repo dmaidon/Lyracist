@@ -4295,7 +4295,9 @@ namespace KSRotation.ViewModels
             RunShutdownStep("DjBannerWindowService.Shutdown", _djBannerWindowService.Shutdown);
             RunShutdownStep(nameof(StopScaryoke), StopScaryoke);
 #endif
+#if !MAUI
             RunShutdownStep(nameof(ShutdownTrivia), ShutdownTrivia);
+#endif
         }
 
         private static void RunShutdownStep(string name, Action step)
