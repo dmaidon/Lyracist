@@ -1349,4 +1349,85 @@ public sealed class ShaderBackdropController
         return shaderActive;
     }
 }
+
+/// <summary>
+/// Operator-side toast shown when a selected shader fails to compile. It is a popup anchored to the app's main
+/// window (never the venue display), auto-dismisses, and de-duplicates repeats of the same error.
+/// </summary>
+public static class ShaderErrorToast
+{
+    private static bool _installed;
+    private static string? _lastKey;
+    private static DateTime _lastShownUtc;
+    private static System.Windows.Controls.Primitives.Popup? _popup;
+    private static System.Windows.Threading.DispatcherTimer? _timer;
+
+    /// <summary>Subscribes to <see cref="AudioShaderPresets.CompileFailed"/>. Safe to call more than once.</summary>
+    public static void Install()
+    {
+        if (_installed) return;
+        _installed = true;
+        AudioShaderPresets.CompileFailed += (name, error) =>
+        {
+            var disp = System.Windows.Application.Current?.Dispatcher;
+            if (disp == null) return;
+            if (disp.CheckAccess()) Show(name, error);
+            else disp.BeginInvoke(() => Show(name, error));
+        };
+    }
+
+    private static void Show(string name, string? error)
+    {
+        string firstLine = (error ?? "Unknown shader compile error.")
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault() ?? "Unknown shader compile error.";
+        if (firstLine.Length > 160) firstLine = firstLine[..160] + "...";
+
+        string key = name + "|" + firstLine;
+        if (key == _lastKey && (DateTime.UtcNow - _lastShownUtc).TotalSeconds < 30) return;
+        _lastKey = key;
+        _lastShownUtc = DateTime.UtcNow;
+
+        if (System.Windows.Application.Current?.MainWindow?.Content is not FrameworkElement anchor || !anchor.IsLoaded) return;
+
+        _popup?.IsOpen = false;
+        _timer?.Stop();
+
+        var text = new System.Windows.Controls.TextBlock
+        {
+            Text = $"Shader '{name}' failed to compile and was not shown.\n{firstLine}",
+            Foreground = System.Windows.Media.Brushes.White,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 420
+        };
+        var border = new Border
+        {
+            Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xB0, 0x2A, 0x2A)),
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(14, 10, 14, 10),
+            Child = text,
+            Cursor = System.Windows.Input.Cursors.Hand,
+            ToolTip = "Click to dismiss"
+        };
+
+        var popup = new System.Windows.Controls.Primitives.Popup
+        {
+            AllowsTransparency = true,
+            StaysOpen = true,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.Relative,
+            PlacementTarget = anchor,
+            Child = border
+        };
+        border.MouseLeftButtonUp += (_, _) => popup.IsOpen = false;
+        border.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+        popup.HorizontalOffset = Math.Max(0, anchor.ActualWidth - border.DesiredSize.Width - 16);
+        popup.VerticalOffset = Math.Max(0, anchor.ActualHeight - border.DesiredSize.Height - 16);
+        popup.IsOpen = true;
+        _popup = popup;
+
+        _timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
+        _timer.Tick += (_, _) => { _timer.Stop(); popup.IsOpen = false; };
+        _timer.Start();
+    }
+}
 #endif

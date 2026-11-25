@@ -364,6 +364,7 @@ public partial class App : System.Windows.Application
         // Close splash window now that MainWindow is ready
         splash?.Close();
 
+        ShaderErrorToast.Install();
         base.OnStartup(e);
     }
 

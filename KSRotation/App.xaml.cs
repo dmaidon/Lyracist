@@ -24,6 +24,7 @@ namespace KSRotation
             // Windows time zone change is ignored until the app is restarted.
             Microsoft.Win32.SystemEvents.TimeChanged += (_, _) => TimeZoneInfo.ClearCachedData();
 
+            ShaderErrorToast.Install();
             TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             LoggerService.LogAppStart();
