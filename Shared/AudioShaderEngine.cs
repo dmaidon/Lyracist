@@ -942,9 +942,166 @@ public static class AudioShaderPresets
 
 #if !MAUI
 /// <summary>
-/// WPF image control that evaluates an <see cref="SKRuntimeEffect"/> fragment shader into a
-/// double-buffered <see cref="WriteableBitmap"/> on a 30 FPS render clock, driven by live FFT
-/// frequency bands (or smooth ambient motion when audio is idle).
+/// One rendered shader surface shared by every <see cref="AudioShaderHost"/> showing the same shader at the
+/// same resolution (e.g. the operator window and the venue display), so the effect is evaluated once per frame.
+/// </summary>
+internal sealed class SharedShaderRenderer
+{
+    private const double MinFrameIntervalSeconds = 1.0 / 30.0;
+    private static readonly Dictionary<string, SharedShaderRenderer> _active = new();
+    private static readonly Stopwatch _clock = Stopwatch.StartNew();
+
+    private readonly string _key;
+    private int _refCount;
+    private readonly SKRuntimeEffect? _effect;
+    private readonly SKRuntimeEffectUniforms? _uniforms;
+    private readonly HashSet<string>? _uniformNames;
+    private readonly float[] _resVec = new float[2];
+    private readonly float[] _mouseVec = new float[4];
+    private readonly float[] _dateVec = new float[4];
+    private readonly SKPaint _paint = new() { BlendMode = SKBlendMode.Src };
+    private double _lastFrameSeconds = -1;
+    private int _frameCount;
+    private float _bass, _mid, _high, _energy;
+
+    public int Width { get; }
+    public int Height { get; }
+
+    /// <summary>The bitmap to display, or null when the shader failed to compile.</summary>
+    public WriteableBitmap? Bitmap { get; }
+
+    private SharedShaderRenderer(string key, string name, int width, int height)
+    {
+        _key = key;
+        Width = width;
+        Height = height;
+        _effect = AudioShaderPresets.GetOrCompileEffect(name, out string? error);
+        if (_effect == null)
+        {
+            AudioShaderPresets.RaiseCompileFailed(name, error ?? AudioShaderPresets.LastCompileError(name));
+            return;
+        }
+        _uniforms = new SKRuntimeEffectUniforms(_effect);
+        _uniformNames = new HashSet<string>(_effect.Uniforms, StringComparer.Ordinal);
+        Bitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
+    }
+
+    public static SharedShaderRenderer Acquire(string name, int width, int height)
+    {
+        string key = $"{name}|{width}x{height}|{AudioShaderPresets.CacheVersion}";
+        if (!_active.TryGetValue(key, out var renderer))
+        {
+            renderer = new SharedShaderRenderer(key, name, width, height);
+            _active[key] = renderer;
+        }
+        renderer._refCount++;
+        return renderer;
+    }
+
+    public void Release()
+    {
+        if (--_refCount > 0) return;
+        _active.Remove(_key);
+        _paint.Dispose();
+    }
+
+    /// <summary>
+    /// Renders a frame unless one was already produced in this interval (by another host sharing this renderer).
+    /// Returns the render time in milliseconds, or -1 when nothing was rendered.
+    /// </summary>
+    public double RenderIfDue(Func<int, float[]>? bandProvider)
+    {
+        if (_effect == null || _uniforms == null || _uniformNames == null || Bitmap == null) return -1;
+
+        double now = _clock.Elapsed.TotalSeconds;
+        double delta = _lastFrameSeconds >= 0 ? (now - _lastFrameSeconds) : MinFrameIntervalSeconds;
+        if (_lastFrameSeconds >= 0 && delta < MinFrameIntervalSeconds) return -1;
+        _lastFrameSeconds = now;
+        _frameCount++;
+
+        long start = Stopwatch.GetTimestamp();
+        UpdateAudioUniforms((float)now, bandProvider);
+
+        var nowDate = DateTime.Now;
+        var names = _uniformNames;
+        var uniforms = _uniforms;
+        _resVec[0] = Width; _resVec[1] = Height;
+        _mouseVec[0] = Width * 0.5f; _mouseVec[1] = Height * 0.5f;
+        _dateVec[0] = nowDate.Year; _dateVec[1] = nowDate.Month - 1; _dateVec[2] = nowDate.Day; _dateVec[3] = (float)nowDate.TimeOfDay.TotalSeconds;
+        if (names.Contains("iResolution")) uniforms["iResolution"] = _resVec;
+        if (names.Contains("iTime")) uniforms["iTime"] = (float)now;
+        if (names.Contains("iTimeDelta")) uniforms["iTimeDelta"] = (float)delta;
+        if (names.Contains("iFrame")) uniforms["iFrame"] = _frameCount;
+        if (names.Contains("iBass")) uniforms["iBass"] = _bass;
+        if (names.Contains("iMid")) uniforms["iMid"] = _mid;
+        if (names.Contains("iHigh")) uniforms["iHigh"] = _high;
+        if (names.Contains("iEnergy")) uniforms["iEnergy"] = _energy;
+        if (names.Contains("iMouse")) uniforms["iMouse"] = _mouseVec;
+        if (names.Contains("iDate")) uniforms["iDate"] = _dateVec;
+        if (names.Contains("iSampleRate")) uniforms["iSampleRate"] = 48000f;
+
+        using var shader = _effect.ToShader(uniforms);
+        if (shader == null) return -1;
+
+        Bitmap.Lock();
+        try
+        {
+            var info = new SKImageInfo(Width, Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var surface = SKSurface.Create(info, Bitmap.BackBuffer, Bitmap.BackBufferStride);
+            if (surface != null)
+            {
+                _paint.Shader = shader;
+                surface.Canvas.DrawRect(0, 0, Width, Height, _paint);
+                _paint.Shader = null;
+            }
+            Bitmap.AddDirtyRect(new Int32Rect(0, 0, Width, Height));
+        }
+        finally
+        {
+            Bitmap.Unlock();
+        }
+
+        return (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
+    }
+
+    private void UpdateAudioUniforms(float time, Func<int, float[]>? bandProvider)
+    {
+        float rawBass = 0f;
+        float rawMid = 0f;
+        float rawHigh = 0f;
+
+        var bands = bandProvider?.Invoke(32);
+        if (bands is { Length: >= 16 })
+        {
+            int bassEnd = Math.Max(2, bands.Length / 5);
+            int midEnd = Math.Max(bassEnd + 2, (bands.Length * 3) / 5);
+
+            for (int i = 0; i < bassEnd; i++) rawBass = Math.Max(rawBass, bands[i]);
+            for (int i = bassEnd; i < midEnd; i++) rawMid += bands[i];
+            rawMid /= Math.Max(1, midEnd - bassEnd);
+
+            for (int i = midEnd; i < bands.Length; i++) rawHigh += bands[i];
+            rawHigh /= Math.Max(1, bands.Length - midEnd);
+        }
+
+        if (rawBass < 0.01f && rawMid < 0.01f && rawHigh < 0.01f)
+        {
+            rawBass = 0.18f + 0.12f * (float)Math.Sin(time * 2.1f);
+            rawMid = 0.15f + 0.10f * (float)Math.Sin(time * 1.4f + 1.2f);
+            rawHigh = 0.12f + 0.08f * (float)Math.Cos(time * 2.7f);
+        }
+
+        _bass += (rawBass - _bass) * (rawBass > _bass ? 0.75f : 0.22f);
+        _mid += (rawMid - _mid) * (rawMid > _mid ? 0.65f : 0.20f);
+        _high += (rawHigh - _high) * (rawHigh > _high ? 0.70f : 0.25f);
+        _energy = Math.Clamp((_bass * 0.45f) + (_mid * 0.35f) + (_high * 0.20f), 0f, 1.25f);
+    }
+}
+
+/// <summary>
+/// WPF image control that displays a <see cref="SharedShaderRenderer"/> frame (an <see cref="SKRuntimeEffect"/>
+/// fragment shader on a ~30 FPS clock), driven by live FFT frequency bands or smooth ambient motion when audio is idle.
+/// Hosts showing the same shader at the same size share one render.
 /// </summary>
 public sealed class AudioShaderHost : Border
 {
@@ -952,7 +1109,6 @@ public sealed class AudioShaderHost : Border
     private const int StandardRenderHeight = 270;
     private const int ReducedRenderWidth = 320;
     private const int ReducedRenderHeight = 180;
-    private const double MinFrameIntervalSeconds = 1.0 / 30.0;
 
     public static readonly DependencyProperty ShaderNameProperty = DependencyProperty.Register(
         nameof(ShaderName), typeof(string), typeof(AudioShaderHost),
@@ -980,29 +1136,14 @@ public sealed class AudioShaderHost : Border
     public Func<int, float[]>? BandProvider { get; set; }
 
     private readonly System.Windows.Controls.Image _image;
-    private WriteableBitmap? _bitmap;
-    private readonly Stopwatch _clock = new();
-    private double _lastFrameSeconds = -1;
-    private int _frameCount;
     private bool _hooked;
     private bool _autoReduced;
     private int _slowFrames;
 
+    private SharedShaderRenderer? _renderer;
     private string? _resolvedName;
     private int _resolvedVersion = -1;
-    private SKRuntimeEffect? _effect;
-    private SKRuntimeEffectUniforms? _uniforms;
-    private HashSet<string>? _uniformNames;
-    private readonly float[] _resVec = new float[2];
-    private readonly float[] _mouseVec = new float[4];
-    private readonly float[] _dateVec = new float[4];
-    private readonly SKPaint _paint = new() { BlendMode = SKBlendMode.Src };
-
-    // Smoothed audio uniform state
-    private float _bass;
-    private float _mid;
-    private float _high;
-    private float _energy;
+    private bool _resolvedReduced;
 
     public AudioShaderHost()
     {
@@ -1048,8 +1189,6 @@ public sealed class AudioShaderHost : Border
     private void Hook()
     {
         if (_hooked) return;
-        _clock.Start();
-        _lastFrameSeconds = -1;
         CompositionTarget.Rendering += OnRendering;
         _hooked = true;
     }
@@ -1059,137 +1198,54 @@ public sealed class AudioShaderHost : Border
         if (!_hooked) return;
         CompositionTarget.Rendering -= OnRendering;
         _hooked = false;
+        ReleaseRenderer();
+    }
+
+    private void ReleaseRenderer()
+    {
+        _renderer?.Release();
+        _renderer = null;
+        _resolvedName = null;
+        _image.Source = null;
     }
 
     private void OnRendering(object? sender, EventArgs e)
     {
         if (!IsVisible) return;
 
-        double now = _clock.Elapsed.TotalSeconds;
-        double delta = _lastFrameSeconds >= 0 ? (now - _lastFrameSeconds) : MinFrameIntervalSeconds;
-        if (_lastFrameSeconds >= 0 && delta < MinFrameIntervalSeconds)
-        {
-            return;
-        }
-        _lastFrameSeconds = now;
-        _frameCount++;
-
-        // Resolve the effect only when the shader name or cache changes (no per-frame disk I/O or retry of failures).
         string shaderName = ShaderName;
-        int version = AudioShaderPresets.CacheVersion;
-        if (shaderName != _resolvedName || version != _resolvedVersion)
+        if (shaderName != _resolvedName)
         {
-            _resolvedName = shaderName;
-            _resolvedVersion = version;
-            _effect = AudioShaderPresets.GetOrCompileEffect(shaderName, out _);
-            _uniforms = null;
-            _bass = _mid = _high = _energy = 0f;
+            // New shader: forget any adaptive downgrade from the previous one.
             _autoReduced = false;
             _slowFrames = 0;
-            if (_effect == null)
-            {
-                AudioShaderPresets.RaiseCompileFailed(shaderName, AudioShaderPresets.LastCompileError(shaderName));
-            }
-            _uniformNames = _effect == null
-                ? null
-                : new HashSet<string>(_effect.Uniforms, StringComparer.Ordinal);
-            if (_effect != null) _uniforms = new SKRuntimeEffectUniforms(_effect);
         }
-        var effect = _effect;
-        var uniforms = _uniforms;
-        if (effect == null || uniforms == null || _uniformNames == null) return;
 
-        long renderStart = Stopwatch.GetTimestamp();
         bool reduced = ReducedQuality || _autoReduced;
-        int targetW = reduced ? ReducedRenderWidth : StandardRenderWidth;
-        int targetH = reduced ? ReducedRenderHeight : StandardRenderHeight;
+        int version = AudioShaderPresets.CacheVersion;
 
-        if (_bitmap == null || _bitmap.PixelWidth != targetW || _bitmap.PixelHeight != targetH)
+        // Re-acquire only when the shader, quality or cache changes (no per-frame disk I/O or recompiles).
+        if (shaderName != _resolvedName || version != _resolvedVersion || reduced != _resolvedReduced)
         {
-            _bitmap = new WriteableBitmap(targetW, targetH, 96, 96, PixelFormats.Pbgra32, null);
-            _image.Source = _bitmap;
+            _renderer?.Release();
+            _resolvedName = shaderName;
+            _resolvedVersion = version;
+            _resolvedReduced = reduced;
+            _renderer = SharedShaderRenderer.Acquire(
+                shaderName,
+                reduced ? ReducedRenderWidth : StandardRenderWidth,
+                reduced ? ReducedRenderHeight : StandardRenderHeight);
+            _image.Source = _renderer.Bitmap;
         }
 
-        UpdateAudioUniforms((float)now);
+        double ms = _renderer?.RenderIfDue(BandProvider) ?? -1;
 
-        var nowDate = DateTime.Now;
-        var names = _uniformNames;
-        _resVec[0] = targetW; _resVec[1] = targetH;
-        _mouseVec[0] = targetW * 0.5f; _mouseVec[1] = targetH * 0.5f;
-        _dateVec[0] = nowDate.Year; _dateVec[1] = nowDate.Month - 1; _dateVec[2] = nowDate.Day; _dateVec[3] = (float)nowDate.TimeOfDay.TotalSeconds;
-        if (names.Contains("iResolution")) uniforms["iResolution"] = _resVec;
-        if (names.Contains("iTime")) uniforms["iTime"] = (float)now;
-        if (names.Contains("iTimeDelta")) uniforms["iTimeDelta"] = (float)delta;
-        if (names.Contains("iFrame")) uniforms["iFrame"] = _frameCount;
-        if (names.Contains("iBass")) uniforms["iBass"] = _bass;
-        if (names.Contains("iMid")) uniforms["iMid"] = _mid;
-        if (names.Contains("iHigh")) uniforms["iHigh"] = _high;
-        if (names.Contains("iEnergy")) uniforms["iEnergy"] = _energy;
-        if (names.Contains("iMouse")) uniforms["iMouse"] = _mouseVec;
-        if (names.Contains("iDate")) uniforms["iDate"] = _dateVec;
-        if (names.Contains("iSampleRate")) uniforms["iSampleRate"] = 48000f;
-
-        using var shader = effect.ToShader(uniforms);
-        if (shader == null) return;
-
-        _bitmap.Lock();
-        try
+        // Adaptive quality: sustained frames over ~28 ms drop this host to the reduced resolution.
+        if (ms >= 0 && !reduced)
         {
-            var info = new SKImageInfo(targetW, targetH, SKColorType.Bgra8888, SKAlphaType.Premul);
-            using var surface = SKSurface.Create(info, _bitmap.BackBuffer, _bitmap.BackBufferStride);
-            if (surface != null)
-            {
-                _paint.Shader = shader;
-                surface.Canvas.DrawRect(0, 0, targetW, targetH, _paint);
-                _paint.Shader = null;
-            }
-            _bitmap.AddDirtyRect(new Int32Rect(0, 0, targetW, targetH));
-        }
-        finally
-        {
-            _bitmap.Unlock();
-        }
-
-        // Adaptive quality: if frames keep taking longer than ~28 ms, drop to the reduced resolution.
-        if (!reduced)
-        {
-            double ms = (Stopwatch.GetTimestamp() - renderStart) * 1000.0 / Stopwatch.Frequency;
             _slowFrames = ms > 28.0 ? _slowFrames + 1 : Math.Max(0, _slowFrames - 1);
             if (_slowFrames >= 45) _autoReduced = true;
         }
-    }
-
-    private void UpdateAudioUniforms(float time)
-    {
-        float rawBass = 0f;
-        float rawMid = 0f;
-        float rawHigh = 0f;
-
-        var bands = BandProvider?.Invoke(32);
-        if (bands is { Length: >= 16 })
-        {
-            int bassEnd = Math.Max(2, bands.Length / 5);
-            int midEnd = Math.Max(bassEnd + 2, (bands.Length * 3) / 5);
-
-            for (int i = 0; i < bassEnd; i++) rawBass = Math.Max(rawBass, bands[i]);
-            for (int i = bassEnd; i < midEnd; i++) rawMid += bands[i];
-            rawMid /= Math.Max(1, midEnd - bassEnd);
-
-            for (int i = midEnd; i < bands.Length; i++) rawHigh += bands[i];
-            rawHigh /= Math.Max(1, bands.Length - midEnd);
-        }
-
-        if (rawBass < 0.01f && rawMid < 0.01f && rawHigh < 0.01f)
-        {
-            rawBass = 0.18f + 0.12f * (float)Math.Sin(time * 2.1f);
-            rawMid = 0.15f + 0.10f * (float)Math.Sin(time * 1.4f + 1.2f);
-            rawHigh = 0.12f + 0.08f * (float)Math.Cos(time * 2.7f);
-        }
-
-        _bass += (rawBass - _bass) * (rawBass > _bass ? 0.75f : 0.22f);
-        _mid += (rawMid - _mid) * (rawMid > _mid ? 0.65f : 0.20f);
-        _high += (rawHigh - _high) * (rawHigh > _high ? 0.70f : 0.25f);
-        _energy = Math.Clamp((_bass * 0.45f) + (_mid * 0.35f) + (_high * 0.20f), 0f, 1.25f);
     }
 }
 #endif
