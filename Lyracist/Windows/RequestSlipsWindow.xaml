@@ -1,0 +1,165 @@
+<!-- Created on Nov 28, 2026 @ 10:00:00 -> XAML Window for Printable Branded Paper Request Slips popup so controls can be resized and edited in XAML Designer -->
+<Window x:Class="Lyracist.Windows.RequestSlipsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="🖨️ Printable Branded Karaoke Request Slips"
+        Width="520"
+        Height="460"
+        WindowStartupLocation="CenterOwner"
+        Topmost="True"
+        ResizeMode="CanResize"
+        Background="#0F172A"
+        Foreground="White">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" MinHeight="56.55" />
+        </Grid.RowDefinitions>
+
+        <!-- Title Header -->
+        <TextBlock Grid.Row="0"
+                   Text="🖨️ Generate Cuttable Paper Request Slips"
+                   FontSize="17"
+                   FontWeight="Bold"
+                   Foreground="#FBBF24"
+                   Margin="0,0,0,14" />
+
+        <!-- Venue / Show Name -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Venue / Show Name:"
+                       Foreground="White"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4" />
+            <TextBox x:Name="VenueTextBox"
+                     Text="Karaoke Night"
+                     Height="34"
+                     FontSize="13"
+                     Padding="8,4"
+                     VerticalContentAlignment="Center"
+                     Background="#1E293B"
+                     Foreground="White"
+                     CaretBrush="White"
+                     BorderBrush="#64748B"
+                     BorderThickness="1.5" />
+        </StackPanel>
+
+        <!-- DJ / Host Name -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="DJ / Host Name:"
+                       Foreground="White"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4" />
+            <TextBox x:Name="DjTextBox"
+                     Text="Guest DJ"
+                     Height="34"
+                     FontSize="13"
+                     Padding="8,4"
+                     VerticalContentAlignment="Center"
+                     Background="#1E293B"
+                     Foreground="White"
+                     CaretBrush="White"
+                     BorderBrush="#64748B"
+                     BorderThickness="1.5" />
+        </StackPanel>
+
+        <!-- Phone Request Portal URL -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,10">
+            <TextBlock Text="Phone Request Portal URL (for QR Code):"
+                       Foreground="White"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4" />
+            <TextBox x:Name="PortalUrlTextBox"
+                     Text="http://127.0.0.1:5005/mobile.html"
+                     Height="34"
+                     FontSize="13"
+                     Padding="8,4"
+                     VerticalContentAlignment="Center"
+                     Background="#1E293B"
+                     Foreground="White"
+                     CaretBrush="White"
+                     BorderBrush="#64748B"
+                     BorderThickness="1.5" />
+        </StackPanel>
+
+        <!-- Layout (Slips per Page) -->
+        <StackPanel Grid.Row="3" Margin="0,63,0,12" Grid.RowSpan="2">
+            <TextBlock Text="Layout (Slips per Page):"
+                       Foreground="White"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4" />
+            <ComboBox x:Name="LayoutComboBox"
+                      Height="40"
+                      FontSize="13"
+                      Padding="8,4"
+                      VerticalContentAlignment="Center"
+                      Background="#1E293B"
+                      Foreground="White"
+                      BorderBrush="#64748B"
+                      BorderThickness="1.5"
+                      SelectedIndex="1">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#1E293B" />
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="Padding" Value="8,6" />
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBoxItem Content="8 Slips per Page (Large)" />
+                <ComboBoxItem Content="10 Slips per Page (Standard)" />
+                <ComboBoxItem Content="12 Slips per Page (Compact)" />
+            </ComboBox>
+        </StackPanel>
+
+        <!-- QR Code Checkbox -->
+        <CheckBox x:Name="IncludeQrCheckBox"
+                  Grid.Row="5"
+                  Content="Include Phone Request QR Code on each slip"
+                  IsChecked="True"
+                  Foreground="White"
+                  FontSize="12.5" Height="32" Width="298" />
+
+        <!-- Bottom Action Buttons -->
+        <StackPanel Grid.Row="6"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left" Margin="148,10,0,0" Grid.RowSpan="2" Width="332">
+            <Button x:Name="CancelButton"
+                    Content="Cancel"
+                    Width="110"
+                    Height="40  "
+                    FontSize="12.5"
+                    FontWeight="SemiBold"
+                    Margin="0,0,12,0"
+                    Background="#334155"
+                    Foreground="White"
+                    BorderBrush="#64748B"
+                    BorderThickness="1.5"
+                    Click="CancelButton_Click" />
+
+            <Button x:Name="GeneratePdfButton"
+                    Content="🖨️ Generate &amp; Open PDF"
+                    Width="210"
+                    Height="40"
+                    FontSize="12.5"
+                    FontWeight="Bold"
+                    Background="#10B981"
+                    Foreground="White"
+                    BorderBrush="#34D399"
+                    BorderThickness="1.5"
+                    Click="GeneratePdfButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

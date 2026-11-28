@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 09:51:00 -> Wire LyricsShaderHost BandProvider to live IAudioSpectrumService
+// Edited on Nov 28, 2026 @ 10:05:00 -> Guard against null App.AppHost in LyricsWindow constructor
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -27,7 +27,7 @@ public partial class LyricsWindow : Window
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
-        _spectrumService = spectrumService ?? App.AppHost.Services.GetService<IAudioSpectrumService>();
+        _spectrumService = spectrumService ?? App.AppHost?.Services?.GetService<IAudioSpectrumService>();
 
         LyricsShaderHost.BandProvider = count =>
         {

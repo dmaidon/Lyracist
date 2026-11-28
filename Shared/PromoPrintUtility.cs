@@ -1,11 +1,13 @@
-// Created on Nov 27, 2026 @ 13:21:00 -> Add Printable Branded Paper Request Slips PDF generator and Weekly Karaoke Schedule Poster Maker
+// Edited on Nov 28, 2026 @ 12:02:00 -> Show saved venues dropdown list when clicking in the Venue Name box in Weekly Karaoke Schedule Poster Maker
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using QRCoder;
 using SkiaSharp;
@@ -14,7 +16,11 @@ using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using Color = System.Windows.Media.Color;
 using ComboBox = System.Windows.Controls.ComboBox;
+using Control = System.Windows.Controls.Control;
+using Cursors = System.Windows.Input.Cursors;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using ListBox = System.Windows.Controls.ListBox;
+using ListBoxItem = System.Windows.Controls.ListBoxItem;
 using MessageBox = System.Windows.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using TextBox = System.Windows.Controls.TextBox;
@@ -36,6 +42,163 @@ namespace Lyracist.Shared
     /// </summary>
     public static class PromoPrintUtility
     {
+        // ─── Printable Request Slips Popup UI (Placed at Top for Easy Editing) ───
+
+        public static void ShowRequestSlipsDialog(Window? owner, string defaultVenue, string defaultDj, string? portalUrl)
+        {
+            var win = new Window
+            {
+                Title = "🖨️ Printable Branded Karaoke Request Slips",
+                Width = 520,
+                SizeToContent = SizeToContent.Height,
+                WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen,
+                Owner = owner,
+                Topmost = true,
+                ShowInTaskbar = false,
+                ResizeMode = ResizeMode.CanResize,
+                Background = new SolidColorBrush(Color.FromRgb(15, 23, 42)),
+                Foreground = Brushes.White
+            };
+
+            var root = new StackPanel { Margin = new Thickness(20) };
+            root.Children.Add(new TextBlock
+            {
+                Text = "🖨️ Generate Cuttable Paper Request Slips",
+                FontSize = 17,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)),
+                Margin = new Thickness(0, 0, 0, 12)
+            });
+
+            root.Children.Add(new TextBlock { Text = "Venue / Show Name:", Foreground = Brushes.White, FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
+            var tbVenue = CreateDialogTextBox(string.IsNullOrWhiteSpace(defaultVenue) ? "Karaoke Night" : defaultVenue, height: 34);
+            tbVenue.Margin = new Thickness(0, 0, 0, 10);
+            root.Children.Add(tbVenue);
+
+            root.Children.Add(new TextBlock { Text = "DJ / Host Name:", Foreground = Brushes.White, FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
+            var tbDj = CreateDialogTextBox(string.IsNullOrWhiteSpace(defaultDj) ? "Guest DJ" : defaultDj, height: 34);
+            tbDj.Margin = new Thickness(0, 0, 0, 10);
+            root.Children.Add(tbDj);
+
+            root.Children.Add(new TextBlock { Text = "Phone Request Portal URL (for QR Code):", Foreground = Brushes.White, FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
+            var tbPortalUrl = CreateDialogTextBox(portalUrl ?? string.Empty, height: 34);
+            tbPortalUrl.Margin = new Thickness(0, 0, 0, 10);
+            root.Children.Add(tbPortalUrl);
+
+            root.Children.Add(new TextBlock { Text = "Layout (Slips per Page):", Foreground = Brushes.White, FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
+            var cbCount = CreateDialogComboBox(height: 36);
+            cbCount.Margin = new Thickness(0, 0, 0, 12);
+            cbCount.Items.Add("8 Slips per Page (Large)");
+            cbCount.Items.Add("10 Slips per Page (Standard)");
+            cbCount.Items.Add("12 Slips per Page (Compact)");
+            cbCount.SelectedIndex = 1;
+            root.Children.Add(cbCount);
+
+            var chkQr = new CheckBox
+            {
+                Content = "Include Phone Request QR Code on each slip",
+                IsChecked = !string.IsNullOrWhiteSpace(portalUrl),
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 2, 0, 16)
+            };
+            root.Children.Add(chkQr);
+
+            var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+            var btnCancel = new Button
+            {
+                Content = "Cancel",
+                Width = 110,
+                Height = 36,
+                Margin = new Thickness(0, 0, 12, 0),
+                Background = new SolidColorBrush(Color.FromRgb(51, 65, 85)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(100, 116, 139))
+            };
+            btnCancel.Click += (_, _) => win.Close();
+
+            var btnGenerate = new Button
+            {
+                Content = "🖨️ Generate & Open PDF",
+                Width = 210,
+                Height = 36,
+                FontWeight = FontWeights.Bold,
+                Background = new SolidColorBrush(Color.FromRgb(16, 185, 129)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(52, 211, 153))
+            };
+            btnGenerate.Click += (_, _) =>
+            {
+                int slips = cbCount.SelectedIndex == 0 ? 8 : (cbCount.SelectedIndex == 2 ? 12 : 10);
+                try
+                {
+                    string pdfPath = GeneratePrintableRequestSlipsPdf(
+                        tbVenue.Text,
+                        tbDj.Text,
+                        tbPortalUrl.Text,
+                        slips,
+                        chkQr.IsChecked == true);
+                    Process.Start(new ProcessStartInfo(pdfPath) { UseShellExecute = true });
+                    win.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to generate request slips PDF: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            };
+
+            btnRow.Children.Add(btnCancel);
+            btnRow.Children.Add(btnGenerate);
+            root.Children.Add(btnRow);
+            win.Content = root;
+            win.Loaded += (_, _) =>
+            {
+                win.Topmost = true;
+                win.Activate();
+                tbVenue.Focus();
+                tbVenue.SelectAll();
+            };
+            win.ShowDialog();
+        }
+
+        private static TextBox CreateDialogTextBox(string initialText, double height = 34)
+        {
+            return new TextBox
+            {
+                Text = initialText ?? string.Empty,
+                Height = height,
+                Padding = new Thickness(8, 4, 8, 4),
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Background = new SolidColorBrush(Color.FromRgb(30, 41, 59)),
+                Foreground = Brushes.White,
+                CaretBrush = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(100, 116, 139)),
+                BorderThickness = new Thickness(1.5),
+                FontSize = 12.5
+            };
+        }
+
+        private static ComboBox CreateDialogComboBox(double height = 36)
+        {
+            var cb = new ComboBox
+            {
+                Height = height,
+                Padding = new Thickness(8, 3, 8, 3),
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Background = new SolidColorBrush(Color.FromRgb(30, 41, 59)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(100, 116, 139)),
+                BorderThickness = new Thickness(1.5),
+                FontSize = 12.5
+            };
+
+            var itemStyle = new Style(typeof(ComboBoxItem));
+            itemStyle.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(30, 41, 59))));
+            itemStyle.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
+            itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 5, 8, 5)));
+            cb.ItemContainerStyle = itemStyle;
+            return cb;
+        }
+
         public static string GeneratePrintableRequestSlipsPdf(
             string venueName,
             string djName,
@@ -380,104 +543,163 @@ namespace Lyracist.Shared
             }
         }
 
-        public static void ShowRequestSlipsDialog(Window? owner, string defaultVenue, string defaultDj, string? portalUrl)
+        private static List<string> LoadKnownVenues(string? defaultVenue, IEnumerable<string>? availableVenues)
         {
-            var win = new Window
+            var venues = new List<string>();
+            void AddIfValid(string? v)
             {
-                Title = "🖨️ Printable Branded Karaoke Request Slips",
-                Width = 460,
-                Height = 360,
-                WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen,
-                Owner = owner,
-                ResizeMode = ResizeMode.NoResize,
-                Background = new SolidColorBrush(Color.FromRgb(15, 23, 42)),
-                Foreground = Brushes.White
-            };
-
-            var root = new StackPanel { Margin = new Thickness(20) };
-            root.Children.Add(new TextBlock
-            {
-                Text = "🖨️ Generate Cuttable Paper Request Slips",
-                FontSize = 17,
-                FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)),
-                Margin = new Thickness(0, 0, 0, 12)
-            });
-
-            root.Children.Add(new TextBlock { Text = "Venue / Show Name:", FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
-            var tbVenue = new TextBox { Text = string.IsNullOrWhiteSpace(defaultVenue) ? "Karaoke Night" : defaultVenue, Height = 30, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 10) };
-            root.Children.Add(tbVenue);
-
-            root.Children.Add(new TextBlock { Text = "DJ / Host Name:", FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
-            var tbDj = new TextBox { Text = string.IsNullOrWhiteSpace(defaultDj) ? "Guest DJ" : defaultDj, Height = 30, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 10) };
-            root.Children.Add(tbDj);
-
-            root.Children.Add(new TextBlock { Text = "Layout (Slips per Page):", FontSize = 12, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
-            var cbCount = new ComboBox { Height = 30, Margin = new Thickness(0, 0, 0, 10) };
-            cbCount.Items.Add("8 Slips per Page (Large)");
-            cbCount.Items.Add("10 Slips per Page (Standard)");
-            cbCount.Items.Add("12 Slips per Page (Compact)");
-            cbCount.SelectedIndex = 1;
-            root.Children.Add(cbCount);
-
-            var chkQr = new CheckBox
-            {
-                Content = "Include Phone Request QR Code on each slip",
-                IsChecked = !string.IsNullOrWhiteSpace(portalUrl),
-                Foreground = Brushes.White,
-                Margin = new Thickness(0, 2, 0, 16)
-            };
-            root.Children.Add(chkQr);
-
-            var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-            var btnCancel = new Button { Content = "Cancel", Width = 90, Height = 32, Margin = new Thickness(0, 0, 10, 0) };
-            btnCancel.Click += (_, _) => win.Close();
-
-            var btnGenerate = new Button
-            {
-                Content = "🖨️ Generate & Open PDF",
-                Width = 180,
-                Height = 32,
-                FontWeight = FontWeights.Bold,
-                Background = new SolidColorBrush(Color.FromRgb(16, 185, 129)),
-                Foreground = Brushes.White
-            };
-            btnGenerate.Click += (_, _) =>
-            {
-                int slips = cbCount.SelectedIndex == 0 ? 8 : (cbCount.SelectedIndex == 2 ? 12 : 10);
-                try
+                if (string.IsNullOrWhiteSpace(v)) return;
+                string trimmed = v.Trim();
+                if (!venues.Any(existing => string.Equals(existing, trimmed, StringComparison.OrdinalIgnoreCase)))
                 {
-                    string pdfPath = GeneratePrintableRequestSlipsPdf(
-                        tbVenue.Text,
-                        tbDj.Text,
-                        portalUrl,
-                        slips,
-                        chkQr.IsChecked == true);
-                    Process.Start(new ProcessStartInfo(pdfPath) { UseShellExecute = true });
-                    win.Close();
+                    venues.Add(trimmed);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to generate request slips PDF: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            };
+            }
 
-            btnRow.Children.Add(btnCancel);
-            btnRow.Children.Add(btnGenerate);
-            root.Children.Add(btnRow);
-            win.Content = root;
-            win.ShowDialog();
+            if (availableVenues != null)
+            {
+                foreach (var v in availableVenues) AddIfValid(v);
+            }
+
+            try
+            {
+                foreach (var v in VenueLocationStore.GetVenueNames())
+                {
+                    AddIfValid(v);
+                }
+            }
+            catch { }
+
+            try
+            {
+                string lyracistSettingsPath = Path.Combine(Globals.SettingsDir, "lyracist_settings.json");
+                if (File.Exists(lyracistSettingsPath))
+                {
+                    using var doc = JsonDocument.Parse(File.ReadAllText(lyracistSettingsPath));
+                    if (doc.RootElement.TryGetProperty("Venues", out var venuesProp) && venuesProp.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var elem in venuesProp.EnumerateArray())
+                        {
+                            if (elem.ValueKind == JsonValueKind.String)
+                            {
+                                AddIfValid(elem.GetString());
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            AddIfValid(defaultVenue);
+            return venues;
         }
 
-        public static void ShowSchedulePosterDialog(Window? owner, string defaultDj, string defaultVenue)
+        private static (Grid Container, TextBox Input) CreateVenuePickerBox(string initialText, IReadOnlyList<string> venues, double height = 30)
         {
+            var container = new Grid();
+            var tb = CreateDialogTextBox(initialText, height);
+            tb.Padding = new Thickness(8, 4, 24, 4);
+            container.Children.Add(tb);
+
+            var arrow = new TextBlock
+            {
+                Text = "▾",
+                Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)),
+                FontSize = 12,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 0, 8, 0),
+                IsHitTestVisible = false
+            };
+            container.Children.Add(arrow);
+
+            if (venues.Count > 0)
+            {
+                var popup = new Popup
+                {
+                    PlacementTarget = tb,
+                    Placement = PlacementMode.Bottom,
+                    StaysOpen = false,
+                    AllowsTransparency = true,
+                    PopupAnimation = PopupAnimation.Fade
+                };
+
+                var listBox = new ListBox
+                {
+                    MaxHeight = 200,
+                    Background = new SolidColorBrush(Color.FromRgb(15, 23, 42)),
+                    Foreground = Brushes.White,
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(56, 189, 248)),
+                    BorderThickness = new Thickness(1.5),
+                    FontSize = 12.5
+                };
+
+                var itemStyle = new Style(typeof(ListBoxItem));
+                itemStyle.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(30, 41, 59))));
+                itemStyle.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
+                itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 6, 10, 6)));
+                itemStyle.Setters.Add(new Setter(FrameworkElement.CursorProperty, Cursors.Hand));
+                listBox.ItemContainerStyle = itemStyle;
+
+                foreach (var v in venues)
+                {
+                    listBox.Items.Add(v);
+                }
+
+                bool suppressSelection = false;
+                listBox.PreviewMouseLeftButtonUp += (_, _) =>
+                {
+                    if (listBox.SelectedItem is string chosen && !suppressSelection)
+                    {
+                        tb.Text = chosen;
+                        tb.CaretIndex = tb.Text.Length;
+                        popup.IsOpen = false;
+                    }
+                };
+
+                listBox.SelectionChanged += (_, _) =>
+                {
+                    if (listBox.SelectedItem is string chosen && !suppressSelection)
+                    {
+                        tb.Text = chosen;
+                        tb.CaretIndex = tb.Text.Length;
+                        popup.IsOpen = false;
+                    }
+                };
+
+                void OpenVenuePopup()
+                {
+                    listBox.Width = Math.Max(180, tb.ActualWidth);
+                    suppressSelection = true;
+                    listBox.SelectedItem = venues.FirstOrDefault(v => string.Equals(v, tb.Text?.Trim(), StringComparison.OrdinalIgnoreCase));
+                    suppressSelection = false;
+                    popup.IsOpen = true;
+                }
+
+                popup.Child = listBox;
+
+                tb.PreviewMouseLeftButtonDown += (_, _) =>
+                {
+                    tb.Dispatcher.BeginInvoke(new Action(OpenVenuePopup));
+                };
+            }
+
+            return (container, tb);
+        }
+
+        public static void ShowSchedulePosterDialog(Window? owner, string defaultDj, string defaultVenue, IEnumerable<string>? availableVenues = null)
+        {
+            var knownVenues = LoadKnownVenues(defaultVenue, availableVenues);
+
             var win = new Window
             {
                 Title = "🎨 Weekly Karaoke Schedule Poster Maker",
-                Width = 680,
-                Height = 580,
+                Width = 700,
+                SizeToContent = SizeToContent.Height,
                 WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen,
                 Owner = owner,
+                Topmost = true,
+                ShowInTaskbar = false,
                 ResizeMode = ResizeMode.NoResize,
                 Background = new SolidColorBrush(Color.FromRgb(15, 23, 42)),
                 Foreground = Brushes.White
@@ -501,22 +723,22 @@ namespace Lyracist.Shared
             topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
             var spHeadline = new StackPanel();
-            spHeadline.Children.Add(new TextBlock { Text = "Poster Headline:", FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
-            var tbHeadline = new TextBox { Text = "WEEKLY KARAOKE SCHEDULE", Height = 28, Padding = new Thickness(5, 3, 5, 3) };
+            spHeadline.Children.Add(new TextBlock { Text = "Poster Headline:", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+            var tbHeadline = CreateDialogTextBox("WEEKLY KARAOKE SCHEDULE", 30);
             spHeadline.Children.Add(tbHeadline);
             Grid.SetColumn(spHeadline, 0);
             topGrid.Children.Add(spHeadline);
 
             var spDj = new StackPanel();
-            spDj.Children.Add(new TextBlock { Text = "DJ / Host Name:", FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
-            var tbDj = new TextBox { Text = string.IsNullOrWhiteSpace(defaultDj) ? "Guest DJ" : defaultDj, Height = 28, Padding = new Thickness(5, 3, 5, 3) };
+            spDj.Children.Add(new TextBlock { Text = "DJ / Host Name:", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+            var tbDj = CreateDialogTextBox(string.IsNullOrWhiteSpace(defaultDj) ? "Guest DJ" : defaultDj, 30);
             spDj.Children.Add(tbDj);
             Grid.SetColumn(spDj, 2);
             topGrid.Children.Add(spDj);
 
             var spFormat = new StackPanel();
-            spFormat.Children.Add(new TextBlock { Text = "Output Format:", FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
-            var cbFormat = new ComboBox { Height = 28 };
+            spFormat.Children.Add(new TextBlock { Text = "Output Format:", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+            var cbFormat = CreateDialogComboBox(30);
             cbFormat.Items.Add("1080x1080 Square (Social Media)");
             cbFormat.Items.Add("1920x1080 16:9 (TV / DJ Banner)");
             cbFormat.SelectedIndex = 0;
@@ -526,8 +748,11 @@ namespace Lyracist.Shared
 
             root.Children.Add(topGrid);
 
-            root.Children.Add(new TextBlock { Text = "Theme:", FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
-            var cbTheme = new ComboBox { Height = 28, Width = 220, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 10) };
+            root.Children.Add(new TextBlock { Text = "Theme:", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+            var cbTheme = CreateDialogComboBox(30);
+            cbTheme.Width = 240;
+            cbTheme.HorizontalAlignment = HorizontalAlignment.Left;
+            cbTheme.Margin = new Thickness(0, 0, 0, 10);
             foreach (var posterTheme in PosterThemes)
             {
                 cbTheme.Items.Add(posterTheme.Name);
@@ -544,10 +769,10 @@ namespace Lyracist.Shared
             headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
             headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.2, GridUnitType.Star) });
 
-            var lblDay = new TextBlock { Text = "Day", FontSize = 11, FontWeight = FontWeights.Bold };
-            var lblVenue = new TextBlock { Text = "Venue Name", FontSize = 11, FontWeight = FontWeights.Bold };
-            var lblTime = new TextBlock { Text = "Show Time", FontSize = 11, FontWeight = FontWeights.Bold };
-            var lblNotes = new TextBlock { Text = "Specials / Notes", FontSize = 11, FontWeight = FontWeights.Bold };
+            var lblDay = new TextBlock { Text = "Day", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.Bold };
+            var lblVenue = new TextBlock { Text = "Venue Name (click to pick)", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.Bold };
+            var lblTime = new TextBlock { Text = "Show Time", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.Bold };
+            var lblNotes = new TextBlock { Text = "Specials / Notes", Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.Bold };
             Grid.SetColumn(lblDay, 0);
             Grid.SetColumn(lblVenue, 2);
             Grid.SetColumn(lblTime, 4);
@@ -572,17 +797,20 @@ namespace Lyracist.Shared
                 rGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
                 rGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.2, GridUnitType.Star) });
 
-                var tDay = new TextBox { Text = i == 0 ? "FRIDAY" : (i == 1 ? "SATURDAY" : sampleDays[i]), Height = 28, Padding = new Thickness(5, 3, 5, 3) };
-                var tVenue = new TextBox { Text = i == 0 ? (string.IsNullOrWhiteSpace(defaultVenue) ? "Main Street Pub" : defaultVenue) : "", Height = 28, Padding = new Thickness(5, 3, 5, 3) };
-                var tTime = new TextBox { Text = i == 0 ? "8:00 PM - 1:00 AM" : "", Height = 28, Padding = new Thickness(5, 3, 5, 3) };
-                var tNotes = new TextBox { Text = i == 0 ? "Karaoke, Phone Requests & Trivia!" : "", Height = 28, Padding = new Thickness(5, 3, 5, 3) };
+                var tDay = CreateDialogTextBox(i == 0 ? "FRIDAY" : (i == 1 ? "SATURDAY" : sampleDays[i]), 30);
+                var (venueContainer, tVenue) = CreateVenuePickerBox(
+                    i == 0 ? (string.IsNullOrWhiteSpace(defaultVenue) ? "Main Street Pub" : defaultVenue) : "",
+                    knownVenues,
+                    30);
+                var tTime = CreateDialogTextBox(i == 0 ? "8:00 PM - 1:00 AM" : "", 30);
+                var tNotes = CreateDialogTextBox(i == 0 ? "Karaoke, Phone Requests & Trivia!" : "", 30);
 
                 Grid.SetColumn(tDay, 0);
-                Grid.SetColumn(tVenue, 2);
+                Grid.SetColumn(venueContainer, 2);
                 Grid.SetColumn(tTime, 4);
                 Grid.SetColumn(tNotes, 6);
                 rGrid.Children.Add(tDay);
-                rGrid.Children.Add(tVenue);
+                rGrid.Children.Add(venueContainer);
                 rGrid.Children.Add(tTime);
                 rGrid.Children.Add(tNotes);
                 root.Children.Add(rGrid);
@@ -590,7 +818,16 @@ namespace Lyracist.Shared
             }
 
             var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 12, 0, 0) };
-            var btnCancel = new Button { Content = "Close", Width = 90, Height = 34, Margin = new Thickness(0, 0, 10, 0) };
+            var btnCancel = new Button
+            {
+                Content = "Close",
+                Width = 96,
+                Height = 34,
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = new SolidColorBrush(Color.FromRgb(51, 65, 85)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(100, 116, 139))
+            };
             btnCancel.Click += (_, _) => win.Close();
 
             var btnExport = new Button
@@ -600,7 +837,8 @@ namespace Lyracist.Shared
                 Height = 34,
                 FontWeight = FontWeights.Bold,
                 Background = new SolidColorBrush(Color.FromRgb(124, 58, 237)),
-                Foreground = Brushes.White
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(167, 139, 250))
             };
             btnExport.Click += (_, _) =>
             {
@@ -632,6 +870,13 @@ namespace Lyracist.Shared
             btnRow.Children.Add(btnExport);
             root.Children.Add(btnRow);
             win.Content = root;
+            win.Loaded += (_, _) =>
+            {
+                win.Topmost = true;
+                win.Activate();
+                tbHeadline.Focus();
+                tbHeadline.SelectAll();
+            };
             win.ShowDialog();
         }
     }

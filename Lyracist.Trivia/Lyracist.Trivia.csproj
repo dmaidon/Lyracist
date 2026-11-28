@@ -17,8 +17,8 @@
     <NoWarn>$(NoWarn);NU1903</NoWarn>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.26.208</AssemblyVersion>
-    <FileVersion>26.11.26.208</FileVersion>
+    <AssemblyVersion>26.11.28.209</AssemblyVersion>
+    <FileVersion>26.11.28.209</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>

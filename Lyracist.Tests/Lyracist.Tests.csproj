@@ -10,8 +10,8 @@
     <IsPackable>false</IsPackable>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.26.250</AssemblyVersion>
-    <FileVersion>26.11.26.250</FileVersion>
+    <AssemblyVersion>26.11.28.251</AssemblyVersion>
+    <FileVersion>26.11.28.251</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

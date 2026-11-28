@@ -14,8 +14,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.26.114</AssemblyVersion>
-    <FileVersion>26.11.26.114</FileVersion>
+    <AssemblyVersion>26.11.28.115</AssemblyVersion>
+    <FileVersion>26.11.28.115</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

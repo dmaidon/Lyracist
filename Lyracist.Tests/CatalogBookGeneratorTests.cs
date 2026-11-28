@@ -1,9 +1,9 @@
-// Edited on Nov 27, 2026 @ 13:31:00 -> Update user manuals for Custom Karaoke Track Studio, False Start / Undo Finish, Fuzzy & Crate Search, Originals Upload, Promo Print Tools, and LyracistDbEditor upgrades
+// Edited on Nov 28, 2026 @ 12:11:00 -> Document Schedule Poster click-to-pick Venue Name dropdown, RequestSlipsWindow.xaml, and colorized KaraokePage DJ strip buttons
 using System;
 using System.IO;
-using Xunit;
-using Microsoft.EntityFrameworkCore;
 using Lyracist.Data.Services;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 // Test parallelization is disabled via xunit.runner.json (parallelizeAssembly/parallelizeTestCollections)
 // instead of the obsolete CollectionBehaviorAttribute.DisableTestParallelization.
@@ -7463,6 +7463,25 @@ Section: Live Show Controls, Search, Patron Portal, Print/Promo Utilities & Libr
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " KaraokeStudioAndProSuiteUpgrades";
+                                doc.Save(pdfPath);
+                            }
+
+                            if (keywords == null || !keywords.Contains("SchedulePosterVenueDropdownAndDjStripColors"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    gfx.DrawString("Colorized DJ Strip Buttons, RequestSlipsWindow & Schedule Poster Venue Picker", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, 40));
+                                    gfx.DrawString("1. Top-Right Karaoke Page DJ Control Strip: Colorized all 6 buttons (Start Song, Skip Singer, False Start/Undo, Adjust Synth Display, Karaoke Studio, Pre-Show Screen) and added Slips & Poster buttons on the Singer Queue toolbar.", bodyFont, brush, new PdfSharp.Drawing.XPoint(40, 68));
+                                    gfx.DrawString("2. RequestSlipsWindow.xaml & Schedule Poster Venue Picker: Added RequestSlipsWindow.xaml and click-to-pick saved venues dropdown on every Venue Name box in the Weekly Karaoke Schedule Poster Maker.", bodyFont, brush, new PdfSharp.Drawing.XPoint(40, 86));
+                                }
+                                doc.Info.Keywords = (doc.Info.Keywords ?? string.Empty) + " SchedulePosterVenueDropdownAndDjStripColors";
                                 doc.Save(pdfPath);
                             }
                         }

@@ -1,5 +1,6 @@
-// Created on Oct 4, 2026 @ 10:00:00 -> Bottom-of-screen synth bars for the Rotation and DJ Banner screens, driven by IAudioSpectrumService
+// Edited on Nov 28, 2026 @ 10:04:15 -> Guard against null App.AppHost in XAML designer and uninitialized host contexts in SpectrumBarsOverlay.Hook()
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -68,6 +69,11 @@ public sealed class SpectrumBarsOverlay : Canvas
 
     private void Refresh()
     {
+        if (DesignerProperties.GetIsInDesignMode(this))
+        {
+            return;
+        }
+
         if (IsLoaded && WantsBars)
         {
             Visibility = Visibility.Visible;
@@ -82,9 +88,10 @@ public sealed class SpectrumBarsOverlay : Canvas
 
     private void Hook()
     {
-        if (_hooked) return;
-        _service ??= App.AppHost.Services.GetService<IAudioSpectrumService>();
-        _service?.Start();
+        if (_hooked || DesignerProperties.GetIsInDesignMode(this)) return;
+        _service ??= App.AppHost?.Services?.GetService<IAudioSpectrumService>();
+        if (_service == null) return;
+        _service.Start();
         _activeCount++;
         CompositionTarget.Rendering += OnRendering;
         _hooked = true;

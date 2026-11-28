@@ -1,4 +1,4 @@
-// Edited on Nov 27, 2026 @ 13:03:30 -> Add UndoLastFinishCommand and turn snapshot recovery for False Start / Undo Finish
+// Edited on Nov 28, 2026 @ 10:00:00 -> Open RequestSlipsWindow XAML dialog from PrintRequestSlipsCommand
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1067,11 +1067,15 @@ public partial class RotationViewModel : BaseViewModel
     [RelayCommand]
     private void PrintRequestSlips()
     {
-        PromoPrintUtility.ShowRequestSlipsDialog(
-            System.Windows.Application.Current?.MainWindow,
+        var win = new Lyracist.Windows.RequestSlipsWindow(
             AppSettings.SelectedVenue,
             AppSettings.DjName,
             $"http://{LocalNetworkHelper.GetLocalIPv4()}:{AppSettings.TabletPort}/request");
+        if (System.Windows.Application.Current?.MainWindow != null && System.Windows.Application.Current.MainWindow != win)
+        {
+            win.Owner = System.Windows.Application.Current.MainWindow;
+        }
+        win.ShowDialog();
     }
 
     [RelayCommand]
@@ -1080,7 +1084,8 @@ public partial class RotationViewModel : BaseViewModel
         PromoPrintUtility.ShowSchedulePosterDialog(
             System.Windows.Application.Current?.MainWindow,
             AppSettings.DjName,
-            AppSettings.SelectedVenue);
+            AppSettings.SelectedVenue,
+            AppSettings.Venues);
     }
 
     public Singer? GetCurrentSinger()

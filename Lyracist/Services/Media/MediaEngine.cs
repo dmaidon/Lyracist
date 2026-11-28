@@ -1,4 +1,4 @@
-// Edited on Nov 27, 2026 @ 13:05:15 -> Add playback freeze watchdog and automatic decoder recovery in MediaEngine
+// Edited on Nov 28, 2026 @ 09:50:15 -> Suppress CS4014 on fire-and-forget Dispatcher.BeginInvoke in MediaEngine
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -98,7 +98,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
 
                             if (_isPlaying && !_isMp4Mode)
                             {
-                                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                                _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                                 {
                                     if (_isPlaying) _timer?.Start();
                                 }));

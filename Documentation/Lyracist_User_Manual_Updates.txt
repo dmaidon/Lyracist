@@ -1,4 +1,4 @@
-// Edited on Nov 27, 2026 @ 13:24:00 -> Document Custom Karaoke Track Studio, False Start / Undo Finish, Fuzzy & Subfolder Crate Search, Originals Upload, Promo Print Tools, and LyracistDbEditor Audition/Sync Upgrades
+// Edited on Nov 28, 2026 @ 12:10:00 -> Document colorized KaraokePage DJ strip buttons, front-screen Slips/Poster buttons, RequestSlipsWindow.xaml, and Schedule Poster click-to-pick Venue Name dropdown
 Lyracist, KSRotation, KSRotation.Maui & LyracistDbEditor: Custom Karaoke Track Studio, 1-Click False Start & Undo Finish, Fuzzy / Abbreviation / Crate Search, Indie Originals Upload, Promo Print Utilities & Database Editor Pro Upgrades - (November 2026)
 
 Section: Live Show Controls, Search, Patron Portal, Print/Promo Utilities & Library Management
@@ -37,9 +37,9 @@ Section: Live Show Controls, Search, Patron Portal, Print/Promo Utilities & Libr
    - Tracks are saved into 'Data/Originals/', automatically queued in the singer rotation with an '[ORIGINAL UPLOAD]' badge, and resolved automatically by Lyracist's 'SongPathResolver'.
 
 0E. Printable Branded Paper Request Slips PDF & Weekly Karaoke Schedule Poster Maker:
-   - Accessible from both KSRotation (top Rotation toolbar '🖨️ Paper Slips' and '🎨 Schedule Poster') and Lyracist (Rotation Page toolbar 'Slips PDF' and 'Poster'):
-     * Printable Paper Request Slips PDF Generator: Generates an 8.5" x 11" multi-up cuttable PDF sheet (8, 10, or 12 slips per page) branded with the Venue Name, Host/DJ Name, Singer Name / Song Title / Artist / Key Shift (+/-) fields, crop guides, and an optional embedded Wi-Fi Request Portal QR code.
-     * Weekly Karaoke Schedule Poster & Social Flyer Maker: Generates high-resolution PNG graphics in both '1080x1080' (Instagram / Facebook Square) and '1920x1080' (16:9 TV Display / Event Header) formats across 4 visual themes ('Neon Nightclub', 'Classic Gold VIP', 'Retro Synthwave', ' Rock & Roll Dive') for up to 7 weekly show nights.
+   - Accessible from KSRotation (top Rotation toolbar '🖨️ Paper Slips' and '🎨 Schedule Poster') and Lyracist (both the front Karaoke Page Singer Queue toolbar 'Slips' / 'Poster' buttons and the Rotation Page toolbar 'Slips PDF' / 'Poster'):
+     * Printable Paper Request Slips PDF Generator ('RequestSlipsWindow.xaml' / 'PromoPrintUtility.ShowRequestSlipsDialog'): Generates an 8.5" x 11" multi-up cuttable PDF sheet (8, 10, or 12 slips per page) branded with the Venue Name, Host/DJ Name, Singer Name / Song Title / Artist / Key Shift (+/-) fields, crop guides, and an optional editable Wi-Fi Request Portal QR code.
+     * Weekly Karaoke Schedule Poster & Social Flyer Maker: Generates high-resolution PNG graphics in both '1080x1080' (Instagram / Facebook Square) and '1920x1080' (16:9 TV Display / Event Header) formats across 4 visual themes ('Neon Nightclub', 'Classic Gold VIP', 'Retro Synthwave', 'Rock & Roll Dive') for up to 7 weekly show nights. Clicking inside any 'Venue Name' box automatically drops down the list of saved venues for 1-click selection while still allowing custom venue names to be typed directly.
 
 0F. Lyracist Database Editor ('LyracistDbEditor.exe') Pro Library Upgrades:
    - Built-In MP3+G CDG Karaoke Audition Player ('🎧 Audition' & 'Audition Player & USB Drive Sync' tab):

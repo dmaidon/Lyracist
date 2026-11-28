@@ -14,8 +14,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.26.126</AssemblyVersion>
-    <FileVersion>26.11.26.126</FileVersion>
+    <AssemblyVersion>26.11.28.127</AssemblyVersion>
+    <FileVersion>26.11.28.127</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>

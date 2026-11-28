@@ -1,4 +1,4 @@
-// Edited on Nov 27, 2026 @ 13:04:15 -> Add UndoLastFinishCommand and turn snapshot recovery for False Start / Undo Finish
+// Edited on Nov 28, 2026 @ 12:02:00 -> Pass saved Venues list to ShowSchedulePosterDialog
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2585,7 +2585,8 @@ namespace KSRotation.ViewModels
             PromoPrintUtility.ShowSchedulePosterDialog(
                 System.Windows.Application.Current?.MainWindow,
                 DjName,
-                VenueName);
+                VenueName,
+                Venues);
 #endif
         }
 

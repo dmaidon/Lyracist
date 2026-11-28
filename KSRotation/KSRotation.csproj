@@ -12,8 +12,8 @@
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.28.846</AssemblyVersion>
-    <FileVersion>26.11.28.846</FileVersion>
+    <AssemblyVersion>26.11.28.849</AssemblyVersion>
+    <FileVersion>26.11.28.849</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

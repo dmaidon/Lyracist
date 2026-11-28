@@ -13,8 +13,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Version>1.1.1</Version>
     <PackageVersion>1.1.1</PackageVersion>
-    <AssemblyVersion>26.11.26.633</AssemblyVersion>
-    <FileVersion>26.11.26.633</FileVersion>
+    <AssemblyVersion>26.11.28.641</AssemblyVersion>
+    <FileVersion>26.11.28.641</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
