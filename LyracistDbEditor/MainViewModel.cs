@@ -151,7 +151,7 @@ public partial class MainViewModel : ObservableObject
     public bool CanRemoveDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
     public bool CanRescanDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
 
-    public ObservableCollection<string> SubfolderCrates { get; } = ["All Crates"];
+    public ObservableCollection<string> SubfolderCrates { get; } = [CrateList.AllCrates];
 
     [ObservableProperty]
     private string _selectedSubfolderCrate = "All Crates";
@@ -162,26 +162,26 @@ public partial class MainViewModel : ObservableObject
         Search();
     }
 
-    public void RefreshSubfolderCrates()
+    public async void RefreshSubfolderCrates()
     {
         try
         {
-            using var context = new LyracistDbContext();
-            var searchService = new SearchService(context);
-            var crates = searchService.GetDistinctSubfolderCrates();
-            string prev = SelectedSubfolderCrate;
-            SubfolderCrates.Clear();
-            SubfolderCrates.Add("All Crates");
-            foreach (string c in crates)
+            // Reads every song path, so it runs off the UI thread.
+            var crates = await Task.Run(() =>
             {
-                SubfolderCrates.Add(c);
-            }
-            if (!SubfolderCrates.Contains(prev))
+                using var context = new LyracistDbContext();
+                return new SearchService(context).GetDistinctSubfolderCrates();
+            });
+            CrateList.Sync(SubfolderCrates, crates);
+            if (!SubfolderCrates.Contains(SelectedSubfolderCrate))
             {
-                SelectedSubfolderCrate = "All Crates";
+                SelectedSubfolderCrate = CrateList.AllCrates;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to load folder list", ex);
+        }
     }
 
     public MainViewModel()
@@ -1118,8 +1118,23 @@ public partial class MainViewModel : ObservableObject
         "{Artist} - {Title}",
         "{Title} - {Artist}",
         "{Title}",
-        "{Artist} - {Title} ({Genre})"
+        "{Artist} - {Title} ({Genre})",
+        "{Brand} - {Artist} - {Title}",
+        "[{Genre}] {Artist} - {Title}"
     ];
+
+    /// <summary>
+    /// The disc/brand ID from a "BRAND - Artist - Title" file name (e.g. "SC8123-04"). Songs carry no
+    /// brand tag, so a leading part only counts when it is one of three or more and contains a digit
+    /// or is all capitals.
+    /// </summary>
+    private static string ExtractBrand(string filePath)
+    {
+        string[] parts = Path.GetFileNameWithoutExtension(filePath).Split(" - ", StringSplitOptions.TrimEntries);
+        if (parts.Length < 3) return string.Empty;
+        string first = parts[0];
+        return first.Any(char.IsDigit) || !first.Any(char.IsLower) ? first : string.Empty;
+    }
 
     [ObservableProperty]
     private string _selectedRenamePattern = "{Artist} - {Title}";
@@ -1205,6 +1220,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             int restoredCount = 0;
+            var failedItems = new List<RenameHistoryItem>();
             await Task.Run(async () =>
             {
                 for (int i = batch.Items.Count - 1; i >= 0; i--)
@@ -1225,16 +1241,25 @@ public partial class MainViewModel : ObservableObject
                             string msg = $"Restored: {Path.GetFileName(item.NewPath)} -> {Path.GetFileName(item.OldPath)}";
                             RunOnUi(() => ScanLog.Add(msg));
                         }
+                        else if (File.Exists(item.NewPath))
+                        {
+                            failedItems.Insert(0, item);
+                            string msg = $"Not restored (original name is in use): {Path.GetFileName(item.NewPath)}";
+                            RunOnUi(() => ScanLog.Add(msg));
+                        }
                     }
                     catch (Exception ex)
                     {
+                        failedItems.Insert(0, item);
                         string errMsg = $"Failed to restore '{Path.GetFileName(item.NewPath)}': {ex.Message}";
                         RunOnUi(() => ScanLog.Add(errMsg));
                     }
                 }
             });
 
-            _renameHistoryBatches.RemoveAt(_renameHistoryBatches.Count - 1);
+            // Keep anything that failed in history so Undo can be retried.
+            if (failedItems.Count == 0) _renameHistoryBatches.Remove(batch);
+            else batch.Items = failedItems;
             SaveRenameUndoHistory();
             ScanProgressText = $"Undo complete: restored {restoredCount} file(s).";
             ScanLog.Add($"[UNDO FINISHED] Restored {restoredCount} file(s).");
@@ -1255,7 +1280,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private Task PreviewRename() => RunRenameAsync(dryRun: true);
 
-    private static string FormatRenameBaseName(string pattern, string? title, string? artist, string? genre)
+    private static string FormatRenameBaseName(string pattern, string? title, string? artist, string? genre, string brand)
     {
         string cleanTitle = (title ?? string.Empty).Trim();
         string cleanArtist = (artist ?? string.Empty).Trim();
@@ -1270,6 +1295,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         string formatted = template
+            .Replace("{Brand}", brand, StringComparison.OrdinalIgnoreCase)
             .Replace("{Artist}", cleanArtist, StringComparison.OrdinalIgnoreCase)
             .Replace("{Title}", cleanTitle, StringComparison.OrdinalIgnoreCase)
             .Replace("{Genre}", string.IsNullOrEmpty(cleanGenre) ? "Karaoke" : cleanGenre, StringComparison.OrdinalIgnoreCase)
@@ -1433,7 +1459,7 @@ public partial class MainViewModel : ObservableObject
 
                         if (!string.IsNullOrWhiteSpace(title))
                         {
-                            string targetBase = FormatRenameBaseName(pattern, title, artist, genre);
+                            string targetBase = FormatRenameBaseName(pattern, title, artist, genre, ExtractBrand(filePath));
                             string sanitizedTitle = SanitizeFileName(targetBase);
                             if (!string.IsNullOrWhiteSpace(sanitizedTitle))
                             {
@@ -1484,6 +1510,9 @@ public partial class MainViewModel : ObservableObject
                                         NewCdgPath = hasCdg ? newCdgPath : null
                                     });
                                     renameSuccessCount++;
+                                    // Record undo history as we go, so a crash or abort partway doesn't lose it.
+                                    if (undoBatch.Items.Count == 1) _renameHistoryBatches.Add(undoBatch);
+                                    if (undoBatch.Items.Count % 25 == 1) SaveRenameUndoHistory();
                                     await UpdateRenamedSongPathAsync(filePath, newPath);
                                     Log($"Renamed: {fileName} -> {newFileName}");
                                 }
@@ -1510,7 +1539,6 @@ public partial class MainViewModel : ObservableObject
 
                 if (!dryRun && undoBatch.Items.Count > 0)
                 {
-                    _renameHistoryBatches.Add(undoBatch);
                     SaveRenameUndoHistory();
                 }
 

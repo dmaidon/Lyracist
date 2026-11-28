@@ -316,6 +316,116 @@ namespace Lyracist.Services.Database
             }
         }
 
+        private static readonly object _historyQueueLock = new();
+        private static System.Threading.Tasks.Task _historyQueue = System.Threading.Tasks.Task.CompletedTask;
+
+        /// <summary>
+        /// Runs history writes one at a time, in the order queued, off the UI thread. This guarantees an
+        /// Undo Finish can't run before the performance it is reverting has been written.
+        /// </summary>
+        public static System.Threading.Tasks.Task QueueHistoryWrite(Action write)
+        {
+            lock (_historyQueueLock)
+            {
+                _historyQueue = _historyQueue.ContinueWith(
+                    _ =>
+                    {
+                        try
+                        {
+                            write();
+                        }
+                        catch (Exception ex)
+                        {
+                            Lyracist.Shared.Globals.LogError("Lyracist", "Queued history write failed", ex);
+                        }
+                    },
+                    System.Threading.Tasks.TaskScheduler.Default);
+                return _historyQueue;
+            }
+        }
+
+        /// <summary>
+        /// Reverses one <see cref="RecordCompletedPerformance"/> call: lowers the song's times-performed
+        /// count (deleting the row when it reaches zero) and the singer's total.
+        /// </summary>
+        public static void RevertCompletedPerformance(
+            string? singerName,
+            string? songTitle,
+            string? artist,
+            bool decrementTotalSongs = true)
+        {
+            if (string.IsNullOrWhiteSpace(singerName)) return;
+
+            string cleanName = NameFormatting.CleanSingerName(singerName);
+            if (string.IsNullOrWhiteSpace(cleanName)) return;
+
+            string cleanTitle = NameFormatting.ProperCase((songTitle ?? string.Empty).Trim());
+            string cleanArtist = NameFormatting.ProperCase((artist ?? string.Empty).Trim());
+
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+
+                if (!IsEligibleDatabaseSinger(cleanName, connection))
+                {
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(cleanTitle))
+                {
+                    using var findCmd = connection.CreateCommand();
+                    findCmd.CommandText = @"
+                        SELECT SingerHistoryId, TimesPerformed
+                        FROM SingerHistory
+                        WHERE SingerName = $name COLLATE NOCASE
+                          AND SongTitle = $title COLLATE NOCASE
+                          AND (Artist = $artist COLLATE NOCASE OR Artist = '' OR $artist = '')
+                        ORDER BY CASE WHEN Artist = $artist COLLATE NOCASE THEN 0 WHEN Artist != '' THEN 1 ELSE 2 END,
+                                 SingerHistoryId ASC
+                        LIMIT 1;";
+                    findCmd.Parameters.AddWithValue("$name", cleanName);
+                    findCmd.Parameters.AddWithValue("$title", cleanTitle);
+                    findCmd.Parameters.AddWithValue("$artist", cleanArtist);
+
+                    int? id = null;
+                    int times = 1;
+                    using (var reader = findCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            id = reader.GetInt32(0);
+                            times = reader.IsDBNull(1) ? 1 : reader.GetInt32(1);
+                        }
+                    }
+
+                    if (id.HasValue)
+                    {
+                        using var changeCmd = connection.CreateCommand();
+                        changeCmd.CommandText = times > 1
+                            ? "UPDATE SingerHistory SET TimesPerformed = TimesPerformed - 1 WHERE SingerHistoryId = $id;"
+                            : "DELETE FROM SingerHistory WHERE SingerHistoryId = $id;";
+                        changeCmd.Parameters.AddWithValue("$id", id.Value);
+                        changeCmd.ExecuteNonQuery();
+                    }
+                }
+
+                if (decrementTotalSongs)
+                {
+                    using var totalCmd = connection.CreateCommand();
+                    totalCmd.CommandText = "UPDATE Singers SET TotalSongsSung = MAX(TotalSongsSung - 1, 0) WHERE Name = $name COLLATE NOCASE;";
+                    totalCmd.Parameters.AddWithValue("$name", cleanName);
+                    totalCmd.ExecuteNonQuery();
+                }
+
+                Lyracist.Data.LyracistDbContext.EnsureAndSyncDedicatedSingersDatabase();
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error reverting completed performance", ex);
+            }
+        }
+
         /// <summary>
         /// Records a completed live performance for a qualifying singer (First &amp; Last name or Distinct name),
         /// saving the song and venue into <c>SingerHistory</c> and updating <c>Singers</c> (<c>TotalSongsSung</c>, <c>LastSang</c>, and <c>Venues</c>).

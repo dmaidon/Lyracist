@@ -130,48 +130,27 @@ public partial class KaraokeStudioWindow : Window
         }
     }
 
+    private void SliderGuideVocal_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (LblGuideVocal != null)
+        {
+            LblGuideVocal.Text = $"Guide Vocal: {(int)Math.Round(e.NewValue)}% (used in Guide Vocal mode)";
+        }
+    }
+
     private void OnParseLyricsClicked(object sender, RoutedEventArgs e)
     {
-        string raw = TbRawLyrics.Text ?? string.Empty;
-        var lines = raw.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries)
-            .Select(l => l.Trim())
-            .Where(l => l.Length > 0)
-            .ToList();
-
-        if (lines.Count == 0)
+        var parsed = StudioLyricLine.ParseLyrics(TbRawLyrics.Text);
+        if (parsed.Count == 0)
         {
             MessageBox.Show("Paste one or more lyric lines into the box first.", "No Lyrics", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         LyricLines.Clear();
-        double cursorSec = 4.0;
-        foreach (string line in lines)
+        foreach (var line in parsed)
         {
-            double start = cursorSec;
-            string text = line;
-
-            // If line already starts with an LRC timestamp [mm:ss.ff], preserve it
-            if (text.StartsWith('[') && text.IndexOf(']') is int closeIdx and > 1)
-            {
-                string tag = text[1..closeIdx];
-                if (StudioLyricLine.TryParseTimestamp(tag, out double parsedSec))
-                {
-                    start = parsedSec;
-                    text = text[(closeIdx + 1)..].Trim();
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(text)) continue;
-
-            LyricLines.Add(new StudioLyricLine
-            {
-                StartTimeSeconds = start,
-                EndTimeSeconds = start + 3.5,
-                LyricText = text,
-                SingerAssignment = "Singer 1"
-            });
-            cursorSec = start + 4.0;
+            LyricLines.Add(line);
         }
 
         if (LyricLines.Count > 0)
@@ -296,7 +275,8 @@ public partial class KaraokeStudioWindow : Window
             OnParseLyricsClicked(sender, e);
         }
 
-        string outDir = AppSettings.LibraryDirectories.FirstOrDefault(Directory.Exists) ?? Globals.OriginalsDir;
+        // A dedicated subfolder keeps exports from landing beside (or on top of) existing library songs.
+        string outDir = Path.Combine(AppSettings.LibraryDirectories.FirstOrDefault(Directory.Exists) ?? Globals.DataDir, "Karaoke Studio");
         Directory.CreateDirectory(outDir);
 
         var options = new KaraokeStudioExportOptions
@@ -306,6 +286,7 @@ public partial class KaraokeStudioWindow : Window
             SongTitle = string.IsNullOrWhiteSpace(TbSongTitle.Text) ? "Custom Karaoke Track" : TbSongTitle.Text.Trim(),
             ArtistName = string.IsNullOrWhiteSpace(TbArtistName.Text) ? "Custom Artist" : TbArtistName.Text.Trim(),
             VocalIsolationMode = Math.Max(0, CbVocalMode.SelectedIndex),
+            GuideVocalPercent = (int)Math.Round(SliderGuideVocal.Value),
             KeySemitones = (int)Math.Round(SliderKeyShift.Value),
             TempoPercent = (int)Math.Round(SliderTempo.Value),
             ExportFormatIndex = Math.Max(0, CbExportFormat.SelectedIndex),
@@ -348,6 +329,10 @@ public partial class KaraokeStudioWindow : Window
                 "Karaoke Studio Export Complete",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+        }
+        catch (OperationCanceledException)
+        {
+            TxtStatus.Text = "Export cancelled.";
         }
         catch (Exception ex)
         {

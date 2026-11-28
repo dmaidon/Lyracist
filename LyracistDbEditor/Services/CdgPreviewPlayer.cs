@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Lyracist.Data.Services;
 
 namespace LyracistDbEditor;
 
@@ -44,6 +45,7 @@ public sealed class CdgPreviewPlayer : IDisposable
     private string? _tempDir;
     private bool _isPlaying;
     private CancellationTokenSource? _dspCts;
+    private int _loadGeneration;
 
     public static readonly int[] EqFrequenciesHz = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 
@@ -84,10 +86,14 @@ public sealed class CdgPreviewPlayer : IDisposable
 
     public async Task LoadTrackAsync(string filePath, int keySemitones, double[] eqBandsDb, double volumePercent)
     {
+        int generation = ++_loadGeneration;
         Stop();
+        _mediaPlayer.Close(); // releases the lock on the previous temp audio
         CleanupTempDir();
 
         _sourceFilePath = filePath;
+        _rawAudioPath = null;
+        _activeAudioPath = null;
         _cdgBytes = [];
         _packetCount = 0;
         ResetPaletteAndCanvas();
@@ -98,60 +104,79 @@ public sealed class CdgPreviewPlayer : IDisposable
         }
 
         string ext = Path.GetExtension(filePath).ToLowerInvariant();
-        _tempDir = Path.Combine(Path.GetTempPath(), "LyracistDbEditorPlayer_" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_tempDir);
+        // Each load works in its own folder with its own locals, so a second load started while this
+        // one is still extracting can't mix the two up.
+        string tempDir = Path.Combine(Path.GetTempPath(), "LyracistDbEditorPlayer_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
 
         string? cdgPath = null;
         string? audioPath = null;
+        byte[] cdgBytes = [];
 
-        await Task.Run(() =>
+        try
         {
-            if (ext == ".zip")
+            await Task.Run(() =>
             {
-                using var archive = ZipFile.OpenRead(filePath);
-                var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
-                var audioEntry = archive.Entries.FirstOrDefault(e =>
-                    e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
-                    e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
-                    e.FullName.EndsWith(".m4a", StringComparison.OrdinalIgnoreCase) ||
-                    e.FullName.EndsWith(".flac", StringComparison.OrdinalIgnoreCase));
-
-                if (audioEntry != null)
+                if (ext == ".zip")
                 {
-                    audioPath = Path.Combine(_tempDir, "raw_audio" + Path.GetExtension(audioEntry.FullName));
-                    audioEntry.ExtractToFile(audioPath, overwrite: true);
-                }
-                if (cdgEntry != null)
-                {
-                    cdgPath = Path.Combine(_tempDir, "track.cdg");
-                    cdgEntry.ExtractToFile(cdgPath, overwrite: true);
-                }
-            }
-            else if (ext == ".cdg")
-            {
-                cdgPath = filePath;
-                string mp3Candidate = Path.ChangeExtension(filePath, ".mp3");
-                string wavCandidate = Path.ChangeExtension(filePath, ".wav");
-                if (File.Exists(mp3Candidate)) audioPath = mp3Candidate;
-                else if (File.Exists(wavCandidate)) audioPath = wavCandidate;
-            }
-            else
-            {
-                audioPath = filePath;
-                string companionCdg = Path.ChangeExtension(filePath, ".cdg");
-                if (File.Exists(companionCdg))
-                {
-                    cdgPath = companionCdg;
-                }
-            }
+                    using var archive = ZipFile.OpenRead(filePath);
+                    var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
+                    var audioEntry = archive.Entries.FirstOrDefault(e =>
+                        e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                        e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
+                        e.FullName.EndsWith(".m4a", StringComparison.OrdinalIgnoreCase) ||
+                        e.FullName.EndsWith(".flac", StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(cdgPath) && File.Exists(cdgPath))
-            {
-                _cdgBytes = File.ReadAllBytes(cdgPath);
-                _packetCount = _cdgBytes.Length / PacketSize;
-            }
-        });
+                    if (audioEntry != null)
+                    {
+                        audioPath = Path.Combine(tempDir, "raw_audio" + Path.GetExtension(audioEntry.FullName));
+                        audioEntry.ExtractToFile(audioPath, overwrite: true);
+                    }
+                    if (cdgEntry != null)
+                    {
+                        cdgPath = Path.Combine(tempDir, "track.cdg");
+                        cdgEntry.ExtractToFile(cdgPath, overwrite: true);
+                    }
+                }
+                else if (ext == ".cdg")
+                {
+                    cdgPath = filePath;
+                    string mp3Candidate = Path.ChangeExtension(filePath, ".mp3");
+                    string wavCandidate = Path.ChangeExtension(filePath, ".wav");
+                    if (File.Exists(mp3Candidate)) audioPath = mp3Candidate;
+                    else if (File.Exists(wavCandidate)) audioPath = wavCandidate;
+                }
+                else
+                {
+                    audioPath = filePath;
+                    string companionCdg = Path.ChangeExtension(filePath, ".cdg");
+                    if (File.Exists(companionCdg))
+                    {
+                        cdgPath = companionCdg;
+                    }
+                }
 
+                if (!string.IsNullOrEmpty(cdgPath) && File.Exists(cdgPath))
+                {
+                    cdgBytes = File.ReadAllBytes(cdgPath);
+                }
+            });
+        }
+        catch
+        {
+            DeleteDirectory(tempDir);
+            throw;
+        }
+
+        if (generation != _loadGeneration)
+        {
+            DeleteDirectory(tempDir);
+            return;
+        }
+
+        _tempDir = tempDir;
+        _cdgBytes = cdgBytes;
+        _packetCount = cdgBytes.Length / PacketSize;
         _rawAudioPath = audioPath;
         _activeAudioPath = audioPath;
 
@@ -214,21 +239,11 @@ public sealed class CdgPreviewPlayer : IDisposable
     {
         try
         {
-            string ffmpegExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe");
-            if (!File.Exists(ffmpegExe))
-            {
-                ffmpegExe = @"C:\ffmpeg\bin\ffmpeg.exe";
-                if (!File.Exists(ffmpegExe)) ffmpegExe = "ffmpeg";
-            }
-
             var filters = new List<string>();
-            if (keySemitones != 0)
+            string pitchFilter = FfmpegRunner.BuildPitchTempoFilter(keySemitones, 1.0);
+            if (pitchFilter.Length > 0)
             {
-                double pitchRatio = Math.Pow(2.0, keySemitones / 12.0);
-                double tempoCompensation = 1.0 / pitchRatio;
-                string pStr = pitchRatio.ToString("F5", CultureInfo.InvariantCulture);
-                string tStr = Math.Clamp(tempoCompensation, 0.5, 2.0).ToString("F5", CultureInfo.InvariantCulture);
-                filters.Add($"asetrate=44100*{pStr},aresample=44100,atempo={tStr}");
+                filters.Add(pitchFilter);
             }
 
             for (int i = 0; i < Math.Min(EqFrequenciesHz.Length, eqBandsDb.Length); i++)
@@ -246,22 +261,15 @@ public sealed class CdgPreviewPlayer : IDisposable
             string outFile = Path.Combine(tempDir, $"dsp_{Guid.NewGuid():N}.mp3");
             string filterArg = string.Join(",", filters);
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = ffmpegExe,
-                Arguments = $"-y -i \"{inputAudioPath}\" -vn -af \"{filterArg}\" -b:a 192k \"{outFile}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardError = true
-            };
-
-            using var proc = Process.Start(psi);
-            if (proc == null) return null;
-            await proc.WaitForExitAsync(token);
-            return proc.ExitCode == 0 && File.Exists(outFile) ? outFile : null;
+            await FfmpegRunner.RunAsync($"-y -i \"{inputAudioPath}\" -vn -af \"{filterArg}\" -b:a 192k \"{outFile}\"", token);
+            return File.Exists(outFile) ? outFile : null;
         }
-        catch
+        catch (Exception ex)
         {
+            if (ex is not OperationCanceledException)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: audition DSP render failed", ex);
+            }
             return null;
         }
     }
@@ -453,19 +461,27 @@ public sealed class CdgPreviewPlayer : IDisposable
 
     private void CleanupTempDir()
     {
+        DeleteDirectory(_tempDir);
+        _tempDir = null;
+    }
+
+    private static void DeleteDirectory(string? path)
+    {
         try
         {
-            if (!string.IsNullOrEmpty(_tempDir) && Directory.Exists(_tempDir))
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
             {
-                Directory.Delete(_tempDir, recursive: true);
+                Directory.Delete(path, recursive: true);
             }
         }
-        catch { }
-        _tempDir = null;
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+        }
     }
 
     public void Dispose()
     {
+        _loadGeneration++;
         Stop();
         _mediaPlayer.Close();
         CleanupTempDir();

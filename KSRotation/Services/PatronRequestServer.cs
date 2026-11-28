@@ -38,8 +38,13 @@ namespace KSRotation.Services
         Action<string>? onSingerProfileChanged = null,
         Func<string, bool>? onReactionReceived = null)
     {
-        private const int MaxRequestBodyBytes = 16_777_216; // 16 MB (supports base64 original backing track uploads)
-        private const int MaxOriginalTrackBytes = 12_582_912; // 12 MB raw audio/video backing track
+        private const int MaxRequestBodyBytes = 4_194_304; // 4 MB (the original-track upload route has its own cap)
+        private const string OriginalUploadPath = "/api/originals/upload";
+        private const int MaxOriginalUploadsPerHour = 3;
+        // Large uploads over venue Wi-Fi need far longer than an ordinary request.
+        private static readonly TimeSpan OriginalUploadReadTimeout = TimeSpan.FromMinutes(2);
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<DateTime>> _originalUploadsByIp = new();
+        private readonly SemaphoreSlim _originalUploadSlots = new(2, 2);
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
         private const int MaxConcurrentConnections = 64;
         private const int MaxPinAttemptsBeforeLockout = 5;
@@ -131,6 +136,25 @@ namespace KSRotation.Services
 
                 state.Count++;
                 return true;
+            }
+        }
+
+        private bool HasOriginalUploadQuota(string clientIp)
+        {
+            var times = _originalUploadsByIp.GetOrAdd(clientIp, _ => []);
+            lock (times)
+            {
+                times.RemoveAll(t => DateTime.UtcNow - t > TimeSpan.FromHours(1));
+                return times.Count < MaxOriginalUploadsPerHour;
+            }
+        }
+
+        private void RecordOriginalUpload(string clientIp)
+        {
+            var times = _originalUploadsByIp.GetOrAdd(clientIp, _ => []);
+            lock (times)
+            {
+                times.Add(DateTime.UtcNow);
             }
         }
 
@@ -266,7 +290,15 @@ namespace KSRotation.Services
                     }
 
                     int contentLength = ParseContentLength(headerLines);
-                    if (contentLength < 0 || contentLength > MaxRequestBodyBytes)
+                    bool isOriginalUpload = method.Equals("POST", StringComparison.OrdinalIgnoreCase)
+                        && path.Equals(OriginalUploadPath, StringComparison.OrdinalIgnoreCase);
+                    int bodyLimit = isOriginalUpload ? OriginalUploadStore.MaxUploadBodyBytes : MaxRequestBodyBytes;
+                    if (isOriginalUpload)
+                    {
+                        readTimeoutCts.CancelAfter(OriginalUploadReadTimeout);
+                    }
+
+                    if (contentLength < 0 || contentLength > bodyLimit)
                     {
                         await SendBadRequestAsync(stream, "{\"error\":\"Request body too large.\"}");
                         return;
@@ -974,95 +1006,29 @@ namespace KSRotation.Services
                         await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
 #endif
                     }
-                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/originals/upload", StringComparison.OrdinalIgnoreCase))
+                    else if (isOriginalUpload)
                     {
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
-                        string body = Encoding.UTF8.GetString(bodyBytes);
-
-                        using JsonDocument doc = JsonDocument.Parse(body);
-                        JsonElement root = doc.RootElement;
-                        string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "").Trim() : "";
-                        string duetPartner = root.TryGetProperty("duetPartner", out var dpProp) ? (dpProp.GetString() ?? "").Trim() : "";
-                        string song = root.TryGetProperty("song", out var sProp) ? (sProp.GetString() ?? "").Trim() : "";
-                        string artist = root.TryGetProperty("artist", out var aProp) ? (aProp.GetString() ?? "").Trim() : "";
-                        string fileName = root.TryGetProperty("fileName", out var fnProp) ? (fnProp.GetString() ?? "").Trim() : "";
-                        string fileBase64 = root.TryGetProperty("fileBase64", out var fbProp) ? (fbProp.GetString() ?? "").Trim() : "";
-
-                        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(song) || string.IsNullOrWhiteSpace(fileBase64))
+                        if (!HasOriginalUploadQuota(clientIp))
                         {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Performer name, song title, and audio/backing track file are required.\"}");
+                            await SendBadRequestAsync(stream, "{\"error\":\"Upload limit reached for this device. Please see the DJ.\"}");
                             return;
                         }
 
-                        if (_onCheckRequestAllowed != null)
+                        // Bounds memory use: each of these requests buffers well over 16 MB.
+                        if (!await _originalUploadSlots.WaitAsync(TimeSpan.FromSeconds(10), readTimeoutCts.Token))
                         {
-                            string? blockedReason = _onCheckRequestAllowed();
-                            if (!string.IsNullOrEmpty(blockedReason))
-                            {
-                                await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(blockedReason)}\"}}");
-                                return;
-                            }
-                        }
-
-                        string ext = Path.GetExtension(fileName).ToLowerInvariant();
-                        HashSet<string> allowedExts = [".mp3", ".wav", ".mp4", ".zip", ".m4a", ".ogg", ".flac"];
-                        if (!allowedExts.Contains(ext))
-                        {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Unsupported track format. Please upload an .mp3, .wav, .mp4, .m4a, .flac, or .zip (MP3+G) file.\"}");
+                            await SendBadRequestAsync(stream, "{\"error\":\"Other uploads are in progress. Please try again in a moment.\"}");
                             return;
                         }
 
-                        if (fileBase64.Contains(','))
-                        {
-                            fileBase64 = fileBase64[(fileBase64.IndexOf(',') + 1)..];
-                        }
-
-                        byte[] trackBytes;
                         try
                         {
-                            trackBytes = Convert.FromBase64String(fileBase64);
+                            await HandleOriginalUploadAsync(stream, readStream, contentLength, clientIp, readTimeoutCts.Token);
                         }
-                        catch
+                        finally
                         {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Invalid track file encoding.\"}");
-                            return;
+                            _originalUploadSlots.Release();
                         }
-
-                        if (trackBytes.Length < 64 || trackBytes.Length > MaxOriginalTrackBytes)
-                        {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Track file must be between 64 bytes and 12 MB.\"}");
-                            return;
-                        }
-
-                        string effectiveArtist = string.IsNullOrWhiteSpace(artist) ? name : artist;
-                        string originalsDir = Lyracist.Shared.Globals.OriginalsDir;
-                        Directory.CreateDirectory(originalsDir);
-
-                        static string CleanFilePart(string input)
-                        {
-                            foreach (char c in Path.GetInvalidFileNameChars())
-                            {
-                                input = input.Replace(c, '_');
-                            }
-                            return input.Trim();
-                        }
-
-                        string safeFile = $"{CleanFilePart(effectiveArtist)} - {CleanFilePart(song)} (Original){ext}";
-                        string fullPath = Path.GetFullPath(Path.Combine(originalsDir, safeFile));
-                        if (!fullPath.StartsWith(Path.GetFullPath(originalsDir), StringComparison.OrdinalIgnoreCase))
-                        {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Invalid file name.\"}");
-                            return;
-                        }
-
-                        await File.WriteAllBytesAsync(fullPath, trackBytes);
-
-                        var songs = new List<RequestedSong>
-                        {
-                            new RequestedSong($"{song} (Original)", effectiveArtist)
-                        };
-                        _onRequestReceived(name, songs, "Karaoke", duetPartner);
-                        await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new { success = true, savedAs = safeFile }));
                     }
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/reaction", StringComparison.OrdinalIgnoreCase))
                     {
@@ -1482,6 +1448,92 @@ namespace KSRotation.Services
                 }
             }
             return string.Empty;
+        }
+
+        private async Task HandleOriginalUploadAsync(NetworkStream stream, Stream readStream, int contentLength, string clientIp, CancellationToken token)
+        {
+            byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, token);
+            using JsonDocument doc = JsonDocument.Parse(bodyBytes);
+            JsonElement root = doc.RootElement;
+            string Read(string property) => root.TryGetProperty(property, out var value) ? (value.GetString() ?? "").Trim() : "";
+
+            string name = Read("name");
+            string duetPartner = Read("duetPartner");
+            string song = Read("song");
+            string artist = Read("artist");
+            string fileName = Read("fileName");
+            string fileBase64 = Read("fileBase64");
+
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(song) || string.IsNullOrWhiteSpace(fileBase64))
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"Performer name, song title, and audio/backing track file are required.\"}");
+                return;
+            }
+
+            string effectiveArtist = string.IsNullOrWhiteSpace(artist) ? name : artist;
+            string requestTitle = $"{song} (Original)";
+
+            string? blockedReason = _onCheckRequestAllowed?.Invoke();
+            if (!string.IsNullOrEmpty(blockedReason))
+            {
+                await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(blockedReason)}\"}}");
+                return;
+            }
+
+            if (_onCheckDuplicateSong?.Invoke(requestTitle, effectiveArtist) == true)
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"That song has already been performed or queued in this session.\"}");
+                return;
+            }
+
+            string ext = Path.GetExtension(fileName).ToLowerInvariant();
+            if (!OriginalUploadStore.AllowedExtensions.Contains(ext))
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"Unsupported track format. Please upload an .mp3, .wav, .mp4, .m4a, .flac, .ogg, or .zip (MP3+G) file.\"}");
+                return;
+            }
+
+            byte[] trackBytes;
+            try
+            {
+                trackBytes = Convert.FromBase64String(fileBase64[(fileBase64.IndexOf(',') + 1)..]);
+            }
+            catch (FormatException)
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"Invalid track file encoding.\"}");
+                return;
+            }
+
+            if (trackBytes.Length < 64 || trackBytes.Length > OriginalUploadStore.MaxTrackBytes)
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"Track file must be between 64 bytes and 12 MB.\"}");
+                return;
+            }
+
+            if (ext == ".zip" && !OriginalUploadStore.IsPlayableZip(trackBytes))
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"The .zip must contain an .mp3 or .wav and its .cdg file.\"}");
+                return;
+            }
+
+            string originalsDir = Lyracist.Shared.Globals.OriginalsDir;
+            Directory.CreateDirectory(originalsDir);
+            if (!OriginalUploadStore.HasRoomFor(originalsDir, trackBytes.Length))
+            {
+                await SendBadRequestAsync(stream, "{\"error\":\"Upload storage is full. Please see the DJ.\"}");
+                return;
+            }
+
+            string fullPath = OriginalUploadStore.GetUniquePath(originalsDir, effectiveArtist, song, ext);
+            await using (var file = new FileStream(fullPath, FileMode.CreateNew))
+            {
+                await file.WriteAsync(trackBytes);
+            }
+            RecordOriginalUpload(clientIp);
+            await OriginalUploadStore.AddToLibraryAsync(fullPath, requestTitle, effectiveArtist);
+
+            _onRequestReceived(name, [new RequestedSong(requestTitle, effectiveArtist)], "Karaoke", duetPartner);
+            await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new { success = true, savedAs = Path.GetFileName(fullPath) }));
         }
 
         private static async Task<byte[]> ReadBodyBytesAsync(Stream stream, int contentLength, CancellationToken cancellationToken)

@@ -7,17 +7,27 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ## [Unreleased] - 2026-11-27
 
+### Fixed
+
+- **Karaoke Studio**: Exports now go to a `Karaoke Studio` subfolder under unique names, so they can no longer overwrite or delete the source track or a library song. Lyric times follow tempo changes, key shift is correct for 48 kHz sources, and LRC header and singer tags are read properly.
+- **FFmpeg**: Error output is drained (an unread pipe could stall a long encode), failures are reported, and cancelling ends the process. MP4 export streams frames to FFmpeg instead of writing a PNG for each.
+- **Playback**: Freeze recovery and the key-change reload now seek after playback starts, are cancelled by Stop or a new song, and recovery is limited to 3 tries per song. False Start no longer replays a finished track.
+- **Undo Finish**: Restores a merged-in patron request and singer link, leaves already-completed rounds alone, reverses the saved singer history, and is cleared when the singer is removed or the rotation is cleared.
+- **Originals upload**: Full 12 MB files are accepted, with a longer timeout, per-device and storage limits, no overwriting, duplicate checks, `.zip` validation, and automatic library indexing. Other endpoints are back to a 4 MB limit.
+- **LyracistDbEditor**: Drive sync clears stale comparisons, blocks nested folders and low-space copies, copies through temporary files, and continues past individual failures. Fixed audition player errors and temp-file handling; removal now asks first; failed rename undos can be retried.
+- **Search, folders and printing**: Fuzzy search checks the whole library, the folder filter matches the song's own folder (up to 2,000 results when browsing) and keeps its selection, poster text no longer overlaps, the four poster themes are available, and Lyracist's slip QR code points to its request page.
+
 ### Added
 
 - **Custom Karaoke Track Studio (`Lyracist/Windows/KaraokeStudioWindow.xaml`, `KaraokeStudioWindow.xaml.cs`, `Lyracist/Services/Media/KaraokeStudioExporter.cs`)**:
   - Added a built-in **Karaoke Studio** (`🎙️ Karaoke Studio` button on `KaraokePage.xaml`) to turn audio files into custom MP3+G (`.cdg` + `.mp3`) or `.mp4` karaoke tracks.
-  - Implemented FFmpeg vocal isolation (`Isolate Backing Track (Strip Lead Vocals)`, `Practice / Guide Vocal (Keep 25% Lead Vocal)`, and `Keep Original Audio`), key shifting (`-6` to `+6` semitones), and tempo scaling (`75%` to `125%`).
+  - Implemented FFmpeg vocal isolation (`Isolate Backing Track (Strip Lead Vocals)`, `Practice / Guide Vocal` with an adjustable `0%`-`100%` level, and `Keep Original Audio`), key shifting (`-6` to `+6` semitones), and tempo scaling (`50%` to `150%`).
   - Added an interactive lyric synchronization grid with raw lyric / `.lrc` / `.txt` parsing, live audio playback, **`F8` (`⏱ Stamp Selected Line`)** timestamp stamping, per-line **Singer / Duet Color Assignments** (`Singer 1`, `Singer 2`, `Both (Duet)`), optional **Translation / Subtitle** text, and **Instrumental Break Countdown Bars**.
   - Added a binary 300 packets/sec CD+G (`.cdg`) tile encoder and a SkiaSharp + FFmpeg `.mp4` video renderer (`16:9` Stage Wide and `9:16` Vertical Social) with optional auto-import into `lyracist.db` and `SongSearch`.
 - **`LyracistDbEditor` Pro Library Management Upgrades (`LyracistDbEditor/Services/CdgPreviewPlayer.cs`, `LibraryHealthViewModel.cs`, `MainViewModel.cs`, `MainWindow.xaml`)**:
   - **Built-In MP3+G Karaoke Audition Player (`CdgPreviewPlayer`)**: Added an embedded karaoke player supporting `.mp3`+`.cdg`, `.zip` (`ZIPCDG`), `.mp4`, and audio tracks with a live 300×216 CDG graphics canvas, seek slider, `-6` to `+6` semitone key shift, and a 10-band graphic equalizer (`31Hz` to `16kHz`, `-12 dB` to `+12 dB`).
   - **Broken MP3+G Pair & Corrupt ZIP Audit**: Added a 4th Library Health audit column scanning for missing `.cdg` companion files, orphaned `.cdg` files without audio, corrupt or incomplete `.zip` archives, and `0`-byte files.
-  - **Custom Pattern File Renamer with Persistent Undo History**: Added configurable pattern templates (`{Artist} - {Title}`, `{Title} - {Artist}`, `{Title}`, `{Artist} - {Title} ({Genre})`) and persistent rename rollback history (`Data/rename_history.json`) via the **`Undo`** button.
+  - **Custom Pattern File Renamer with Persistent Undo History**: Added configurable pattern templates (`{Artist} - {Title}`, `{Title} - {Artist}`, `{Title}`, `{Artist} - {Title} ({Genre})`, `{Brand} - {Artist} - {Title}`, `[{Genre}] {Artist} - {Title}`) and persistent rename rollback history (`Data/rename_history.json`) via the **`Undo`** button.
   - **Multi-Rig / External USB Gig Drive Synchronizer**: Added source-to-target library comparison, target drive free/total disk space analysis, preview list, and multi-folder synchronization.
 - **Fuzzy Typo Tolerance, Artist Abbreviation Expansion & Subfolder / Crate Filtering (`Lyracist.Data/Services/SearchService.cs`, `Lyracist/Services/Media/LibraryService.cs`, `KaraokeViewModel.cs`, `KaraokePage.xaml`, `LyracistDbEditor`)**:
   - Added `SearchService.ArtistAbbreviations` (`gnr`, `ccr`, `acdc`, `rhcp`, `ratm`, `stp`, `mj`, `bsb`, `nkotb`, `elo`, `bto`, `reo`, `skynard`, `zep`, `deflepard`, etc.) and `ExpandAbbreviations()`.

@@ -2399,6 +2399,7 @@ namespace KSRotation.ViewModels
                 }
             }
 
+            InvalidateUndo(entry);
             Singers.Remove(entry);
             RotationHelpers.UnlinkSinger(Singers, entry);
             if (PendingLinkSinger == entry) PendingLinkSinger = null;
@@ -2602,11 +2603,51 @@ namespace KSRotation.ViewModels
             public bool PreviousIsSpecial { get; init; }
             public bool PreviousIsInactive { get; init; }
             public QueuedSong? PoppedQueuedSong { get; init; }
+            /// <summary>Waiting request that finishing the turn merged into the singer, if any.</summary>
+            public PatronRequest? ConsumedRequest { get; init; }
+            public int ConsumedRequestIndex { get; init; }
+            public List<QueuedSong> SongsQueuedFromRequest { get; init; } = [];
+            public Guid? PreviousLinkedSingerId { get; init; }
         }
 
         private FinishedTurnSnapshot? _lastFinishedTurn;
 
         public bool CanUndoLastFinish => _lastFinishedTurn != null;
+
+        // Forgets the saved turn when the rotation is cleared or its singer is removed, so Undo can't
+        // bring back someone who was deliberately taken out.
+        private void InvalidateUndo(SingerEntry? entry = null)
+        {
+            if (_lastFinishedTurn == null || (entry != null && _lastFinishedTurn.Entry != entry)) return;
+            _lastFinishedTurn = null;
+            OnPropertyChanged(nameof(CanUndoLastFinish));
+        }
+
+        // Removes the database history written when the undone round was marked complete.
+        private void RevertRoundHistory(SingerEntry entry, int round)
+        {
+#if !MAUI
+            SongPerformance? performance;
+            lock (_performanceHistoryLock)
+            {
+                performance = _performanceHistory.FirstOrDefault(p => p.SingerId == entry.Id && p.Round == round);
+            }
+            if (performance == null || performance.IsMusic || IsTestMode) return;
+
+            string singer = performance.SingerName;
+            string partner = performance.DuetPartnerName;
+            string title = performance.SongTitle;
+            string artist = performance.ArtistName;
+            _ = Lyracist.Services.Database.SingerHistoryService.QueueHistoryWrite(() =>
+            {
+                Lyracist.Services.Database.SingerHistoryService.RevertCompletedPerformance(singer, title, artist);
+                if (!string.IsNullOrWhiteSpace(partner) && !string.Equals(partner, "None", StringComparison.OrdinalIgnoreCase))
+                {
+                    Lyracist.Services.Database.SingerHistoryService.RevertCompletedPerformance(partner, title, artist);
+                }
+            });
+#endif
+        }
 
         /// <summary>
         /// False Start / Undo Last Finish: restores the most recently finished singer back to their previous
@@ -2625,6 +2666,16 @@ namespace KSRotation.ViewModels
             _isFinishingSong = true;
             try
             {
+                // Put a merged-in request back where it was, and take its songs off the singer's queue.
+                foreach (var queued in snap.SongsQueuedFromRequest)
+                {
+                    entry.QueuedSongs.Remove(queued);
+                }
+                if (snap.ConsumedRequest != null && !IncomingRequests.Contains(snap.ConsumedRequest))
+                {
+                    IncomingRequests.Insert(Math.Clamp(snap.ConsumedRequestIndex, 0, IncomingRequests.Count), snap.ConsumedRequest);
+                }
+
                 if (snap.PoppedQueuedSong != null)
                 {
                     entry.QueuedSongs.Insert(0, snap.PoppedQueuedSong);
@@ -2659,7 +2710,17 @@ namespace KSRotation.ViewModels
 
             if (snap.RoundMarked > 0)
             {
+                RevertRoundHistory(entry, snap.RoundMarked);
                 entry.SetRoundCompleted(snap.RoundMarked, false);
+            }
+
+            if (snap.PreviousLinkedSingerId is Guid partnerId && entry.LinkedSingerId == null)
+            {
+                var linkedPartner = Singers.FirstOrDefault(s => s.Id == partnerId);
+                if (linkedPartner != null && linkedPartner.LinkedSingerId == null)
+                {
+                    RotationHelpers.LinkSingers(Singers, entry, linkedPartner);
+                }
             }
 
             RotationHelpers.EnsureRotationStartFlag(Singers);
@@ -2694,9 +2755,15 @@ namespace KSRotation.ViewModels
             bool priorSpecial = entry.IsSpecial;
             bool priorInactive = entry.IsInactive;
             QueuedSong? poppedQueued = null;
+            Guid? priorLinkedId = entry.LinkedSingerId;
+            PatronRequest? consumedRequest = null;
+            int consumedRequestIndex = 0;
+            List<QueuedSong> queuedFromRequest = [];
 
             int roundToMark = entry.GetNextIncompleteRound();
-            if (roundToMark == 0)
+            // With all ten rounds already complete, Undo must not clear a round this turn didn't set.
+            bool allRoundsAlreadyComplete = roundToMark == 0;
+            if (allRoundsAlreadyComplete)
             {
                 roundToMark = 10;
             }
@@ -2716,6 +2783,13 @@ namespace KSRotation.ViewModels
                     var pendingRequest = IncomingRequests.FirstOrDefault(r =>
                         string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase)
                         && string.Equals(r.RequestType, "Music", StringComparison.OrdinalIgnoreCase) == entry.IsMusic);
+
+                    if (pendingRequest != null)
+                    {
+                        consumedRequest = pendingRequest;
+                        consumedRequestIndex = IncomingRequests.IndexOf(pendingRequest);
+                    }
+                    var queuedBeforeMerge = entry.QueuedSongs.ToList();
 
                     if (entry.QueuedSongs.Count > 0)
                     {
@@ -2800,6 +2874,8 @@ namespace KSRotation.ViewModels
                         entry.Artist = string.Empty;
                     }
 
+                    queuedFromRequest = entry.QueuedSongs.Except(queuedBeforeMerge).ToList();
+
                     // Clear any Scaryoke challenge assignment until their next spin
                     entry.ScaryokeCategory = null;
                     entry.ScaryokeColor = null;
@@ -2838,7 +2914,11 @@ namespace KSRotation.ViewModels
                 {
                     Entry = entry,
                     PreviousIndex = previousIndex,
-                    RoundMarked = roundToMark,
+                    RoundMarked = allRoundsAlreadyComplete ? 0 : roundToMark,
+                    ConsumedRequest = consumedRequest,
+                    ConsumedRequestIndex = consumedRequestIndex,
+                    SongsQueuedFromRequest = queuedFromRequest,
+                    PreviousLinkedSingerId = priorLinkedId,
                     PreviousSong = priorSong,
                     PreviousArtist = priorArtist,
                     PreviousDuetPartner = priorDuet,
@@ -3321,6 +3401,7 @@ namespace KSRotation.ViewModels
         {
             if (e.Action == NotifyCollectionChangedAction.Reset)
             {
+                InvalidateUndo();
                 foreach (SingerEntry entry in _subscribedSingers)
                 {
                     entry.PropertyChanged -= OnSingerEntryPropertyChanged;
@@ -3747,7 +3828,7 @@ namespace KSRotation.ViewModels
                             string activeVenueSnap = !string.IsNullOrWhiteSpace(SelectedVenue) ? SelectedVenue : VenueName;
                             DateTime utcSnap = now.ToUniversalTime();
 
-                            _ = Task.Run(() =>
+                            _ = Lyracist.Services.Database.SingerHistoryService.QueueHistoryWrite(() =>
                             {
                                 Lyracist.Services.Database.SingerHistoryService.RecordCompletedPerformance(
                                     singerNameSnap,

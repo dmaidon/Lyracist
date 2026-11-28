@@ -309,8 +309,13 @@ public partial class RotationViewModel : BaseViewModel
         _display = display;
         _mediaEngine = mediaEngine;
         _floatCurrentSingerToTop = AppSettings.FloatCurrentSingerToTop;
-        Rotation.CollectionChanged += (_, _) =>
+        Rotation.CollectionChanged += (_, e) =>
         {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            {
+                InvalidateUndo();
+            }
+
             if (_suppressRotationOrderSync) return;
 
             Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
@@ -707,6 +712,7 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.IsMusic = isMusic;
             inactiveSinger.IsSpecial = isSpecial;
 
+            InvalidateUndo(inactiveSinger);
             InactiveSingers.Remove(inactiveSinger);
             RotationHelpers.InsertNewSinger(Rotation, inactiveSinger);
             Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
@@ -863,6 +869,7 @@ public partial class RotationViewModel : BaseViewModel
                     Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             }
 
+            InvalidateUndo(removed);
             Rotation.Remove(removed);
             Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, removed);
             RefreshLinkedPartnerNames();
@@ -1064,7 +1071,7 @@ public partial class RotationViewModel : BaseViewModel
             System.Windows.Application.Current?.MainWindow,
             AppSettings.SelectedVenue,
             AppSettings.DjName,
-            $"http://{LocalNetworkHelper.GetLocalIPv4()}:8080");
+            $"http://{LocalNetworkHelper.GetLocalIPv4()}:{AppSettings.TabletPort}/request");
     }
 
     [RelayCommand]
@@ -1173,6 +1180,44 @@ public partial class RotationViewModel : BaseViewModel
 
     public bool CanUndoLastFinish => _lastFinishedTurn != null;
 
+    /// <summary>
+    /// Forgets the saved turn when the rotation is cleared, or when the DJ removes or retires that
+    /// singer, so Undo can't bring back someone who was deliberately taken out.
+    /// </summary>
+    private void InvalidateUndo(Singer? singer = null)
+    {
+        if (_lastFinishedTurn == null || (singer != null && _lastFinishedTurn.Singer != singer)) return;
+        _lastFinishedTurn = null;
+        OnPropertyChanged(nameof(CanUndoLastFinish));
+    }
+
+    // Removes the history written when the undone turn finished, so redoing it isn't counted twice.
+    private static void RevertPerformanceHistory(string name, string title, string artist)
+    {
+        Lyracist.Services.Database.SingerHistoryService.QueueHistoryWrite(() =>
+        {
+            Lyracist.Services.Database.SingerHistoryService.RevertCompletedPerformance(name, title, artist);
+
+            if (!Lyracist.Services.Database.SingerHistoryService.IsEligibleDatabaseSinger(name)) return;
+
+            string cleanName = NameFormatting.CleanSingerName(name);
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = context.Singers.FirstOrDefault(s => s.Name.ToLower() == cleanName.ToLower());
+            var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
+            if (dbSinger == null || dbSong == null) return;
+
+            var latest = context.RotationEntries
+                .Where(e => e.SingerId == dbSinger.SingerId && e.SongId == dbSong.SongId && e.Status == "Finished")
+                .OrderByDescending(e => e.TimestampAdded)
+                .FirstOrDefault();
+            if (latest != null)
+            {
+                context.RotationEntries.Remove(latest);
+                context.SaveChanges();
+            }
+        });
+    }
+
     [RelayCommand]
     public void UndoLastFinish()
     {
@@ -1213,6 +1258,11 @@ public partial class RotationViewModel : BaseViewModel
         singer.TotalSongsSung = snap.TotalSongsSung;
         singer.ScaryokeCategory = snap.ScaryokeCategory;
         singer.ScaryokeColor = snap.ScaryokeColor;
+
+        if (!snap.IsMusic)
+        {
+            RevertPerformanceHistory(singer.Name, snap.SongTitle, snap.Artist);
+        }
 
         if (snap.RecordedSessionSong != null && SessionPerformedSongs.Contains(snap.RecordedSessionSong))
         {
@@ -1734,6 +1784,7 @@ public partial class RotationViewModel : BaseViewModel
                 }
             }
 
+            InvalidateUndo(singer);
             Rotation.Remove(singer);
             if (PendingLinkSinger == singer) PendingLinkSinger = null;
             Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
@@ -1762,6 +1813,7 @@ public partial class RotationViewModel : BaseViewModel
     private void DeleteInactiveSinger(Singer singer)
     {
         if (singer == null) return;
+        InvalidateUndo(singer);
         InactiveSingers.Remove(singer);
         Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, singer);
         if (PendingLinkSinger == singer) PendingLinkSinger = null;
@@ -1857,7 +1909,7 @@ public partial class RotationViewModel : BaseViewModel
         if (string.IsNullOrEmpty(name)) return;
         string activeVenue = AppSettings.SelectedVenue;
 
-        System.Threading.Tasks.Task.Run(() =>
+        Lyracist.Services.Database.SingerHistoryService.QueueHistoryWrite(() =>
         {
             try
             {

@@ -95,9 +95,12 @@
                         <TextBlock Text="Vocal Isolation Mode" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,3" />
                         <ComboBox x:Name="CbVocalMode" SelectedIndex="0" Height="30" Margin="0,0,0,8">
                             <ComboBoxItem Content="Isolate Backing Track (Strip Lead Vocals)" />
-                            <ComboBoxItem Content="Practice / Guide Vocal (Keep 25% Lead Vocal)" />
+                            <ComboBoxItem Content="Practice / Guide Vocal (set level below)" />
                             <ComboBoxItem Content="Keep Original Audio (Already Instrumental)" />
                         </ComboBox>
+
+                        <TextBlock x:Name="LblGuideVocal" Text="Guide Vocal: 25% (used in Guide Vocal mode)" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,3" />
+                        <Slider x:Name="SliderGuideVocal" Minimum="0" Maximum="100" Value="25" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderGuideVocal_ValueChanged" Margin="0,0,0,8" />
 
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
@@ -111,7 +114,7 @@
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock x:Name="LblTempo" Text="Tempo: 100%" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,3" />
-                                <Slider x:Name="SliderTempo" Minimum="75" Maximum="125" Value="100" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderTempo_ValueChanged" />
+                                <Slider x:Name="SliderTempo" Minimum="50" Maximum="150" Value="100" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderTempo_ValueChanged" />
                             </StackPanel>
                         </Grid>
 

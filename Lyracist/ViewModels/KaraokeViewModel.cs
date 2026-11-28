@@ -781,17 +781,10 @@ public partial class KaraokeViewModel : BaseViewModel
             var crates = _libraryService.GetSubfolderCrates().ToList();
             System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
             {
-                string previous = SelectedSubfolderCrate;
-                SubfolderCrates.Clear();
-                SubfolderCrates.Add("All Crates");
-                foreach (string c in crates)
+                Lyracist.Data.Services.CrateList.Sync(SubfolderCrates, crates);
+                if (!SubfolderCrates.Contains(SelectedSubfolderCrate))
                 {
-                    SubfolderCrates.Add(c);
-                }
-
-                if (!SubfolderCrates.Contains(previous))
-                {
-                    SelectedSubfolderCrate = "All Crates";
+                    SelectedSubfolderCrate = Lyracist.Data.Services.CrateList.AllCrates;
                 }
             }));
         });
@@ -1412,7 +1405,8 @@ public partial class KaraokeViewModel : BaseViewModel
     private async Task FalseStart()
     {
         // 1. If a song is currently playing or paused mid-song, restart from 0:00 without advancing rotation
-        if (!string.IsNullOrEmpty(_mediaEngine.CurrentSongPath) && (_mediaEngine.IsPlaying || _mediaEngine.Position > 0.5))
+        // (a finished or stopped track can still report its old position, so it must not count)
+        if (_mediaEngine.HasActiveTrack && (_mediaEngine.IsPlaying || _mediaEngine.Position > 0.5))
         {
             _suppressSeekPositionCallback = true;
             SeekPosition = 0;

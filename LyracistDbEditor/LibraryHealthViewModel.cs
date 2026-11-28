@@ -693,7 +693,12 @@ public partial class MainViewModel
                         }
 
                         string ext = fi.Extension.ToLowerInvariant();
-                        if (s.KaraokeType == "MP3G" || (s.IsKaraoke && (ext == ".mp3" || ext == ".wav")))
+                        // "Original" uploads and LRC-lyric tracks are audio-only on purpose.
+                        bool expectsCdg = s.KaraokeType == "MP3G"
+                            || (s.IsKaraoke && (ext == ".mp3" || ext == ".wav")
+                                && s.KaraokeType != "Original"
+                                && !File.Exists(Path.ChangeExtension(s.FilePath, ".lrc")));
+                        if (expectsCdg)
                         {
                             string cdgPath = Path.ChangeExtension(s.FilePath, ".cdg");
                             if (!File.Exists(cdgPath))
@@ -850,6 +855,16 @@ public partial class MainViewModel
 
         if (issue.SongId.HasValue)
         {
+            var confirm = System.Windows.MessageBox.Show(
+                $"Remove this song from the library database?\n\n{issue.Title}\n{issue.FilePath}\n\nThe file on disk is not deleted.",
+                "Confirm Remove",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+            if (confirm != System.Windows.MessageBoxResult.Yes) return;
+        }
+
+        if (issue.SongId.HasValue)
+        {
             try
             {
                 using var context = new LyracistDbContext();
@@ -902,6 +917,35 @@ public partial class MainViewModel
     private string _driveSyncDiskSpaceText = "Target Drive Space: Not analyzed yet.";
 
     public ObservableCollection<DriveSyncCandidate> DriveSyncCandidates { get; } = [];
+
+    // A comparison is only valid for the folders it was made against.
+    partial void OnSyncSourceFolderPathChanged(string value) => ClearDriveComparison();
+    partial void OnSyncTargetFolderPathChanged(string value) => ClearDriveComparison();
+
+    private void ClearDriveComparison()
+    {
+        if (DriveSyncCandidates.Count == 0) return;
+        DriveSyncCandidates.Clear();
+        DriveSyncStatusText = "Folders changed. Click Compare Drives again.";
+    }
+
+    private static bool IsSameOrInside(string path, string root) =>
+        (path + Path.DirectorySeparatorChar).StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+
+    private long? GetTargetFreeBytes()
+    {
+        try
+        {
+            string? root = Path.GetPathRoot(Path.GetFullPath(SyncTargetFolderPath));
+            if (string.IsNullOrEmpty(root)) return null;
+            var drive = new DriveInfo(root);
+            return drive.IsReady ? drive.AvailableFreeSpace : null;
+        }
+        catch (Exception ex) when (ex is IOException or ArgumentException or UnauthorizedAccessException)
+        {
+            return null; // e.g. a network path, where free space can't be read
+        }
+    }
 
     private CancellationTokenSource? _driveSyncCts;
 
@@ -963,9 +1007,9 @@ public partial class MainViewModel
 
         string srcRoot = Path.GetFullPath(SyncSourceFolderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         string dstRoot = Path.GetFullPath(SyncTargetFolderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        if (string.Equals(srcRoot, dstRoot, StringComparison.OrdinalIgnoreCase))
+        if (IsSameOrInside(dstRoot, srcRoot) || IsSameOrInside(srcRoot, dstRoot))
         {
-            System.Windows.MessageBox.Show("Source and Target folders must be different directories.", "Invalid Folders", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Source and Target must be separate folders, and neither can be inside the other.", "Invalid Folders", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
@@ -1057,7 +1101,18 @@ public partial class MainViewModel
         }
 
         var itemsToCopy = DriveSyncCandidates.ToList();
-        double totalMb = itemsToCopy.Sum(c => c.SizeBytes) / (1024.0 * 1024.0);
+        long totalBytes = itemsToCopy.Sum(c => c.SizeBytes);
+        double totalMb = totalBytes / (1024.0 * 1024.0);
+
+        if (GetTargetFreeBytes() is long freeBytes && freeBytes < totalBytes)
+        {
+            System.Windows.MessageBox.Show(
+                $"The target drive needs {totalMb:N1} MB but has only {freeBytes / (1024.0 * 1024.0):N1} MB free. Free up space and try again.",
+                "Not Enough Space",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
 
         var confirm = System.Windows.MessageBox.Show(
             $"Copy {itemsToCopy.Count:N0} new/updated file(s) ({totalMb:N1} MB) to:\n{SyncTargetFolderPath}?",
@@ -1075,6 +1130,8 @@ public partial class MainViewModel
         {
             int copied = 0;
             int total = itemsToCopy.Count;
+            var done = new List<DriveSyncCandidate>();
+            var failures = new List<string>();
 
             await Task.Run(() =>
             {
@@ -1082,15 +1139,29 @@ public partial class MainViewModel
                 {
                     if (token.IsCancellationRequested) break;
 
-                    string? targetDir = Path.GetDirectoryName(item.TargetPath);
-                    if (!string.IsNullOrEmpty(targetDir))
+                    // Copy under a temp name and swap in, so an unplugged drive can't leave a half-written song.
+                    string partialPath = item.TargetPath + ".partial";
+                    try
                     {
-                        Directory.CreateDirectory(targetDir);
+                        string? targetDir = Path.GetDirectoryName(item.TargetPath);
+                        if (!string.IsNullOrEmpty(targetDir))
+                        {
+                            Directory.CreateDirectory(targetDir);
+                        }
+
+                        File.Copy(item.SourcePath, partialPath, overwrite: true);
+                        File.Move(partialPath, item.TargetPath, overwrite: true);
+                        copied++;
+                        done.Add(item);
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        failures.Add($"{item.RelativePath}: {ex.Message}");
+                        try { File.Delete(partialPath); }
+                        catch (Exception cleanupEx) when (cleanupEx is IOException or UnauthorizedAccessException) { }
                     }
 
-                    File.Copy(item.SourcePath, item.TargetPath, overwrite: true);
-                    copied++;
-                    int cur = copied;
+                    int cur = copied + failures.Count;
                     double pct = (double)cur / total * 100.0;
                     RunOnUi(() =>
                     {
@@ -1100,11 +1171,17 @@ public partial class MainViewModel
                 }
             }, token);
 
-            DriveSyncCandidates.Clear();
+            // Whatever wasn't copied stays listed so it can be retried.
+            foreach (var item in done)
+            {
+                DriveSyncCandidates.Remove(item);
+            }
             UpdateTargetDriveDiskSpaceInfo();
             DriveSyncStatusText = token.IsCancellationRequested
                 ? $"Sync cancelled after copying {copied:N0} file(s)."
-                : $"Drive Sync complete! Copied {copied:N0} file(s) successfully.";
+                : failures.Count == 0
+                    ? $"Drive Sync complete! Copied {copied:N0} file(s) successfully."
+                    : $"Copied {copied:N0} file(s); {failures.Count:N0} failed. First error: {failures[0]}";
         }
         catch (OperationCanceledException)
         {
@@ -1221,7 +1298,14 @@ public partial class MainViewModel
         EnsurePlayerSubscribed();
         PlayerNowPlayingTitle = $"{song.Artist} — {song.Title} [{song.KaraokeType}]";
         PlayerNowPlayingPath = song.FilePath;
-        await _auditionPlayer.LoadTrackAsync(song.FilePath, PlayerKeySemitones, GetCurrentEqBands(), PlayerVolumePercent);
+        try
+        {
+            await _auditionPlayer.LoadTrackAsync(song.FilePath, PlayerKeySemitones, GetCurrentEqBands(), PlayerVolumePercent);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            PlayerNowPlayingTitle = $"Could not open this track: {ex.Message}";
+        }
     }
 
     [RelayCommand]

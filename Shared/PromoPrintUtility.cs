@@ -126,9 +126,9 @@ namespace Lyracist.Shared
                         canvas.DrawRoundRect(headerRect, 5f, 5f, headerFill);
                         canvas.DrawRect(new SKRect(cardRect.Left, cardRect.Top + headerH - 5f, cardRect.Right, cardRect.Top + headerH), headerFill);
 
-                        canvas.DrawText("🎤 KARAOKE REQUEST SLIP", cardRect.Left + 8f, cardRect.Top + 11f, SKTextAlign.Left, titleFont, goldText);
+                        canvas.DrawText("♪ KARAOKE REQUEST SLIP", cardRect.Left + 8f, cardRect.Top + 11f, SKTextAlign.Left, titleFont, goldText);
                         string brandLine = $"{cleanVenue} • Hosted by {cleanDj}";
-                        if (brandLine.Length > 42) brandLine = brandLine[..42] + "…";
+                        brandLine = FitText(brandLine, subFont, cardRect.Width - 16f);
                         canvas.DrawText(brandLine, cardRect.Left + 8f, cardRect.Top + headerH - 4f, SKTextAlign.Left, subFont, whiteText);
 
                         float contentRight = cardRect.Right - 8f;
@@ -191,8 +191,10 @@ namespace Lyracist.Shared
             string djName,
             string headline,
             IReadOnlyList<ScheduleShowRow> scheduleRows,
-            bool squareSocialFormat = true)
+            bool squareSocialFormat = true,
+            int themeIndex = 0)
         {
+            PosterTheme theme = PosterThemes[Math.Clamp(themeIndex, 0, PosterThemes.Length - 1)];
             string cleanDj = string.IsNullOrWhiteSpace(djName) ? "Guest DJ" : djName.Trim();
             string cleanHeadline = string.IsNullOrWhiteSpace(headline) ? "WEEKLY KARAOKE SCHEDULE" : headline.Trim();
 
@@ -209,7 +211,7 @@ namespace Lyracist.Shared
                 bgPaint.Shader = SKShader.CreateRadialGradient(
                     new SKPoint(width * 0.5f, height * 0.25f),
                     width * 0.85f,
-                    [new SKColor(30, 18, 66), new SKColor(12, 16, 33), new SKColor(6, 8, 18)],
+                    [theme.BackgroundCenter, theme.BackgroundMiddle, theme.BackgroundEdge],
                     [0f, 0.6f, 1f],
                     SKShaderTileMode.Clamp);
                 canvas.DrawRect(0, 0, width, height, bgPaint);
@@ -218,14 +220,14 @@ namespace Lyracist.Shared
             // Outer neon frame
             using var outerGlow = new SKPaint
             {
-                Color = new SKColor(139, 92, 246, 180),
+                Color = theme.Accent.WithAlpha(180),
                 Style = SKPaintStyle.Stroke,
                 StrokeWidth = 6f,
                 IsAntialias = true
             };
             using var goldFrame = new SKPaint
             {
-                Color = new SKColor(245, 158, 11, 220),
+                Color = theme.Frame.WithAlpha(220),
                 Style = SKPaintStyle.Stroke,
                 StrokeWidth = 2.5f,
                 IsAntialias = true
@@ -245,15 +247,15 @@ namespace Lyracist.Shared
             using var footerFont = new SKFont(regFace, 20f);
 
             using var whitePaint = new SKPaint { Color = SKColors.White, IsAntialias = true };
-            using var goldPaint = new SKPaint { Color = new SKColor(251, 191, 36), IsAntialias = true };
-            using var cyanPaint = new SKPaint { Color = new SKColor(56, 189, 248), IsAntialias = true };
+            using var goldPaint = new SKPaint { Color = theme.Headline, IsAntialias = true };
+            using var cyanPaint = new SKPaint { Color = theme.Host, IsAntialias = true };
             using var mutedPaint = new SKPaint { Color = new SKColor(203, 213, 225), IsAntialias = true };
-            using var cardFill = new SKPaint { Color = new SKColor(22, 31, 56, 225), Style = SKPaintStyle.Fill, IsAntialias = true };
-            using var cardStroke = new SKPaint { Color = new SKColor(124, 58, 237, 190), Style = SKPaintStyle.Stroke, StrokeWidth = 2f, IsAntialias = true };
-            using var dayBadgeFill = new SKPaint { Color = new SKColor(124, 58, 237), Style = SKPaintStyle.Fill, IsAntialias = true };
+            using var cardFill = new SKPaint { Color = theme.Card.WithAlpha(225), Style = SKPaintStyle.Fill, IsAntialias = true };
+            using var cardStroke = new SKPaint { Color = theme.Badge.WithAlpha(190), Style = SKPaintStyle.Stroke, StrokeWidth = 2f, IsAntialias = true };
+            using var dayBadgeFill = new SKPaint { Color = theme.Badge, Style = SKPaintStyle.Fill, IsAntialias = true };
 
-            canvas.DrawText(cleanHeadline.ToUpperInvariant(), width / 2f, 112f, SKTextAlign.Center, headerFont, goldPaint);
-            canvas.DrawText($"HOSTED BY {cleanDj.ToUpperInvariant()}", width / 2f, 162f, SKTextAlign.Center, djFont, cyanPaint);
+            canvas.DrawText(FitText(cleanHeadline.ToUpperInvariant(), headerFont, width - 120f), width / 2f, 112f, SKTextAlign.Center, headerFont, goldPaint);
+            canvas.DrawText(FitText($"HOSTED BY {cleanDj.ToUpperInvariant()}", djFont, width - 120f), width / 2f, 162f, SKTextAlign.Center, djFont, cyanPaint);
 
             var activeRows = scheduleRows
                 .Where(r => !string.IsNullOrWhiteSpace(r.Venue) || !string.IsNullOrWhiteSpace(r.Day))
@@ -290,26 +292,32 @@ namespace Lyracist.Shared
                 // Day badge pill on the left
                 var badgeRect = new SKRect(rect.Left + 16f, rect.Top + 14f, rect.Left + 225f, rect.Bottom - 14f);
                 canvas.DrawRoundRect(badgeRect, 12f, 12f, dayBadgeFill);
-                canvas.DrawText((row.Day ?? "SHOW NIGHT").Trim().ToUpperInvariant(), badgeRect.MidX, badgeRect.MidY + 9f, SKTextAlign.Center, dayFont, whitePaint);
+                string dayText = (row.Day ?? "SHOW NIGHT").Trim().ToUpperInvariant();
+                // Shrink long day names to fit the badge before resorting to truncation.
+                float dayWidth = dayFont.MeasureText(dayText);
+                using var fittedDayFont = new SKFont(boldFace, Math.Max(15f, dayFont.Size * Math.Min(1f, (badgeRect.Width - 16f) / Math.Max(1f, dayWidth))));
+                canvas.DrawText(FitText(dayText, fittedDayFont, badgeRect.Width - 16f), badgeRect.MidX, badgeRect.MidY + 9f, SKTextAlign.Center, fittedDayFont, whitePaint);
 
                 // Venue and notes
                 float textLeft = badgeRect.Right + 22f;
                 bool hasNotes = !string.IsNullOrWhiteSpace(row.Notes);
                 float venueBaseline = hasNotes ? rect.Top + (cardH * 0.44f) : rect.MidY + 10f;
-                canvas.DrawText((row.Venue ?? "").Trim(), textLeft, venueBaseline, SKTextAlign.Left, venueFont, whitePaint);
+                string timeText = FitText((row.Time ?? "").Trim(), timeFont, (rect.Right - textLeft) * 0.45f);
+                float textWidth = rect.Right - 22f - textLeft - (timeText.Length > 0 ? timeFont.MeasureText(timeText) + 20f : 0f);
+                canvas.DrawText(FitText((row.Venue ?? "").Trim(), venueFont, textWidth), textLeft, venueBaseline, SKTextAlign.Left, venueFont, whitePaint);
 
                 if (hasNotes)
                 {
-                    canvas.DrawText(row.Notes.Trim(), textLeft, rect.Top + (cardH * 0.80f), SKTextAlign.Left, notesFont, mutedPaint);
+                    canvas.DrawText(FitText(row.Notes.Trim(), notesFont, textWidth), textLeft, rect.Top + (cardH * 0.80f), SKTextAlign.Left, notesFont, mutedPaint);
                 }
 
                 if (!string.IsNullOrWhiteSpace(row.Time))
                 {
-                    canvas.DrawText(row.Time.Trim(), rect.Right - 22f, rect.MidY + 9f, SKTextAlign.Right, timeFont, goldPaint);
+                    canvas.DrawText(timeText, rect.Right - 22f, rect.MidY + 9f, SKTextAlign.Right, timeFont, goldPaint);
                 }
             }
 
-            canvas.DrawText("🎤 Bring Your Friends • Sing Your Favorites • Instant Phone Song Requests!", width / 2f, height - 52f, SKTextAlign.Center, footerFont, mutedPaint);
+            canvas.DrawText("♪ Bring Your Friends • Sing Your Favorites • Instant Phone Song Requests!", width / 2f, height - 52f, SKTextAlign.Center, footerFont, mutedPaint);
 
             using var image = surface.Snapshot();
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
@@ -322,6 +330,38 @@ namespace Lyracist.Shared
             data.SaveTo(outStream);
 
             return filePath;
+        }
+
+        private sealed record PosterTheme(
+            string Name,
+            SKColor BackgroundCenter,
+            SKColor BackgroundMiddle,
+            SKColor BackgroundEdge,
+            SKColor Accent,
+            SKColor Frame,
+            SKColor Headline,
+            SKColor Host,
+            SKColor Card,
+            SKColor Badge);
+
+        private static readonly PosterTheme[] PosterThemes =
+        [
+            new("Neon Nightclub", new(30, 18, 66), new(12, 16, 33), new(6, 8, 18),
+                new(139, 92, 246), new(245, 158, 11), new(251, 191, 36), new(56, 189, 248), new(22, 31, 56), new(124, 58, 237)),
+            new("Classic Gold VIP", new(54, 42, 14), new(22, 18, 10), new(8, 7, 5),
+                new(212, 175, 55), new(250, 224, 140), new(250, 214, 100), new(245, 235, 205), new(34, 29, 18), new(146, 112, 28)),
+            new("Retro Synthwave", new(92, 18, 92), new(40, 12, 70), new(10, 6, 32),
+                new(236, 72, 153), new(34, 211, 238), new(255, 138, 216), new(103, 232, 249), new(46, 18, 74), new(190, 24, 133)),
+            new("Rock & Roll Dive", new(66, 16, 16), new(28, 12, 12), new(8, 6, 6),
+                new(220, 38, 38), new(214, 211, 209), new(248, 113, 113), new(231, 229, 228), new(38, 24, 24), new(153, 27, 27))
+        ];
+
+        private static string FitText(string text, SKFont font, float maxWidth)
+        {
+            if (font.MeasureText(text) <= maxWidth) return text;
+            int length = text.Length;
+            while (length > 0 && font.MeasureText(text[..length] + "…") > maxWidth) length--;
+            return length == 0 ? string.Empty : text[..length].TrimEnd() + "…";
         }
 
         private static SKBitmap? RenderQrSkBitmap(string payload)
@@ -435,7 +475,7 @@ namespace Lyracist.Shared
             {
                 Title = "🎨 Weekly Karaoke Schedule Poster Maker",
                 Width = 680,
-                Height = 520,
+                Height = 580,
                 WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen,
                 Owner = owner,
                 ResizeMode = ResizeMode.NoResize,
@@ -485,6 +525,15 @@ namespace Lyracist.Shared
             topGrid.Children.Add(spFormat);
 
             root.Children.Add(topGrid);
+
+            root.Children.Add(new TextBlock { Text = "Theme:", FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+            var cbTheme = new ComboBox { Height = 28, Width = 220, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 10) };
+            foreach (var posterTheme in PosterThemes)
+            {
+                cbTheme.Items.Add(posterTheme.Name);
+            }
+            cbTheme.SelectedIndex = 0;
+            root.Children.Add(cbTheme);
 
             var headerGrid = new Grid { Margin = new Thickness(0, 0, 0, 4) };
             headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) });
@@ -569,7 +618,7 @@ namespace Lyracist.Shared
                 try
                 {
                     bool isSquare = cbFormat.SelectedIndex == 0;
-                    string pngPath = GenerateWeeklySchedulePosterPng(tbDj.Text, tbHeadline.Text, rows, isSquare);
+                    string pngPath = GenerateWeeklySchedulePosterPng(tbDj.Text, tbHeadline.Text, rows, isSquare, cbTheme.SelectedIndex);
                     Process.Start(new ProcessStartInfo(pngPath) { UseShellExecute = true });
                     win.Close();
                 }

@@ -545,6 +545,13 @@ namespace Lyracist.Data.Services
             return ($"%\\{escaped}\\%", $"%/{escaped}/%");
         }
 
+        // Matches songs whose immediate parent folder is the crate (the same rule the dropdown is built
+        // with): the folder appears in the path with no further separator after it.
+        private const string CrateMatchSql =
+            "((s.FilePath LIKE @crateWin ESCAPE '!' AND s.FilePath NOT LIKE @crateWin || '\\%' ESCAPE '!') " +
+            "OR (s.FilePath LIKE @crateUnix ESCAPE '!' AND s.FilePath NOT LIKE @crateUnix || '/%' ESCAPE '!'))";
+
+
         public async Task<List<Song>> Search(string query, bool? isKaraoke = null, string? subfolderCrate = null)
         {
             var (crateWin, crateUnix) = BuildCratePatterns(subfolderCrate);
@@ -561,9 +568,9 @@ namespace Lyracist.Data.Services
                         FROM Songs s
                         LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
                         WHERE (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                        AND (s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                        " + "AND " + CrateMatchSql + @"
                         ORDER BY s.Artist, s.Title
-                        LIMIT 150";
+                        LIMIT 2000";
                     var rows = await conn.QueryAsync<Song, SongAudioSettings, Song>(
                         crateOnlySql,
                         (song, audioSettings) => { song.AudioSettings = audioSettings; return song; },
@@ -599,7 +606,7 @@ namespace Lyracist.Data.Services
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
                     AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                    AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                    " + "AND (@crateWin IS NULL OR " + CrateMatchSql + ")" + @"
                     LIMIT 150";
 
                 var results = (await connection.QueryAsync<Song, SongAudioSettings, Song>(
@@ -704,7 +711,7 @@ namespace Lyracist.Data.Services
                 LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
                 WHERE {wordFilter}
                 AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                AND (@crateWin IS NULL OR {CrateMatchSql})
                 ORDER BY (CASE WHEN {titleOrArtistRank} THEN 0 ELSE 1 END), s.Title
                 LIMIT 150";
 
@@ -766,6 +773,20 @@ namespace Lyracist.Data.Services
             return [.. results];
         }
 
+        private static int FuzzyTokenDistance(string queryToken, string targetToken, int maxAllowed)
+        {
+            if (targetToken.StartsWith(queryToken, StringComparison.OrdinalIgnoreCase)) return 0;
+
+            // Compare against either the full target word or its prefix of the query's length.
+            string compare = targetToken.Length > queryToken.Length + maxAllowed
+                ? targetToken[..queryToken.Length]
+                : targetToken;
+
+            return Math.Abs(compare.Length - queryToken.Length) > maxAllowed
+                ? int.MaxValue
+                : ComputeEditDistance(queryToken, compare);
+        }
+
         private sealed class FuzzyCandidateRow
         {
             public int SongId { get; set; }
@@ -808,74 +829,63 @@ namespace Lyracist.Data.Services
                 INNER JOIN Songs s ON s.SongId = f.rowid
                 WHERE ({probeFilter})
                 AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
-                LIMIT 2500";
+                AND (@crateWin IS NULL OR {CrateMatchSql})";
 
-            List<FuzzyCandidateRow> candidates;
-            try
-            {
-                candidates = connection.Query<FuzzyCandidateRow>(candidateSql, parameters).ToList();
-            }
-            catch
-            {
-                return [];
-            }
-
-            if (candidates.Count == 0) return [];
+            // Titles and artists repeat the same words heavily, so each distinct word is only scored once.
+            var distanceCache = queryTokens.Select(_ => new Dictionary<string, int>(StringComparer.Ordinal)).ToArray();
 
             var matchedIds = new List<(int SongId, int TotalDistance)>();
-            foreach (var c in candidates)
+            try
             {
-                string combined = string.Concat(c.NormalizedTitle, " ", c.NormalizedArtist);
-                string[] targetTokens = combined.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (targetTokens.Length == 0) continue;
-
-                int totalDist = 0;
-                bool allTokensMatched = true;
-
-                foreach (string qTok in queryTokens)
+                // Unbuffered: rows are scored as they stream rather than materialized first.
+                foreach (var c in connection.Query<FuzzyCandidateRow>(candidateSql, parameters, buffered: false))
                 {
-                    int maxAllowed = qTok.Length >= 7 ? 2 : 1;
-                    int bestDist = int.MaxValue;
+                    string[] targetTokens = string.Concat(c.NormalizedTitle, " ", c.NormalizedArtist)
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (targetTokens.Length == 0) continue;
 
-                    foreach (string tTok in targetTokens)
+                    int totalDist = 0;
+                    bool allTokensMatched = true;
+
+                    for (int q = 0; q < queryTokens.Length; q++)
                     {
-                        if (tTok.StartsWith(qTok, StringComparison.OrdinalIgnoreCase))
+                        string qTok = queryTokens[q];
+                        int maxAllowed = qTok.Length >= 7 ? 2 : 1;
+                        int bestDist = int.MaxValue;
+
+                        foreach (string tTok in targetTokens)
                         {
-                            bestDist = 0;
+                            if (!distanceCache[q].TryGetValue(tTok, out int dist))
+                            {
+                                dist = FuzzyTokenDistance(qTok, tTok, maxAllowed);
+                                distanceCache[q][tTok] = dist;
+                            }
+
+                            if (dist < bestDist)
+                            {
+                                bestDist = dist;
+                                if (bestDist == 0) break;
+                            }
+                        }
+
+                        if (bestDist > maxAllowed)
+                        {
+                            allTokensMatched = false;
                             break;
                         }
-
-                        // Compare against either the full target token or its prefix of length qTok.Length
-                        string compareTarget = tTok.Length > qTok.Length + maxAllowed
-                            ? tTok[..Math.Min(tTok.Length, qTok.Length)]
-                            : tTok;
-
-                        if (Math.Abs(compareTarget.Length - qTok.Length) > maxAllowed) continue;
-
-                        int dist = ComputeEditDistance(qTok, compareTarget);
-                        if (dist < bestDist)
-                        {
-                            bestDist = dist;
-                            if (bestDist == 0) break;
-                        }
-                    }
-
-                    if (bestDist <= maxAllowed)
-                    {
                         totalDist += bestDist;
                     }
-                    else
+
+                    if (allTokensMatched)
                     {
-                        allTokensMatched = false;
-                        break;
+                        matchedIds.Add((c.SongId, totalDist));
                     }
                 }
-
-                if (allTokensMatched)
-                {
-                    matchedIds.Add((c.SongId, totalDist));
-                }
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Fuzzy search failed", ex);
+                return [];
             }
 
             if (matchedIds.Count == 0) return [];
@@ -1129,9 +1139,9 @@ namespace Lyracist.Data.Services
                     FROM Songs s
                     LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
                     WHERE (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                    AND (s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                    " + "AND " + CrateMatchSql + @"
                     ORDER BY s.Artist, s.Title
-                    LIMIT 150";
+                    LIMIT 2000";
                 return crateConn.Query<Song, SongAudioSettings, Song>(
                     crateOnlySql,
                     (song, audioSettings) => { song.AudioSettings = audioSettings; return song; },
@@ -1166,7 +1176,7 @@ namespace Lyracist.Data.Services
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
                     AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
-                    AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                    " + "AND (@crateWin IS NULL OR " + CrateMatchSql + ")" + @"
                     LIMIT 150";
 
                 var results = connection.Query<Song, SongAudioSettings, Song>(

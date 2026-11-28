@@ -44,6 +44,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
 
     public string CurrentSongPath => _currentSongPath;
     public bool IsPlaying => _isPlaying;
+    public bool HasActiveTrack => _loadedAudioPath != null;
 
     public double Volume
     {
@@ -72,44 +73,35 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                     _pitchChangeCts?.Cancel();
                     _pitchChangeCts = new CancellationTokenSource();
                     var token = _pitchChangeCts.Token;
+                    Task previousReload = _reloadTask;
 
                     // Snapshot the path now, on the caller's thread, so a concurrent LoadSong()
                     // swapping _loadedAudioPath can't make this task reload the wrong song.
                     string loadedPath = _loadedAudioPath;
 
-                    Task.Run(async () =>
+                    _reloadTask = Task.Run(async () =>
                     {
                         try
                         {
                             await Task.Delay(150, token); // Debounce slider drags
+                            await previousReload;
                             token.ThrowIfCancellationRequested();
 
                             var currentPos = _video.Position;
-                            bool wasPlaying = _isPlaying;
 
                             if (!_isMp4Mode)
                             {
                                 System.Windows.Application.Current.Dispatcher.Invoke(() => _timer?.Stop());
                             }
 
-                            // Load the media backend again
-                            await _video.LoadAsync(loadedPath);
-                            token.ThrowIfCancellationRequested();
+                            await ReloadAtPositionAsync(loadedPath, currentPos, token);
 
-                            // Apply equalizer, speed, volume, and the new Pitch setting
-                            UpdateAudioParameters();
-
-                            // Seek to the exact same position
-                            await _video.SeekAsync(currentPos);
-                            token.ThrowIfCancellationRequested();
-
-                            if (wasPlaying && _isPlaying)
+                            if (_isPlaying && !_isMp4Mode)
                             {
-                                await _video.PlayAsync();
-                                if (!_isMp4Mode)
+                                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                                 {
-                                    System.Windows.Application.Current.Dispatcher.Invoke(() => _timer?.Start());
-                                }
+                                    if (_isPlaying) _timer?.Start();
+                                }));
                             }
                         }
                         catch (OperationCanceledException) { }
@@ -117,10 +109,47 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                         {
                             Lyracist.Shared.Globals.LogError("Lyracist", "Error during pitch hot-reload", ex);
                         }
-                    }, token);
+                    });
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Reloads the current media and resumes at <paramref name="position"/>. The seek has to come after
+    /// Play: the backend ignores a seek on media that isn't playing yet, which restarts from 0:00.
+    /// </summary>
+    private async Task ReloadAtPositionAsync(string path, TimeSpan position, CancellationToken token)
+    {
+        await _video.LoadAsync(path);
+        token.ThrowIfCancellationRequested();
+
+        UpdateAudioParameters();
+
+        // Even if the DJ paused meanwhile, play-seek-pause so that resuming doesn't start from 0:00.
+        await _video.PlayAsync();
+        for (int i = 0; i < 100 && !_video.IsPlaying; i++)
+        {
+            await Task.Delay(30, token);
+        }
+        token.ThrowIfCancellationRequested();
+
+        await _video.SeekAsync(position);
+
+        // The DJ may have paused while the media was still opening.
+        if (!_isPlaying)
+        {
+            await _video.PauseAsync();
+        }
+    }
+
+    // Cancels any in-flight reload and waits (briefly, in case the decoder itself is hung) for it to
+    // finish so it can't load or play over whatever happens next.
+    private async Task CancelReloadAsync()
+    {
+        _pitchChangeCts?.Cancel();
+        _recoveryCts?.Cancel();
+        await Task.WhenAny(_reloadTask, Task.Delay(3000));
     }
 
     public double Treble
@@ -277,6 +306,10 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     private double _lastWatchdogPosition = -1;
     private int _stalledWatchdogTicks;
     private bool _isWatchdogRecovering;
+    private int _recoveryAttempts;
+    private CancellationTokenSource? _recoveryCts;
+    private Task _reloadTask = Task.CompletedTask;
+    private const int MaxRecoveriesPerSong = 3;
     private const int WatchdogStallTickThreshold = 14; // ~3.5 seconds at 250ms ticks
 
     private void InitializePositionTimer()
@@ -293,7 +326,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     {
         PositionChanged?.Invoke();
 
-        if (!_isPlaying || _isWatchdogRecovering || string.IsNullOrEmpty(_loadedAudioPath))
+        if (!_isPlaying || _isWatchdogRecovering || !_reloadTask.IsCompleted || string.IsNullOrEmpty(_loadedAudioPath))
         {
             _stalledWatchdogTicks = 0;
             _lastWatchdogPosition = -1;
@@ -330,8 +363,13 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
         if (_isWatchdogRecovering || !_isPlaying) return;
         string? audioPath = _loadedAudioPath;
         if (string.IsNullOrEmpty(audioPath) || !File.Exists(audioPath)) return;
+        if (_recoveryAttempts >= MaxRecoveriesPerSong) return;
+        _recoveryAttempts++;
 
         _isWatchdogRecovering = true;
+        _recoveryCts?.Cancel();
+        _recoveryCts = new CancellationTokenSource();
+        var token = _recoveryCts.Token;
         try
         {
             Lyracist.Shared.Globals.LogError(
@@ -344,23 +382,21 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
                 _timer?.Stop();
             }
 
-            await Task.Run(async () =>
+            var reload = Task.Run(async () =>
             {
                 await _video.StopAsync();
-                await _video.LoadAsync(audioPath);
-                UpdateAudioParameters();
-                await _video.SeekAsync(TimeSpan.FromSeconds(Math.Max(0, stalledPositionSeconds)));
-                if (_isPlaying)
-                {
-                    await _video.PlayAsync();
-                }
+                token.ThrowIfCancellationRequested();
+                await ReloadAtPositionAsync(audioPath, TimeSpan.FromSeconds(Math.Max(0, stalledPositionSeconds)), token);
             });
+            _reloadTask = reload.ContinueWith(_ => { }, TaskScheduler.Default);
+            await reload;
 
-            if (_isPlaying && !_isMp4Mode)
+            if (_isPlaying && !_isMp4Mode && !token.IsCancellationRequested)
             {
                 _timer?.Start();
             }
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "MediaEngine Watchdog recovery failed", ex);
@@ -433,6 +469,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     {
         await Stop();
         CleanUpTempFiles();
+        _recoveryAttempts = 0;
 
         if (string.IsNullOrEmpty(path)) return;
 
@@ -536,13 +573,12 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
 
     public async Task Stop()
     {
-        // Cancel any in-flight pitch hot-reload so it can't load/seek/play over
-        // whatever gets loaded next (see the Pitch setter).
-        _pitchChangeCts?.Cancel();
-
         bool wasPlaying = _isPlaying;
         _isPlaying = false;
         _loadedAudioPath = null;
+
+        // Cancel any in-flight key-change reload or freeze recovery before touching the backend.
+        await CancelReloadAsync();
 
         await Task.Run(async () => await _video.StopAsync());
         CleanUpTempFiles();

@@ -9,6 +9,8 @@ public interface IMediaEngine
 {
     string CurrentSongPath { get; }
     bool IsPlaying { get; }
+    /// <summary>True while a loaded track is playing or paused; false once it has stopped or ended.</summary>
+    bool HasActiveTrack { get; }
     Task LoadSong(string path);
     Task Play();
     Task Pause();

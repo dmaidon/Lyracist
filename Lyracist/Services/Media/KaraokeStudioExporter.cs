@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Lyracist.Data.Services;
 using SkiaSharp;
 
 namespace Lyracist.Services.Media;
@@ -62,23 +63,97 @@ public partial class StudioLyricLine : ObservableObject
         seconds = 0;
         if (string.IsNullOrWhiteSpace(input)) return false;
         string clean = input.Trim().Trim('[', ']');
-        if (TimeSpan.TryParseExact(clean, [@"mm\:ss\.ff", @"m\:ss\.ff", @"mm\:ss\.f", @"mm\:ss", @"m\:ss"], CultureInfo.InvariantCulture, out var ts))
+        if (TimeSpan.TryParseExact(clean, [@"mm\:ss\.ff", @"m\:ss\.ff", @"mm\:ss\.fff", @"m\:ss\.fff", @"mm\:ss\.f", @"mm\:ss", @"m\:ss"], CultureInfo.InvariantCulture, out var ts))
         {
             seconds = ts.TotalSeconds;
             return true;
         }
         return double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out seconds);
     }
+
+    /// <summary>
+    /// Parses pasted or imported lyrics (plain text or LRC). LRC header tags such as [ti:] are skipped,
+    /// [S2] / [BOTH] prefixes become singer assignments, and "Line | Translation" is split.
+    /// </summary>
+    public static List<StudioLyricLine> ParseLyrics(string? raw)
+    {
+        var result = new List<StudioLyricLine>();
+        double cursorSec = 4.0;
+        foreach (string rawLine in (raw ?? string.Empty).Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries))
+        {
+            string text = rawLine.Trim();
+            if (System.Text.RegularExpressions.Regex.IsMatch(text, @"^\[[A-Za-z#]+:[^\]]*\]$")) continue;
+
+            double start = cursorSec;
+            if (text.StartsWith('[') && text.IndexOf(']') is int closeIdx and > 1
+                && TryParseTimestamp(text[1..closeIdx], out double parsedSec))
+            {
+                start = parsedSec;
+                text = text[(closeIdx + 1)..].Trim();
+            }
+
+            string singer = "Singer 1";
+            if (text.StartsWith("[S2]", StringComparison.OrdinalIgnoreCase))
+            {
+                singer = "Singer 2";
+                text = text[4..].Trim();
+            }
+            else if (text.StartsWith("[BOTH]", StringComparison.OrdinalIgnoreCase))
+            {
+                singer = "Both (Duet)";
+                text = text[6..].Trim();
+            }
+
+            string translation = string.Empty;
+            int pipe = text.IndexOf('|');
+            if (pipe >= 0)
+            {
+                translation = text[(pipe + 1)..].Trim();
+                text = text[..pipe].Trim();
+            }
+
+            if (string.IsNullOrWhiteSpace(text)) continue;
+
+            result.Add(new StudioLyricLine
+            {
+                StartTimeSeconds = start,
+                EndTimeSeconds = start + 3.5,
+                LyricText = text,
+                TranslationText = translation,
+                SingerAssignment = singer
+            });
+            cursorSec = start + 4.0;
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns copies of the lines re-timed for a tempo change. Timestamps are stamped against the
+    /// original audio, so at 80% tempo every line lands later by a factor of 1 / 0.8.
+    /// </summary>
+    public static List<StudioLyricLine> ScaleForTempo(IEnumerable<StudioLyricLine> lines, int tempoPercent)
+    {
+        double factor = KaraokeStudioExporter.ClampTempoPercent(tempoPercent) / 100.0;
+        return lines.Select(l => new StudioLyricLine
+        {
+            StartTimeSeconds = l.StartTimeSeconds / factor,
+            EndTimeSeconds = l.EndTimeSeconds / factor,
+            LyricText = l.LyricText,
+            TranslationText = l.TranslationText,
+            SingerAssignment = l.SingerAssignment
+        }).ToList();
+    }
 }
 
-public sealed class KaraokeStudioExportOptions
+public sealed record KaraokeStudioExportOptions
 {
     public required string InputAudioPath { get; init; }
     public required string OutputDirectory { get; init; }
     public required string SongTitle { get; init; }
     public required string ArtistName { get; init; }
-    /// <summary>0 = Isolate Backing (Remove Lead Vocal), 1 = Keep Low Guide Vocal (25%), 2 = Keep Original Audio</summary>
+    /// <summary>0 = Isolate Backing (Remove Lead Vocal), 1 = Guide Vocal at GuideVocalPercent, 2 = Keep Original Audio</summary>
     public int VocalIsolationMode { get; init; }
+    public int GuideVocalPercent { get; init; } = 25;
     public int KeySemitones { get; init; }
     public int TempoPercent { get; init; } = 100;
     /// <summary>0 = MP3+G (.mp3 + .cdg), 1 = MP4 16:9 Wide (1280x720), 2 = MP4 9:16 Vertical Social (720x1280)</summary>
@@ -94,76 +169,59 @@ public static class KaraokeStudioExporter
     private const int CdgPacketSize = 24;
     private const int CdgPacketsPerSecond = 300;
 
-    public static string ResolveFfmpegPath()
+    public const int MinTempoPercent = 50;
+    public const int MaxTempoPercent = 150;
+
+    public static int ClampTempoPercent(int tempoPercent) => Math.Clamp(tempoPercent, MinTempoPercent, MaxTempoPercent);
+
+    /// <summary>
+    /// Center-channel vocal reduction. 0% guide removes the lead vocal, 100% leaves the original mix,
+    /// and values between blend the two.
+    /// </summary>
+    public static string BuildVocalFilter(int vocalIsolationMode, int guideVocalPercent)
     {
-        string local = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe");
-        if (File.Exists(local)) return local;
-        if (File.Exists(@"C:\ffmpeg\bin\ffmpeg.exe")) return @"C:\ffmpeg\bin\ffmpeg.exe";
-        return "ffmpeg";
+        if (vocalIsolationMode == 2) return string.Empty;
+        double guide = vocalIsolationMode == 1 ? Math.Clamp(guideVocalPercent, 0, 100) / 100.0 : 0.0;
+        if (guide >= 1.0) return string.Empty;
+
+        if (guide <= 0.0)
+        {
+            return "pan=stereo|c0=0.5*c0-0.5*c1|c1=0.5*c1-0.5*c0,highpass=f=110,volume=1.35";
+        }
+
+        string keep = (0.5 + (0.5 * guide)).ToString("F3", CultureInfo.InvariantCulture);
+        string cancel = (0.5 - (0.5 * guide)).ToString("F3", CultureInfo.InvariantCulture);
+        string volume = (1.0 + (0.35 * (1.0 - guide))).ToString("F3", CultureInfo.InvariantCulture);
+        return $"pan=stereo|c0={keep}*c0-{cancel}*c1|c1={keep}*c1-{cancel}*c0,volume={volume}";
     }
 
     /// <summary>
-    /// Processes the input audio track through FFmpeg to apply lead vocal isolation (or guide vocal mix),
-    /// key shifting (-6 to +6 semitones), and tempo scaling (75% to 125%).
+    /// Returns a base file name that doesn't collide with any existing export file, so an export can
+    /// never overwrite the source track or an existing library song.
     /// </summary>
-    public static async Task<string> ProcessAudioTrackAsync(
-        string inputAudioPath,
-        string outputMp3Path,
-        int vocalIsolationMode,
-        int keySemitones,
-        int tempoPercent,
-        CancellationToken token)
+    public static string GetUniqueBaseName(string directory, string baseName)
     {
-        var filters = new List<string>();
-
-        // 1. Vocal Isolation (Bass-preserving stereo phase center cancellation)
-        if (vocalIsolationMode == 0)
+        string[] suffixes = [".mp3", ".cdg", ".lrc", ".mp4", " (Vertical).mp4"];
+        string candidate = baseName;
+        for (int n = 2; suffixes.Any(s => File.Exists(Path.Combine(directory, candidate + s))); n++)
         {
-            // Full vocal removal: cancel center channel above 130Hz while preserving mono bass below 130Hz
-            filters.Add("pan=stereo|c0=0.5*c0-0.5*c1|c1=0.5*c1-0.5*c0,highpass=f=110,volume=1.35");
+            candidate = $"{baseName} ({n})";
         }
-        else if (vocalIsolationMode == 1)
-        {
-            // Guide vocal mode: blend 25% center lead vocal with 100% stereo sides
-            filters.Add("pan=stereo|c0=0.65*c0-0.35*c1|c1=0.65*c1-0.35*c0,volume=1.18");
-        }
+        return candidate;
+    }
 
-        // 2. Key Shift & Tempo Adjustment
-        double pitchFactor = keySemitones != 0 ? Math.Pow(2.0, keySemitones / 12.0) : 1.0;
-        double tempoFactor = Math.Clamp(tempoPercent / 100.0, 0.75, 1.25);
-
-        if (keySemitones != 0 || tempoPercent != 100)
+    private static async Task ProcessAudioTrackAsync(KaraokeStudioExportOptions options, string outputMp3Path, CancellationToken token)
+    {
+        var filters = new[]
         {
-            double compensatedTempo = Math.Clamp(tempoFactor / pitchFactor, 0.5, 2.0);
-            string pStr = pitchFactor.ToString("F5", CultureInfo.InvariantCulture);
-            string tStr = compensatedTempo.ToString("F5", CultureInfo.InvariantCulture);
-            filters.Add($"asetrate=44100*{pStr},aresample=44100,atempo={tStr}");
-        }
+            BuildVocalFilter(options.VocalIsolationMode, options.GuideVocalPercent),
+            FfmpegRunner.BuildPitchTempoFilter(options.KeySemitones, ClampTempoPercent(options.TempoPercent) / 100.0)
+        }.Where(f => f.Length > 0).ToList();
 
         string filterArg = filters.Count > 0 ? $"-af \"{string.Join(",", filters)}\"" : string.Empty;
-        string ffmpeg = ResolveFfmpegPath();
-
-        var psi = new ProcessStartInfo
-        {
-            FileName = ffmpeg,
-            Arguments = $"-y -i \"{inputAudioPath}\" -vn {filterArg} -ar 44100 -ac 2 -b:a 192k \"{outputMp3Path}\"",
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardError = true
-        };
-
-        using var proc = Process.Start(psi);
-        if (proc != null)
-        {
-            await proc.WaitForExitAsync(token);
-        }
-
-        if (!File.Exists(outputMp3Path))
-        {
-            File.Copy(inputAudioPath, outputMp3Path, overwrite: true);
-        }
-
-        return outputMp3Path;
+        await FfmpegRunner.RunAsync(
+            $"-y -i \"{options.InputAudioPath}\" -vn {filterArg} -ar 44100 -ac 2 -b:a 192k \"{outputMp3Path}\"",
+            token);
     }
 
     public static async Task<string> ExportCustomKaraokeTrackAsync(
@@ -172,48 +230,63 @@ public static class KaraokeStudioExporter
         CancellationToken token)
     {
         Directory.CreateDirectory(options.OutputDirectory);
+        options = options with { Lines = StudioLyricLine.ScaleForTempo(options.Lines, options.TempoPercent) };
 
         string safeArtist = SanitizeFileName(string.IsNullOrWhiteSpace(options.ArtistName) ? "Custom Artist" : options.ArtistName);
         string safeTitle = SanitizeFileName(string.IsNullOrWhiteSpace(options.SongTitle) ? "Custom Song" : options.SongTitle);
-        string baseName = $"{safeArtist} - {safeTitle}";
+        bool isMp3G = options.ExportFormatIndex == 0;
+        bool vertical = options.ExportFormatIndex == 2;
 
-        string processedMp3 = Path.Combine(options.OutputDirectory, baseName + ".mp3");
-        statusProgress?.Report("Step 1/3: Isolating vocals & applying key/tempo in FFmpeg...");
-        await ProcessAudioTrackAsync(
-            options.InputAudioPath,
-            processedMp3,
-            options.VocalIsolationMode,
-            options.KeySemitones,
-            options.TempoPercent,
-            token);
-
-        double durationSec = EstimateDurationSeconds(processedMp3, options.Lines);
-
-        // Also save companion .lrc file so Lyracist LRC player / Store pipeline has word/line timing
-        string lrcPath = Path.Combine(options.OutputDirectory, baseName + ".lrc");
-        WriteLrcFile(lrcPath, options);
-
-        if (options.ExportFormatIndex == 0)
+        // Everything is built in a private temp folder and only moved into place once it all succeeded.
+        string workDir = Path.Combine(Path.GetTempPath(), "LyracistStudio_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(workDir);
+        try
         {
-            // MP3+G (.cdg + .mp3)
-            string cdgPath = Path.Combine(options.OutputDirectory, baseName + ".cdg");
-            statusProgress?.Report("Step 2/3: Encoding binary CDG graphics stream (300 packets/sec)...");
-            await Task.Run(() => GenerateCdgFile(cdgPath, options, durationSec), token);
-            statusProgress?.Report($"Step 3/3: Export complete! Created {Path.GetFileName(processedMp3)} + {Path.GetFileName(cdgPath)}");
-            return processedMp3;
+            string workMp3 = Path.Combine(workDir, "audio.mp3");
+            statusProgress?.Report("Step 1/3: Isolating vocals & applying key/tempo in FFmpeg...");
+            await ProcessAudioTrackAsync(options, workMp3, token);
+
+            double durationSec = EstimateDurationSeconds(workMp3, options.Lines);
+
+            // Companion .lrc so Lyracist LRC player / Store pipeline has line timing
+            string workLrc = Path.Combine(workDir, "lyrics.lrc");
+            WriteLrcFile(workLrc, options);
+
+            string workCdg = Path.Combine(workDir, "graphics.cdg");
+            string workMp4 = Path.Combine(workDir, "video.mp4");
+            if (isMp3G)
+            {
+                statusProgress?.Report("Step 2/3: Encoding binary CDG graphics stream (300 packets/sec)...");
+                await Task.Run(() => GenerateCdgFile(workCdg, options, durationSec, token), token);
+            }
+            else
+            {
+                statusProgress?.Report("Step 2/3: Rendering synchronized karaoke video & encoding MP4...");
+                await RenderMp4KaraokeVideoAsync(workMp3, workMp4, options, durationSec, vertical, token);
+            }
+
+            string baseName = GetUniqueBaseName(options.OutputDirectory, $"{safeArtist} - {safeTitle}");
+            string resultPath;
+            if (isMp3G)
+            {
+                resultPath = Path.Combine(options.OutputDirectory, baseName + ".mp3");
+                File.Move(workCdg, Path.Combine(options.OutputDirectory, baseName + ".cdg"));
+                File.Move(workMp3, resultPath);
+            }
+            else
+            {
+                resultPath = Path.Combine(options.OutputDirectory, baseName + (vertical ? " (Vertical).mp4" : ".mp4"));
+                File.Move(workMp4, resultPath);
+            }
+
+            File.Move(workLrc, Path.Combine(options.OutputDirectory, baseName + ".lrc"));
+            statusProgress?.Report($"Step 3/3: Export complete! Created {Path.GetFileName(resultPath)}");
+            return resultPath;
         }
-        else
+        finally
         {
-            // MP4 Video (16:9 Wide or 9:16 Vertical Social)
-            bool vertical = options.ExportFormatIndex == 2;
-            string mp4Path = Path.Combine(options.OutputDirectory, baseName + (vertical ? " (Vertical).mp4" : ".mp4"));
-            statusProgress?.Report("Step 2/3: Rendering synchronized karaoke video frames & encoding MP4...");
-            await RenderMp4KaraokeVideoAsync(processedMp3, mp4Path, options, durationSec, vertical, statusProgress, token);
-
-            // Clean up intermediate mp3 if exporting pure MP4
-            try { if (File.Exists(mp4Path) && File.Exists(processedMp3)) File.Delete(processedMp3); } catch { }
-            statusProgress?.Report($"Step 3/3: Export complete! Created {Path.GetFileName(mp4Path)}");
-            return mp4Path;
+            try { Directory.Delete(workDir, recursive: true); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         }
     }
 
@@ -257,7 +330,7 @@ public static class KaraokeStudioExporter
     /// Encodes a real binary CD+G (.cdg) karaoke packet stream at 300 packets/second using SkiaSharp
     /// 300x216 16-color indexed frame rasterization and 6x12 tile delta encoding.
     /// </summary>
-    public static void GenerateCdgFile(string cdgPath, KaraokeStudioExportOptions options, double durationSeconds)
+    public static void GenerateCdgFile(string cdgPath, KaraokeStudioExportOptions options, double durationSeconds, CancellationToken token = default)
     {
         int totalPackets = Math.Max(900, (int)Math.Ceiling(durationSeconds * CdgPacketsPerSecond));
         byte[] streamBytes = new byte[totalPackets * CdgPacketSize];
@@ -321,6 +394,7 @@ public static class KaraokeStudioExporter
         Span<byte> tileData = stackalloc byte[16];
         for (int pkt = 10; pkt < totalPackets - stepPackets; pkt += stepPackets)
         {
+            token.ThrowIfCancellationRequested();
             double timeSec = (double)pkt / CdgPacketsPerSecond;
             RenderKaraokeFrameToIndexedCanvas(infoSurface.Canvas, infoSurface, options, timeSec, mainFont, subFont, palette, targetCanvas);
 
@@ -488,20 +562,17 @@ public static class KaraokeStudioExporter
         KaraokeStudioExportOptions options,
         double durationSec,
         bool vertical,
-        IProgress<string>? statusProgress,
         CancellationToken token)
     {
         int width = vertical ? 720 : 1280;
         int height = vertical ? 1280 : 720;
         const int fps = 4; // 4 keyframe renders/sec keeps rendering fast while smooth for lyric transitions
 
-        string tempFramesDir = Path.Combine(Path.GetTempPath(), "LyracistStudioFrames_" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempFramesDir);
-
-        try
-        {
-            int totalFrames = Math.Max(8, (int)Math.Ceiling(durationSec * fps));
-            await Task.Run(() =>
+        int totalFrames = Math.Max(8, (int)Math.Ceiling(durationSec * fps));
+        await FfmpegRunner.RunAsync(
+            $"-y -f rawvideo -pix_fmt bgra -s {width}x{height} -framerate {fps} -i - -i \"{audioPath}\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -c:a aac -b:a 192k -shortest \"{outputMp4Path}\"",
+            token,
+            (input, ct) => Task.Run(() =>
             {
                 using var surface = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
                 using var boldFace = SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) ?? SKTypeface.Default;
@@ -519,7 +590,7 @@ public static class KaraokeStudioExporter
 
                 for (int f = 0; f < totalFrames; f++)
                 {
-                    if (token.IsCancellationRequested) break;
+                    ct.ThrowIfCancellationRequested();
                     double t = (double)f / fps;
                     var canvas = surface.Canvas;
                     canvas.Clear(new SKColor(12, 16, 32));
@@ -565,35 +636,11 @@ public static class KaraokeStudioExporter
                         }
                     }
 
-                    using var img = surface.Snapshot();
-                    using var png = img.Encode(SKEncodedImageFormat.Png, 90);
-                    string framePath = Path.Combine(tempFramesDir, $"frame_{f:D5}.png");
-                    using var fs = File.Create(framePath);
-                    png.SaveTo(fs);
+                    canvas.Flush();
+                    using var pixels = surface.PeekPixels();
+                    input.Write(pixels.GetPixelSpan());
                 }
-            }, token);
-
-            statusProgress?.Report("Step 3/3: Muxing video frames and audio into MP4 with FFmpeg...");
-            string ffmpeg = ResolveFfmpegPath();
-            var psi = new ProcessStartInfo
-            {
-                FileName = ffmpeg,
-                Arguments = $"-y -framerate {fps} -i \"{Path.Combine(tempFramesDir, "frame_%05d.png")}\" -i \"{audioPath}\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -c:a aac -b:a 192k -shortest \"{outputMp4Path}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardError = true
-            };
-
-            using var proc = Process.Start(psi);
-            if (proc != null)
-            {
-                await proc.WaitForExitAsync(token);
-            }
-        }
-        finally
-        {
-            try { if (Directory.Exists(tempFramesDir)) Directory.Delete(tempFramesDir, recursive: true); } catch { }
-        }
+            }, ct));
     }
 
     private static string Truncate(string? value, int maxLen)
