@@ -1,3 +1,4 @@
+// Edited on Nov 27, 2026 @ 13:14:30 -> Add folder pickers for Multi-Rig / USB Drive Sync source and target folders
 using System;
 using System.Globalization;
 using System.Windows;
@@ -43,6 +44,31 @@ namespace LyracistDbEditor
                 {
                     vm.RenameFolderPath = dialog.FolderName;
                 }
+            }
+        }
+
+        private void OnBrowseSyncSourceClicked(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select Source Master Karaoke / Music Library Folder"
+            };
+            if (dialog.ShowDialog() == true && DataContext is MainViewModel vm)
+            {
+                vm.SyncSourceFolderPath = dialog.FolderName;
+            }
+        }
+
+        private void OnBrowseSyncTargetClicked(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select Target Backup / External USB Gig Drive Folder"
+            };
+            if (dialog.ShowDialog() == true && DataContext is MainViewModel vm)
+            {
+                vm.SyncTargetFolderPath = dialog.FolderName;
+                vm.UpdateTargetDriveDiskSpaceInfo();
             }
         }
     }

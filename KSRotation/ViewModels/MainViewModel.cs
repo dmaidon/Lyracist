@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 11:21:00 -> Add IsShaderOnlyModeActive to MainViewModel to hide rotation and show full-screen shader during DJ music breaks
+// Edited on Nov 27, 2026 @ 13:04:15 -> Add UndoLastFinishCommand and turn snapshot recovery for False Start / Undo Finish
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2566,12 +2566,134 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
+        public void PrintRequestSlips()
+        {
+#if !MAUI
+            PromoPrintUtility.ShowRequestSlipsDialog(
+                System.Windows.Application.Current?.MainWindow,
+                VenueName,
+                DjName,
+                ConnectionUrl);
+#endif
+        }
+
+        [RelayCommand]
+        public void OpenSchedulePosterMaker()
+        {
+#if !MAUI
+            PromoPrintUtility.ShowSchedulePosterDialog(
+                System.Windows.Application.Current?.MainWindow,
+                DjName,
+                VenueName);
+#endif
+        }
+
+        private sealed class FinishedTurnSnapshot
+        {
+            public required SingerEntry Entry { get; init; }
+            public int PreviousIndex { get; init; }
+            public int RoundMarked { get; init; }
+            public string PreviousSong { get; init; } = string.Empty;
+            public string PreviousArtist { get; init; } = string.Empty;
+            public string PreviousDuetPartner { get; init; } = string.Empty;
+            public string? PreviousScaryokeCategory { get; init; }
+            public string? PreviousScaryokeColor { get; init; }
+            public bool PreviousHasSungInLastRound { get; init; }
+            public bool PreviousIsSpecial { get; init; }
+            public bool PreviousIsInactive { get; init; }
+            public QueuedSong? PoppedQueuedSong { get; init; }
+        }
+
+        private FinishedTurnSnapshot? _lastFinishedTurn;
+
+        public bool CanUndoLastFinish => _lastFinishedTurn != null;
+
+        /// <summary>
+        /// False Start / Undo Last Finish: restores the most recently finished singer back to their previous
+        /// song, round checkmark state, and Current performer status without losing rotation order.
+        /// </summary>
+        [RelayCommand]
+        public void UndoLastFinish()
+        {
+            if (_lastFinishedTurn == null) return;
+            var snap = _lastFinishedTurn;
+            _lastFinishedTurn = null;
+            OnPropertyChanged(nameof(CanUndoLastFinish));
+
+            var entry = snap.Entry;
+
+            _isFinishingSong = true;
+            try
+            {
+                if (snap.PoppedQueuedSong != null)
+                {
+                    entry.QueuedSongs.Insert(0, snap.PoppedQueuedSong);
+                }
+
+                entry.Song = snap.PreviousSong;
+                entry.Artist = snap.PreviousArtist;
+                entry.DuetPartnerName = snap.PreviousDuetPartner;
+                entry.ScaryokeCategory = snap.PreviousScaryokeCategory;
+                entry.ScaryokeColor = snap.PreviousScaryokeColor;
+                entry.HasSungInLastRound = snap.PreviousHasSungInLastRound;
+                entry.IsSpecial = snap.PreviousIsSpecial;
+                entry.IsInactive = snap.PreviousIsInactive;
+
+                int targetIdx = Math.Clamp(snap.PreviousIndex, 0, Singers.Count);
+                int curIdx = Singers.IndexOf(entry);
+                if (curIdx < 0)
+                {
+                    Singers.Insert(targetIdx, entry);
+                }
+                else if (curIdx != targetIdx)
+                {
+                    RotationHelpers.MoveSingerInList(Singers, curIdx, Math.Clamp(snap.PreviousIndex, 0, Singers.Count - 1));
+                }
+
+                RotationHelpers.SetCurrentSinger(Singers, entry, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+            }
+            finally
+            {
+                _isFinishingSong = false;
+            }
+
+            if (snap.RoundMarked > 0)
+            {
+                entry.SetRoundCompleted(snap.RoundMarked, false);
+            }
+
+            RotationHelpers.EnsureRotationStartFlag(Singers);
+            RotationHelpers.EnforceLinkedAdjacency(Singers);
+            RefreshLinkedPartnerNames();
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RecalculateRoundEstimation();
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
+        [RelayCommand]
         private void FinishSingerSong(SingerEntry entry)
         {
             if (entry == null)
             {
                 return;
             }
+
+            int previousIndex = Math.Max(0, Singers.IndexOf(entry));
+            string priorSong = entry.Song;
+            string priorArtist = entry.Artist;
+            string priorDuet = entry.DuetPartnerName;
+            string? priorScaryokeCat = entry.ScaryokeCategory;
+            string? priorScaryokeCol = entry.ScaryokeColor;
+            bool priorHasSungLast = entry.HasSungInLastRound;
+            bool priorSpecial = entry.IsSpecial;
+            bool priorInactive = entry.IsInactive;
+            QueuedSong? poppedQueued = null;
 
             int roundToMark = entry.GetNextIncompleteRound();
             if (roundToMark == 0)
@@ -2598,6 +2720,7 @@ namespace KSRotation.ViewModels
                     if (entry.QueuedSongs.Count > 0)
                     {
                         var nextSong = entry.QueuedSongs[0];
+                        poppedQueued = nextSong;
                         entry.QueuedSongs.RemoveAt(0);
                         entry.Song = nextSong.Song;
                         entry.Artist = nextSong.Artist;
@@ -2710,6 +2833,23 @@ namespace KSRotation.ViewModels
                 {
                     _isFinishingSong = false;
                 }
+
+                _lastFinishedTurn = new FinishedTurnSnapshot
+                {
+                    Entry = entry,
+                    PreviousIndex = previousIndex,
+                    RoundMarked = roundToMark,
+                    PreviousSong = priorSong,
+                    PreviousArtist = priorArtist,
+                    PreviousDuetPartner = priorDuet,
+                    PreviousScaryokeCategory = priorScaryokeCat,
+                    PreviousScaryokeColor = priorScaryokeCol,
+                    PreviousHasSungInLastRound = priorHasSungLast,
+                    PreviousIsSpecial = priorSpecial,
+                    PreviousIsInactive = priorInactive,
+                    PoppedQueuedSong = poppedQueued
+                };
+                OnPropertyChanged(nameof(CanUndoLastFinish));
 
                 // Re-establishes the 1st-singer invariant now that _isFinishingSong is suppressing
                 // OnSingersCollectionChanged's own reentrant call — matters when a fully-played music

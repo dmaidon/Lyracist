@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,10 @@
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.11.25.143</AssemblyVersion>
-    <FileVersion>26.11.25.143</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.144</AssemblyVersion>
+    <FileVersion>26.11.26.144</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

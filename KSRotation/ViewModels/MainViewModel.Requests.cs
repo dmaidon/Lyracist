@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 13:23:45 -> Add BuzzSingerPhoneCommand, recentBuzzEvents buffer, and buzz-singer DJ action
+// Edited on Nov 27, 2026 @ 13:04:15 -> Add undo-finish / false-start action to ExecuteDjActionOnUi
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -839,6 +839,13 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
                         FinishSingerSong(singer);
+                        return "";
+                    }
+                case "undo-finish":
+                case "false-start":
+                    {
+                        if (!CanUndoLastFinish) return "No completed turn to undo.";
+                        UndoLastFinish();
                         return "";
                     }
                 case "buzz-singer":

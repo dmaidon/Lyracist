@@ -1,4 +1,4 @@
-<!-- Edited on Nov 21, 2026 @ 08:16:15 -> Add Song Title and Artist inputs with right-click previously sung songs menu to Add Performer card -->
+<!-- Edited on Nov 27, 2026 @ 13:03:45 -> Add Undo Finish / False Start button to RotationPage toolbar -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -167,7 +167,10 @@
                         <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
 
                         <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing" />
+                        <ui:Button Icon="{ui:SymbolIcon ArrowUndo24}" Content="Undo Finish" Command="{Binding UndoLastFinishCommand}" Appearance="Secondary" Margin="0,0,4,0" ToolTip="False Start / Undo Last Finish: restore the most recently finished singer and song back to Current" />
                         <ui:Button Icon="{ui:SymbolIcon Save24}" Content="Save" Command="{Binding SaveRotationCommand}" Appearance="Secondary" Margin="0,0,4,0" ToolTip="Save Rotation List Report to Reports folder" />
+                        <ui:Button Icon="{ui:SymbolIcon Print24}" Content="Slips" Command="{Binding PrintRequestSlipsCommand}" Appearance="Secondary" Margin="0,0,4,0" ToolTip="Generate Printable Branded Paper Request Slips (8, 10, or 12 per page)" />
+                        <ui:Button Icon="{ui:SymbolIcon Image24}" Content="Poster" Command="{Binding OpenSchedulePosterMakerCommand}" Appearance="Secondary" Margin="0,0,4,0" ToolTip="Open Weekly Karaoke Schedule Social Media / TV Poster Maker" />
                         <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation" />
                         <Button Command="{Binding ToggleLastRoundCommand}"
                                 Margin="6,0,0,0"

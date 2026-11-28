@@ -1,4 +1,4 @@
-<!-- Edited on Oct 24, 2026 @ 15:02:00 -> Add UseWindowsForms and link shared monitor positioning files -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,10 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.11.25.282</AssemblyVersion>
-    <FileVersion>26.11.25.282</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.283</AssemblyVersion>
+    <FileVersion>26.11.26.283</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

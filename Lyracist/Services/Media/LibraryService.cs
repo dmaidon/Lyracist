@@ -1,4 +1,4 @@
-// Edited on Nov 14, 2026 @ 09:20:00 -> Enforce first/last or distinct singer name check when saving singer audio settings
+// Edited on Nov 27, 2026 @ 12:58:30 -> Add subfolder crate filtering and GetSubfolderCrates support in LibraryService
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -209,20 +209,36 @@ public class LibraryService : ILibraryService
         }
     }
 
-    public IEnumerable<KaraokeSong> Search(string query, bool isMusic = false)
+    public IEnumerable<string> GetSubfolderCrates(bool? isMusic = null)
     {
         try
         {
             using var context = new LyracistDbContext();
+            var searchService = new SearchService(context);
+            return searchService.GetDistinctSubfolderCrates(isMusic.HasValue ? !isMusic.Value : null);
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get subfolder crates", ex);
+            return [];
+        }
+    }
 
-            if (string.IsNullOrWhiteSpace(query))
+    public IEnumerable<KaraokeSong> Search(string query, bool isMusic = false, string? subfolderCrate = null)
+    {
+        bool hasCrate = !string.IsNullOrWhiteSpace(subfolderCrate) && !string.Equals(subfolderCrate, "All Crates", StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            using var context = new LyracistDbContext();
+
+            if (string.IsNullOrWhiteSpace(query) && !hasCrate)
             {
                 return context.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToList().Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
             // Run matching search synchronously on SQLite FTS5 table
-            var results = searchService.SearchSync(query, isKaraoke: !isMusic);
+            var results = searchService.SearchSync(query, isKaraoke: !isMusic, subfolderCrate: subfolderCrate);
             return results.Select(MapToKaraokeSong);
         }
         catch (Exception ex)
@@ -232,13 +248,13 @@ public class LibraryService : ILibraryService
             {
                 LyracistDbContext.EnsureSchemaAndRepair();
                 using var retryContext = new LyracistDbContext();
-                if (string.IsNullOrWhiteSpace(query))
+                if (string.IsNullOrWhiteSpace(query) && !hasCrate)
                 {
                     return retryContext.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToList().Select(MapToKaraokeSong);
                 }
 
                 var retrySearch = new SearchService(retryContext);
-                return retrySearch.SearchSync(query, isKaraoke: !isMusic).Select(MapToKaraokeSong);
+                return retrySearch.SearchSync(query, isKaraoke: !isMusic, subfolderCrate: subfolderCrate).Select(MapToKaraokeSong);
             }
             catch (Exception retryEx)
             {
@@ -248,20 +264,21 @@ public class LibraryService : ILibraryService
         }
     }
 
-    public async Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false)
+    public async Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false, string? subfolderCrate = null)
     {
+        bool hasCrate = !string.IsNullOrWhiteSpace(subfolderCrate) && !string.Equals(subfolderCrate, "All Crates", StringComparison.OrdinalIgnoreCase);
         try
         {
             using var context = new LyracistDbContext();
 
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(query) && !hasCrate)
             {
                 var all = await context.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToListAsync();
                 return all.Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
-            var results = await searchService.Search(query, isKaraoke: !isMusic);
+            var results = await searchService.Search(query, isKaraoke: !isMusic, subfolderCrate: subfolderCrate);
             return results.Select(MapToKaraokeSong);
         }
         catch (Exception ex)
@@ -271,14 +288,14 @@ public class LibraryService : ILibraryService
             {
                 LyracistDbContext.EnsureSchemaAndRepair();
                 using var retryContext = new LyracistDbContext();
-                if (string.IsNullOrWhiteSpace(query))
+                if (string.IsNullOrWhiteSpace(query) && !hasCrate)
                 {
                     var all = await retryContext.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToListAsync();
                     return all.Select(MapToKaraokeSong);
                 }
 
                 var retrySearch = new SearchService(retryContext);
-                var results = await retrySearch.Search(query, isKaraoke: !isMusic);
+                var results = await retrySearch.Search(query, isKaraoke: !isMusic, subfolderCrate: subfolderCrate);
                 return results.Select(MapToKaraokeSong);
             }
             catch (Exception retryEx)
@@ -337,13 +354,25 @@ public class LibraryService : ILibraryService
             }
         }
 
+        string crate = string.Empty;
+        try
+        {
+            string? dir = Path.GetDirectoryName(resolvedPath);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                crate = Path.GetFileName(dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            }
+        }
+        catch { }
+
         return new KaraokeSong
         {
             Title = song.Title,
             Artist = song.Artist,
             AudioPath = resolvedPath,
             CdgPath = cdgPath,
-            IsKaraoke = song.IsKaraoke
+            IsKaraoke = song.IsKaraoke,
+            SubfolderCrate = crate
         };
     }
 

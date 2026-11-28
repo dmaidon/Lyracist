@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 11:59:00 -> Update user manuals for PCDJ LYRX ANGLE-HLSL .frag support and Shader Only music-break mode
+// Edited on Nov 27, 2026 @ 13:31:00 -> Update user manuals for Custom Karaoke Track Studio, False Start / Undo Finish, Fuzzy & Crate Search, Originals Upload, Promo Print Tools, and LyracistDbEditor upgrades
 using System;
 using System.IO;
 using Xunit;
@@ -7317,6 +7317,152 @@ Section: Display & Projection Settings / 'Shader Only' Music-Break Mode & PCDJ L
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " ShaderOnlyMusicBreakMode";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForKaraokeStudioAndProSuiteUpgrades()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"Lyracist, KSRotation, KSRotation.Maui & LyracistDbEditor: Custom Karaoke Track Studio, 1-Click False Start & Undo Finish, Fuzzy / Abbreviation / Crate Search, Indie Originals Upload, Promo Print Utilities & Database Editor Pro Upgrades - (November 2026)
+
+Section: Live Show Controls, Search, Patron Portal, Print/Promo Utilities & Library Management
+
+1. Custom Karaoke Track Studio ('Karaoke Studio' on the Lyracist Karaoke Page):
+   - Launch 'Karaoke Studio' from the top DJ control strip on the Lyracist Karaoke Page to turn any regular audio track (.mp3, .wav, .flac, .m4a, .ogg) into a synchronized custom karaoke track.
+   - Vocal Removal & Guide Vocal Mix: FFmpeg center-vocal isolation produces an instrumental backing track and isolated vocal stem with adjustable Guide Vocal % (0-100%), Key Shift (-6 to +6 semitones), and Tempo (50%-150%).
+   - Interactive Lyric Timestamp Editor & F8 Tap Sync: Paste raw lyrics (with optional 'Line | Translation' format), play source audio, and press F8 as each line begins to capture timestamps, assign Duet singer colors, and render Instrumental Break Countdown Bars.
+   - Multi-Format Karaoke Export: Exports binary MP3+G (.cdg + .mp3 + .zip), 1080p Wide Video (.mp4 - 16:9), or Vertical Social Video (.mp4 - 9:16) and optionally auto-imports directly into the Lyracist Karaoke Library.
+
+2. 1-Click False Start & Undo Last Finish Turn Recovery:
+   - In Lyracist ('False Start / Undo' on the Karaoke Page & 'Undo Finish' on the Rotation Page): Rewinds an active song to 0:00 if playing/paused, or restores the previous singer's exact rotation position, active song, round progress, and SessionPerformedSongs log if a turn was just completed.
+   - In KSRotation, KSRotation.Maui & Remote DJ ('dj.html'): Clicking 'Undo Finish' restores the most recently completed singer's round checkbox (R1-R10), pre-finish Song/Artist, and active IsCurrent turn status.
+
+3. Player Freeze Watchdog, Fuzzy / Abbreviation / Crate Search, Indie Originals Upload & Promo Print Tools:
+   - MediaEngine 250ms Watchdog: Automatically detects stalled playback (~3.5s) and reloads, restores pitch/EQ, seeks to the exact timestamp, and resumes.
+   - Fuzzy Typo, Artist Abbreviation & Subfolder Crate Search: Expands KJ shorthand ('gnr', 'ccr', 'acdc', 'rhcp', 'skynard', 'zep', etc.), tolerates typos via Damerau-Levenshtein matching, and filters by parent Subfolder / Crate.
+   - Indie Artist 'Originals' Upload ('PatronPortal.html'): Patrons can upload their own backing track (up to 12 MB) into 'Data/Originals/' from the smartphone portal.
+   - Printable Paper Request Slips PDF & Weekly Schedule Poster Maker: Generates cuttable 8/10/12-per-page branded request slips PDFs with QR code and 1080x1080 / 1920x1080 weekly schedule posters.
+
+4. LyracistDbEditor Pro Library Upgrades:
+   - Built-In MP3+G CDG Karaoke Audition Player with real-time 300x216 CDG graphics, -6 to +6 Key Shift, and 10-band Graphic Equalizer.
+   - Broken MP3+G Pair & Corrupt ZIP Archive Audit, Custom Pattern File Renamer with persistent Undo History ('Data/rename_history.json'), and Multi-Rig / External USB Gig Drive Synchronizer with disk-space analysis.";
+
+                if (File.Exists(docxPath))
+                {
+                    try
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                                {
+                                    if (p.Text != null && p.Text.Contains("Custom Karaoke Track Studio"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Lyracist Pro Suite: Custom Karaoke Track Studio, Turn Recovery, Promo Print & Library Upgrades")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+                                    {
+                                        if (line.StartsWith("Lyracist, KSRotation, KSRotation.Maui")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating DOCX manual at {docxPath}: {ex.Message}", ex);
+                    }
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        if (PdfSharp.Fonts.GlobalFontSettings.FontResolver == null)
+                        {
+                            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SimpleFontResolver();
+                        }
+
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string? keywords = doc.Info.Keywords;
+                            if (keywords == null || !keywords.Contains("KaraokeStudioAndProSuiteUpgrades"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.A4;
+
+                                using (var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page))
+                                {
+                                    var titleFont = new PdfSharp.Drawing.XFont("Arial", 16, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                    var bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                    var brush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(20, 20, 20));
+                                    var headingBrush = new PdfSharp.Drawing.XSolidBrush(PdfSharp.Drawing.XColor.FromArgb(0, 100, 200));
+
+                                    double y = 40;
+                                    gfx.DrawString("Custom Karaoke Track Studio, Turn Recovery, Promo Print & Library Upgrades", titleFont, headingBrush, new PdfSharp.Drawing.XPoint(40, y));
+                                    y += 24;
+
+                                    var lines = updateText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                                    foreach (var line in lines)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(line))
+                                        {
+                                            y += 8;
+                                            continue;
+                                        }
+                                        gfx.DrawString(line, bodyFont, brush, new PdfSharp.Drawing.XPoint(40, y));
+                                        y += 14;
+
+                                        if (y > page.Height.Point - 40)
+                                        {
+                                            page = doc.AddPage();
+                                            page.Size = PdfSharp.PageSize.A4;
+                                            gfx.Dispose();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " KaraokeStudioAndProSuiteUpgrades";
                                 doc.Save(pdfPath);
                             }
                         }

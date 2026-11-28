@@ -1,4 +1,4 @@
-// Edited on Nov 21, 2026 @ 08:16:00 -> Add NewSingerSongTitle and NewSingerArtist properties for Add Performer card and right-click history menu
+// Edited on Nov 27, 2026 @ 13:03:30 -> Add UndoLastFinishCommand and turn snapshot recovery for False Start / Undo Finish
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1057,6 +1057,25 @@ public partial class RotationViewModel : BaseViewModel
         _display.UpdateRotation([.. Rotation]);
     }
 
+    [RelayCommand]
+    private void PrintRequestSlips()
+    {
+        PromoPrintUtility.ShowRequestSlipsDialog(
+            System.Windows.Application.Current?.MainWindow,
+            AppSettings.SelectedVenue,
+            AppSettings.DjName,
+            $"http://{LocalNetworkHelper.GetLocalIPv4()}:8080");
+    }
+
+    [RelayCommand]
+    private void OpenSchedulePosterMaker()
+    {
+        PromoPrintUtility.ShowSchedulePosterDialog(
+            System.Windows.Application.Current?.MainWindow,
+            AppSettings.DjName,
+            AppSettings.SelectedVenue);
+    }
+
     public Singer? GetCurrentSinger()
     {
         return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation)
@@ -1127,13 +1146,139 @@ public partial class RotationViewModel : BaseViewModel
         _display.UpdateRotation([.. Rotation]);
     }
 
+    private sealed class FinishedTurnSnapshot
+    {
+        public required Singer Singer { get; init; }
+        public int PreviousIndex { get; init; }
+        public string SongTitle { get; init; } = string.Empty;
+        public string Artist { get; init; } = string.Empty;
+        public string Key { get; init; } = "0";
+        public double Tempo { get; init; } = 1.0;
+        public string Notes { get; init; } = string.Empty;
+        public string Source { get; init; } = "Local";
+        public string ExternalLink { get; init; } = string.Empty;
+        public string DuetPartnerName { get; init; } = string.Empty;
+        public bool IsMusic { get; init; }
+        public bool IsSpecial { get; init; }
+        public bool HasSungInLastRound { get; init; }
+        public int CompletedCount { get; init; }
+        public int TotalSongsSung { get; init; }
+        public string? ScaryokeCategory { get; init; }
+        public string? ScaryokeColor { get; init; }
+        public PendingSong? PoppedPendingSong { get; init; }
+        public PerformedSong? RecordedSessionSong { get; init; }
+    }
+
+    private FinishedTurnSnapshot? _lastFinishedTurn;
+
+    public bool CanUndoLastFinish => _lastFinishedTurn != null;
+
+    [RelayCommand]
+    public void UndoLastFinish()
+    {
+        if (_lastFinishedTurn == null) return;
+        var snap = _lastFinishedTurn;
+        _lastFinishedTurn = null;
+        OnPropertyChanged(nameof(CanUndoLastFinish));
+
+        var singer = snap.Singer;
+        if (InactiveSingers.Contains(singer))
+        {
+            InactiveSingers.Remove(singer);
+        }
+
+        if (snap.PoppedPendingSong != null)
+        {
+            if (!_pendingSingerSongs.TryGetValue(singer.Name, out var list))
+            {
+                list = [];
+                _pendingSingerSongs[singer.Name] = list;
+            }
+            list.Insert(0, snap.PoppedPendingSong);
+        }
+
+        singer.SongTitle = snap.SongTitle;
+        singer.Artist = snap.Artist;
+        singer.Key = snap.Key;
+        singer.Tempo = snap.Tempo;
+        singer.Notes = snap.Notes;
+        singer.Source = snap.Source;
+        singer.ExternalLink = snap.ExternalLink;
+        singer.DuetPartnerName = snap.DuetPartnerName;
+        singer.IsMusic = snap.IsMusic;
+        singer.IsSpecial = snap.IsSpecial;
+        singer.IsInactive = false;
+        singer.HasSungInLastRound = snap.HasSungInLastRound;
+        singer.CompletedCount = snap.CompletedCount;
+        singer.TotalSongsSung = snap.TotalSongsSung;
+        singer.ScaryokeCategory = snap.ScaryokeCategory;
+        singer.ScaryokeColor = snap.ScaryokeColor;
+
+        if (snap.RecordedSessionSong != null && SessionPerformedSongs.Contains(snap.RecordedSessionSong))
+        {
+            SessionPerformedSongs.Remove(snap.RecordedSessionSong);
+            OnPropertyChanged(nameof(SessionPerformedSongsText));
+        }
+
+        RunRotationOrderChange(() =>
+        {
+            int targetIdx = Math.Clamp(snap.PreviousIndex, 0, Rotation.Count);
+            int curIdx = Rotation.IndexOf(singer);
+            if (curIdx < 0)
+            {
+                Rotation.Insert(targetIdx, singer);
+            }
+            else if (curIdx != targetIdx)
+            {
+                Lyracist.Shared.RotationHelpers.MoveSingerInList(Rotation, curIdx, Math.Clamp(snap.PreviousIndex, 0, Rotation.Count - 1));
+            }
+
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+        });
+
+        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+        RefreshLinkedPartnerNames();
+        if (SelectedSinger != null && SelectedSinger.Name.Equals(singer.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            RefreshSelectedSingerQueue();
+        }
+        ResolveEstimatedPerformanceSeconds();
+        RecalculateAllWaitsAndEstimations();
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
     [RelayCommand]
     private void DoneSinger(Singer singer)
     {
         if (singer == null) return;
 
+        int previousIdx = Math.Max(0, Rotation.IndexOf(singer));
+
         if (singer.IsMusic)
         {
+            _lastFinishedTurn = new FinishedTurnSnapshot
+            {
+                Singer = singer,
+                PreviousIndex = previousIdx,
+                SongTitle = singer.SongTitle,
+                Artist = singer.Artist,
+                Key = singer.Key,
+                Tempo = singer.Tempo,
+                Notes = singer.Notes,
+                Source = singer.Source,
+                ExternalLink = singer.ExternalLink,
+                DuetPartnerName = singer.DuetPartnerName,
+                IsMusic = true,
+                IsSpecial = singer.IsSpecial,
+                HasSungInLastRound = singer.HasSungInLastRound,
+                CompletedCount = singer.CompletedCount,
+                TotalSongsSung = singer.TotalSongsSung,
+                ScaryokeCategory = singer.ScaryokeCategory,
+                ScaryokeColor = singer.ScaryokeColor
+            };
+            OnPropertyChanged(nameof(CanUndoLastFinish));
+
             RunRotationOrderChange(() =>
                 Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             Rotation.Remove(singer);
@@ -1151,6 +1296,18 @@ public partial class RotationViewModel : BaseViewModel
         string name = singer.Name;
         string title = singer.SongTitle;
         string artist = singer.Artist;
+        string priorKey = singer.Key;
+        double priorTempo = singer.Tempo;
+        string priorNotes = singer.Notes;
+        string priorSource = singer.Source;
+        string priorExternalLink = singer.ExternalLink;
+        string priorDuet = singer.DuetPartnerName;
+        bool priorSpecial = singer.IsSpecial;
+        bool priorHasSungLastRound = singer.HasSungInLastRound;
+        int priorCompletedCount = singer.CompletedCount;
+        int priorTotalSongsSung = singer.TotalSongsSung;
+        string? priorScaryokeCategory = singer.ScaryokeCategory;
+        string? priorScaryokeColor = singer.ScaryokeColor;
 
         if (IsLastRound)
         {
@@ -1164,6 +1321,7 @@ public partial class RotationViewModel : BaseViewModel
         // 2. Log performance history in database and session history
         SavePerformanceHistory(name, title, artist, singer.Key, singer.Tempo, singer.Source, singer.ExternalLink);
         RecordPerformedSong(name, title, artist, singer.Key, singer.DuetPartnerName, singer.Tempo);
+        PerformedSong? recordedSession = SessionPerformedSongs.LastOrDefault();
 
         // Clear duet partner and Scaryoke category challenge for subsequent rounds/songs in rotation
         singer.DuetPartnerName = string.Empty;
@@ -1175,8 +1333,31 @@ public partial class RotationViewModel : BaseViewModel
             Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
 
         // If the singer was a one-time special performer, automatically mark them inactive and transfer to InactiveSingers
-        if (singer.IsSpecial)
+        if (priorSpecial || singer.IsSpecial)
         {
+            _lastFinishedTurn = new FinishedTurnSnapshot
+            {
+                Singer = singer,
+                PreviousIndex = previousIdx,
+                SongTitle = title,
+                Artist = artist,
+                Key = priorKey,
+                Tempo = priorTempo,
+                Notes = priorNotes,
+                Source = priorSource,
+                ExternalLink = priorExternalLink,
+                DuetPartnerName = priorDuet,
+                IsMusic = false,
+                IsSpecial = true,
+                HasSungInLastRound = priorHasSungLastRound,
+                CompletedCount = priorCompletedCount,
+                TotalSongsSung = priorTotalSongsSung,
+                ScaryokeCategory = priorScaryokeCategory,
+                ScaryokeColor = priorScaryokeColor,
+                RecordedSessionSong = recordedSession
+            };
+            OnPropertyChanged(nameof(CanUndoLastFinish));
+
             Rotation.Remove(singer);
             if (!InactiveSingers.Contains(singer))
             {
@@ -1195,9 +1376,11 @@ public partial class RotationViewModel : BaseViewModel
         }
 
         // 3. Check for pending songs
+        PendingSong? poppedPending = null;
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
         {
             var nextSong = list[0];
+            poppedPending = nextSong;
             list.RemoveAt(0);
 
             // Update to next song
@@ -1220,6 +1403,30 @@ public partial class RotationViewModel : BaseViewModel
             singer.ExternalLink = string.Empty;
             singer.Source = "Local";
         }
+
+        _lastFinishedTurn = new FinishedTurnSnapshot
+        {
+            Singer = singer,
+            PreviousIndex = previousIdx,
+            SongTitle = title,
+            Artist = artist,
+            Key = priorKey,
+            Tempo = priorTempo,
+            Notes = priorNotes,
+            Source = priorSource,
+            ExternalLink = priorExternalLink,
+            DuetPartnerName = priorDuet,
+            IsMusic = false,
+            IsSpecial = false,
+            HasSungInLastRound = priorHasSungLastRound,
+            CompletedCount = priorCompletedCount,
+            TotalSongsSung = priorTotalSongsSung,
+            ScaryokeCategory = priorScaryokeCategory,
+            ScaryokeColor = priorScaryokeColor,
+            PoppedPendingSong = poppedPending,
+            RecordedSessionSong = recordedSession
+        };
+        OnPropertyChanged(nameof(CanUndoLastFinish));
 
         if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
         {

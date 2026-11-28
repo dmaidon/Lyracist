@@ -1,4 +1,4 @@
-<!-- Edited on Oct 31, 2026 @ 09:18:00 -> Bump AssemblyVersion and FileVersion to 26.10.31.189 -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -15,8 +15,10 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.11.25.207</AssemblyVersion>
-    <FileVersion>26.11.25.207</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.208</AssemblyVersion>
+    <FileVersion>26.11.26.208</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>

@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 09:48:00 -> Link AudioShaderEngine into Lyracist -->
+<!-- Edited on Nov 27, 2026 @ 13:08:30 -> Link Shared/PromoPrintUtility.cs into Lyracist -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,10 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.11.25.632</AssemblyVersion>
-    <FileVersion>26.11.25.632</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.633</AssemblyVersion>
+    <FileVersion>26.11.26.633</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -111,6 +113,7 @@
     <Compile Include="..\KSRotation\Models\HolidayThemes.cs" Link="Models\HolidayThemes.cs" />
     <Compile Include="..\KSRotation\Models\EmojiReactionThemes.cs" Link="Models\EmojiReactionThemes.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
+    <Compile Include="..\Shared\PromoPrintUtility.cs" Link="PromoPrintUtility.cs" />
     <Compile Include="..\Shared\AvatarImageHelper.cs" Link="AvatarImageHelper.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />

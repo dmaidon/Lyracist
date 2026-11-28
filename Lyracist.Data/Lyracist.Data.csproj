@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 08:41:00 -> Replace PDFsharp with SkiaSharp for PDF generation -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,8 +7,10 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.11.25.374</AssemblyVersion>
-    <FileVersion>26.11.25.374</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.375</AssemblyVersion>
+    <FileVersion>26.11.26.375</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

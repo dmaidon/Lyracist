@@ -1,4 +1,4 @@
-// Edited on Oct 7, 2026 @ 19:57:00 -> Add GetMixInMs and GetMixOutMs cue point methods
+// Edited on Nov 27, 2026 @ 12:58:00 -> Add subfolder crate filtering and GetSubfolderCrates to ILibraryService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,8 +16,9 @@ public interface ILibraryService
 
     void RemoveSongsUnderDirectory(string path);
     int GetSongCount();
-    IEnumerable<KaraokeSong> Search(string query, bool isMusic = false);
-    Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false);
+    IEnumerable<KaraokeSong> Search(string query, bool isMusic = false, string? subfolderCrate = null);
+    Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false, string? subfolderCrate = null);
+    IEnumerable<string> GetSubfolderCrates(bool? isMusic = null);
     IEnumerable<KaraokeSong> GetAllSongs();
     IEnumerable<KaraokeSong> GetBackgroundMusicSongs();
     void NotifyLibraryUpdated();

@@ -1,4 +1,4 @@
-// Edited on Nov 24, 2026 @ 10:22:00 -> Add Globals.ShadersDir for shared ShaderToy .glsl / .sksl files
+// Edited on Nov 27, 2026 @ 13:06:30 -> Add Globals.OriginalsDir for indie artist original backing track uploads
 using System;
 using System.IO;
 
@@ -55,6 +55,9 @@ namespace Lyracist.Shared
 
         // 8. Shaders directory (in Startup Path) - a folder for default and imported ShaderToy (.glsl, .sksl, .frag, .fs, .txt) shaders.
         public static string ShadersDir => Path.Combine(StartupPath, "Shaders");
+
+        // 9. Originals directory (in Data) - a folder for performer-submitted original backing tracks (.mp3, .wav, .mp4, .zip).
+        public static string OriginalsDir => Path.Combine(DataDir, "Originals");
 
         private static string SanitizeAppName(string appName)
         {

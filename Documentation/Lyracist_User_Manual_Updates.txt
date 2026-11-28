@@ -1,4 +1,57 @@
-// Edited on Nov 24, 2026 @ 11:59:00 -> Document PCDJ LYRX ANGLE-HLSL .frag support and Shader Only music-break mode
+// Edited on Nov 27, 2026 @ 13:24:00 -> Document Custom Karaoke Track Studio, False Start / Undo Finish, Fuzzy & Subfolder Crate Search, Originals Upload, Promo Print Tools, and LyracistDbEditor Audition/Sync Upgrades
+Lyracist, KSRotation, KSRotation.Maui & LyracistDbEditor: Custom Karaoke Track Studio, 1-Click False Start & Undo Finish, Fuzzy / Abbreviation / Crate Search, Indie Originals Upload, Promo Print Utilities & Database Editor Pro Upgrades - (November 2026)
+
+Section: Live Show Controls, Search, Patron Portal, Print/Promo Utilities & Library Management
+
+0. Custom Karaoke Track Studio ('🎙️ Karaoke Studio' on the Lyracist Karaoke Page):
+   - Launch '🎙️ Karaoke Studio' from the top DJ control strip on the Lyracist Karaoke Page to turn any regular audio track ('.mp3', '.wav', '.flac', '.m4a', '.ogg') into a synchronized custom karaoke track.
+   - Vocal Removal & Guide Vocal Mix:
+     * Built-in FFmpeg phase/stereotools center-vocal isolation produces an instrumental backing track and isolated vocal stem.
+     * Adjustable 'Guide Vocal %' slider (0% to 100%) mixes a customizable level of guide vocals back into the instrumental track alongside '-6' to '+6' semitone Key Shift and '50%' to '150%' Tempo adjustment.
+   - Interactive Lyric Timestamp Editor & 'F8' Tap Sync:
+     * Paste raw lyrics (with optional 'Line | Translation' format for bilingual subtitle lines) and click '📋 Parse Raw Lyrics into Lines'.
+     * Click '▶ Play Source Audio' and tap '⏱️ Tap Sync Selected Line (F8)' (or press the 'F8' hotkey) as each lyric line begins to capture start/end timestamps and auto-advance to the next line.
+     * Assign per-line singer roles ('1 = Singer 1 (Cyan)', '2 = Singer 2 (Hot Pink)', '3 = Both / Duet (Gold)') and enable animated 'Instrumental Break Countdown Bars' during long instrumental gaps (>= 8 seconds).
+   - Multi-Format Karaoke Export:
+     * 'MP3+G (.cdg + .mp3 + .zip)': Encodes standard 300x216 16-color subcode packet '.cdg' graphics (24-byte packets at 300 packets/sec) paired with the processed '.mp3' and packaged into a standard karaoke '.zip'.
+     * '1080p Wide Video (.mp4 - 16:9)' & 'Vertical Social Video (.mp4 - 9:16)': Renders 30fps progressive-wipe karaoke video via SkiaSharp and FFmpeg H.264/AAC.
+     * Automatic Library Import: Checking 'Auto-import exported track into Lyracist Karaoke Library' immediately indexes the finished track in 'Data/lyracist.db' and 'SongSearch'.
+
+0A. 1-Click False Start & Undo Last Finish Turn Recovery:
+   - Lyracist ('⏮ False Start / Undo' on the Karaoke Page & 'Undo Finish' on the Rotation Page):
+     * If a track is currently playing or paused, clicking '⏮ False Start / Undo' immediately rewinds the song to '0:00' and restarts playback without advancing the singer's turn.
+     * If the DJ accidentally clicked 'Finished / Next' too early, clicking '⏮ False Start / Undo' (or 'Undo Finish') restores the previous singer's exact rotation position, active song, round progress, and 'SessionPerformedSongs' log.
+   - KSRotation, KSRotation.Maui & Remote DJ Web Portal ('dj.html'):
+     * Clicking '↩ Undo Finish' on the main Rotation toolbar restores the most recently completed singer's round checkbox ('R1'-'R10'), un-completes the turn, restores their pre-finish Song/Artist, and returns them to active 'IsCurrent' status.
+
+0B. Player Freeze Watchdog & Seamless Auto-Recovery ('MediaEngine'):
+   - Monitors active karaoke and music playback with a 250ms heartbeat watchdog. If the underlying decoder or audio device stalls (~3.5 seconds without position movement while playing), Lyracist automatically reloads the media stream, restores volume, pitch, tempo, and 10-band EQ settings, seeks to the exact interrupted timestamp, and resumes playback.
+
+0C. Fuzzy Typo Tolerance, Artist Abbreviation Expansion & Subfolder / Crate Filtering:
+   - Artist Abbreviation Expansion: Automatically expands common KJ shorthand in search queries ('gnr' -> 'guns n roses', 'ccr' -> 'creedence clearwater revival', 'acdc', 'rhcp', 'ratm', 'stp', 'mj', 'bsb', 'nkotb', 'elo', 'bto', 'reo', 'skynard' -> 'lynyrd skynyrd', 'zep' -> 'led zeppelin', 'deflepard' -> 'def leppard', etc.).
+   - Fuzzy Typo Tolerance: When an exact FTS5 query returns few results, automatic Damerau-Levenshtein edit-distance matching finds songs despite misspelled artist or song titles.
+   - Subfolder / Crate Filter ('📁 Folder / Crate:'): Both Lyracist (Karaoke Page search bar) and LyracistDbEditor allow filtering the catalog by parent subfolder/crate name (e.g., 'Country', '80s Rock', 'Duets', 'SoundChoice').
+
+0D. "Originals" Indie Artist Backing Track Upload Portal ('PatronPortal.html'):
+   - Patrons and local musicians can select the '🎸 Original' tab in the smartphone request portal to upload their own backing track ('.mp3', '.wav', '.mp4', '.zip', '.m4a', '.ogg', '.flac' up to 12 MB) over venue Wi-Fi.
+   - Tracks are saved into 'Data/Originals/', automatically queued in the singer rotation with an '[ORIGINAL UPLOAD]' badge, and resolved automatically by Lyracist's 'SongPathResolver'.
+
+0E. Printable Branded Paper Request Slips PDF & Weekly Karaoke Schedule Poster Maker:
+   - Accessible from both KSRotation (top Rotation toolbar '🖨️ Paper Slips' and '🎨 Schedule Poster') and Lyracist (Rotation Page toolbar 'Slips PDF' and 'Poster'):
+     * Printable Paper Request Slips PDF Generator: Generates an 8.5" x 11" multi-up cuttable PDF sheet (8, 10, or 12 slips per page) branded with the Venue Name, Host/DJ Name, Singer Name / Song Title / Artist / Key Shift (+/-) fields, crop guides, and an optional embedded Wi-Fi Request Portal QR code.
+     * Weekly Karaoke Schedule Poster & Social Flyer Maker: Generates high-resolution PNG graphics in both '1080x1080' (Instagram / Facebook Square) and '1920x1080' (16:9 TV Display / Event Header) formats across 4 visual themes ('Neon Nightclub', 'Classic Gold VIP', 'Retro Synthwave', ' Rock & Roll Dive') for up to 7 weekly show nights.
+
+0F. Lyracist Database Editor ('LyracistDbEditor.exe') Pro Library Upgrades:
+   - Built-In MP3+G CDG Karaoke Audition Player ('🎧 Audition' & 'Audition Player & USB Drive Sync' tab):
+     * Preview any karaoke track ('.zip' MP3+G archive, loose '.mp3' + '.cdg' pair, or audio file) directly inside LyracistDbEditor with real-time 300x216 CDG graphics decoding, '-6' to '+6' semitone Key Shift, and a 10-band Graphic Equalizer ('31Hz' to '16kHz').
+   - Broken MP3+G Pair & Corrupt ZIP Archive Audit ('Find Broken Pairs / Corrupt ZIPs'):
+     * Scans the library for '.mp3' files in karaoke folders missing their companion '.cdg', orphaned '.cdg' files missing their audio track, and corrupt/empty '.zip' archives, with 1-click removal.
+   - Custom Pattern File Renamer with Persistent Undo History ('↩ Undo Rename'):
+     * Choose or type custom naming templates ('{Artist} - {Title}', '{Title} - {Artist}', '{Brand} - {Artist} - {Title}', '[{Genre}] {Artist} - {Title}') for batch disk renaming (handling companion '.cdg' files automatically).
+     * Every rename operation is journaled to 'Data/rename_history.json' so clicking '↩ Undo Rename' reverses the last rename on disk and in 'lyracist.db'.
+   - Multi-Rig / External USB Gig Drive Synchronizer:
+     * Compares a Master Library folder against a Target/Backup USB Gig Drive, reports new vs. changed files, calculates total transfer bytes against available target drive free space, and synchronizes all missing/updated karaoke files in the background.
+
 KSRotation & Lyracist: Beat-Reactive SkSL Background Shaders (PCDJ LYRX Style) - (November 2026)
 
 Section: Display & Projection Settings / Beat-Reactive Background Shaders (PCDJ LYRX Style)

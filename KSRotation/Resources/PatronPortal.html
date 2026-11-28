@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 13:28:00 -> Add Patron Phone Turn Alerts (On Deck 1-ahead and Your Turn Now buzz/chime/pager modal) -->
+<!-- Edited on Nov 27, 2026 @ 13:06:30 -> Add Originals indie artist backing track upload option to PatronPortal.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -868,7 +868,13 @@
                     <div class="tabs request-type-tabs" style="margin-bottom: 0px; padding: 2px; border-radius: 8px;">
                         <button type="button" class="tab-btn active" id="type-karaoke" onclick="setRequestType('Karaoke')" style="padding: 8px; font-size: 0.85rem;">Karaoke (Sing)</button>
                         <button type="button" class="tab-btn" id="type-music" onclick="setRequestType('Music')" style="padding: 8px; font-size: 0.85rem;">Music (Play)</button>
+                        <button type="button" class="tab-btn" id="type-original" onclick="setRequestType('Original')" style="padding: 8px; font-size: 0.85rem;">🎸 Original</button>
                     </div>
+                </div>
+                <div class="form-group" id="original-upload-group" style="display: none; background: rgba(139, 92, 246, 0.12); border: 1px dashed #8B5CF6; border-radius: 10px; padding: 12px;">
+                    <label for="original-track-file" style="color: #C4B5FD;">🎸 Upload Your Original Backing Track (.mp3, .wav, .mp4, .zip)</label>
+                    <input type="file" id="original-track-file" accept=".mp3,.wav,.mp4,.zip,.m4a,.flac,.ogg,audio/*,video/mp4" style="padding: 8px; font-size: 0.88rem;">
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;">Perform your own original music! Max file size: 12 MB.</div>
                 </div>
                 <div class="form-group" style="position: relative;">
                     <label for="online-search">Search Songs &amp; Artists (Online)</label>
@@ -984,18 +990,25 @@
             currentRequestType = type;
             document.getElementById('type-karaoke').classList.toggle('active', type === 'Karaoke');
             document.getElementById('type-music').classList.toggle('active', type === 'Music');
+            const origBtn = document.getElementById('type-original');
+            if (origBtn) origBtn.classList.toggle('active', type === 'Original');
             
             const duetGroup = document.getElementById('duet-group');
             if (duetGroup) {
-                duetGroup.style.display = type === 'Karaoke' ? 'block' : 'none';
+                duetGroup.style.display = (type === 'Karaoke' || type === 'Original') ? 'block' : 'none';
+            }
+
+            const origGroup = document.getElementById('original-upload-group');
+            if (origGroup) {
+                origGroup.style.display = type === 'Original' ? 'block' : 'none';
             }
 
             const titleLabel = document.querySelector('#songs-container .song-entry label');
             if (titleLabel) {
-                titleLabel.textContent = type === 'Karaoke' ? 'Song 1' : 'Track Details';
+                titleLabel.textContent = type === 'Karaoke' ? 'Song 1' : (type === 'Original' ? 'Your Original Song Details' : 'Track Details');
             }
             const addBtn = document.getElementById('add-song-btn');
-            if (type === 'Music') {
+            if (type === 'Music' || type === 'Original') {
                 if (addBtn) addBtn.style.display = 'none';
                 const container = document.getElementById('songs-container');
                 while (container.children.length > 1) {
@@ -1121,6 +1134,56 @@
             if (songs.length === 0) {
                 alertDiv.textContent = "Please request at least one song.";
                 alertDiv.className = 'alert error';
+                return;
+            }
+
+            if (currentRequestType === 'Original') {
+                const fileInput = document.getElementById('original-track-file');
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    alertDiv.textContent = "Please select your original backing track file to upload.";
+                    alertDiv.className = 'alert error';
+                    return;
+                }
+                const file = fileInput.files[0];
+                if (file.size > 12 * 1024 * 1024) {
+                    alertDiv.textContent = "Original backing track file must be 12 MB or smaller.";
+                    alertDiv.className = 'alert error';
+                    return;
+                }
+                try {
+                    const base64Data = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => reject(new Error("Failed to read file"));
+                        reader.readAsDataURL(file);
+                    });
+                    const response = await fetch('/api/originals/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name,
+                            duetPartner,
+                            song: songs[0].song,
+                            artist: songs[0].artist || name,
+                            fileName: file.name,
+                            fileBase64: base64Data
+                        })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        alertDiv.textContent = "Original track uploaded & request submitted! Head up when called!";
+                        alertDiv.className = 'alert success';
+                        saveRequestToLocal(name, songs);
+                        fileInput.value = '';
+                        resetSongsContainer();
+                    } else {
+                        alertDiv.textContent = data.error || "Failed to upload original track.";
+                        alertDiv.className = 'alert error';
+                    }
+                } catch (err) {
+                    alertDiv.textContent = "Error uploading original track to server.";
+                    alertDiv.className = 'alert error';
+                }
                 return;
             }
 

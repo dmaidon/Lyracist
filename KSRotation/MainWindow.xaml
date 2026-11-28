@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 11:21:00 -> Add Shader Only checkbox to KSRotation Rotation toolbar and Display tab -->
+<!-- Edited on Nov 28, 2026 @ 07:08:00 -> Document Undo Finish, Originals Upload, and Paper Slips / Schedule Poster tools in KSRotation Help tab -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1340,11 +1340,32 @@
                             Margin="0,0,12,0"
                             ToolTip="Add a special one-time singer who automatically becomes inactive after their performance" />
                             <Button
+                            Content="↩ Undo Finish"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding UndoLastFinishCommand}"
+                            Width="130"
+                            Margin="0,0,12,0"
+                            ToolTip="False Start / Undo Last Finish: restore the most recently finished singer and song back to Current" />
+                            <Button
                             Content="Save Rotation"
                             Style="{StaticResource ModernSecondaryButtonStyle}"
                             Command="{Binding SaveRotationCommand}"
                             Width="130"
                             ToolTip="Save the night's rotation report to file and optionally email it" />
+                            <Button
+                            Content="🖨️ Request Slips"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding PrintRequestSlipsCommand}"
+                            Width="140"
+                            Margin="12,0,0,0"
+                            ToolTip="Generate cuttable paper karaoke request slips (8, 10, or 12 per page with QR code)" />
+                            <Button
+                            Content="🎨 Schedule Poster"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding OpenSchedulePosterMakerCommand}"
+                            Width="150"
+                            Margin="12,0,0,0"
+                            ToolTip="Create a Weekly Karaoke Schedule Flyer for social media (1080x1080) or venue TVs (1920x1080)" />
                             <Button
                             Content="Clear Rotation"
                             Style="{StaticResource ModernSecondaryButtonStyle}"
@@ -5420,6 +5441,13 @@
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
                                     <TextBlock Text="📳 Buzz Singer's Phone &amp; 2-Stage Patron Turn Alerts: Patrons can enable '📳 Buzz My Phone When I'm Up' on PatronPortal.html (or tap '🔔 Watch' on their row) to receive automatic phone vibration, Web Audio chime, and flashing pager alerts when they are On Deck (1 performer ahead) and when it is Their Turn Now. Click the '📳' button on any singer row (or right-click -> '📳 Buzz Singer's Phone') to manually page a performer's phone on demand." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="↩ Undo Finish, 🎸 Indie Originals Upload &amp; 🖨️ Paper Slips / 🎨 Schedule Poster: Click '↩ Undo Finish' on the Rotation toolbar (or in KSRotation.Maui / dj.html) if you accidentally marked a singer Done too early to restore their round checkmark, song/artist, and active turn. Patrons can select the '🎸 Original' tab on PatronPortal.html to upload their own backing track (up to 12 MB) into Data\Originals. Click '🖨️ Paper Slips' to generate an 8/10/12-per-page cuttable request slips PDF with QR code, or '🎨 Schedule Poster' to generate 1080x1080 and 1920x1080 weekly show posters." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">

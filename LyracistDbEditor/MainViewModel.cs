@@ -1,4 +1,4 @@
-// Edited on Oct 31, 2026 @ 13:19:00 -> Add EditGenre, OpenFileLocation, CreateManualBackup, NeedsRepair reset in ScanSongMetadata, and async GenerateBook
+// Edited on Nov 27, 2026 @ 13:13:00 -> Add SubfolderCrates filter, custom pattern file renamer templates, persistent rename undo history, and player cleanup
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +18,22 @@ using Lyracist.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace LyracistDbEditor;
+
+public sealed class RenameHistoryItem
+{
+    public string OldPath { get; set; } = string.Empty;
+    public string NewPath { get; set; } = string.Empty;
+    public string? OldCdgPath { get; set; }
+    public string? NewCdgPath { get; set; }
+}
+
+public sealed class RenameHistoryBatch
+{
+    public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
+    public string FolderPath { get; set; } = string.Empty;
+    public string PatternUsed { get; set; } = string.Empty;
+    public List<RenameHistoryItem> Items { get; set; } = [];
+}
 
 public partial class MainViewModel : ObservableObject
 {
@@ -134,6 +151,39 @@ public partial class MainViewModel : ObservableObject
     public bool CanRemoveDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
     public bool CanRescanDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
 
+    public ObservableCollection<string> SubfolderCrates { get; } = ["All Crates"];
+
+    [ObservableProperty]
+    private string _selectedSubfolderCrate = "All Crates";
+
+    partial void OnSelectedSubfolderCrateChanged(string value)
+    {
+        _resultLimit = PageSize;
+        Search();
+    }
+
+    public void RefreshSubfolderCrates()
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var searchService = new SearchService(context);
+            var crates = searchService.GetDistinctSubfolderCrates();
+            string prev = SelectedSubfolderCrate;
+            SubfolderCrates.Clear();
+            SubfolderCrates.Add("All Crates");
+            foreach (string c in crates)
+            {
+                SubfolderCrates.Add(c);
+            }
+            if (!SubfolderCrates.Contains(prev))
+            {
+                SelectedSubfolderCrate = "All Crates";
+            }
+        }
+        catch { }
+    }
+
     public MainViewModel()
     {
         // Load library directories on startup
@@ -142,8 +192,14 @@ public partial class MainViewModel : ObservableObject
         {
             LibraryDirectories.Add(dir);
         }
+        if (LibraryDirectories.Count > 0)
+        {
+            SyncSourceFolderPath = LibraryDirectories[0];
+        }
 
         RefreshStats();
+        RefreshSubfolderCrates();
+        LoadRenameUndoHistory();
         Search();
         RefreshReadinessCounts();
     }
@@ -169,6 +225,8 @@ public partial class MainViewModel : ObservableObject
         try { _renameCts?.Cancel(); } catch (ObjectDisposedException) { }
         try { _libraryScanCts?.Cancel(); } catch (ObjectDisposedException) { }
         try { _readinessCts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { _driveSyncCts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { _auditionPlayer.Dispose(); } catch { }
     }
 
     // Extracts tags via FFprobe; for a .zip, the first mp3/wav inside is extracted to a temp file
@@ -205,9 +263,13 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
+            string? crate = string.Equals(SelectedSubfolderCrate, "All Crates", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : SelectedSubfolderCrate;
+
             using var context = new LyracistDbContext();
             List<Song> songs;
-            if (string.IsNullOrWhiteSpace(SearchText))
+            if (string.IsNullOrWhiteSpace(SearchText) && crate == null)
             {
                 IQueryable<Song> query = context.Songs;
                 if (OnlyShowMissingArtist)
@@ -222,10 +284,7 @@ public partial class MainViewModel : ObservableObject
             else
             {
                 var searchService = new SearchService(context);
-                // SearchSync does the same work as Search() without wrapping it in a Task.Run just
-                // to immediately block on it via .Result - that pattern added a threadpool
-                // round-trip for no benefit, since this method is synchronous either way.
-                songs = searchService.SearchSync(SearchText);
+                songs = searchService.SearchSync(SearchText, subfolderCrate: crate);
                 if (OnlyShowMissingArtist)
                 {
                     songs = songs.Where(s => s.NeedsRepair || s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
@@ -1051,8 +1110,19 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ==========================================
-    // METADATA FILE RENAMER PROPERTIES & LOGIC
+    // METADATA FILE RENAMER PROPERTIES & LOGIC (WITH CUSTOM PATTERNS & UNDO HISTORY)
     // ==========================================
+
+    public IReadOnlyList<string> RenamePatternTemplates { get; } =
+    [
+        "{Artist} - {Title}",
+        "{Title} - {Artist}",
+        "{Title}",
+        "{Artist} - {Title} ({Genre})"
+    ];
+
+    [ObservableProperty]
+    private string _selectedRenamePattern = "{Artist} - {Title}";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRename))]
@@ -1060,9 +1130,121 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRename))]
+    [NotifyPropertyChangedFor(nameof(CanUndoLastRename))]
     private bool _isRenaming = false;
 
     public bool CanRename => !string.IsNullOrWhiteSpace(RenameFolderPath) && !IsRenaming;
+
+    private readonly List<RenameHistoryBatch> _renameHistoryBatches = [];
+
+    public bool CanUndoLastRename => !IsRenaming && _renameHistoryBatches.Count > 0;
+
+    public string LastRenameUndoSummary => _renameHistoryBatches.Count == 0
+        ? "No batch renames in undo history."
+        : $"Undo available: {_renameHistoryBatches[^1].Items.Count} file(s) from {_renameHistoryBatches[^1].TimestampUtc.ToLocalTime():MMM d, h:mm tt}";
+
+    private static string RenameHistoryFilePath => Path.Combine(Globals.DataDir, "rename_history.json");
+
+    private void LoadRenameUndoHistory()
+    {
+        try
+        {
+            if (File.Exists(RenameHistoryFilePath))
+            {
+                string json = File.ReadAllText(RenameHistoryFilePath);
+                var loaded = JsonSerializer.Deserialize<List<RenameHistoryBatch>>(json);
+                _renameHistoryBatches.Clear();
+                if (loaded != null)
+                {
+                    _renameHistoryBatches.AddRange(loaded.Where(b => b.Items?.Count > 0));
+                }
+            }
+        }
+        catch { }
+        OnPropertyChanged(nameof(CanUndoLastRename));
+        OnPropertyChanged(nameof(LastRenameUndoSummary));
+    }
+
+    private void SaveRenameUndoHistory()
+    {
+        try
+        {
+            Directory.CreateDirectory(Globals.DataDir);
+            while (_renameHistoryBatches.Count > 15)
+            {
+                _renameHistoryBatches.RemoveAt(0);
+            }
+            string json = JsonSerializer.Serialize(_renameHistoryBatches, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(RenameHistoryFilePath, json);
+        }
+        catch { }
+        RunOnUi(() =>
+        {
+            OnPropertyChanged(nameof(CanUndoLastRename));
+            OnPropertyChanged(nameof(LastRenameUndoSummary));
+        });
+    }
+
+    [RelayCommand]
+    private async Task UndoLastRename()
+    {
+        if (IsRenaming || _renameHistoryBatches.Count == 0) return;
+
+        var batch = _renameHistoryBatches[^1];
+        var confirm = System.Windows.MessageBox.Show(
+            $"Undo the batch rename of {batch.Items.Count} file(s) in '{batch.FolderPath}' ({batch.TimestampUtc.ToLocalTime():g})?\n\nThis restores both the disk filenames (including companion .cdg files) and database paths.",
+            "Confirm Undo Batch Rename",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsRenaming = true;
+        ScanLog.Clear();
+        ScanLog.Add($"[UNDO START] Rolling back {batch.Items.Count} renamed file(s)...");
+
+        try
+        {
+            int restoredCount = 0;
+            await Task.Run(async () =>
+            {
+                for (int i = batch.Items.Count - 1; i >= 0; i--)
+                {
+                    var item = batch.Items[i];
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(item.NewCdgPath) && !string.IsNullOrEmpty(item.OldCdgPath) && File.Exists(item.NewCdgPath) && !File.Exists(item.OldCdgPath))
+                        {
+                            File.Move(item.NewCdgPath, item.OldCdgPath);
+                        }
+
+                        if (File.Exists(item.NewPath) && !File.Exists(item.OldPath))
+                        {
+                            File.Move(item.NewPath, item.OldPath);
+                            await UpdateRenamedSongPathAsync(item.NewPath, item.OldPath);
+                            restoredCount++;
+                            string msg = $"Restored: {Path.GetFileName(item.NewPath)} -> {Path.GetFileName(item.OldPath)}";
+                            RunOnUi(() => ScanLog.Add(msg));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string errMsg = $"Failed to restore '{Path.GetFileName(item.NewPath)}': {ex.Message}";
+                        RunOnUi(() => ScanLog.Add(errMsg));
+                    }
+                }
+            });
+
+            _renameHistoryBatches.RemoveAt(_renameHistoryBatches.Count - 1);
+            SaveRenameUndoHistory();
+            ScanProgressText = $"Undo complete: restored {restoredCount} file(s).";
+            ScanLog.Add($"[UNDO FINISHED] Restored {restoredCount} file(s).");
+            Search();
+        }
+        finally
+        {
+            IsRenaming = false;
+        }
+    }
 
     private CancellationTokenSource? _renameCts;
 
@@ -1072,6 +1254,30 @@ public partial class MainViewModel : ObservableObject
     // Lists what Rename Files would do (old name -> new name) without touching any file or the database.
     [RelayCommand]
     private Task PreviewRename() => RunRenameAsync(dryRun: true);
+
+    private static string FormatRenameBaseName(string pattern, string? title, string? artist, string? genre)
+    {
+        string cleanTitle = (title ?? string.Empty).Trim();
+        string cleanArtist = (artist ?? string.Empty).Trim();
+        string cleanGenre = (genre ?? string.Empty).Trim();
+
+        if (string.IsNullOrEmpty(cleanTitle)) return string.Empty;
+
+        string template = string.IsNullOrWhiteSpace(pattern) ? "{Title}" : pattern.Trim();
+        if (string.IsNullOrEmpty(cleanArtist) || cleanArtist.Equals("Unknown Artist", StringComparison.OrdinalIgnoreCase))
+        {
+            return cleanTitle;
+        }
+
+        string formatted = template
+            .Replace("{Artist}", cleanArtist, StringComparison.OrdinalIgnoreCase)
+            .Replace("{Title}", cleanTitle, StringComparison.OrdinalIgnoreCase)
+            .Replace("{Genre}", string.IsNullOrEmpty(cleanGenre) ? "Karaoke" : cleanGenre, StringComparison.OrdinalIgnoreCase)
+            .Replace("()", "")
+            .Trim(' ', '-', '_');
+
+        return string.IsNullOrWhiteSpace(formatted) ? cleanTitle : formatted;
+    }
 
     private async Task RunRenameAsync(bool dryRun)
     {
@@ -1083,10 +1289,12 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        string pattern = string.IsNullOrWhiteSpace(SelectedRenamePattern) ? "{Artist} - {Title}" : SelectedRenamePattern;
+
         if (!dryRun)
         {
             var proceed = System.Windows.MessageBox.Show(
-                $"Rename audio/zip files in '{RenameFolderPath}' to match their Title tags?\nMatching database rows are updated too. A database backup is made first.\n\nTip: use Preview first to see exactly what will change.",
+                $"Rename audio/zip files in '{RenameFolderPath}' using pattern '{pattern}'?\nMatching database rows are updated too, and an Undo history record + database backup are created first.\n\nTip: use Preview first to see exactly what will change.",
                 "Confirm Rename",
                 System.Windows.MessageBoxButton.YesNo,
                 System.Windows.MessageBoxImage.Question);
@@ -1113,11 +1321,17 @@ public partial class MainViewModel : ObservableObject
         var token = cts.Token;
         string folder = RenameFolderPath;
         var planned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var undoBatch = new RenameHistoryBatch
+        {
+            TimestampUtc = DateTime.UtcNow,
+            FolderPath = folder,
+            PatternUsed = pattern
+        };
 
         ScanLog.Clear();
         ScanLog.Add(dryRun
-            ? $"[PREVIEW] No files will be changed. Folder: {folder}"
-            : $"[START] Renaming files in folder: {folder}");
+            ? $"[PREVIEW] Pattern: {pattern} | No files will be changed. Folder: {folder}"
+            : $"[START] Pattern: {pattern} | Renaming files in folder: {folder}");
         ScanProgressText = "Preparing directory scan...";
         ScanProgressPercent = 0;
 
@@ -1175,6 +1389,8 @@ public partial class MainViewModel : ObservableObject
                     try
                     {
                         string? title = null;
+                        string? artist = null;
+                        string? genre = null;
 
                         if (ext == ".zip")
                         {
@@ -1194,6 +1410,8 @@ public partial class MainViewModel : ObservableObject
                                 {
                                     using var tagFile = TagLib.File.Create(tempFile);
                                     title = tagFile.Tag.Title;
+                                    artist = tagFile.Tag.FirstPerformer;
+                                    genre = tagFile.Tag.FirstGenre;
                                 }
                                 finally
                                 {
@@ -1209,11 +1427,14 @@ public partial class MainViewModel : ObservableObject
                             // Direct audio file metadata
                             using var tagFile = TagLib.File.Create(filePath);
                             title = tagFile.Tag.Title;
+                            artist = tagFile.Tag.FirstPerformer;
+                            genre = tagFile.Tag.FirstGenre;
                         }
 
                         if (!string.IsNullOrWhiteSpace(title))
                         {
-                            string sanitizedTitle = SanitizeFileName(title);
+                            string targetBase = FormatRenameBaseName(pattern, title, artist, genre);
+                            string sanitizedTitle = SanitizeFileName(targetBase);
                             if (!string.IsNullOrWhiteSpace(sanitizedTitle))
                             {
                                 string directory = Path.GetDirectoryName(filePath) ?? folder;
@@ -1255,6 +1476,13 @@ public partial class MainViewModel : ObservableObject
                                     }
 
                                     File.Move(filePath, newPath);
+                                    undoBatch.Items.Add(new RenameHistoryItem
+                                    {
+                                        OldPath = filePath,
+                                        NewPath = newPath,
+                                        OldCdgPath = hasCdg ? oldCdgPath : null,
+                                        NewCdgPath = hasCdg ? newCdgPath : null
+                                    });
                                     renameSuccessCount++;
                                     await UpdateRenamedSongPathAsync(filePath, newPath);
                                     Log($"Renamed: {fileName} -> {newFileName}");
@@ -1278,6 +1506,12 @@ public partial class MainViewModel : ObservableObject
                     {
                         Log($"Error parsing '{fileName}': {ex.Message}");
                     }
+                }
+
+                if (!dryRun && undoBatch.Items.Count > 0)
+                {
+                    _renameHistoryBatches.Add(undoBatch);
+                    SaveRenameUndoHistory();
                 }
 
                 RunOnUi(() => ScanProgressText = token.IsCancellationRequested ? "Cancelled" : "Completed");

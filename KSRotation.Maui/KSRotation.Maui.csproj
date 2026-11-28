@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 09:55:00 -> Link AudioShaderEngine into KSRotation.Maui -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -38,6 +38,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
+		<Version>1.1.1</Version>
+		<PackageVersion>1.1.1</PackageVersion>
 		<AssemblyVersion>26.10.22.758</AssemblyVersion>
 
 		<FileVersion>26.10.22.758</FileVersion>

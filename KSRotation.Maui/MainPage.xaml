@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 13:25:45 -> Add Buzz Singer's Phone button, Turn Alerts toggle, and legend entry in MainPage.xaml -->
+<!-- Edited on Nov 27, 2026 @ 13:04:15 -> Add Undo Finish / False Start button to KSRotation.Maui MainPage.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -37,6 +37,7 @@
                         </Button>
                         <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                         <Button Text="🎃 Scaryoke" Clicked="OnScaryokeWheelClicked" BackgroundColor="Transparent" BorderColor="#F97316" TextColor="#F97316" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
+                        <Button Text="↩ Undo Finish" Command="{Binding UndoLastFinishCommand}" BackgroundColor="Transparent" BorderColor="#F59E0B" TextColor="#F59E0B" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" ToolTipProperties.Text="False Start / Undo Last Finish" />
                         <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
                         <Button Text="Last Round"
                                 Command="{Binding ToggleLastRoundCommand}"

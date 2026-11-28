@@ -1,4 +1,4 @@
-<!-- Edited on Oct 22, 2026 @ 08:41:00 -> Add PDFsharp and SkiaSharp dependencies for test suites -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -8,8 +8,10 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.11.25.249</AssemblyVersion>
-    <FileVersion>26.11.25.249</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.250</AssemblyVersion>
+    <FileVersion>26.11.26.250</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

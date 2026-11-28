@@ -1,4 +1,4 @@
-// Edited on Oct 8, 2026 @ 13:20:00 -> Dynamic SongPathResolver integration for LoadSong and zip extraction
+// Edited on Nov 27, 2026 @ 13:05:15 -> Add playback freeze watchdog and automatic decoder recovery in MediaEngine
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -274,14 +274,101 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
     // in MP4 mode too. Runs for the lifetime of the app rather than being started/stopped with
     // playback - the tick handler is a no-op cost when nothing is loaded, and MediaEngine (like
     // the FrameReady subscribers on it) lives as long as the process does.
+    private double _lastWatchdogPosition = -1;
+    private int _stalledWatchdogTicks;
+    private bool _isWatchdogRecovering;
+    private const int WatchdogStallTickThreshold = 14; // ~3.5 seconds at 250ms ticks
+
     private void InitializePositionTimer()
     {
         _positionTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(250)
         };
-        _positionTimer.Tick += (s, e) => PositionChanged?.Invoke();
+        _positionTimer.Tick += OnPositionTimerTick;
         _positionTimer.Start();
+    }
+
+    private void OnPositionTimerTick(object? sender, EventArgs e)
+    {
+        PositionChanged?.Invoke();
+
+        if (!_isPlaying || _isWatchdogRecovering || string.IsNullOrEmpty(_loadedAudioPath))
+        {
+            _stalledWatchdogTicks = 0;
+            _lastWatchdogPosition = -1;
+            return;
+        }
+
+        double pos = Position;
+        double dur = Duration;
+        if (pos <= 0.25 || (dur > 2.0 && pos >= dur - 1.25))
+        {
+            _stalledWatchdogTicks = 0;
+            _lastWatchdogPosition = pos;
+            return;
+        }
+
+        if (Math.Abs(pos - _lastWatchdogPosition) < 0.005)
+        {
+            _stalledWatchdogTicks++;
+            if (_stalledWatchdogTicks >= WatchdogStallTickThreshold)
+            {
+                _stalledWatchdogTicks = 0;
+                _ = RecoverFrozenPlaybackAsync(pos);
+            }
+        }
+        else
+        {
+            _stalledWatchdogTicks = 0;
+            _lastWatchdogPosition = pos;
+        }
+    }
+
+    private async Task RecoverFrozenPlaybackAsync(double stalledPositionSeconds)
+    {
+        if (_isWatchdogRecovering || !_isPlaying) return;
+        string? audioPath = _loadedAudioPath;
+        if (string.IsNullOrEmpty(audioPath) || !File.Exists(audioPath)) return;
+
+        _isWatchdogRecovering = true;
+        try
+        {
+            Lyracist.Shared.Globals.LogError(
+                "Lyracist",
+                $"MediaEngine Watchdog: playback stalled at {stalledPositionSeconds:F2}s; auto-recovering player",
+                new TimeoutException("Playback position heartbeat stalled."));
+
+            if (!_isMp4Mode)
+            {
+                _timer?.Stop();
+            }
+
+            await Task.Run(async () =>
+            {
+                await _video.StopAsync();
+                await _video.LoadAsync(audioPath);
+                UpdateAudioParameters();
+                await _video.SeekAsync(TimeSpan.FromSeconds(Math.Max(0, stalledPositionSeconds)));
+                if (_isPlaying)
+                {
+                    await _video.PlayAsync();
+                }
+            });
+
+            if (_isPlaying && !_isMp4Mode)
+            {
+                _timer?.Start();
+            }
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "MediaEngine Watchdog recovery failed", ex);
+        }
+        finally
+        {
+            _isWatchdogRecovering = false;
+        }
     }
 
     private void OnVideoFrameReady(object? sender, VideoFrame frame)

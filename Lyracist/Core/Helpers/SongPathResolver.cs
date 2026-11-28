@@ -1,4 +1,4 @@
-// Edited on Oct 30, 2026 @ 10:43:00 -> Add root/negative lookup caching and zero-I/O ResolveCachedOrOriginal for fast list mapping
+// Edited on Nov 27, 2026 @ 13:07:30 -> Include Globals.OriginalsDir in SongPathResolver search roots
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -228,6 +228,17 @@ public static class SongPathResolver
                         roots.Add(dir);
                     }
                 }
+            }
+        }
+        catch { }
+
+        // 3. Performer-uploaded original backing tracks directory
+        try
+        {
+            string originalsDir = Lyracist.Shared.Globals.OriginalsDir;
+            if (Directory.Exists(originalsDir) && !roots.Contains(originalsDir, StringComparer.OrdinalIgnoreCase))
+            {
+                roots.Insert(0, originalsDir);
             }
         }
         catch { }

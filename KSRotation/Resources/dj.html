@@ -1,4 +1,4 @@
-<!-- Edited on Nov 14, 2026 @ 13:26:45 -> Add Buzz Singer's Phone button to Remote DJ Board singer cards -->
+<!-- Edited on Nov 27, 2026 @ 13:04:15 -> Add Undo Finish / False Start button to Remote DJ Board -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -867,6 +867,7 @@
                             <button id="scaryoke-btn" class="btn-scaryoke" style="font-size: 0.8rem; padding: 4px 10px;" onclick="sendAction('toggle-scaryoke')">🎃 Scaryoke</button>
                             <button id="scaryoke-spin-toolbar-btn" class="btn-primary" style="background: linear-gradient(135deg, #FF7518, #EA580C); font-weight: bold; font-size: 0.8rem; padding: 4px 12px; display: none;" onclick="triggerScaryokeSpin()">🎲 Spin Wheel</button>
                             <button id="last-round-btn" class="btn-last-round" style="font-size: 0.8rem; padding: 4px 10px;" onclick="sendAction('toggle-last-round')">Last Round</button>
+                            <button class="btn-outline" style="font-size: 0.8rem; padding: 4px 8px; border-color: #F59E0B; color: #F59E0B;" onclick="sendAction('undo-finish')" title="False Start / Undo Last Completed Turn">↩ Undo Finish</button>
                             <button class="btn-outline" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('previous-singer')">◀ Previous</button>
                             <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('next-singer')">Next Singer ▶</button>
                         </div>

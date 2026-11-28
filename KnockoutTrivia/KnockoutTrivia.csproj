@@ -1,4 +1,4 @@
-<!-- Edited on Oct 6, 2026 @ 10:18:45 -> Link Shared\SingleInstanceHelper.cs in project -->
+<!-- Edited on Nov 26, 2026 @ 08:40:30 -> Set PackageVersion and Version to 1.1.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,10 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.11.25.125</AssemblyVersion>
-    <FileVersion>26.11.25.125</FileVersion>
+    <Version>1.1.1</Version>
+    <PackageVersion>1.1.1</PackageVersion>
+    <AssemblyVersion>26.11.26.126</AssemblyVersion>
+    <FileVersion>26.11.26.126</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>

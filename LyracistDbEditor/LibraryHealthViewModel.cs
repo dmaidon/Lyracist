@@ -1,11 +1,14 @@
-// Edited on Oct 31, 2026 @ 13:19:30 -> Batch FTS5 and NoArtistStore removals, run PickKeeper off UI thread, and add RemoveSelectedOrphanedFile
+// Edited on Nov 27, 2026 @ 13:12:00 -> Add Broken MP3+G Pair & Corrupt Archive Audit, Multi-Rig USB Drive Synchronizer, and Built-In CDG Karaoke Player with 10-Band EQ
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Data;
@@ -14,6 +17,27 @@ using Lyracist.Data.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LyracistDbEditor;
+
+public sealed class BrokenFileIssue
+{
+    public int? SongId { get; init; }
+    public string IssueType { get; init; } = string.Empty;
+    public string Title { get; init; } = string.Empty;
+    public string FilePath { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+}
+
+public sealed class DriveSyncCandidate
+{
+    public string RelativePath { get; init; } = string.Empty;
+    public string SourcePath { get; init; } = string.Empty;
+    public string TargetPath { get; init; } = string.Empty;
+    public long SizeBytes { get; init; }
+    public string Status { get; init; } = "New";
+    public string FormattedSize => SizeBytes >= 1024 * 1024
+        ? $"{SizeBytes / (1024.0 * 1024.0):F2} MB"
+        : $"{Math.Max(1, SizeBytes / 1024)} KB";
+}
 
 public class DuplicateGroup
 {
@@ -611,5 +635,629 @@ public partial class MainViewModel
             ReadinessAuditLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
             if (ReadinessAuditLog.Count > 100) ReadinessAuditLog.RemoveAt(ReadinessAuditLog.Count - 1);
         });
+    }
+
+    // ==========================================
+    // LIBRARY HEALTH: BROKEN MP3+G PAIR & CORRUPT ARCHIVE AUDIT
+    // ==========================================
+
+    public ObservableCollection<BrokenFileIssue> BrokenFileIssues { get; } = [];
+
+    [ObservableProperty]
+    private BrokenFileIssue? _selectedBrokenIssue;
+
+    [ObservableProperty]
+    private bool _isFindingBrokenFiles;
+
+    [ObservableProperty]
+    private string _brokenFilesStatusText = "Not yet scanned.";
+
+    [RelayCommand]
+    private async Task FindBrokenPairsAndArchives()
+    {
+        if (IsFindingBrokenFiles) return;
+        IsFindingBrokenFiles = true;
+        BrokenFilesStatusText = "Auditing MP3+G pairs, CDG companions, and ZIP archives...";
+
+        try
+        {
+            var dirsSnapshot = LibraryDirectories.ToList();
+            var issues = await Task.Run(() =>
+            {
+                var found = new List<BrokenFileIssue>();
+                var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                using var context = new LyracistDbContext();
+                var allSongs = context.Songs.AsNoTracking().ToList();
+
+                // 1. Check cataloged songs for zero-byte files, missing .cdg companions, or corrupt/incomplete .zip archives
+                foreach (var s in allSongs)
+                {
+                    if (string.IsNullOrWhiteSpace(s.FilePath) || !File.Exists(s.FilePath)) continue;
+
+                    try
+                    {
+                        var fi = new FileInfo(s.FilePath);
+                        if (fi.Length == 0)
+                        {
+                            found.Add(new BrokenFileIssue
+                            {
+                                SongId = s.SongId,
+                                IssueType = "Zero-Byte File",
+                                Title = $"{s.Artist} — {s.Title}",
+                                FilePath = s.FilePath,
+                                Description = "File size is 0 bytes (corrupt or incomplete download)."
+                            });
+                            seenPaths.Add(s.FilePath);
+                            continue;
+                        }
+
+                        string ext = fi.Extension.ToLowerInvariant();
+                        if (s.KaraokeType == "MP3G" || (s.IsKaraoke && (ext == ".mp3" || ext == ".wav")))
+                        {
+                            string cdgPath = Path.ChangeExtension(s.FilePath, ".cdg");
+                            if (!File.Exists(cdgPath))
+                            {
+                                found.Add(new BrokenFileIssue
+                                {
+                                    SongId = s.SongId,
+                                    IssueType = "Missing .CDG Pair",
+                                    Title = $"{s.Artist} — {s.Title}",
+                                    FilePath = s.FilePath,
+                                    Description = "Karaoke audio file is missing its companion .cdg lyrics file."
+                                });
+                                seenPaths.Add(s.FilePath);
+                            }
+                            else if (new FileInfo(cdgPath).Length < 96)
+                            {
+                                found.Add(new BrokenFileIssue
+                                {
+                                    SongId = s.SongId,
+                                    IssueType = "Corrupt .CDG",
+                                    Title = $"{s.Artist} — {s.Title}",
+                                    FilePath = cdgPath,
+                                    Description = "Companion .cdg file is empty or truncated (< 96 bytes)."
+                                });
+                                seenPaths.Add(cdgPath);
+                            }
+                        }
+                        else if (ext == ".zip")
+                        {
+                            try
+                            {
+                                using var archive = ZipFile.OpenRead(s.FilePath);
+                                bool hasCdg = archive.Entries.Any(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase) && e.Length >= 96);
+                                bool hasAudio = archive.Entries.Any(e =>
+                                    (e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                                     e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
+                                     e.FullName.EndsWith(".m4a", StringComparison.OrdinalIgnoreCase) ||
+                                     e.FullName.EndsWith(".flac", StringComparison.OrdinalIgnoreCase)) && e.Length > 0);
+
+                                if (!hasCdg || !hasAudio)
+                                {
+                                    found.Add(new BrokenFileIssue
+                                    {
+                                        SongId = s.SongId,
+                                        IssueType = "Incomplete ZIP+G",
+                                        Title = $"{s.Artist} — {s.Title}",
+                                        FilePath = s.FilePath,
+                                        Description = !hasCdg && !hasAudio
+                                            ? "ZIP archive contains neither audio nor .cdg graphics."
+                                            : (!hasCdg ? "ZIP archive is missing a valid .cdg entry." : "ZIP archive is missing an audio (.mp3/.wav) entry.")
+                                    });
+                                    seenPaths.Add(s.FilePath);
+                                }
+                            }
+                            catch (Exception zipEx)
+                            {
+                                found.Add(new BrokenFileIssue
+                                {
+                                    SongId = s.SongId,
+                                    IssueType = "Corrupt ZIP",
+                                    Title = $"{s.Artist} — {s.Title}",
+                                    FilePath = s.FilePath,
+                                    Description = $"ZIP header corrupt: {zipEx.Message}"
+                                });
+                                seenPaths.Add(s.FilePath);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                // 2. Scan registered library folders for orphaned .cdg files that have no matching .mp3/.wav companion
+                foreach (string dir in dirsSnapshot)
+                {
+                    if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir)) continue;
+                    try
+                    {
+                        foreach (string cdgFile in Directory.EnumerateFiles(dir, "*.cdg", SearchOption.AllDirectories))
+                        {
+                            if (seenPaths.Contains(cdgFile)) continue;
+                            string mp3Path = Path.ChangeExtension(cdgFile, ".mp3");
+                            string wavPath = Path.ChangeExtension(cdgFile, ".wav");
+                            if (!File.Exists(mp3Path) && !File.Exists(wavPath))
+                            {
+                                found.Add(new BrokenFileIssue
+                                {
+                                    SongId = null,
+                                    IssueType = "Orphan .CDG (No Audio)",
+                                    Title = Path.GetFileNameWithoutExtension(cdgFile),
+                                    FilePath = cdgFile,
+                                    Description = "Standalone .cdg file on disk with no matching .mp3 or .wav audio file."
+                                });
+                                seenPaths.Add(cdgFile);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                return found.OrderBy(f => f.IssueType).ThenBy(f => f.Title).ToList();
+            });
+
+            BrokenFileIssues.Clear();
+            foreach (var issue in issues)
+            {
+                BrokenFileIssues.Add(issue);
+            }
+
+            BrokenFilesStatusText = issues.Count == 0
+                ? "All MP3+G pairs and ZIP archives are healthy!"
+                : $"Found {issues.Count:N0} broken pair / archive issue(s).";
+        }
+        catch (Exception ex)
+        {
+            BrokenFilesStatusText = $"Audit failed: {ex.Message}";
+        }
+        finally
+        {
+            IsFindingBrokenFiles = false;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenBrokenIssueFolder()
+    {
+        if (SelectedBrokenIssue == null || string.IsNullOrWhiteSpace(SelectedBrokenIssue.FilePath)) return;
+        try
+        {
+            if (File.Exists(SelectedBrokenIssue.FilePath))
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{SelectedBrokenIssue.FilePath}\"") { UseShellExecute = true });
+            }
+            else
+            {
+                string? dir = Path.GetDirectoryName(SelectedBrokenIssue.FilePath);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe", $"\"{dir}\"") { UseShellExecute = true });
+                }
+            }
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private async Task RemoveSelectedBrokenIssue()
+    {
+        if (SelectedBrokenIssue == null) return;
+        var issue = SelectedBrokenIssue;
+
+        if (issue.SongId.HasValue)
+        {
+            try
+            {
+                using var context = new LyracistDbContext();
+                var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == issue.SongId.Value);
+                if (dbSong != null)
+                {
+                    var searchService = new SearchService(context);
+                    context.Songs.Remove(dbSong);
+                    await context.SaveChangesAsync();
+                    await searchService.RemoveSongFromIndex(dbSong.SongId);
+                    await NoArtistStore.RemoveAsync(dbSong.FilePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to remove database entry: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+        }
+
+        BrokenFileIssues.Remove(issue);
+        SelectedBrokenIssue = BrokenFileIssues.FirstOrDefault();
+        BrokenFilesStatusText = BrokenFileIssues.Count == 0
+            ? "All listed broken entries cleared."
+            : $"{BrokenFileIssues.Count:N0} issue(s) remaining.";
+        RefreshStats();
+        Search();
+    }
+
+    // ==========================================
+    // MULTI-RIG / EXTERNAL USB DRIVE LIBRARY SYNCHRONIZER
+    // ==========================================
+
+    [ObservableProperty]
+    private string _syncSourceFolderPath = string.Empty;
+
+    [ObservableProperty]
+    private string _syncTargetFolderPath = string.Empty;
+
+    [ObservableProperty]
+    private bool _isDriveSyncRunning;
+
+    [ObservableProperty]
+    private double _driveSyncProgressPercent;
+
+    [ObservableProperty]
+    private string _driveSyncStatusText = "Select Source and Target folders, then click Compare Drives.";
+
+    [ObservableProperty]
+    private string _driveSyncDiskSpaceText = "Target Drive Space: Not analyzed yet.";
+
+    public ObservableCollection<DriveSyncCandidate> DriveSyncCandidates { get; } = [];
+
+    private CancellationTokenSource? _driveSyncCts;
+
+    public void UpdateTargetDriveDiskSpaceInfo()
+    {
+        if (string.IsNullOrWhiteSpace(SyncTargetFolderPath))
+        {
+            DriveSyncDiskSpaceText = "Target Drive Space: Select a target folder.";
+            return;
+        }
+
+        try
+        {
+            string? root = Path.GetPathRoot(Path.GetFullPath(SyncTargetFolderPath));
+            if (string.IsNullOrEmpty(root))
+            {
+                DriveSyncDiskSpaceText = "Target Drive Space: Unknown drive root.";
+                return;
+            }
+
+            var di = new DriveInfo(root);
+            if (!di.IsReady)
+            {
+                DriveSyncDiskSpaceText = $"Drive {root} is not ready.";
+                return;
+            }
+
+            double freeGb = di.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
+            double totalGb = di.TotalSize / (1024.0 * 1024.0 * 1024.0);
+            long requiredBytes = DriveSyncCandidates.Sum(c => c.SizeBytes);
+            double reqGb = requiredBytes / (1024.0 * 1024.0 * 1024.0);
+
+            string fitNote = requiredBytes > 0
+                ? (di.AvailableFreeSpace >= requiredBytes ? $" • Required: {reqGb:F2} GB (OK)" : $" • Required: {reqGb:F2} GB (⚠️ INSUFFICIENT SPACE)")
+                : string.Empty;
+
+            DriveSyncDiskSpaceText = $"Drive {di.Name} ({di.VolumeLabel}): {freeGb:F2} GB free of {totalGb:F2} GB{fitNote}";
+        }
+        catch (Exception ex)
+        {
+            DriveSyncDiskSpaceText = $"Drive analysis unavailable: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task CompareDrivesForSync()
+    {
+        if (IsDriveSyncRunning) return;
+        if (string.IsNullOrWhiteSpace(SyncSourceFolderPath) || !Directory.Exists(SyncSourceFolderPath))
+        {
+            System.Windows.MessageBox.Show("Please select a valid Source library folder first.", "Source Required", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(SyncTargetFolderPath))
+        {
+            System.Windows.MessageBox.Show("Please select a Target backup / USB drive folder.", "Target Required", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        string srcRoot = Path.GetFullPath(SyncSourceFolderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string dstRoot = Path.GetFullPath(SyncTargetFolderPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        if (string.Equals(srcRoot, dstRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.MessageBox.Show("Source and Target folders must be different directories.", "Invalid Folders", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        IsDriveSyncRunning = true;
+        DriveSyncStatusText = "Comparing source library against target drive...";
+        DriveSyncProgressPercent = 0;
+
+        try
+        {
+            var supportedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ".mp3", ".cdg", ".zip", ".mp4", ".wav", ".flac", ".m4a", ".wma", ".ogg", ".lrc", ".txt"
+            };
+
+            var (candidates, totalSourceFiles) = await Task.Run(() =>
+            {
+                var list = new List<DriveSyncCandidate>();
+                int srcCount = 0;
+
+                foreach (string srcFile in Directory.EnumerateFiles(srcRoot, "*.*", SearchOption.AllDirectories))
+                {
+                    if (!supportedExts.Contains(Path.GetExtension(srcFile))) continue;
+                    srcCount++;
+
+                    string rel = Path.GetRelativePath(srcRoot, srcFile);
+                    string dstFile = Path.Combine(dstRoot, rel);
+                    var srcInfo = new FileInfo(srcFile);
+
+                    if (!File.Exists(dstFile))
+                    {
+                        list.Add(new DriveSyncCandidate
+                        {
+                            RelativePath = rel,
+                            SourcePath = srcFile,
+                            TargetPath = dstFile,
+                            SizeBytes = srcInfo.Length,
+                            Status = "New File"
+                        });
+                    }
+                    else
+                    {
+                        var dstInfo = new FileInfo(dstFile);
+                        if (dstInfo.Length != srcInfo.Length)
+                        {
+                            list.Add(new DriveSyncCandidate
+                            {
+                                RelativePath = rel,
+                                SourcePath = srcFile,
+                                TargetPath = dstFile,
+                                SizeBytes = srcInfo.Length,
+                                Status = "Modified Size"
+                            });
+                        }
+                    }
+                }
+                return (list, srcCount);
+            });
+
+            DriveSyncCandidates.Clear();
+            foreach (var c in candidates)
+            {
+                DriveSyncCandidates.Add(c);
+            }
+
+            UpdateTargetDriveDiskSpaceInfo();
+            double totalMb = candidates.Sum(c => c.SizeBytes) / (1024.0 * 1024.0);
+            DriveSyncStatusText = candidates.Count == 0
+                ? $"Target drive is 100% in sync! ({totalSourceFiles:N0} files checked)."
+                : $"Found {candidates.Count:N0} file(s) to sync ({totalMb:N1} MB) out of {totalSourceFiles:N0} source files.";
+        }
+        catch (Exception ex)
+        {
+            DriveSyncStatusText = $"Compare failed: {ex.Message}";
+        }
+        finally
+        {
+            IsDriveSyncRunning = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExecuteDriveSync()
+    {
+        if (IsDriveSyncRunning) return;
+        if (DriveSyncCandidates.Count == 0)
+        {
+            await CompareDrivesForSync();
+            if (DriveSyncCandidates.Count == 0) return;
+        }
+
+        var itemsToCopy = DriveSyncCandidates.ToList();
+        double totalMb = itemsToCopy.Sum(c => c.SizeBytes) / (1024.0 * 1024.0);
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Copy {itemsToCopy.Count:N0} new/updated file(s) ({totalMb:N1} MB) to:\n{SyncTargetFolderPath}?",
+            "Confirm Multi-Rig / USB Drive Sync",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsDriveSyncRunning = true;
+        var cts = new CancellationTokenSource();
+        _driveSyncCts = cts;
+        var token = cts.Token;
+
+        try
+        {
+            int copied = 0;
+            int total = itemsToCopy.Count;
+
+            await Task.Run(() =>
+            {
+                foreach (var item in itemsToCopy)
+                {
+                    if (token.IsCancellationRequested) break;
+
+                    string? targetDir = Path.GetDirectoryName(item.TargetPath);
+                    if (!string.IsNullOrEmpty(targetDir))
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+
+                    File.Copy(item.SourcePath, item.TargetPath, overwrite: true);
+                    copied++;
+                    int cur = copied;
+                    double pct = (double)cur / total * 100.0;
+                    RunOnUi(() =>
+                    {
+                        DriveSyncProgressPercent = pct;
+                        DriveSyncStatusText = $"Syncing {cur:N0} / {total:N0}: {item.RelativePath}";
+                    });
+                }
+            }, token);
+
+            DriveSyncCandidates.Clear();
+            UpdateTargetDriveDiskSpaceInfo();
+            DriveSyncStatusText = token.IsCancellationRequested
+                ? $"Sync cancelled after copying {copied:N0} file(s)."
+                : $"Drive Sync complete! Copied {copied:N0} file(s) successfully.";
+        }
+        catch (OperationCanceledException)
+        {
+            DriveSyncStatusText = "Drive Sync cancelled.";
+        }
+        catch (Exception ex)
+        {
+            DriveSyncStatusText = $"Drive Sync error: {ex.Message}";
+        }
+        finally
+        {
+            IsDriveSyncRunning = false;
+            if (ReferenceEquals(_driveSyncCts, cts)) _driveSyncCts = null;
+            cts.Dispose();
+        }
+    }
+
+    [RelayCommand]
+    private void CancelDriveSync()
+    {
+        _driveSyncCts?.Cancel();
+    }
+
+    // ==========================================
+    // BUILT-IN MP3+G / CDG KARAOKE AUDITION PLAYER WITH 10-BAND EQ & KEY SHIFT
+    // ==========================================
+
+    private readonly CdgPreviewPlayer _auditionPlayer = new();
+    private bool _playerEventsSubscribed;
+    private bool _suppressPlayerSeek;
+
+    [ObservableProperty]
+    private ImageSource? _playerCdgFrame;
+
+    [ObservableProperty]
+    private string _playerNowPlayingTitle = "Select any track and click '▶ Audition Track' to test audio & CDG lyrics";
+
+    [ObservableProperty]
+    private string _playerNowPlayingPath = string.Empty;
+
+    [ObservableProperty]
+    private bool _isPlayerPlaying;
+
+    [ObservableProperty]
+    private double _playerPositionSeconds;
+
+    [ObservableProperty]
+    private double _playerDurationSeconds = 1.0;
+
+    [ObservableProperty]
+    private string _playerTimeDisplay = "0:00 / 0:00";
+
+    [ObservableProperty]
+    private int _playerKeySemitones;
+
+    [ObservableProperty]
+    private double _playerVolumePercent = 90.0;
+
+    [ObservableProperty] private double _eqBand0; // 31 Hz
+    [ObservableProperty] private double _eqBand1; // 62 Hz
+    [ObservableProperty] private double _eqBand2; // 125 Hz
+    [ObservableProperty] private double _eqBand3; // 250 Hz
+    [ObservableProperty] private double _eqBand4; // 500 Hz
+    [ObservableProperty] private double _eqBand5; // 1 kHz
+    [ObservableProperty] private double _eqBand6; // 2 kHz
+    [ObservableProperty] private double _eqBand7; // 4 kHz
+    [ObservableProperty] private double _eqBand8; // 8 kHz
+    [ObservableProperty] private double _eqBand9; // 16 kHz
+
+    partial void OnPlayerVolumePercentChanged(double value) => _auditionPlayer.SetVolume(value);
+
+    partial void OnPlayerPositionSecondsChanged(double value)
+    {
+        if (_suppressPlayerSeek) return;
+        _auditionPlayer.Seek(TimeSpan.FromSeconds(Math.Max(0, value)));
+    }
+
+    private double[] GetCurrentEqBands() =>
+        [EqBand0, EqBand1, EqBand2, EqBand3, EqBand4, EqBand5, EqBand6, EqBand7, EqBand8, EqBand9];
+
+    private void EnsurePlayerSubscribed()
+    {
+        if (_playerEventsSubscribed) return;
+        _playerEventsSubscribed = true;
+        _auditionPlayer.FrameUpdated += frame => RunOnUi(() => PlayerCdgFrame = frame);
+        _auditionPlayer.PlaybackStateChanged += () => RunOnUi(() =>
+        {
+            IsPlayerPlaying = _auditionPlayer.IsPlaying;
+            _suppressPlayerSeek = true;
+            PlayerPositionSeconds = _auditionPlayer.Position.TotalSeconds;
+            double dur = _auditionPlayer.Duration.TotalSeconds;
+            PlayerDurationSeconds = dur > 0.5 ? dur : Math.Max(1.0, PlayerPositionSeconds + 1.0);
+            _suppressPlayerSeek = false;
+            PlayerTimeDisplay = $"{ _auditionPlayer.Position:m\\:ss} / {_auditionPlayer.Duration:m\\:ss}";
+        });
+    }
+
+    [RelayCommand]
+    private async Task AuditionSong(Song? song)
+    {
+        song ??= SelectedSong ?? SelectedDuplicateSong;
+        if (song == null || string.IsNullOrWhiteSpace(song.FilePath))
+        {
+            System.Windows.MessageBox.Show("Select a song from the Library or Duplicate list first.", "No Song Selected", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
+        if (!File.Exists(song.FilePath))
+        {
+            System.Windows.MessageBox.Show($"File not found on disk:\n{song.FilePath}", "File Missing", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        EnsurePlayerSubscribed();
+        PlayerNowPlayingTitle = $"{song.Artist} — {song.Title} [{song.KaraokeType}]";
+        PlayerNowPlayingPath = song.FilePath;
+        await _auditionPlayer.LoadTrackAsync(song.FilePath, PlayerKeySemitones, GetCurrentEqBands(), PlayerVolumePercent);
+    }
+
+    [RelayCommand]
+    private void TogglePlayerPlayPause()
+    {
+        EnsurePlayerSubscribed();
+        if (_auditionPlayer.IsPlaying)
+        {
+            _auditionPlayer.Pause();
+        }
+        else
+        {
+            _auditionPlayer.Play();
+        }
+    }
+
+    [RelayCommand]
+    private void StopPlayer()
+    {
+        _auditionPlayer.Stop();
+    }
+
+    [RelayCommand]
+    private async Task ApplyPlayerDsp()
+    {
+        EnsurePlayerSubscribed();
+        var pos = _auditionPlayer.Position;
+        bool wasPlaying = _auditionPlayer.IsPlaying;
+        await _auditionPlayer.ApplyDspAndOpenAsync(PlayerKeySemitones, GetCurrentEqBands(), PlayerVolumePercent, pos, wasPlaying);
+    }
+
+    [RelayCommand]
+    private async Task ResetPlayerEqAndKey()
+    {
+        PlayerKeySemitones = 0;
+        EqBand0 = EqBand1 = EqBand2 = EqBand3 = EqBand4 = EqBand5 = EqBand6 = EqBand7 = EqBand8 = EqBand9 = 0;
+        await ApplyPlayerDsp();
     }
 }

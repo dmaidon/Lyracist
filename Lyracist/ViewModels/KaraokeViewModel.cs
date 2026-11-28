@@ -1,4 +1,4 @@
-// Edited on Nov 21, 2026 @ 08:18:00 -> Add NewSingerSongTitle and NewSingerArtist properties to Singer Assignment card for right-click song history menu
+// Edited on Nov 27, 2026 @ 13:00:30 -> Add SubfolderCrates filter, FalseStartCommand, and promo/print utilities to KaraokeViewModel
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -760,7 +760,41 @@ public partial class KaraokeViewModel : BaseViewModel
 
     private void OnLibraryUpdated(object? sender, EventArgs e)
     {
+        RefreshSubfolderCrates();
         RefreshFilteredList();
+    }
+
+    public ObservableCollection<string> SubfolderCrates { get; } = ["All Crates"];
+
+    [ObservableProperty]
+    private string _selectedSubfolderCrate = "All Crates";
+
+    partial void OnSelectedSubfolderCrateChanged(string value)
+    {
+        RefreshFilteredList();
+    }
+
+    public void RefreshSubfolderCrates()
+    {
+        Task.Run(() =>
+        {
+            var crates = _libraryService.GetSubfolderCrates().ToList();
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                string previous = SelectedSubfolderCrate;
+                SubfolderCrates.Clear();
+                SubfolderCrates.Add("All Crates");
+                foreach (string c in crates)
+                {
+                    SubfolderCrates.Add(c);
+                }
+
+                if (!SubfolderCrates.Contains(previous))
+                {
+                    SelectedSubfolderCrate = "All Crates";
+                }
+            }));
+        });
     }
 
     public void OnNavigatedTo()
@@ -770,6 +804,10 @@ public partial class KaraokeViewModel : BaseViewModel
         IsAmazonAvailable = !string.IsNullOrWhiteSpace(AppSettings.AmazonAccessKey);
 
         LoadSingerNames();
+        if (SubfolderCrates.Count <= 1)
+        {
+            RefreshSubfolderCrates();
+        }
     }
 
     partial void OnSearchQueryChanged(string value)
@@ -790,14 +828,17 @@ public partial class KaraokeViewModel : BaseViewModel
     private async void RefreshFilteredList()
     {
         string query = SearchQuery;
+        string? crate = string.Equals(SelectedSubfolderCrate, "All Crates", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : SelectedSubfolderCrate;
         int myToken = ++_searchRequestToken;
 
         try
         {
             // SQLite's "async" API runs synchronously on the calling thread, so push both queries to the
             // pool and run them concurrently; each opens its own DbContext.
-            var karaokeTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: false)).ToList());
-            var musicTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: true)).ToList());
+            var karaokeTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: false, subfolderCrate: crate)).ToList());
+            var musicTask = Task.Run(async () => (await _libraryService.SearchAsync(query, isMusic: true, subfolderCrate: crate)).ToList());
             await Task.WhenAll(karaokeTask, musicTask);
 
             // Discard results if a newer search has since been issued.
@@ -1368,6 +1409,33 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task FalseStart()
+    {
+        // 1. If a song is currently playing or paused mid-song, restart from 0:00 without advancing rotation
+        if (!string.IsNullOrEmpty(_mediaEngine.CurrentSongPath) && (_mediaEngine.IsPlaying || _mediaEngine.Position > 0.5))
+        {
+            _suppressSeekPositionCallback = true;
+            SeekPosition = 0;
+            _suppressSeekPositionCallback = false;
+            _mediaEngine.Seek(0);
+            if (!_mediaEngine.IsPlaying)
+            {
+                _showFlow.OnKaraokeTrackStarted();
+                await _mediaEngine.Play();
+                IsPlaying = true;
+            }
+            return;
+        }
+
+        // 2. Otherwise, if a turn was just marked finished by mistake (or ended early), undo the last finish
+        if (Rotation.CanUndoLastFinish)
+        {
+            Rotation.UndoLastFinish();
+            UpdateNowNext();
+        }
+    }
+
+    [RelayCommand]
     private void AddHistorySongToRotation(SingerHistoryEntry entry)
     {
         if (entry == null) return;
@@ -1611,6 +1679,17 @@ public partial class KaraokeViewModel : BaseViewModel
         _displayService.ShowRotationWindow();
         wheel.Show();
         wheel.Activate();
+    }
+
+    [RelayCommand]
+    private void OpenKaraokeStudio()
+    {
+        var studio = new Windows.KaraokeStudioWindow
+        {
+            Owner = System.Windows.Application.Current?.MainWindow
+        };
+        studio.ShowDialog();
+        _libraryService.NotifyLibraryUpdated();
     }
 
     [RelayCommand]

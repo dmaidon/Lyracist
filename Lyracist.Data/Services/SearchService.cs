@@ -1,7 +1,8 @@
-// Edited on Oct 30, 2026 @ 12:01:00 -> Add live FTS5 MATCH probe, corrupt FTS5 shadow-table recovery, and automatic self-healing on search fallback
+// Edited on Nov 27, 2026 @ 12:58:00 -> Add artist abbreviation expansion, fuzzy typo tolerance fallback, and subfolder crate filtering
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,6 +18,161 @@ namespace Lyracist.Data.Services
     public class SearchService(LyracistDbContext context)
     {
         private readonly LyracistDbContext _context = context;
+
+        /// <summary>
+        /// Built-in dictionary of common karaoke artist abbreviations, acronyms, and frequent phonetic misspellings.
+        /// Keys are lowercase normalized single tokens; values are their expanded normalized forms.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<string, string> ArtistAbbreviations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["gnr"] = "guns n roses",
+            ["acdc"] = "ac dc",
+            ["ccr"] = "creedence clearwater revival",
+            ["ratm"] = "rage against the machine",
+            ["stp"] = "stone temple pilots",
+            ["rhcp"] = "red hot chili peppers",
+            ["mj"] = "michael jackson",
+            ["bsb"] = "backstreet boys",
+            ["nkotb"] = "new kids on the block",
+            ["elo"] = "electric light orchestra",
+            ["bto"] = "bachman turner overdrive",
+            ["reo"] = "reo speedwagon",
+            ["skynard"] = "lynyrd skynyrd",
+            ["lynard"] = "lynyrd skynyrd",
+            ["skynyrd"] = "lynyrd skynyrd",
+            ["ledzep"] = "led zeppelin",
+            ["zep"] = "led zeppelin",
+            ["zepplin"] = "zeppelin",
+            ["deflepard"] = "def leppard",
+            ["lepard"] = "leppard",
+            ["britany"] = "britney",
+            ["brittany"] = "britney",
+            ["xtina"] = "christina aguilera",
+            ["bfmv"] = "bullet for my valentine",
+            ["a7x"] = "avenged sevenfold",
+            ["soad"] = "system of a down",
+            ["mcr"] = "my chemical romance",
+            ["fob"] = "fall out boy",
+            ["patd"] = "panic at the disco",
+            ["swv"] = "sisters with voices",
+            ["dmb"] = "dave matthews band",
+            ["srv"] = "stevie ray vaughan",
+            ["fgl"] = "florida georgia line",
+            ["bnd"] = "brooks dunn",
+            ["metallca"] = "metallica",
+            ["metalica"] = "metallica",
+            ["journeyy"] = "journey",
+            ["bohemien"] = "bohemian",
+            ["rapsody"] = "rhapsody",
+            ["margaritavile"] = "margaritaville"
+        };
+
+        /// <summary>
+        /// Expands any known artist abbreviation or common misspelling tokens in <paramref name="query"/>.
+        /// </summary>
+        public string ExpandAbbreviations(string query)
+        {
+            string norm = Normalize(query);
+            if (string.IsNullOrWhiteSpace(norm)) return string.Empty;
+
+            string[] tokens = norm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            bool changed = false;
+            var expanded = new List<string>(tokens.Length + 2);
+            foreach (string token in tokens)
+            {
+                if (ArtistAbbreviations.TryGetValue(token, out string? replacement))
+                {
+                    expanded.Add(replacement);
+                    changed = true;
+                }
+                else
+                {
+                    expanded.Add(token);
+                }
+            }
+
+            return changed ? string.Join(" ", expanded) : norm;
+        }
+
+        /// <summary>
+        /// Computes optimal string alignment (restricted Damerau-Levenshtein) edit distance between two normalized tokens,
+        /// handling insertions, deletions, substitutions, and adjacent character transpositions.
+        /// </summary>
+        public static int ComputeEditDistance(string a, string b)
+        {
+            if (string.Equals(a, b, StringComparison.OrdinalIgnoreCase)) return 0;
+            int n = a.Length;
+            int m = b.Length;
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            int[,] d = new int[n + 1, m + 1];
+            for (int i = 0; i <= n; i++) d[i, 0] = i;
+            for (int j = 0; j <= m; j++) d[0, j] = j;
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = char.ToLowerInvariant(a[i - 1]) == char.ToLowerInvariant(b[j - 1]) ? 0 : 1;
+                    int val = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+
+                    if (i > 1 && j > 1
+                        && char.ToLowerInvariant(a[i - 1]) == char.ToLowerInvariant(b[j - 2])
+                        && char.ToLowerInvariant(a[i - 2]) == char.ToLowerInvariant(b[j - 1]))
+                    {
+                        val = Math.Min(val, d[i - 2, j - 2] + 1);
+                    }
+                    d[i, j] = val;
+                }
+            }
+            return d[n, m];
+        }
+
+        /// <summary>
+        /// Returns distinct subfolder names (immediate parent directory names) across the catalog for crate filtering.
+        /// </summary>
+        public List<string> GetDistinctSubfolderCrates(bool? isKaraoke = null)
+        {
+            try
+            {
+                var query = _context.Songs.AsNoTracking();
+                if (isKaraoke.HasValue)
+                {
+                    query = query.Where(s => s.IsKaraoke == isKaraoke.Value);
+                }
+
+                var paths = query.Select(s => s.FilePath).ToList();
+                var crates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string? p in paths)
+                {
+                    if (string.IsNullOrWhiteSpace(p)) continue;
+                    try
+                    {
+                        string? dir = Path.GetDirectoryName(p);
+                        if (!string.IsNullOrEmpty(dir))
+                        {
+                            string folderName = Path.GetFileName(dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                            if (!string.IsNullOrWhiteSpace(folderName) && folderName.Length > 1 && !folderName.EndsWith(':'))
+                            {
+                                crates.Add(folderName);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                return crates.OrderBy(c => c, StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch
+            {
+                return [];
+            }
+        }
 
         private static SqliteConnection? _sharedConnection;
         private static readonly System.Threading.Lock _connectionLock = new();
@@ -378,16 +534,52 @@ namespace Lyracist.Data.Services
             }
         }
 
-        public async Task<List<Song>> Search(string query, bool? isKaraoke = null)
+        private static (string? WinPattern, string? UnixPattern) BuildCratePatterns(string? subfolderCrate)
         {
+            if (string.IsNullOrWhiteSpace(subfolderCrate) || string.Equals(subfolderCrate, "All Crates", StringComparison.OrdinalIgnoreCase))
+            {
+                return (null, null);
+            }
+
+            string escaped = subfolderCrate.Trim().Replace("!", "!!").Replace("%", "!%").Replace("_", "!_");
+            return ($"%\\{escaped}\\%", $"%/{escaped}/%");
+        }
+
+        public async Task<List<Song>> Search(string query, bool? isKaraoke = null, string? subfolderCrate = null)
+        {
+            var (crateWin, crateUnix) = BuildCratePatterns(subfolderCrate);
+
             if (string.IsNullOrWhiteSpace(query))
             {
-                return [];
+                if (crateWin == null) return [];
+                await _querySemaphore.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    var conn = await GetSharedConnectionAsync().ConfigureAwait(false);
+                    const string crateOnlySql = @"
+                        SELECT s.*, a.*
+                        FROM Songs s
+                        LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                        WHERE (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                        AND (s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                        ORDER BY s.Artist, s.Title
+                        LIMIT 150";
+                    var rows = await conn.QueryAsync<Song, SongAudioSettings, Song>(
+                        crateOnlySql,
+                        (song, audioSettings) => { song.AudioSettings = audioSettings; return song; },
+                        new { isKaraoke, crateWin, crateUnix },
+                        splitOn: "SongAudioSettingsId").ConfigureAwait(false);
+                    return [.. rows];
+                }
+                finally
+                {
+                    _querySemaphore.Release();
+                }
             }
 
             EnsureFtsTableExists();
 
-            string ftsQuery = PrepareFtsQuery(query);
+            string ftsQuery = PrepareExpandedFtsQuery(query);
             if (string.IsNullOrWhiteSpace(ftsQuery))
             {
                 return [];
@@ -407,6 +599,7 @@ namespace Lyracist.Data.Services
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
                     AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                    AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
                     LIMIT 150";
 
                 var results = (await connection.QueryAsync<Song, SongAudioSettings, Song>(
@@ -416,7 +609,7 @@ namespace Lyracist.Data.Services
                         song.AudioSettings = audioSettings;
                         return song;
                     },
-                    new { ftsQuery, isKaraoke },
+                    new { ftsQuery, isKaraoke, crateWin, crateUnix },
                     splitOn: "SongAudioSettingsId"
                 ).ConfigureAwait(false)).ToList();
 
@@ -425,7 +618,13 @@ namespace Lyracist.Data.Services
                     return results;
                 }
 
-                var fallbackResults = await SearchFallbackLikeAsync(connection, query, isKaraoke).ConfigureAwait(false);
+                string expandedQuery = ExpandAbbreviations(query);
+                var fallbackResults = await SearchFallbackLikeAsync(connection, expandedQuery, isKaraoke, crateWin, crateUnix).ConfigureAwait(false);
+                if (fallbackResults.Count == 0 && !string.Equals(expandedQuery, Normalize(query), StringComparison.OrdinalIgnoreCase))
+                {
+                    fallbackResults = await SearchFallbackLikeAsync(connection, query, isKaraoke, crateWin, crateUnix).ConfigureAwait(false);
+                }
+
                 if (fallbackResults.Count > 0)
                 {
                     // If the LIKE fallback found a Title/Artist prefix match that FTS5 missed,
@@ -441,9 +640,11 @@ namespace Lyracist.Data.Services
                         {
                         }
                     });
+                    return fallbackResults;
                 }
 
-                return fallbackResults;
+                // Fuzzy typo tolerance fallback (handles misspellings and transposed letters)
+                return await Task.Run(() => SearchFallbackFuzzySync(connection, expandedQuery, isKaraoke, crateWin, crateUnix)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -454,7 +655,9 @@ namespace Lyracist.Data.Services
                     EnsureFtsIndexSynchronized(forceCheck: true);
                     await using var fallbackConn = new SqliteConnection(LyracistDbContext.GetConnectionString());
                     await fallbackConn.OpenAsync().ConfigureAwait(false);
-                    return await SearchFallbackLikeAsync(fallbackConn, query, isKaraoke).ConfigureAwait(false);
+                    var likeRes = await SearchFallbackLikeAsync(fallbackConn, ExpandAbbreviations(query), isKaraoke, crateWin, crateUnix).ConfigureAwait(false);
+                    if (likeRes.Count > 0) return likeRes;
+                    return SearchFallbackFuzzySync(fallbackConn, ExpandAbbreviations(query), isKaraoke, crateWin, crateUnix);
                 }
                 catch (Exception fallbackEx)
                 {
@@ -468,7 +671,7 @@ namespace Lyracist.Data.Services
             }
         }
 
-        private (string Sql, DynamicParameters Params) BuildLikeFallbackQuery(string query, bool? isKaraoke)
+        private (string Sql, DynamicParameters Params) BuildLikeFallbackQuery(string query, bool? isKaraoke, string? crateWin = null, string? crateUnix = null)
         {
             string normalized = Normalize(query);
             var words = string.IsNullOrWhiteSpace(normalized)
@@ -477,6 +680,8 @@ namespace Lyracist.Data.Services
 
             var parameters = new DynamicParameters();
             parameters.Add("isKaraoke", isKaraoke);
+            parameters.Add("crateWin", crateWin);
+            parameters.Add("crateUnix", crateUnix);
 
             var whereClauses = new List<string>();
             for (int i = 0; i < words.Length; i++)
@@ -499,6 +704,7 @@ namespace Lyracist.Data.Services
                 LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
                 WHERE {wordFilter}
                 AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
                 ORDER BY (CASE WHEN {titleOrArtistRank} THEN 0 ELSE 1 END), s.Title
                 LIMIT 150";
 
@@ -526,9 +732,9 @@ namespace Lyracist.Data.Services
             }
         }
 
-        private async Task<List<Song>> SearchFallbackLikeAsync(SqliteConnection connection, string query, bool? isKaraoke)
+        private async Task<List<Song>> SearchFallbackLikeAsync(SqliteConnection connection, string query, bool? isKaraoke, string? crateWin = null, string? crateUnix = null)
         {
-            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke);
+            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke, crateWin, crateUnix);
             var results = await connection.QueryAsync<Song, SongAudioSettings, Song>(
                 sql,
                 (song, audioSettings) =>
@@ -543,9 +749,9 @@ namespace Lyracist.Data.Services
             return [.. results];
         }
 
-        private List<Song> SearchFallbackLikeSync(SqliteConnection connection, string query, bool? isKaraoke)
+        private List<Song> SearchFallbackLikeSync(SqliteConnection connection, string query, bool? isKaraoke, string? crateWin = null, string? crateUnix = null)
         {
-            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke);
+            var (sql, parameters) = BuildLikeFallbackQuery(query, isKaraoke, crateWin, crateUnix);
             var results = connection.Query<Song, SongAudioSettings, Song>(
                 sql,
                 (song, audioSettings) =>
@@ -558,6 +764,153 @@ namespace Lyracist.Data.Services
             );
 
             return [.. results];
+        }
+
+        private sealed class FuzzyCandidateRow
+        {
+            public int SongId { get; set; }
+            public string NormalizedTitle { get; set; } = string.Empty;
+            public string NormalizedArtist { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Fuzzy typo-tolerant fallback search using Damerau-Levenshtein token distance when exact/prefix/LIKE searches return 0 results.
+        /// Pre-filters candidate rows via 2-character prefix/suffix SQL probes so large libraries remain fast.
+        /// </summary>
+        private List<Song> SearchFallbackFuzzySync(SqliteConnection connection, string query, bool? isKaraoke, string? crateWin = null, string? crateUnix = null)
+        {
+            string normalized = Normalize(query);
+            string[] queryTokens = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(t => t.Length >= 3)
+                .ToArray();
+            if (queryTokens.Length == 0) return [];
+
+            var parameters = new DynamicParameters();
+            parameters.Add("isKaraoke", isKaraoke);
+            parameters.Add("crateWin", crateWin);
+            parameters.Add("crateUnix", crateUnix);
+
+            var probeClauses = new List<string>();
+            for (int i = 0; i < queryTokens.Length; i++)
+            {
+                string tok = queryTokens[i];
+                string prefix2 = tok[..2];
+                string suffix2 = tok[^2..];
+                parameters.Add($"p{i}", $"%{prefix2}%");
+                parameters.Add($"s{i}", $"%{suffix2}%");
+                probeClauses.Add($"(f.NormalizedTitle LIKE @p{i} OR f.NormalizedArtist LIKE @p{i} OR f.NormalizedTitle LIKE @s{i} OR f.NormalizedArtist LIKE @s{i})");
+            }
+
+            string probeFilter = string.Join(" AND ", probeClauses);
+            string candidateSql = $@"
+                SELECT f.SongId, f.NormalizedTitle, f.NormalizedArtist
+                FROM SongSearch f
+                INNER JOIN Songs s ON s.SongId = f.rowid
+                WHERE ({probeFilter})
+                AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                LIMIT 2500";
+
+            List<FuzzyCandidateRow> candidates;
+            try
+            {
+                candidates = connection.Query<FuzzyCandidateRow>(candidateSql, parameters).ToList();
+            }
+            catch
+            {
+                return [];
+            }
+
+            if (candidates.Count == 0) return [];
+
+            var matchedIds = new List<(int SongId, int TotalDistance)>();
+            foreach (var c in candidates)
+            {
+                string combined = string.Concat(c.NormalizedTitle, " ", c.NormalizedArtist);
+                string[] targetTokens = combined.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (targetTokens.Length == 0) continue;
+
+                int totalDist = 0;
+                bool allTokensMatched = true;
+
+                foreach (string qTok in queryTokens)
+                {
+                    int maxAllowed = qTok.Length >= 7 ? 2 : 1;
+                    int bestDist = int.MaxValue;
+
+                    foreach (string tTok in targetTokens)
+                    {
+                        if (tTok.StartsWith(qTok, StringComparison.OrdinalIgnoreCase))
+                        {
+                            bestDist = 0;
+                            break;
+                        }
+
+                        // Compare against either the full target token or its prefix of length qTok.Length
+                        string compareTarget = tTok.Length > qTok.Length + maxAllowed
+                            ? tTok[..Math.Min(tTok.Length, qTok.Length)]
+                            : tTok;
+
+                        if (Math.Abs(compareTarget.Length - qTok.Length) > maxAllowed) continue;
+
+                        int dist = ComputeEditDistance(qTok, compareTarget);
+                        if (dist < bestDist)
+                        {
+                            bestDist = dist;
+                            if (bestDist == 0) break;
+                        }
+                    }
+
+                    if (bestDist <= maxAllowed)
+                    {
+                        totalDist += bestDist;
+                    }
+                    else
+                    {
+                        allTokensMatched = false;
+                        break;
+                    }
+                }
+
+                if (allTokensMatched)
+                {
+                    matchedIds.Add((c.SongId, totalDist));
+                }
+            }
+
+            if (matchedIds.Count == 0) return [];
+
+            var topIds = matchedIds
+                .OrderBy(m => m.TotalDistance)
+                .Take(150)
+                .Select(m => m.SongId)
+                .ToList();
+
+            const string fetchSql = @"
+                SELECT s.*, a.*
+                FROM Songs s
+                LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                WHERE s.SongId IN @topIds";
+
+            var fetched = connection.Query<Song, SongAudioSettings, Song>(
+                fetchSql,
+                (song, audioSettings) =>
+                {
+                    song.AudioSettings = audioSettings;
+                    return song;
+                },
+                new { topIds },
+                splitOn: "SongAudioSettingsId").ToDictionary(s => s.SongId);
+
+            var ordered = new List<Song>(topIds.Count);
+            foreach (int id in topIds)
+            {
+                if (fetched.TryGetValue(id, out var song))
+                {
+                    ordered.Add(song);
+                }
+            }
+            return ordered;
         }
 
         // Helper to transform user search query into a safe FTS5 MATCH expression
@@ -587,6 +940,25 @@ namespace Lyracist.Data.Services
 
             // Join word prefixes with AND operator
             return string.Join(" AND ", words);
+        }
+
+        private string PrepareExpandedFtsQuery(string query)
+        {
+            string baseFts = PrepareFtsQuery(query);
+            if (string.IsNullOrEmpty(baseFts)) return string.Empty;
+
+            string expanded = ExpandAbbreviations(query);
+            string normOrig = Normalize(query);
+            if (!string.IsNullOrEmpty(expanded) && !string.Equals(expanded, normOrig, StringComparison.OrdinalIgnoreCase))
+            {
+                string expandedFts = PrepareFtsQuery(expanded);
+                if (!string.IsNullOrEmpty(expandedFts) && !string.Equals(expandedFts, baseFts, StringComparison.Ordinal))
+                {
+                    return $"({expandedFts}) OR ({baseFts})";
+                }
+            }
+
+            return baseFts;
         }
 
         public async Task RemoveSongFromIndex(int songId)
@@ -743,16 +1115,33 @@ namespace Lyracist.Data.Services
             }
         }
 
-        public List<Song> SearchSync(string query, bool? isKaraoke = null)
+        public List<Song> SearchSync(string query, bool? isKaraoke = null, string? subfolderCrate = null)
         {
+            var (crateWin, crateUnix) = BuildCratePatterns(subfolderCrate);
+
             if (string.IsNullOrWhiteSpace(query))
             {
-                return [];
+                if (crateWin == null) return [];
+                using var crateConn = new SqliteConnection(LyracistDbContext.GetConnectionString());
+                crateConn.Open();
+                const string crateOnlySql = @"
+                    SELECT s.*, a.*
+                    FROM Songs s
+                    LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                    WHERE (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                    AND (s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
+                    ORDER BY s.Artist, s.Title
+                    LIMIT 150";
+                return crateConn.Query<Song, SongAudioSettings, Song>(
+                    crateOnlySql,
+                    (song, audioSettings) => { song.AudioSettings = audioSettings; return song; },
+                    new { isKaraoke, crateWin, crateUnix },
+                    splitOn: "SongAudioSettingsId").ToList();
             }
 
             EnsureFtsTableExists();
 
-            string ftsQuery = PrepareFtsQuery(query);
+            string ftsQuery = PrepareExpandedFtsQuery(query);
             if (string.IsNullOrWhiteSpace(ftsQuery))
             {
                 return [];
@@ -777,6 +1166,7 @@ namespace Lyracist.Data.Services
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
                     AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
+                    AND (@crateWin IS NULL OR s.FilePath LIKE @crateWin ESCAPE '!' OR s.FilePath LIKE @crateUnix ESCAPE '!')
                     LIMIT 150";
 
                 var results = connection.Query<Song, SongAudioSettings, Song>(
@@ -786,7 +1176,7 @@ namespace Lyracist.Data.Services
                         song.AudioSettings = audioSettings;
                         return song;
                     },
-                    new { ftsQuery, isKaraoke },
+                    new { ftsQuery, isKaraoke, crateWin, crateUnix },
                     splitOn: "SongAudioSettingsId"
                 ).ToList();
 
@@ -795,7 +1185,13 @@ namespace Lyracist.Data.Services
                     return results;
                 }
 
-                var fallbackResults = SearchFallbackLikeSync(connection, query, isKaraoke);
+                string expandedQuery = ExpandAbbreviations(query);
+                var fallbackResults = SearchFallbackLikeSync(connection, expandedQuery, isKaraoke, crateWin, crateUnix);
+                if (fallbackResults.Count == 0 && !string.Equals(expandedQuery, Normalize(query), StringComparison.OrdinalIgnoreCase))
+                {
+                    fallbackResults = SearchFallbackLikeSync(connection, query, isKaraoke, crateWin, crateUnix);
+                }
+
                 if (fallbackResults.Count > 0)
                 {
                     _ = Task.Run(() =>
@@ -809,9 +1205,10 @@ namespace Lyracist.Data.Services
                         {
                         }
                     });
+                    return fallbackResults;
                 }
 
-                return fallbackResults;
+                return SearchFallbackFuzzySync(connection, expandedQuery, isKaraoke, crateWin, crateUnix);
             }
             catch (Exception ex)
             {
@@ -822,7 +1219,9 @@ namespace Lyracist.Data.Services
                     EnsureFtsIndexSynchronized(forceCheck: true);
                     using var fallbackConn = new SqliteConnection(LyracistDbContext.GetConnectionString());
                     fallbackConn.Open();
-                    return SearchFallbackLikeSync(fallbackConn, query, isKaraoke);
+                    var likeRes = SearchFallbackLikeSync(fallbackConn, ExpandAbbreviations(query), isKaraoke, crateWin, crateUnix);
+                    if (likeRes.Count > 0) return likeRes;
+                    return SearchFallbackFuzzySync(fallbackConn, ExpandAbbreviations(query), isKaraoke, crateWin, crateUnix);
                 }
                 catch (Exception fallbackEx)
                 {

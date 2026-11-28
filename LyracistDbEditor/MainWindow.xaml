@@ -1,4 +1,4 @@
-<!-- Edited on Oct 31, 2026 @ 13:20:00 -> Fix Duplicate Detection button placement/binding, add Delete/Open Folder/Genre/Backup DB controls, and add Remove Selected Orphan -->
+<!-- Edited on Nov 27, 2026 @ 13:14:30 -> Add Subfolder Crate filter, Custom Pattern File Renamer with Undo, Broken Pair Audit, USB Drive Sync, and Built-In CDG Player with 10-Band EQ -->
 <Window x:Class="LyracistDbEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -91,21 +91,32 @@
                     </Grid.RowDefinitions>
 
                     <!-- Search and Filters -->
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="0">
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <ui:TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search by title, artist, or file path..." Height="35">
-                            <ui:TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
-                            </ui:TextBox.InputBindings>
-                        </ui:TextBox>
+                            <ui:TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search title, artist, path, or abbrev (e.g. GNR, CCR)..." Height="35">
+                                <ui:TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                                </ui:TextBox.InputBindings>
+                            </ui:TextBox>
 
-                        <ui:Button Grid.Column="2" Content="Search" Icon="{ui:SymbolIcon Search24}" Command="{Binding SearchCommand}" Appearance="Primary" Height="35" Width="100" />
-                    </Grid>
+                            <ui:Button Grid.Column="2" Content="Search" Icon="{ui:SymbolIcon Search24}" Command="{Binding SearchCommand}" Appearance="Primary" Height="35" Width="100" />
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="📁 Folder / Crate:" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ComboBox Grid.Column="1" ItemsSource="{Binding SubfolderCrates}" SelectedItem="{Binding SelectedSubfolderCrate, Mode=TwoWay}" Height="30" Padding="8,2" VerticalContentAlignment="Center" ToolTip="Filter library tracks by subfolder / crate category" />
+                        </Grid>
+                    </StackPanel>
 
                     <!-- Results List -->
                     <Grid Grid.Row="2">
@@ -126,6 +137,10 @@
                                     <Setter Property="ContextMenu">
                                         <Setter.Value>
                                             <ContextMenu>
+                                                <MenuItem Header="▶ Audition / Play Track (CDG + 10-Band EQ)"
+                                                          Command="{Binding DataContext.AuditionSongCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                          CommandParameter="{Binding}" />
+                                                <Separator />
                                                 <MenuItem Header="Scan Metadata for this file"
                                                           Command="{Binding DataContext.ScanSongMetadataCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                           CommandParameter="{Binding}" />
@@ -234,12 +249,15 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="8" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Content="Open Folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding OpenFileLocationCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Show file in Windows Explorer" />
-                                <ui:Button Grid.Column="2" Content="Delete" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DeleteSongCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Remove selected track from database" />
-                                <ui:Button Grid.Column="4" Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
+                                <ui:Button Grid.Column="0" Content="▶ Audition" Icon="{ui:SymbolIcon Play24}" Command="{Binding AuditionSongCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Load and play track in the built-in CDG &amp; 10-Band EQ Audition Player" />
+                                <ui:Button Grid.Column="2" Content="Open Folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding OpenFileLocationCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Show file in Windows Explorer" />
+                                <ui:Button Grid.Column="4" Content="Delete" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DeleteSongCommand}" Appearance="Secondary" Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" ToolTip="Remove selected track from database" />
+                                <ui:Button Grid.Column="6" Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
                             </Grid>
                             <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
@@ -316,24 +334,35 @@
                     <!-- File Renamer Card -->
                     <Border Grid.Row="8" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
                         <StackPanel>
-                            <TextBlock Text="Metadata File Renamer" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                            <TextBlock Text="Renames karaoke/audio files in a selected folder based on their embedded title tag." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
+                            <TextBlock Text="Metadata File Renamer (Pattern &amp; Undo History)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Standardizes filenames using custom pattern rules with preview and persistent rollback history." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,8" />
 
-                            <Grid Margin="0,0,0,10">
+                            <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="10" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0" Text="{Binding RenameFolderPath, Mode=TwoWay}" PlaceholderText="Select a folder..." Height="35" IsReadOnly="True" />
-                                <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseRenameFolderClicked" Height="35" Width="90" IsEnabled="{Binding IsRenaming, Converter={StaticResource InvertBoolConverter}}" />
+                                <ui:TextBox Grid.Column="0" Text="{Binding RenameFolderPath, Mode=TwoWay}" PlaceholderText="Select a folder..." Height="33" IsReadOnly="True" />
+                                <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseRenameFolderClicked" Height="33" Width="90" IsEnabled="{Binding IsRenaming, Converter={StaticResource InvertBoolConverter}}" />
                             </Grid>
 
-                            <Grid ColumnDefinitions="*, 10, *, 10, *">
-                                <ui:Button Grid.Column="0" Content="Preview" Icon="{ui:SymbolIcon Eye24}" Command="{Binding PreviewRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" ToolTip="List what would be renamed without changing anything" />
-                                <ui:Button Grid.Column="2" Content="Rename Files" Icon="{ui:SymbolIcon Edit24}" Command="{Binding RenameFilesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" />
-                                <ui:Button Grid.Column="4" Content="Cancel" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRenaming}" />
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Naming Rule:" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <ComboBox Grid.Column="1" IsEditable="True" ItemsSource="{Binding RenamePatternTemplates}" Text="{Binding SelectedRenamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" Padding="8,2" ToolTip="Pattern tokens: {Artist}, {Title}, {Genre}" />
                             </Grid>
+
+                            <Grid ColumnDefinitions="*, 8, *, 8, *, 8, *" Margin="0,0,0,6">
+                                <ui:Button Grid.Column="0" Content="Preview" Icon="{ui:SymbolIcon Eye24}" Command="{Binding PreviewRenameCommand}" Appearance="Secondary" Height="33" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" ToolTip="List what would be renamed without changing anything" />
+                                <ui:Button Grid.Column="2" Content="Rename" Icon="{ui:SymbolIcon Edit24}" Command="{Binding RenameFilesCommand}" Appearance="Primary" Height="33" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" />
+                                <ui:Button Grid.Column="4" Content="Undo" Icon="{ui:SymbolIcon ArrowUndo24}" Command="{Binding UndoLastRenameCommand}" Appearance="Secondary" Height="33" HorizontalAlignment="Stretch" IsEnabled="{Binding CanUndoLastRename}" ToolTip="{Binding LastRenameUndoSummary}" />
+                                <ui:Button Grid.Column="6" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelRenameCommand}" Appearance="Secondary" Height="33" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRenaming}" />
+                            </Grid>
+                            <TextBlock Text="{Binding LastRenameUndoSummary}" FontSize="10.5" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Border>
 
@@ -391,14 +420,16 @@
         <Grid Margin="0,12,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
             <!-- Column 1: Duplicate Detection -->
-            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -411,8 +442,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Text="Duplicate Detection" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Groups songs sharing the same normalized title and artist — common when the same track is imported from multiple providers." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        <TextBlock Text="Duplicate Detection" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Groups songs sharing the same normalized title and artist across providers." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
 
                     <Grid Grid.Row="2">
@@ -421,15 +452,15 @@
                             <ColumnDefinition Width="10" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding DuplicateStatusText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindDuplicatesCommand}" Appearance="Primary" Height="35" Width="100" IsEnabled="{Binding IsFindingDuplicates, Converter={StaticResource InvertBoolConverter}}" />
+                        <TextBlock Grid.Column="0" Text="{Binding DuplicateStatusText}" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindDuplicatesCommand}" Appearance="Primary" Height="34" Width="90" IsEnabled="{Binding IsFindingDuplicates, Converter={StaticResource InvertBoolConverter}}" />
                     </Grid>
 
                     <ListBox Grid.Row="4" ItemsSource="{Binding DuplicateGroups}" SelectedItem="{Binding SelectedDuplicateGroup, Mode=TwoWay}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Expander Header="{Binding Title}" Margin="0,2">
-                                    <StackPanel Margin="16,4,0,4">
+                                    <StackPanel Margin="12,4,0,4">
                                         <TextBlock Text="{Binding Artist}" FontSize="11" FontStyle="Italic" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,0,4" />
                                         <TextBlock Text="{Binding KeeperText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                         <ListBox ItemsSource="{Binding Songs}" SelectedItem="{Binding DataContext.SelectedDuplicateSong, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" BorderThickness="0" Background="Transparent">
@@ -445,15 +476,15 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *" Margin="0,10,0,0">
-                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveDuplicateSongCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the song selected inside a group from the database" />
-                        <ui:Button Grid.Column="2" Content="Remove All But Suggested" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllButSuggestedDuplicatesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Keep one copy per group (existing file, longest, largest) and remove the rest" />
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 8, *" Margin="0,10,0,0">
+                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveDuplicateSongCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" ToolTip="Remove the song selected inside a group from the database" />
+                        <ui:Button Grid.Column="2" Content="Keep Best Only" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllButSuggestedDuplicatesCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" ToolTip="Keep one copy per group (existing file, longest, largest) and remove the rest" />
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- Column 2: Orphaned File Audit -->
-            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <!-- Column 2: Broken MP3+G Pairs & Corrupt Archives Audit -->
+            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -466,8 +497,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Text="Orphaned File Audit" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Finds database rows whose FilePath no longer exists on disk (moved drive, deleted file, renamed folder)." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        <TextBlock Text="Broken MP3+G &amp; ZIP Audit" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Flags missing .cdg/.mp3 companion pairs, orphaned .cdg files, corrupt ZIPs, and 0-byte tracks." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
 
                     <Grid Grid.Row="2">
@@ -476,15 +507,67 @@
                             <ColumnDefinition Width="10" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding OrphanStatusText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindOrphanedFilesCommand}" Appearance="Primary" Height="35" Width="100" IsEnabled="{Binding IsFindingOrphans, Converter={StaticResource InvertBoolConverter}}" />
+                        <TextBlock Grid.Column="0" Text="{Binding BrokenFilesStatusText}" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindBrokenPairsAndArchivesCommand}" Appearance="Primary" Height="34" Width="90" IsEnabled="{Binding IsFindingBrokenFiles, Converter={StaticResource InvertBoolConverter}}" />
+                    </Grid>
+
+                    <ListBox Grid.Row="4" ItemsSource="{Binding BrokenFileIssues}" SelectedItem="{Binding SelectedBrokenIssue, Mode=TwoWay}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Background="#7F1D1D" CornerRadius="4" Padding="5,1" Margin="0,0,6,0">
+                                            <TextBlock Text="{Binding IssueType}" FontSize="10" FontWeight="Bold" Foreground="#FCA5A5" />
+                                        </Border>
+                                        <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Description}" FontSize="11" Foreground="#E0A96D" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding FilePath}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" FontStyle="Italic" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 8, *" Margin="0,10,0,0">
+                        <ui:Button Grid.Column="0" Content="Open Folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding OpenBrokenIssueFolderCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" />
+                        <ui:Button Grid.Column="2" Content="Remove Entry" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSelectedBrokenIssueCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Column 3: Orphaned File Audit -->
+            <Border Grid.Column="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Orphaned File Audit" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Finds database rows whose FilePath no longer exists on disk." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding OrphanStatusText}" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ui:Button Grid.Column="2" Content="Scan" Icon="{ui:SymbolIcon Search24}" Command="{Binding FindOrphanedFilesCommand}" Appearance="Primary" Height="34" Width="90" IsEnabled="{Binding IsFindingOrphans, Converter={StaticResource InvertBoolConverter}}" />
                     </Grid>
 
                     <ListBox Grid.Row="4" ItemsSource="{Binding OrphanedSongs}" SelectedItem="{Binding SelectedOrphanedSong, Mode=TwoWay}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,3">
-                                    <TextBlock FontSize="13" FontWeight="SemiBold">
+                                    <TextBlock FontSize="12.5" FontWeight="SemiBold">
                                         <Run Text="{Binding Title, Mode=OneWay}" />
                                         <Run Text=" — " FontWeight="Normal" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         <Run Text="{Binding Artist, Mode=OneWay}" FontWeight="Normal" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
@@ -495,15 +578,15 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <Grid Grid.Row="6" ColumnDefinitions="*, 10, *" Margin="0,10,0,0">
-                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSelectedOrphanedFileCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" ToolTip="Remove the selected orphaned entry from the database" />
-                        <ui:Button Grid.Column="2" Content="Remove All Orphans" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllOrphanedFilesCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" />
+                    <Grid Grid.Row="6" ColumnDefinitions="*, 8, *" Margin="0,10,0,0">
+                        <ui:Button Grid.Column="0" Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSelectedOrphanedFileCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" ToolTip="Remove the selected orphaned entry from the database" />
+                        <ui:Button Grid.Column="2" Content="Remove All" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveAllOrphanedFilesCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" />
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- Column 3: Queue-Readiness & Loudness Backlog -->
-            <Border Grid.Column="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <!-- Column 4: Queue-Readiness & Loudness Backlog -->
+            <Border Grid.Column="6" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -516,11 +599,11 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Text="Queue-Readiness &amp; Loudness Backlog" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Fills in Key/BPM/Difficulty for karaoke tracks, integrated loudness, and filler track BPM &amp; cue points." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        <TextBlock Text="Queue-Readiness &amp; Loudness" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Fills in Key/BPM/Difficulty, integrated loudness, and filler BPM &amp; cue points." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
 
-                    <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                    <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -528,23 +611,23 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Missing Karaoke Key/BPM" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{Binding MissingReadinessCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                                <TextBlock Text="Key/BPM" FontSize="10.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{Binding MissingReadinessCount}" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Missing Loudness" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{Binding MissingLoudnessCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                                <TextBlock Text="Loudness" FontSize="10.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{Binding MissingLoudnessCount}" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Missing Filler BPM" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{Binding MissingBpmCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                                <TextBlock Text="Filler BPM" FontSize="10.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{Binding MissingBpmCount}" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <ui:Button Grid.Row="4" Content="Refresh Counts" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RefreshReadinessCountsCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" />
+                    <ui:Button Grid.Row="4" Content="Refresh Counts" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RefreshReadinessCountsCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" />
 
-                    <Border Grid.Row="6" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                    <Border Grid.Row="6" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -557,15 +640,15 @@
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="8" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Content="Start Audit" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartReadinessAuditCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRunningReadinessAudit, Converter={StaticResource InvertBoolConverter}}" />
-                                <ui:Button Grid.Column="2" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopReadinessAuditCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRunningReadinessAudit}" />
+                                <ui:Button Grid.Column="0" Content="Start Audit" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartReadinessAuditCommand}" Appearance="Primary" Height="34" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRunningReadinessAudit, Converter={StaticResource InvertBoolConverter}}" />
+                                <ui:Button Grid.Column="2" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopReadinessAuditCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRunningReadinessAudit}" />
                             </Grid>
 
                             <StackPanel Grid.Row="2">
-                                <TextBlock Text="{Binding ReadinessAuditStatusText}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{Binding ReadinessAuditStatusText}" FontSize="11.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <ProgressBar Value="{Binding ReadinessAuditProgressPercent}" Height="6" Maximum="100" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                             </StackPanel>
 
@@ -581,6 +664,191 @@
                 </Grid>
             </Border>
         </Grid>
+        </TabItem>
+
+        <!-- Tab 3: Built-In Karaoke Audition Player (CDG + 10-Band EQ) & Multi-Rig / USB Drive Sync -->
+        <TabItem Header="Audition Player &amp; USB Drive Sync">
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.25*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Built-In MP3+G Karaoke Audition Player with Key Shift & 10-Band Equalizer -->
+                <Border Grid.Column="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="🎤 Built-In MP3+G Karaoke Audition Player" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{Binding PlayerNowPlayingTitle}" FontSize="12" FontWeight="SemiBold" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                        </StackPanel>
+
+                        <!-- CDG Graphics Preview Canvas -->
+                        <Border Grid.Row="2" Background="#070A12" BorderBrush="#334155" BorderThickness="2" CornerRadius="8" Padding="8">
+                            <Grid>
+                                <TextBlock Text="CDG Lyrics Graphics Preview (300×216)" FontSize="13" Foreground="#475569" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image Source="{Binding PlayerCdgFrame}" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Transport & Key Controls -->
+                        <Border Grid.Row="4" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Slider Grid.Column="0" Minimum="0" Maximum="{Binding PlayerDurationSeconds}" Value="{Binding PlayerPositionSeconds, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding PlayerTimeDisplay}" FontFamily="Consolas" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:Button Grid.Column="0" Content="▶ Audition Selected" Command="{Binding AuditionSongCommand}" Appearance="Primary" Height="33" ToolTip="Load and play currently selected song from Library or Duplicates" />
+                                    <ui:Button Grid.Column="2" Content="⏯ Play / Pause" Command="{Binding TogglePlayerPlayPauseCommand}" Appearance="Secondary" Height="33" />
+                                    <ui:Button Grid.Column="4" Content="⏹ Stop" Command="{Binding StopPlayerCommand}" Appearance="Secondary" Height="33" />
+
+                                    <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Key:" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <Slider Width="95" Minimum="-6" Maximum="6" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding PlayerKeySemitones, Mode=TwoWay}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding PlayerKeySemitones, StringFormat='{}{0:+0;-0;0} st'}" FontSize="11.5" FontWeight="Bold" Width="38" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <ui:Button Grid.Column="8" Content="Apply Key / EQ" Command="{Binding ApplyPlayerDspCommand}" Appearance="Secondary" Height="33" ToolTip="Re-render active track with current Key Shift and 10-Band EQ settings" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 10-Band Graphic Equalizer -->
+                        <Border Grid.Row="6" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="🎛️ 10-Band Graphic Equalizer (-12 dB to +12 dB)" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <ui:Button Grid.Column="1" Content="Reset Flat (0 dB)" Command="{Binding ResetPlayerEqAndKeyCommand}" Appearance="Secondary" Height="28" Padding="10,2" FontSize="11" />
+                                </Grid>
+
+                                <UniformGrid Columns="10" Height="130">
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand0, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="31Hz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand1, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="62Hz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand2, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="125Hz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand3, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="250Hz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand4, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="500Hz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand5, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="1kHz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand6, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="2kHz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand7, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="4kHz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand8, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="8kHz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                    <StackPanel HorizontalAlignment="Center"><Slider Orientation="Vertical" Height="95" Minimum="-12" Maximum="12" Value="{Binding EqBand9, Mode=TwoWay}" HorizontalAlignment="Center" /><TextBlock Text="16kHz" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" /></StackPanel>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Multi-Rig / External USB Gig Drive Synchronizer & Disk-Space Analysis -->
+                <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="🔄 Multi-Rig / External USB Gig Drive Synchronizer" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Compare your master library folder against a backup show laptop or external USB drive, verify free disk space, and mirror new or updated karaoke files." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="Source Master Library Folder" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:TextBox Grid.Column="0" Text="{Binding SyncSourceFolderPath, Mode=TwoWay}" PlaceholderText="Select source master library folder..." Height="33" />
+                                    <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseSyncSourceClicked" Height="33" Width="90" />
+                                </Grid>
+
+                                <TextBlock Text="Target Backup / External USB Drive Folder" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:TextBox Grid.Column="0" Text="{Binding SyncTargetFolderPath, Mode=TwoWay}" PlaceholderText="Select target USB drive folder..." Height="33" />
+                                    <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseSyncTargetClicked" Height="33" Width="90" />
+                                </Grid>
+
+                                <Border Background="#1510B981" BorderBrush="#4010B981" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding DriveSyncDiskSpaceText}" FontSize="11.5" FontWeight="SemiBold" Foreground="#A7F3D0" TextWrapping="Wrap" />
+                                </Border>
+
+                                <Grid ColumnDefinitions="*, 8, *, 8, Auto">
+                                    <ui:Button Grid.Column="0" Content="Compare Drives" Icon="{ui:SymbolIcon Search24}" Command="{Binding CompareDrivesForSyncCommand}" Appearance="Secondary" Height="34" HorizontalAlignment="Stretch" IsEnabled="{Binding IsDriveSyncRunning, Converter={StaticResource InvertBoolConverter}}" />
+                                    <ui:Button Grid.Column="2" Content="Sync to Target Drive" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding ExecuteDriveSyncCommand}" Appearance="Primary" Height="34" HorizontalAlignment="Stretch" IsEnabled="{Binding IsDriveSyncRunning, Converter={StaticResource InvertBoolConverter}}" />
+                                    <ui:Button Grid.Column="4" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelDriveSyncCommand}" Appearance="Secondary" Height="34" IsEnabled="{Binding IsDriveSyncRunning}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Grid.Row="4">
+                            <TextBlock Text="{Binding DriveSyncStatusText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6" />
+                            <ProgressBar Value="{Binding DriveSyncProgressPercent}" Height="6" Maximum="100" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                        </StackPanel>
+
+                        <ListBox Grid.Row="6" ItemsSource="{Binding DriveSyncCandidates}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Background="#1E3A5F" CornerRadius="4" Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding RelativePath}" FontSize="11.5" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding FormattedSize}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
         </TabItem>
         </TabControl>
     </Grid>

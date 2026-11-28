@@ -1,4 +1,4 @@
-<!-- Edited on Nov 24, 2026 @ 11:25:30 -> Add Shader Only (Hide Rotation) checkbox to Rotation Queue Screen controls -->
+<!-- Edited on Nov 27, 2026 @ 13:00:30 -> Add Subfolder Crate filter dropdown and False Start / Undo Finish controls to KaraokePage -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -267,7 +267,18 @@
                                Padding="10,2"
                                FontSize="11"
                                FontWeight="Bold"
+                               Margin="0,0,8,0"
                                ToolTip="Skip current singer in rotation" />
+
+                    <ui:Button x:Name="FalseStartButton"
+                               Content="⏮ False Start / Undo"
+                               Command="{Binding FalseStartCommand}"
+                               Appearance="Secondary"
+                               Height="28"
+                               Padding="10,2"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               ToolTip="False Start: Restart the active song from 0:00, or undo the last completed turn if marked finished by mistake" />
 
                     <ui:Button x:Name="AdjustSynthDisplayButton"
                                Content="🎛 Adjust Synth Display"
@@ -279,6 +290,17 @@
                                FontWeight="SemiBold"
                                Margin="8,0,0,0"
                                ToolTip="Configure the audio spectrum visualizer (mode, theme, bar width, and opacity) on the Lyrics projection screen" />
+
+                    <ui:Button x:Name="KaraokeStudioButton"
+                               Content="🎙️ Karaoke Studio"
+                               Command="{Binding OpenKaraokeStudioCommand}"
+                               Appearance="Secondary"
+                               Height="28"
+                               Padding="10,2"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Margin="8,0,0,0"
+                               ToolTip="Open Custom Karaoke Track Studio: strip lead vocals, sync lyrics, assign duet colors, and export custom MP3+G (.cdg) or MP4 karaoke tracks" />
 
                     <wpf:ToggleButton x:Name="PreShowScreenButton"
                                       IsChecked="{Binding IsPreShowModeActive, Mode=TwoWay}"
@@ -326,44 +348,61 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- Search Input Row -->
-                    <Grid Grid.Row="0" Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0" Margin="0,0,6,0">
-                            <ui:TextBox x:Name="SongSearchTextBox"
-                                    Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                    PlaceholderText="Search song or artist (right-click for singer history)..."
-                                    Icon="{ui:SymbolIcon Search24}"
-                                    KeyDown="SearchBox_KeyDown" />
-                            <ui:Button Command="{Binding ClearSearchQueryCommand}"
-                                   Icon="{ui:SymbolIcon Dismiss16}"
-                                   Appearance="Transparent"
-                                   Padding="4"
-                                   Width="28"
-                                   Height="28"
-                                   HorizontalAlignment="Right"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,4,0"
-                                   ToolTip="Clear search text"
-                                   Visibility="{Binding HasSearchQuery, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                    <!-- Search Input & Crate Filter Row -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0" Margin="0,0,6,0">
+                                <ui:TextBox x:Name="SongSearchTextBox"
+                                        Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="Search song, artist, or abbrev (e.g. GNR, CCR)..."
+                                        Icon="{ui:SymbolIcon Search24}"
+                                        KeyDown="SearchBox_KeyDown" />
+                                <ui:Button Command="{Binding ClearSearchQueryCommand}"
+                                       Icon="{ui:SymbolIcon Dismiss16}"
+                                       Appearance="Transparent"
+                                       Padding="4"
+                                       Width="28"
+                                       Height="28"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,4,0"
+                                       ToolTip="Clear search text"
+                                       Visibility="{Binding HasSearchQuery, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                            </Grid>
+                            <ui:Button Grid.Column="1"
+                                   Content="Scan"
+                                   Icon="{ui:SymbolIcon Search24}"
+                                   Command="{Binding SearchDatabaseCommand}"
+                                   Appearance="Primary"
+                                   ToolTip="Scan database for matching songs"
+                                   Margin="0,0,4,0" />
+                            <ui:Button Grid.Column="2"
+                                   Icon="{ui:SymbolIcon FolderOpen24}"
+                                   Command="{Binding ScanFolderCommand}"
+                                   Appearance="Secondary"
+                                   ToolTip="Scan music folder from disk into library..." />
                         </Grid>
-                        <ui:Button Grid.Column="1"
-                               Content="Scan"
-                               Icon="{ui:SymbolIcon Search24}"
-                               Command="{Binding SearchDatabaseCommand}"
-                               Appearance="Primary"
-                               ToolTip="Scan database for matching songs"
-                               Margin="0,0,4,0" />
-                        <ui:Button Grid.Column="2"
-                               Icon="{ui:SymbolIcon FolderOpen24}"
-                               Command="{Binding ScanFolderCommand}"
-                               Appearance="Secondary"
-                               ToolTip="Scan music folder from disk into library..." />
-                    </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="📁 Folder / Crate:" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="2,0,8,0" Opacity="0.85" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding SubfolderCrates}"
+                                      SelectedItem="{Binding SelectedSubfolderCrate, Mode=TwoWay}"
+                                      Height="28"
+                                      FontSize="11"
+                                      Padding="8,2"
+                                      VerticalContentAlignment="Center"
+                                      ToolTip="Filter library songs by disk subfolder / category crate" />
+                        </Grid>
+                    </StackPanel>
 
                     <!-- Search Results list -->
                     <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSearchTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
